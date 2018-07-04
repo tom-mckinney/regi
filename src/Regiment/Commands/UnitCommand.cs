@@ -10,5 +10,10 @@ namespace Regiment.Commands
     {
         [Argument(0, Description = "Name of the project directory or file")]
         public string Name { get; set; }
+
+        public int OnExecute()
+        {
+            return 0;
+        }
     }
 }

@@ -7,7 +7,7 @@ namespace Regiment
 {
     [Command(Description = "My global command line tool.")]
     [Subcommand("unit", typeof(UnitCommand))]
-    class Program
+    public class Program
     {
         public static int Main(string[] args) => CommandLineApplication.Execute<Program>(args);
 
