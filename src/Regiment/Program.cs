@@ -4,10 +4,11 @@ using Regiment.Commands;
 using McMaster.Extensions.CommandLineUtils;
 using Microsoft.Extensions.DependencyInjection;
 using Regiment.Services;
+using McMaster.Extensions.CommandLineUtils.Abstractions;
+using Regiment.Abstractions;
 
 namespace Regiment
 {
-    //[Command(Description = "My global command line tool.")]
     [Subcommand("unit", typeof(UnitCommand))]
     public class Program
     {
@@ -18,6 +19,7 @@ namespace Regiment
             var services = new ServiceCollection()
                 .AddSingleton<IFileService, FileService>()
                 .AddSingleton(console)
+                .AddSingleton<CommandLineContext, DefaultCommandLineContext>()
                 .BuildServiceProvider();
 
             var app = new CommandLineApplication<Program>();
