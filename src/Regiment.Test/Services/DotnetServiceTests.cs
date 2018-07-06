@@ -1,8 +1,10 @@
 ﻿using Regiment.Services;
+using Regiment.Test.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Regiment.Test.Services
 {
@@ -10,13 +12,13 @@ namespace Regiment.Test.Services
     {
         private readonly IDotnetService _service;
 
-        public DotnetServiceTests()
+        public DotnetServiceTests(ITestOutputHelper output)
         {
-            _service = new DotnetService();
+            _service = new DotnetService(new TestConsole(output));
         }
 
         [Fact]
-        public void Test_runs_test_and_prints_errors()
+        public void TestProject_prints_all_output_when_verbose()
         {
 
         }

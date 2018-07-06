@@ -38,7 +38,12 @@ namespace Regiment.Services
             {
                 using (StreamReader stdOutput = unitTest.StandardOutput)
                 {
-                    _console.Write(stdOutput.ReadToEnd());
+                    Span<char> buffer = new Span<char>();
+                    while (!stdOutput.EndOfStream)
+                    {
+                        stdOutput.Read(buffer);
+                        _console.Write(buffer.ToArray());
+                    }
                 }
             }
 
@@ -48,10 +53,9 @@ namespace Regiment.Services
                 while (!stdError.EndOfStream)
                 {
                     stdError.Read(buffer);
-                    _console.Write(buffer);
-                    Console.Write(buffer);
+                    _console.Write(buffer.ToArray());
                 }
-                _console.Write(await stdError.ReadToEndAsync());
+                //_console.Write(await stdError.ReadToEndAsync());
             }
         }
     }
