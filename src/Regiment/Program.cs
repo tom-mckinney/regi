@@ -12,11 +12,12 @@ namespace Regiment
     [Subcommand("unit", typeof(UnitCommand))]
     public class Program
     {
-        public static int Main(string[] args) => CommandLineApplication.Execute<Program>(args);
+        public static int Main(string[] args) => MainWithConsole(PhysicalConsole.Singleton, args);
 
         public static int MainWithConsole(IConsole console, string[] args)
         {
             var services = new ServiceCollection()
+                .AddSingleton<IDotnetService, DotnetService>()
                 .AddSingleton<IFileService, FileService>()
                 .AddSingleton(console)
                 .AddSingleton<CommandLineContext, DefaultCommandLineContext>()

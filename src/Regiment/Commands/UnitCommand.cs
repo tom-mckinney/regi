@@ -14,11 +14,13 @@ namespace Regiment.Commands
     public class UnitCommand
     {
         private readonly IFileService _fileService;
+        private readonly IDotnetService _dotnetService;
         private readonly IConsole _console;
 
-        public UnitCommand(IFileService fileService, IConsole console)
+        public UnitCommand(IFileService fileService, IDotnetService dotnetService, IConsole console)
         {
             _fileService = fileService;
+            _dotnetService = dotnetService;
             _console = console;
         }
 
@@ -36,20 +38,22 @@ namespace Regiment.Commands
 
             foreach(var file in projectFiles)
             {
-                ProcessStartInfo unitTestInfo = new ProcessStartInfo()
-                {
-                    FileName = DotNetExe.FullPath,
-                    Arguments = "test",
-                    WorkingDirectory = file.DirectoryName,
-                    RedirectStandardOutput = true
-                };
+                _dotnetService.TestProject(file, true);
 
-                var unitTest = Process.Start(unitTestInfo);
+                //ProcessStartInfo unitTestInfo = new ProcessStartInfo()
+                //{
+                //    FileName = DotNetExe.FullPath,
+                //    Arguments = "test",
+                //    WorkingDirectory = file.DirectoryName,
+                //    RedirectStandardOutput = true
+                //};
 
-                using (StreamReader output = unitTest.StandardOutput)
-                {
-                    _console.Write(output.ReadToEnd());
-                }
+                //var unitTest = Process.Start(unitTestInfo);
+
+                //using (StreamReader output = unitTest.StandardOutput)
+                //{
+                //    _console.Write(output.ReadToEnd());
+                //}
             }
 
             //string currentDirectory = Directory.GetCurrentDirectory();

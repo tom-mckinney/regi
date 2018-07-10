@@ -9,10 +9,10 @@ namespace Regiment.Test.Utilities
 {
     public class TestConsole : IConsole
     {
-        public TestConsole(ITestOutputHelper output)
+        public TestConsole(ITestOutputHelper testOutput)
         {
-            Out = new XunitTextWriter(output);
-            Error = new XunitTextWriter(output);
+            Out = new XunitTextWriter(testOutput);
+            Error = new XunitTextWriter(testOutput);
         }
 
         public TextWriter Out { get; set; }

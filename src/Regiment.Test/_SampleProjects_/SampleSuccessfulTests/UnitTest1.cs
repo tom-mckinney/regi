@@ -1,7 +1,7 @@
 using System;
 using Xunit;
 
-namespace SampleTests
+namespace SampleSuccessfulTests
 {
     public class UnitTest1
     {

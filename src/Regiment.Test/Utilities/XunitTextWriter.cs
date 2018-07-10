@@ -8,13 +8,18 @@ namespace Regiment.Test.Utilities
 {
     public class XunitTextWriter : TextWriter
     {
-        private readonly ITestOutputHelper _output;
+        private readonly ITestOutputHelper _testOutput;
         private readonly StringBuilder _sb = new StringBuilder();
 
-        public XunitTextWriter(ITestOutputHelper output)
+        public XunitTextWriter(ITestOutputHelper testOutput, bool preserveOutput = false)
         {
-            _output = output;
+            PreserveOutput = preserveOutput;
+            _testOutput = testOutput;
         }
+
+        public bool PreserveOutput { get; }
+
+        public string Output { get; set; }
 
         public override Encoding Encoding => Encoding.Unicode;
 
@@ -22,7 +27,12 @@ namespace Regiment.Test.Utilities
         {
             if (ch == '\n')
             {
-                _output.WriteLine(_sb.ToString());
+                if (PreserveOutput)
+                {
+                    Output += (_sb.ToString() + NewLine);
+                }
+
+                _testOutput.WriteLine(_sb.ToString());
                 _sb.Clear();
             }
             else
@@ -37,7 +47,7 @@ namespace Regiment.Test.Utilities
             {
                 if (_sb.Length > 0)
                 {
-                    _output.WriteLine(_sb.ToString());
+                    _testOutput.WriteLine(_sb.ToString());
                     _sb.Clear();
                 }
             }

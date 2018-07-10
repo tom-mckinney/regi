@@ -9,9 +9,9 @@ namespace Regiment.Test
     {
         private readonly TestConsole _console;
 
-        public ProgramTests(ITestOutputHelper output)
+        public ProgramTests(ITestOutputHelper testOutput)
         {
-            _console = new TestConsole(output);
+            _console = new TestConsole(testOutput);
         }
 
         [Theory]
