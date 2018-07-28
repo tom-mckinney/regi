@@ -11,24 +11,28 @@ namespace Regiment.Models
         Run,
     }
 
-    public enum DotnetResult
+    public enum DotnetStatus
     {
+        Unknown,
         Failure = 1,
         Success,
+        Running
     }
 
     public class DotnetProcess
     {
-        public DotnetProcess(Process process, DotnetTask task)
+        public DotnetProcess(Process process, DotnetTask task, DotnetStatus status)
         {
             Process = process;
             Task = task;
-            Start = DateTimeOffset.Now;
+            Status = status;
+            Start = process.StartTime;
+            End = DateTimeOffset.UtcNow;
         }
 
         public DotnetTask Task { get; set; }
 
-        public DotnetResult Result { get; set; }
+        public DotnetStatus Status { get; set; }
 
         public virtual Process Process { get; }
 

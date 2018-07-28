@@ -23,7 +23,7 @@ namespace Regiment.Test.Services
         {
             List<FileInfo> projectFiles = _service.FindAllProjectFiles();
 
-            Assert.Equal(3, projectFiles.Count);
+            Assert.Equal(4, projectFiles.Count);
         }
     }
 }

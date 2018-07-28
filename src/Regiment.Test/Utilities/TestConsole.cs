@@ -11,9 +11,11 @@ namespace Regiment.Test.Utilities
     {
         public TestConsole(ITestOutputHelper testOutput)
         {
-            Out = new XunitTextWriter(testOutput);
-            Error = new XunitTextWriter(testOutput);
+            Out = new XunitTextWriter(testOutput, o => LogOutput += o);
+            Error = new XunitTextWriter(testOutput, o => LogOutput += o);
         }
+
+        public string LogOutput { get; set; }
 
         public TextWriter Out { get; set; }
 

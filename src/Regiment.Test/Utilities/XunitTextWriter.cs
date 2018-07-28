@@ -9,15 +9,14 @@ namespace Regiment.Test.Utilities
     public class XunitTextWriter : TextWriter
     {
         private readonly ITestOutputHelper _testOutput;
+        private readonly Action<string> _callback;
         private readonly StringBuilder _sb = new StringBuilder();
 
-        public XunitTextWriter(ITestOutputHelper testOutput, bool preserveOutput = false)
+        public XunitTextWriter(ITestOutputHelper testOutput, Action<string> callback = null)
         {
-            PreserveOutput = preserveOutput;
             _testOutput = testOutput;
+            _callback = callback;
         }
-
-        public bool PreserveOutput { get; }
 
         public string Output { get; set; }
 
@@ -27,10 +26,7 @@ namespace Regiment.Test.Utilities
         {
             if (ch == '\n')
             {
-                if (PreserveOutput)
-                {
-                    Output += (_sb.ToString() + NewLine);
-                }
+                _callback?.Invoke(_sb.ToString());
 
                 _testOutput.WriteLine(_sb.ToString());
                 _sb.Clear();

@@ -10,7 +10,8 @@ namespace Regiment.Services
 {
     public interface IDotnetService
     {
-        DotnetProcess TestProject(FileInfo projectFile, bool verbose);
+        DotnetProcess TestProject(FileInfo projectFile, bool verbose = false);
+        DotnetProcess RunProject(FileInfo projectFile, bool verbose = false);
     }
 
     public class DotnetService : IDotnetService
@@ -24,64 +25,104 @@ namespace Regiment.Services
             _console = console;
         }
 
-        public DotnetProcess TestProject(FileInfo projectFile, bool verbose = false)
+        public DotnetProcess RunProject(FileInfo projectFile, bool verbose = false)
         {
-            ProcessStartInfo unitTestInfo = new ProcessStartInfo()
+            Process process = new Process
             {
-                FileName = DotNetExe.FullPath,
-                Arguments = "test",
-                WorkingDirectory = projectFile.DirectoryName,
-                RedirectStandardOutput = verbose,
-                RedirectStandardError = true
+                StartInfo = new ProcessStartInfo()
+                {
+                    FileName = DotNetExe.FullPath,
+                    Arguments = "run",
+                    WorkingDirectory = projectFile.DirectoryName,
+                    RedirectStandardOutput = verbose,
+                    RedirectStandardError = true
+                }
             };
 
-            DotnetProcess unitTest = new DotnetProcess(Process.Start(unitTestInfo), DotnetTask.Test);
+            process.ErrorDataReceived += (o, e) =>
+            {
+                if (!string.IsNullOrWhiteSpace(e.Data))
+                {
+                    _console.BackgroundColor = ConsoleColor.DarkRed;
+                    _console.ForegroundColor = ConsoleColor.White;
+
+                    _console.WriteLine(e.Data);
+
+                    _console.ResetColor();
+                }
+            };
 
             if (verbose)
             {
-                using (StreamReader stdOutput = unitTest.Process.StandardOutput)
+                process.OutputDataReceived += (o, e) =>
                 {
-                    _console.Write(stdOutput.ReadToEnd());
-
-                    //Span<char> buffer = new Span<char>();
-                    //while (!stdOutput.EndOfStream)
-                    //{
-                    //    stdOutput.Read(buffer);
-                    //    _console.Write(buffer.ToArray());
-
-                    //    if (buffer.Length == 0)
-                    //    {
-                    //        break;
-                    //    }
-                    //}
-                    //_console.Write(stdOutput.ReadToEnd());
-                }
+                    _console.WriteLine(e.Data);
+                };
             }
 
-            using (StreamReader stdError = unitTest.Process.StandardError)
+            process.Start();
+
+            process.BeginErrorReadLine();
+
+            if (verbose)
             {
-                string errors = stdError.ReadToEnd();
-                _console.Write(errors);
-
-                unitTest.Result = !string.IsNullOrWhiteSpace(errors) ? DotnetResult.Failure : DotnetResult.Success;
-
-                //stdError.ReadToEnd();
-                //Span<char> buffer = new Span<char>();
-                //while (!stdError.EndOfStream)
-                //{
-                //    stdError.Read(buffer);
-                //    _console.Write(buffer.ToArray());
-
-                //    if (buffer.Length == 0)
-                //    {
-                //        break;
-                //    }
-                //}
+                process.BeginOutputReadLine();
             }
 
-            unitTest.End = DateTimeOffset.Now;
+            return new DotnetProcess(process, DotnetTask.Run, DotnetStatus.Running);
+        }
 
-            return unitTest;
+        public DotnetProcess TestProject(FileInfo projectFile, bool verbose = false)
+        {
+            DotnetStatus status = DotnetStatus.Success;
+
+            Process unitTest = new Process
+            {
+                StartInfo = new ProcessStartInfo()
+                {
+                    FileName = DotNetExe.FullPath,
+                    Arguments = "test",
+                    WorkingDirectory = projectFile.DirectoryName,
+                    RedirectStandardOutput = verbose,
+                    RedirectStandardError = true
+                }
+            };
+
+            unitTest.ErrorDataReceived += (o, e) =>
+            {
+                if (!string.IsNullOrWhiteSpace(e.Data))
+                {
+                    status = DotnetStatus.Failure;
+
+                    _console.BackgroundColor = ConsoleColor.DarkRed;
+                    _console.ForegroundColor = ConsoleColor.White;
+
+                    _console.WriteLine(e.Data);
+
+                    _console.ResetColor();
+                }
+            };
+
+            if (verbose)
+            {
+                unitTest.OutputDataReceived += (o, e) =>
+                {
+                    _console.WriteLine(e.Data);
+                };
+            }
+
+            unitTest.Start();
+
+            unitTest.BeginErrorReadLine();
+
+            if (verbose)
+            {
+                unitTest.BeginOutputReadLine();
+            }
+
+            unitTest.WaitForExit();
+
+            return new DotnetProcess(unitTest, DotnetTask.Test, status);
         }
     }
 }

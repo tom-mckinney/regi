@@ -7,15 +7,23 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="_SampleProjects_\SampleAppLong\bin\**" />
+    <Compile Remove="_SampleProjects_\SampleAppLong\obj\**" />
     <Compile Remove="_SampleProjects_\SampleApp\obj\**" />
     <Compile Remove="_SampleProjects_\SampleTests\**" />
+    <EmbeddedResource Remove="_SampleProjects_\SampleAppLong\bin\**" />
+    <EmbeddedResource Remove="_SampleProjects_\SampleAppLong\obj\**" />
     <EmbeddedResource Remove="_SampleProjects_\SampleApp\obj\**" />
     <EmbeddedResource Remove="_SampleProjects_\SampleTests\**" />
+    <None Remove="_SampleProjects_\SampleAppLong\bin\**" />
+    <None Remove="_SampleProjects_\SampleAppLong\obj\**" />
     <None Remove="_SampleProjects_\SampleApp\obj\**" />
     <None Remove="_SampleProjects_\SampleTests\**" />
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Remove="_SampleProjects_\SampleAppLong\Program.cs" />
+    <Compile Remove="_SampleProjects_\SampleAppLong\Startup.cs" />
     <Compile Remove="_SampleProjects_\SampleApp\Program.cs" />
     <Compile Remove="_SampleProjects_\SampleFailedTests\UnitTest1.cs" />
     <Compile Remove="_SampleProjects_\SampleSuccessfulTests\UnitTest1.cs" />
@@ -32,6 +40,15 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="_SampleProjects_\SampleAppLong\Program.cs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="_SampleProjects_\SampleAppLong\SampleAppLong.csproj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="_SampleProjects_\SampleAppLong\Startup.cs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="_SampleProjects_\SampleApp\Program.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
