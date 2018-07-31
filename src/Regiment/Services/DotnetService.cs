@@ -1,4 +1,5 @@
 ﻿using McMaster.Extensions.CommandLineUtils;
+using Regiment.Extensions;
 using Regiment.Models;
 using System;
 using System.Collections.Generic;
@@ -36,19 +37,18 @@ namespace Regiment.Services
                     WorkingDirectory = projectFile.DirectoryName,
                     RedirectStandardOutput = verbose,
                     RedirectStandardError = true
-                }
+                },
+                EnableRaisingEvents = true
             };
+
+            DotnetProcess output = new DotnetProcess(process, DotnetTask.Run, DotnetStatus.Running);
 
             process.ErrorDataReceived += (o, e) =>
             {
                 if (!string.IsNullOrWhiteSpace(e.Data))
                 {
-                    _console.BackgroundColor = ConsoleColor.DarkRed;
-                    _console.ForegroundColor = ConsoleColor.White;
-
-                    _console.WriteLine(e.Data);
-
-                    _console.ResetColor();
+                    output.Status = DotnetStatus.Failure;
+                    _console.WriteErrorLine(e.Data);
                 }
             };
 
@@ -63,13 +63,12 @@ namespace Regiment.Services
             process.Start();
 
             process.BeginErrorReadLine();
-
             if (verbose)
             {
                 process.BeginOutputReadLine();
-            }
+            }            
 
-            return new DotnetProcess(process, DotnetTask.Run, DotnetStatus.Running);
+            return output;
         }
 
         public DotnetProcess TestProject(FileInfo projectFile, bool verbose = false)
@@ -122,7 +121,10 @@ namespace Regiment.Services
 
             unitTest.WaitForExit();
 
-            return new DotnetProcess(unitTest, DotnetTask.Test, status);
+            return new DotnetProcess(unitTest, DotnetTask.Test, status)
+            {
+                End = DateTimeOffset.UtcNow
+            };
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Regiment.Extensions;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
@@ -19,25 +20,41 @@ namespace Regiment.Models
         Running
     }
 
-    public class DotnetProcess
+    public class DotnetProcess : IDisposable
     {
         public DotnetProcess(Process process, DotnetTask task, DotnetStatus status)
         {
             Process = process;
             Task = task;
             Status = status;
-            Start = process.StartTime;
-            End = DateTimeOffset.UtcNow;
         }
 
         public DotnetTask Task { get; set; }
 
         public DotnetStatus Status { get; set; }
 
-        public virtual Process Process { get; }
+        public virtual Process Process { get; protected set; }
 
-        public DateTimeOffset Start { get; set; }
+        public DateTimeOffset? Start
+        {
+            get
+            {
+                try
+                {
+                    return Process?.StartTime;
+                }
+                catch
+                {
+                    return null;
+                }
+            }
+        }
 
-        public DateTimeOffset End { get; set; }
+        public DateTimeOffset? End { get; set; }
+
+        public void Dispose()
+        {
+            Process.KillTree(TimeSpan.FromSeconds(2));
+        }
     }
 }

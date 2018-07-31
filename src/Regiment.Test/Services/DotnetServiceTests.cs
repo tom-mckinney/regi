@@ -1,5 +1,6 @@
 ﻿using McMaster.Extensions.CommandLineUtils;
 using Moq;
+using Regiment.Extensions;
 using Regiment.Models;
 using Regiment.Services;
 using Regiment.Test.Utilities;
@@ -110,16 +111,13 @@ namespace Regiment.Test.Services
         [Fact]
         public void RunProject_long_starts_and_prints_nothing()
         {
-            DotnetProcess app = _service.RunProject(_applicationLong, true);
+            using (DotnetProcess app = _service.RunProject(_applicationLong, true))
+            {
+                Thread.Sleep(1000);
 
-            Thread.Sleep(5000);
-
-            app.Process.CancelErrorRead();
-            app.Process.CancelOutputRead();
-            app.Process.Close();
-
-            Assert.Equal(DotnetTask.Run, app.Task);
-            Assert.Equal(DotnetStatus.Running, app.Status);
+                Assert.Equal(DotnetTask.Run, app.Task);
+                Assert.Equal(DotnetStatus.Running, app.Status);
+            }
         }
     }
 }

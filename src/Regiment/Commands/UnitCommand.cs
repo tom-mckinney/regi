@@ -39,31 +39,7 @@ namespace Regiment.Commands
             foreach(var file in projectFiles)
             {
                 _dotnetService.TestProject(file, true);
-
-                //ProcessStartInfo unitTestInfo = new ProcessStartInfo()
-                //{
-                //    FileName = DotNetExe.FullPath,
-                //    Arguments = "test",
-                //    WorkingDirectory = file.DirectoryName,
-                //    RedirectStandardOutput = true
-                //};
-
-                //var unitTest = Process.Start(unitTestInfo);
-
-                //using (StreamReader output = unitTest.StandardOutput)
-                //{
-                //    _console.Write(output.ReadToEnd());
-                //}
             }
-
-            //string currentDirectory = Directory.GetCurrentDirectory();
-            //string fullPath = Path.GetRelativePath(currentDirectory, Name);
-            //FileInfo projectFile = new FileInfo(fullPath);
-            //if (projectFile.Exists)
-            //{
-            //    //DotNetExe.
-            //    return 0;
-            //}
 
             return 0;
         }
