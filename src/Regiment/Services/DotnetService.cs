@@ -60,6 +60,14 @@ namespace Regiment.Services
                 };
             }
 
+            process.Exited += (o, e) =>
+            {
+                if (output.Status == DotnetStatus.Running)
+                {
+                    output.Status = DotnetStatus.Success;
+                }
+            };
+
             process.Start();
 
             process.BeginErrorReadLine();

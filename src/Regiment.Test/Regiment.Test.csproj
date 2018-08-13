@@ -22,6 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Remove="_SampleProjects_\SampleAppError\Program.cs" />
     <Compile Remove="_SampleProjects_\SampleAppLong\Program.cs" />
     <Compile Remove="_SampleProjects_\SampleAppLong\Startup.cs" />
     <Compile Remove="_SampleProjects_\SampleApp\Program.cs" />
@@ -40,6 +41,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="_SampleProjects_\SampleAppError\Program.cs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="_SampleProjects_\SampleAppError\SampleAppError.csproj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="_SampleProjects_\SampleAppLong\Program.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

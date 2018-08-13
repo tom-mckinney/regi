@@ -23,6 +23,7 @@ namespace Regiment.Test.Services
         private readonly FileInfo _successfulTests;
         private readonly FileInfo _failedTests;
         private readonly FileInfo _application;
+        private readonly FileInfo _applicationError;
         private readonly FileInfo _applicationLong;
 
         public DotnetServiceTests(ITestOutputHelper testOutput)
@@ -38,6 +39,9 @@ namespace Regiment.Test.Services
                 .First();
             _application = new DirectoryInfo(Directory.GetCurrentDirectory())
                 .GetFiles("SampleApp.csproj", SearchOption.AllDirectories)
+                .First();
+            _applicationError = new DirectoryInfo(Directory.GetCurrentDirectory())
+                .GetFiles("SampleAppError.csproj", SearchOption.AllDirectories)
                 .First();
             _applicationLong = new DirectoryInfo(Directory.GetCurrentDirectory())
                 .GetFiles("SampleAppLong.csproj", SearchOption.AllDirectories)
@@ -85,6 +89,28 @@ namespace Regiment.Test.Services
         }
 
         [Fact]
+        public void RunProject_changes_status_from_running_to_success_on_exit()
+        {
+            DotnetProcess app = _service.RunProject(_application);
+
+            Assert.Equal(DotnetStatus.Running, app.Status);
+
+            app.Process.WaitForExit();
+
+            Assert.Equal(DotnetStatus.Success, app.Status);
+        }
+
+        [Fact]
+        public void RunProject_returns_failure_status_on_thrown_exception()
+        {
+            DotnetProcess app = _service.RunProject(_applicationError);
+
+            app.Process.WaitForExit();
+
+            Assert.Equal(DotnetStatus.Failure, app.Status);
+        }
+
+        [Fact]
         public void RunProject_starts_and_prints_nothing()
         {
             DotnetProcess app = _service.RunProject(_application);
@@ -92,19 +118,19 @@ namespace Regiment.Test.Services
             app.Process.WaitForExit();
 
             Assert.Equal(DotnetTask.Run, app.Task);
-            Assert.Equal(DotnetStatus.Running, app.Status);
+            Assert.Equal(DotnetStatus.Success, app.Status);
             Assert.Null(_console.LogOutput);
         }
 
         [Fact]
-        public void RunProject_verbose_starts_and_prints_nothing()
+        public void RunProject_verbose_starts_and_prints_all_output()
         {
             DotnetProcess app = _service.RunProject(_application, true);
 
             app.Process.WaitForExit();
 
             Assert.Equal(DotnetTask.Run, app.Task);
-            Assert.Equal(DotnetStatus.Running, app.Status);
+            Assert.Equal(DotnetStatus.Success, app.Status);
             Assert.Contains("Hello World!", _console.LogOutput);
         }
 
