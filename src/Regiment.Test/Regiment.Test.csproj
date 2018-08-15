@@ -80,4 +80,10 @@
     <ProjectReference Include="..\Regiment\Regiment.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="_SampleProjects_\startup.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
