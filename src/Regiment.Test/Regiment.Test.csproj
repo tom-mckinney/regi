@@ -81,6 +81,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="_SampleProjects_\ConfigurationBad\startup.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="_SampleProjects_\ConfigurationGood\startup.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="_SampleProjects_\startup.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

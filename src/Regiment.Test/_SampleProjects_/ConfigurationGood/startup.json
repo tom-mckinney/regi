@@ -1,0 +1,9 @@
+{
+  "projects": [
+    {
+      "name": "SampleApp",
+      "path": "../SampleApp",
+      "type": "web"
+    }
+  ]
+}
