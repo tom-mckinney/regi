@@ -6,13 +6,18 @@ namespace Regiment.Models
 {
     public class StartupConfig
     {
-        public List<Project> Projects { get; set; }
+        public List<Project> Apps { get; set; }
+
+        public List<Project> Tests { get; set; }
+
+        public List<Project> Services { get; set; }
     }
 
     public enum ProjectType
     {
         Web = 1,
-        Test
+        Test,
+        IntegrationTest
     }
 
     public class Project

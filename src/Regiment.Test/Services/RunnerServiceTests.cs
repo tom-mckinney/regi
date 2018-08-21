@@ -1,7 +1,10 @@
-﻿using Newtonsoft.Json;
+﻿using Moq;
+using Newtonsoft.Json;
+using Regiment.Models;
 using Regiment.Services;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 using Xunit;
@@ -10,16 +13,20 @@ namespace Regiment.Test.Services
 {
     public class RunnerServiceTests
     {
+        private readonly Mock<IDotnetService> _dotnetServiceMock;
         private readonly IRunnerService _runnerService;
-        private readonly DirectoryInfo _sampleProjectsDirectory;
 
+        private readonly DirectoryInfo _startupConfigGood;
+        private readonly DirectoryInfo _startupConfigBad;
         private readonly char Slash = Path.DirectorySeparatorChar;
 
         public RunnerServiceTests()
         {
-            _runnerService = new RunnerService();
+            _dotnetServiceMock = new Mock<IDotnetService>();
+            _runnerService = new RunnerService(_dotnetServiceMock.Object);
 
-            _sampleProjectsDirectory = new DirectoryInfo(Directory.GetCurrentDirectory() + Slash + "_SampleProjects_");
+            _startupConfigGood = new DirectoryInfo(Directory.GetCurrentDirectory() + Slash + "_SampleProjects_" + Slash + "ConfigurationGood");
+            _startupConfigBad = new DirectoryInfo(Directory.GetCurrentDirectory() + Slash + "_SampleProjects_" + Slash + "ConfigurationBad");
         }
 
         [Fact]
@@ -46,9 +53,15 @@ namespace Regiment.Test.Services
         [Fact]
         public void Finds_startup_config_file_when_run_in_same_directory()
         {
-            var processes = _runnerService.RunAsync(_sampleProjectsDirectory);
+            _dotnetServiceMock.Setup(m => m.RunProject(It.IsAny<FileInfo>(), It.IsAny<bool>()))
+                .Returns(new DotnetProcess(new Process(), DotnetTask.Run, DotnetStatus.Success))
+                .Verifiable();
 
-            Assert.True(processes.Count == 5);
+            var processes = _runnerService.RunAsync(_startupConfigGood);
+
+            Assert.Single(processes);
+
+            _dotnetServiceMock.VerifyAll();
         }
     }
 }

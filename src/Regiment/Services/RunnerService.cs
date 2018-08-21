@@ -16,6 +16,13 @@ namespace Regiment.Services
 
     public class RunnerService : IRunnerService
     {
+        private readonly IDotnetService _dotnetService;
+
+        public RunnerService(IDotnetService dotnetService)
+        {
+            _dotnetService = dotnetService;
+        }
+
         public IList<DotnetProcess> RunAsync(DirectoryInfo directory)
         {
             if (!directory.Exists)
@@ -50,16 +57,25 @@ namespace Regiment.Services
                 config = serializer.Deserialize<StartupConfig>(reader);
             }
 
-            if (config.Projects == null)
+            if (config.Apps == null)
             {
                 throw new JsonSerializationException($"Could not deserialize startup configuration from file: {startupFile.FullName}");
             }
 
             IList<DotnetProcess> processes = new List<DotnetProcess>();
 
-            foreach (var project in config.Projects)
+            foreach (var project in config.Apps)
             {
-                // Do the thing
+                if (project.Type == ProjectType.Web)
+                {
+                    string absolutePath = Path.GetFullPath(project.Path, startupFile.DirectoryName);
+                    FileInfo projectFile = new FileInfo(absolutePath);
+
+                    if (projectFile.Exists)
+                    {
+                        processes.Add(_dotnetService.RunProject(projectFile));
+                    }
+                }
             }
 
             return processes;

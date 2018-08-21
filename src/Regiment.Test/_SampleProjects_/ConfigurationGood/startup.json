@@ -1,9 +1,17 @@
 {
-  "projects": [
+  "apps": [
     {
       "name": "SampleApp",
-      "path": "../SampleApp",
+      "path": "../SampleApp/SampleApp.csproj",
       "type": "web"
     }
-  ]
+  ],
+  "tests": [
+    {
+      "name": "SampleSuccessfulTests",
+      "path": "../SampleSuccessfulTests/SampleSuccessfulTests.csproj",
+      "type": "test"
+    }
+  ],
+  "services": []
 }
