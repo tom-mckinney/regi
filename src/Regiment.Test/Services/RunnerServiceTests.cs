@@ -16,8 +16,8 @@ namespace Regiment.Test.Services
         private readonly Mock<IDotnetService> _dotnetServiceMock;
         private readonly IRunnerService _runnerService;
 
-        private readonly DirectoryInfo _startupConfigGood;
-        private readonly DirectoryInfo _startupConfigBad;
+        private readonly string _startupConfigGood;
+        private readonly string _startupConfigBad;
         private readonly char Slash = Path.DirectorySeparatorChar;
 
         public RunnerServiceTests()
@@ -25,28 +25,28 @@ namespace Regiment.Test.Services
             _dotnetServiceMock = new Mock<IDotnetService>();
             _runnerService = new RunnerService(_dotnetServiceMock.Object);
 
-            _startupConfigGood = new DirectoryInfo(Directory.GetCurrentDirectory() + Slash + "_SampleProjects_" + Slash + "ConfigurationGood");
-            _startupConfigBad = new DirectoryInfo(Directory.GetCurrentDirectory() + Slash + "_SampleProjects_" + Slash + "ConfigurationBad");
+            _startupConfigGood = SampleDirectoryPath("ConfigurationGood");
+            _startupConfigBad = SampleDirectoryPath("ConfigurationBad");
         }
 
         [Fact]
-        public void Throws_exception_when_directory_not_found()
+        public void GetStatupConfig_throws_exception_when_directory_not_found()
         {
-            DirectoryInfo bunkDirectory = new DirectoryInfo(Directory.GetCurrentDirectory() + Slash + "BUNK_DIRECTORY");
+            string bunkDirectory = SampleDirectoryPath("BUNK_DIRECTORY");
             Assert.Throws<DirectoryNotFoundException>(() => _runnerService.RunAsync(bunkDirectory));
         }
 
         [Fact]
-        public void Throws_exception_when_startup_config_not_found()
+        public void GetStatupConfig_throws_exception_when_startup_config_not_found()
         {
-            DirectoryInfo directoryWithoutStartup = new DirectoryInfo(Directory.GetCurrentDirectory() + Slash + "_SampleProjects_" + Slash + "SampleAppError");
+            string directoryWithoutStartup = SampleDirectoryPath("SampleAppError");
             Assert.Throws<FileNotFoundException>(() => _runnerService.RunAsync(directoryWithoutStartup));
         }
 
         [Fact]
-        public void Throws_exception_when_startup_config_has_bad_format()
+        public void GetStatupConfig_throws_exception_when_startup_config_has_bad_format()
         {
-            DirectoryInfo badConfigurationDirectory = new DirectoryInfo(Directory.GetCurrentDirectory() + Slash + "_SampleProjects_" + Slash + "ConfigurationBad");
+            string badConfigurationDirectory = SampleDirectoryPath("ConfigurationBad");
             Assert.Throws<JsonSerializationException>(() => _runnerService.RunAsync(badConfigurationDirectory));
         }
 
@@ -62,6 +62,13 @@ namespace Regiment.Test.Services
             Assert.Single(processes);
 
             _dotnetServiceMock.VerifyAll();
+        }
+
+        internal string SampleDirectoryPath(string name)
+        {
+            string path = $"{Directory.GetCurrentDirectory()}{Slash}_SampleProjects_{Slash}{name}";
+
+            return path;
         }
     }
 }

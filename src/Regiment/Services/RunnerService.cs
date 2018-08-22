@@ -10,8 +10,8 @@ namespace Regiment.Services
 {
     public interface IRunnerService
     {
-        IList<DotnetProcess> RunAsync(DirectoryInfo directory);
-        IList<DotnetProcess> RunAsync(FileInfo startupFile);
+        StartupConfig GetStartupConfig(string path);
+        IList<DotnetProcess> RunAsync(string startupFile);
     }
 
     public class RunnerService : IRunnerService
@@ -23,8 +23,10 @@ namespace Regiment.Services
             _dotnetService = dotnetService;
         }
 
-        public IList<DotnetProcess> RunAsync(DirectoryInfo directory)
+        public StartupConfig GetStartupConfig(string path)
         {
+            DirectoryInfo directory = new DirectoryInfo(path);
+
             if (!directory.Exists)
             {
                 throw new DirectoryNotFoundException($"Could not find directory: {directory.FullName}");
@@ -32,35 +34,24 @@ namespace Regiment.Services
 
             FileInfo startupFile = directory.GetFiles("startup.json").FirstOrDefault();
 
-            if (startupFile == null)
+            if (startupFile == null || !startupFile.Exists)
             {
                 throw new FileNotFoundException($"Could not find startup.json in directory: {directory.FullName}");
             }
-
-            return RunAsync(startupFile);
-        }
-
-        public IList<DotnetProcess> RunAsync(FileInfo startupFile)
-        {
-            if (!startupFile.Exists)
-            {
-                throw new FileNotFoundException($"Startup file does not exist: {startupFile.FullName}");
-            }
-
-            StartupConfig config;
 
             using (StreamReader sr = new StreamReader(startupFile.OpenRead()))
             using (JsonReader reader = new JsonTextReader(sr))
             {
                 var serializer = JsonSerializer.CreateDefault();
+                serializer.MissingMemberHandling = MissingMemberHandling.Error;
 
-                config = serializer.Deserialize<StartupConfig>(reader);
+                return serializer.Deserialize<StartupConfig>(reader);
             }
+        }
 
-            if (config.Apps == null)
-            {
-                throw new JsonSerializationException($"Could not deserialize startup configuration from file: {startupFile.FullName}");
-            }
+        public IList<DotnetProcess> RunAsync(string directoryName)
+        {
+            StartupConfig config = GetStartupConfig(directoryName);
 
             IList<DotnetProcess> processes = new List<DotnetProcess>();
 
@@ -68,7 +59,7 @@ namespace Regiment.Services
             {
                 if (project.Type == ProjectType.Web)
                 {
-                    string absolutePath = Path.GetFullPath(project.Path, startupFile.DirectoryName);
+                    string absolutePath = Path.GetFullPath(project.Path, directoryName);
                     FileInfo projectFile = new FileInfo(absolutePath);
 
                     if (projectFile.Exists)
