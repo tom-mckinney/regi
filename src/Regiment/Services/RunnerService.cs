@@ -11,7 +11,8 @@ namespace Regiment.Services
     public interface IRunnerService
     {
         StartupConfig GetStartupConfig(string path);
-        IList<DotnetProcess> RunAsync(string startupFile);
+        IList<DotnetProcess> RunAsync(string directoryName);
+        IList<DotnetProcess> TestAsync(string directoryName);
     }
 
     public class RunnerService : IRunnerService
@@ -65,6 +66,29 @@ namespace Regiment.Services
                     if (projectFile.Exists)
                     {
                         processes.Add(_dotnetService.RunProject(projectFile));
+                    }
+                }
+            }
+
+            return processes;
+        }
+
+        public IList<DotnetProcess> TestAsync(string directoryName)
+        {
+            StartupConfig config = GetStartupConfig(directoryName);
+
+            IList<DotnetProcess> processes = new List<DotnetProcess>();
+
+            foreach (var project in config.Tests)
+            {
+                if (project.Type == ProjectType.Test)
+                {
+                    string absolutePath = Path.GetFullPath(project.Path, directoryName);
+                    FileInfo projectFile = new FileInfo(absolutePath);
+
+                    if (projectFile.Exists)
+                    {
+                        processes.Add(_dotnetService.TestProject(projectFile));
                     }
                 }
             }
