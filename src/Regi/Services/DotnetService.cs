@@ -17,13 +17,19 @@ namespace Regi.Services
 
     public class DotnetService : IDotnetService
     {
-        private readonly StringBuilder _stringBuilder;
-        private IConsole _console;
+        private readonly IConsole _console;
+        private readonly string _dotnetPath;
 
         public DotnetService(IConsole console)
         {
-            _stringBuilder = new StringBuilder();
             _console = console;
+
+            _dotnetPath = DotNetExe.FullPathOrDefault();
+
+            if (string.IsNullOrWhiteSpace(_dotnetPath))
+            {
+                throw new FileNotFoundException("Could not find path for .NET Core SDK");
+            }
         }
 
         public DotnetProcess RunProject(FileInfo projectFile, bool verbose = false)
@@ -32,7 +38,7 @@ namespace Regi.Services
             {
                 StartInfo = new ProcessStartInfo()
                 {
-                    FileName = DotNetExe.FullPath,
+                    FileName = _dotnetPath,
                     Arguments = "run",
                     WorkingDirectory = projectFile.DirectoryName,
                     RedirectStandardOutput = verbose,
@@ -40,6 +46,10 @@ namespace Regi.Services
                 },
                 EnableRaisingEvents = true
             };
+
+            process.StartInfo.EnvironmentVariables.Add("END_TO_END_TESTING", true.ToString());
+            process.StartInfo.EnvironmentVariables.Add("IN_MEMORY_DATABASE", true.ToString());
+            process.StartInfo.EnvironmentVariables.Add("ASPNETCORE_URLS", $"http://*:{5000}");
 
             DotnetProcess output = new DotnetProcess(process, DotnetTask.Run, DotnetStatus.Running);
 
@@ -81,13 +91,22 @@ namespace Regi.Services
 
         public DotnetProcess TestProject(FileInfo projectFile, bool verbose = false)
         {
+            _console.ForegroundColor = ConsoleColor.Cyan;
+            _console.WriteLine($"Starting tests for project {projectFile.Name}");
+            _console.ResetColor();
+
             DotnetStatus status = DotnetStatus.Success;
+
+            if (string.IsNullOrWhiteSpace(_dotnetPath))
+            {
+                throw new Exception("Cannot find path to dotnet CLI");
+            }
 
             Process unitTest = new Process
             {
                 StartInfo = new ProcessStartInfo()
                 {
-                    FileName = DotNetExe.FullPath,
+                    FileName = _dotnetPath,
                     Arguments = "test",
                     WorkingDirectory = projectFile.DirectoryName,
                     RedirectStandardOutput = verbose,
@@ -128,6 +147,10 @@ namespace Regi.Services
             }
 
             unitTest.WaitForExit();
+
+            _console.ForegroundColor = ConsoleColor.Cyan;
+            _console.WriteLine($"Finished tests for project {projectFile.Name}");
+            _console.ResetColor();
 
             return new DotnetProcess(unitTest, DotnetTask.Test, status)
             {

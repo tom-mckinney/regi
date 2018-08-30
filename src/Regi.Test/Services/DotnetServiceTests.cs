@@ -49,13 +49,12 @@ namespace Regi.Test.Services
         }
 
         [Fact]
-        public void TestProject_on_success_prints_prints_nothing()
+        public void TestProject_on_success_returns_status()
         {
             DotnetProcess unitTest = _service.TestProject(_successfulTests);
 
             Assert.Equal(DotnetTask.Test, unitTest.Task);
             Assert.Equal(DotnetStatus.Success, unitTest.Status);
-            Assert.Null(_console.LogOutput);
         }
 
         [Fact]

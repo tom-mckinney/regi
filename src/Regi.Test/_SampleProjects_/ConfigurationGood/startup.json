@@ -10,7 +10,12 @@
     {
       "name": "SampleSuccessfulTests",
       "path": "../SampleSuccessfulTests/SampleSuccessfulTests.csproj",
-      "type": "test"
+      "type": "unit"
+    },
+    {
+      "name": "SampleSuccessfulTests",
+      "path": "../SampleSuccessfulTests/SampleSuccessfulTests.csproj",
+      "type": "integration"
     }
   ],
   "services": []

@@ -16,7 +16,7 @@ namespace Regi.Test
 
         [Theory]
         [InlineData]
-        [InlineData("unit")]
+        [InlineData("test")]
         public void All_commands_have_accurate_help_response(params string[] args)
         {
             args = args.Concat(new string[] { "--help" }).ToArray();

@@ -17,8 +17,8 @@ namespace Regi.Models
     public enum ProjectType
     {
         Web = 1,
-        Test,
-        IntegrationTest
+        Unit,
+        Integration
     }
 
     public class Project

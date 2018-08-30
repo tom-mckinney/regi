@@ -1,10 +1,13 @@
-﻿using Newtonsoft.Json;
+﻿using McMaster.Extensions.CommandLineUtils;
+using Newtonsoft.Json;
+using Regi.Extensions;
 using Regi.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 
 namespace Regi.Services
 {
@@ -12,16 +15,18 @@ namespace Regi.Services
     {
         StartupConfig GetStartupConfig(string path);
         IList<DotnetProcess> RunAsync(string directoryName);
-        IList<DotnetProcess> TestAsync(string directoryName);
+        IList<DotnetProcess> TestAsync(string directoryName, ProjectType? type = null);
     }
 
     public class RunnerService : IRunnerService
     {
         private readonly IDotnetService _dotnetService;
+        private readonly IConsole _console;
 
-        public RunnerService(IDotnetService dotnetService)
+        public RunnerService(IDotnetService dotnetService, IConsole console)
         {
             _dotnetService = dotnetService;
+            _console = console;
         }
 
         public StartupConfig GetStartupConfig(string path)
@@ -56,6 +61,14 @@ namespace Regi.Services
 
             IList<DotnetProcess> processes = new List<DotnetProcess>();
 
+            Console.CancelKeyPress += (o, e) =>
+            {
+                foreach (var process in processes)
+                {
+                    process.Process.KillTree(TimeSpan.FromSeconds(10));
+                }
+            };
+
             foreach (var project in config.Apps)
             {
                 if (project.Type == ProjectType.Web)
@@ -70,24 +83,35 @@ namespace Regi.Services
                 }
             }
 
+            Thread.Sleep(Timeout.Infinite);
+
             return processes;
         }
 
-        public IList<DotnetProcess> TestAsync(string directoryName)
+        public IList<DotnetProcess> TestAsync(string directoryName, ProjectType? type = null)
         {
             StartupConfig config = GetStartupConfig(directoryName);
 
             IList<DotnetProcess> processes = new List<DotnetProcess>();
 
+            Console.CancelKeyPress += (o, e) =>
+            {
+                foreach (var process in processes)
+                {
+                    process.Process.KillTree(TimeSpan.FromSeconds(10));
+                }
+            };
+
             foreach (var project in config.Tests)
             {
-                if (project.Type == ProjectType.Test)
+                if (!type.HasValue || project.Type == type)
                 {
                     string absolutePath = Path.GetFullPath(project.Path, directoryName);
                     FileInfo projectFile = new FileInfo(absolutePath);
 
                     if (projectFile.Exists)
                     {
+                        _console.WriteLine(projectFile.FullName);
                         processes.Add(_dotnetService.TestProject(projectFile));
                     }
                 }

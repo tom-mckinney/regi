@@ -9,7 +9,8 @@ using Regi.Abstractions;
 
 namespace Regi
 {
-    [Subcommand("unit", typeof(UnitCommand))]
+    [Subcommand("start", typeof(StartCommand))]
+    [Subcommand("test", typeof(TestCommand))]
     public class Program
     {
         public static int Main(string[] args) => MainWithConsole(PhysicalConsole.Singleton, args);
@@ -29,6 +30,8 @@ namespace Regi
             app.Conventions
                 .UseDefaultConventions()
                 .UseConstructorInjection(services);
+
+            app.OnExecute(() => 1);
 
             return app.Execute(args);
         }
