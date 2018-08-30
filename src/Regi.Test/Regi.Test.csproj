@@ -1,0 +1,92 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="_SampleProjects_\SampleAppLong\bin\**" />
+    <Compile Remove="_SampleProjects_\SampleAppLong\obj\**" />
+    <Compile Remove="_SampleProjects_\SampleApp\obj\**" />
+    <Compile Remove="_SampleProjects_\SampleTests\**" />
+    <EmbeddedResource Remove="_SampleProjects_\SampleAppLong\bin\**" />
+    <EmbeddedResource Remove="_SampleProjects_\SampleAppLong\obj\**" />
+    <EmbeddedResource Remove="_SampleProjects_\SampleApp\obj\**" />
+    <EmbeddedResource Remove="_SampleProjects_\SampleTests\**" />
+    <None Remove="_SampleProjects_\SampleAppLong\bin\**" />
+    <None Remove="_SampleProjects_\SampleAppLong\obj\**" />
+    <None Remove="_SampleProjects_\SampleApp\obj\**" />
+    <None Remove="_SampleProjects_\SampleTests\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="_SampleProjects_\SampleAppError\Program.cs" />
+    <Compile Remove="_SampleProjects_\SampleAppLong\Program.cs" />
+    <Compile Remove="_SampleProjects_\SampleAppLong\Startup.cs" />
+    <Compile Remove="_SampleProjects_\SampleApp\Program.cs" />
+    <Compile Remove="_SampleProjects_\SampleFailedTests\UnitTest1.cs" />
+    <Compile Remove="_SampleProjects_\SampleSuccessfulTests\UnitTest1.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="McMaster.Extensions.CommandLineUtils" Version="2.2.5" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.1.1" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.7.2" />
+    <PackageReference Include="Moq" Version="4.8.3" />
+    <PackageReference Include="xunit" Version="2.3.1" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.3.1" />
+    <DotNetCliToolReference Include="dotnet-xunit" Version="2.3.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="_SampleProjects_\SampleAppError\Program.cs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="_SampleProjects_\SampleAppError\SampleAppError.csproj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="_SampleProjects_\SampleAppLong\Program.cs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="_SampleProjects_\SampleAppLong\SampleAppLong.csproj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="_SampleProjects_\SampleAppLong\Startup.cs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="_SampleProjects_\SampleApp\Program.cs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="_SampleProjects_\SampleApp\SampleApp.csproj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="_SampleProjects_\SampleFailedTests\SampleFailedTests.csproj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="_SampleProjects_\SampleFailedTests\UnitTest1.cs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="_SampleProjects_\SampleSuccessfulTests\SampleSuccessfulTests.csproj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="_SampleProjects_\SampleSuccessfulTests\UnitTest1.cs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Regi\Regi.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="_SampleProjects_\ConfigurationBad\startup.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="_SampleProjects_\ConfigurationGood\startup.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>

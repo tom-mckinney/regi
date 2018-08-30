@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <ToolCommandName>regi</ToolCommandName>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <VersionPrefix>0.0.1</VersionPrefix>
+    <IsPackable>true</IsPackable>
+    <PackAsTool>true</PackAsTool>
+    <!-- Optional performance setting - enables tiered JIT compilation-->
+    <TieredCompilation>true</TieredCompilation>
+    <AssemblyName>Regi</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="McMaster.Extensions.CommandLineUtils" Version="2.2.5" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.1.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Update="Microsoft.NETCore.Platforms" Version="2.1.0" />
+  </ItemGroup>
+
+</Project>
