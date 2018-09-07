@@ -12,7 +12,7 @@ namespace Regi.Services
     public interface IDotnetService
     {
         DotnetProcess TestProject(FileInfo projectFile, bool verbose = false);
-        DotnetProcess RunProject(FileInfo projectFile, bool verbose = false);
+        DotnetProcess RunProject(FileInfo projectFile, bool verbose = false, int? port = null);
     }
 
     public class DotnetService : IDotnetService
@@ -32,7 +32,7 @@ namespace Regi.Services
             }
         }
 
-        public DotnetProcess RunProject(FileInfo projectFile, bool verbose = false)
+        public DotnetProcess RunProject(FileInfo projectFile, bool verbose = false, int? port = null)
         {
             Process process = new Process
             {
@@ -49,9 +49,13 @@ namespace Regi.Services
 
             process.StartInfo.EnvironmentVariables.Add("END_TO_END_TESTING", true.ToString());
             process.StartInfo.EnvironmentVariables.Add("IN_MEMORY_DATABASE", true.ToString());
-            process.StartInfo.EnvironmentVariables.Add("ASPNETCORE_URLS", $"http://*:{5000}");
 
-            DotnetProcess output = new DotnetProcess(process, DotnetTask.Run, DotnetStatus.Running);
+            if (port.HasValue)
+            {
+                process.StartInfo.EnvironmentVariables.Add("ASPNETCORE_URLS", $"http://*:{port}");
+            }
+
+            DotnetProcess output = new DotnetProcess(process, DotnetTask.Run, DotnetStatus.Running, port);
 
             process.ErrorDataReceived += (o, e) =>
             {

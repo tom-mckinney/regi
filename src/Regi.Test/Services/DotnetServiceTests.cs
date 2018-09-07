@@ -144,5 +144,18 @@ namespace Regi.Test.Services
                 Assert.Equal(DotnetStatus.Running, app.Status);
             }
         }
+
+        [Fact]
+        public void RunProject_will_start_custom_port_if_specified()
+        {
+            using (DotnetProcess app = _service.RunProject(_applicationLong, true, 8080))
+            {
+                Thread.Sleep(1000);
+
+                Assert.Equal(DotnetTask.Run, app.Task);
+                Assert.Equal(DotnetStatus.Running, app.Status);
+                Assert.Equal(8080, app.Port);
+            }
+        }
     }
 }

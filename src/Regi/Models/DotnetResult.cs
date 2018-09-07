@@ -22,11 +22,12 @@ namespace Regi.Models
 
     public class DotnetProcess : IDisposable
     {
-        public DotnetProcess(Process process, DotnetTask task, DotnetStatus status)
+        public DotnetProcess(Process process, DotnetTask task, DotnetStatus status, int? port = null)
         {
             Process = process;
             Task = task;
             Status = status;
+            Port = port;
         }
 
         public DotnetTask Task { get; set; }
@@ -34,6 +35,8 @@ namespace Regi.Models
         public DotnetStatus Status { get; set; }
 
         public virtual Process Process { get; protected set; }
+
+        public int? Port { get; set; }
 
         public DateTimeOffset? Start
         {

@@ -1,4 +1,5 @@
 ﻿using McMaster.Extensions.CommandLineUtils;
+using Regi.Extensions;
 using Regi.Services;
 using System;
 using System.Collections.Generic;
@@ -27,6 +28,20 @@ namespace Regi.Commands
             string currentDirectory = Directory.GetCurrentDirectory();
 
             var projects = _runnerService.RunAsync(currentDirectory);
+
+            // TODO: Make this wait configurable
+            while (true)
+            {
+                var key = System.Console.ReadKey(true);
+                if (key.Key == ConsoleKey.Enter)
+                {
+                    foreach (var p in projects)
+                    {
+                        p.Process.KillTree(TimeSpan.FromSeconds(10));
+                    }
+                    break;
+                }
+            }
 
             return projects.Count;
         }

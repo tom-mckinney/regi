@@ -57,7 +57,7 @@ namespace Regi.Test.Services
         {
             StartupConfig startupConfig = _runnerService.GetStartupConfig(_startupConfigGood);
 
-            Assert.Single(startupConfig.Apps);
+            Assert.Equal(2, startupConfig.Apps.Count);
             Assert.Equal(2, startupConfig.Tests.Count);
             Assert.Empty(startupConfig.Services);
         }
@@ -65,13 +65,14 @@ namespace Regi.Test.Services
         [Fact]
         public void RunAsync_returns_a_process_for_every_app_in_startup_config()
         {
-            _dotnetServiceMock.Setup(m => m.RunProject(It.IsAny<FileInfo>(), It.IsAny<bool>()))
-                .Returns(new DotnetProcess(new Process(), DotnetTask.Run, DotnetStatus.Success))
+            _dotnetServiceMock.Setup(m => m.RunProject(It.IsAny<FileInfo>(), It.IsAny<bool>(), It.IsAny<int?>()))
+                .Returns<FileInfo, bool, int?>((f, b, i) => new DotnetProcess(new Process(), DotnetTask.Run, DotnetStatus.Success, i))
                 .Verifiable();
 
             var processes = _runnerService.RunAsync(_startupConfigGood);
 
-            Assert.Single(processes);
+            Assert.Equal(2, processes.Count);
+            Assert.Single(processes, p => p.Port == 9080);
 
             _dotnetServiceMock.VerifyAll();
         }

@@ -61,13 +61,6 @@ namespace Regi.Services
 
             IList<DotnetProcess> processes = new List<DotnetProcess>();
 
-            Console.CancelKeyPress += (o, e) =>
-            {
-                foreach (var process in processes)
-                {
-                    process.Process.KillTree(TimeSpan.FromSeconds(10));
-                }
-            };
 
             foreach (var project in config.Apps)
             {
@@ -78,12 +71,18 @@ namespace Regi.Services
 
                     if (projectFile.Exists)
                     {
-                        processes.Add(_dotnetService.RunProject(projectFile));
+                        processes.Add(_dotnetService.RunProject(projectFile, false, project.Port));
                     }
                 }
             }
 
-            Thread.Sleep(Timeout.Infinite);
+            Console.CancelKeyPress += (o, e) =>
+            {
+                foreach (var process in processes)
+                {
+                    process.Process.KillTree(TimeSpan.FromSeconds(10));
+                }
+            };
 
             return processes;
         }

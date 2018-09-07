@@ -28,5 +28,7 @@ namespace Regi.Models
         public string Path { get; set; }
 
         public ProjectType Type { get; set; }
+
+        public int? Port { get; set; }
     }
 }

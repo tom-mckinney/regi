@@ -4,6 +4,12 @@
       "name": "SampleApp",
       "path": "../SampleApp/SampleApp.csproj",
       "type": "web"
+    },
+    {
+      "name": "SampleApp",
+      "path": "../SampleApp/SampleApp.csproj",
+      "type": "web",
+      "port": 9080
     }
   ],
   "tests": [
