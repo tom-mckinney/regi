@@ -1,4 +1,5 @@
-﻿using Moq;
+﻿using Microsoft.Extensions.Options;
+using Moq;
 using Regi.Commands;
 using Regi.Models;
 using Regi.Services;
@@ -17,6 +18,7 @@ namespace Regi.Test.Commands
         private readonly ITestOutputHelper _output;
         private readonly TestConsole _console;
         private readonly Mock<IRunnerService> _runnerServiceMock;
+        private readonly IOptions<Settings> _options = Options.Create(new Settings { RunIndefinitely = false });
 
         public StartCommandTests(ITestOutputHelper output)
         {
@@ -37,7 +39,7 @@ namespace Regi.Test.Commands
                 })
                 .Verifiable();
 
-            StartCommand command = new StartCommand(_runnerServiceMock.Object, _console);
+            StartCommand command = new StartCommand(_runnerServiceMock.Object, _console, _options);
 
             int projectCount = command.OnExecute();
 

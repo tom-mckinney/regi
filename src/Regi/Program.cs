@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Regi.Services;
 using McMaster.Extensions.CommandLineUtils.Abstractions;
 using Regi.Abstractions;
+using Regi.Models;
 
 namespace Regi
 {
@@ -18,6 +19,10 @@ namespace Regi
         public static int MainWithConsole(IConsole console, string[] args)
         {
             var services = new ServiceCollection()
+                .Configure<Settings>(o =>
+                {
+                    o.RunIndefinitely = true;
+                })
                 .AddSingleton<IDotnetService, DotnetService>()
                 .AddSingleton<IRunnerService, RunnerService>()
                 .AddSingleton<IFileService, FileService>()
@@ -31,7 +36,7 @@ namespace Regi
                 .UseDefaultConventions()
                 .UseConstructorInjection(services);
 
-            app.OnExecute(() => 1);
+            app.OnExecute(() => Main(new string[] { "--help" }));
 
             return app.Execute(args);
         }

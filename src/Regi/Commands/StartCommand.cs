@@ -1,5 +1,7 @@
 ﻿using McMaster.Extensions.CommandLineUtils;
+using Microsoft.Extensions.Options;
 using Regi.Extensions;
+using Regi.Models;
 using Regi.Services;
 using System;
 using System.Collections.Generic;
@@ -13,11 +15,13 @@ namespace Regi.Commands
     {
         private readonly IRunnerService _runnerService;
         private readonly IConsole _console;
+        private readonly Settings _options;
 
-        public StartCommand(IRunnerService runnerService, IConsole console)
+        public StartCommand(IRunnerService runnerService, IConsole console, IOptions<Settings> options)
         {
             _runnerService = runnerService;
             _console = console;
+            _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
         }
 
         [Argument(0, Description = "Name of the project")]
@@ -30,7 +34,7 @@ namespace Regi.Commands
             var projects = _runnerService.RunAsync(currentDirectory);
 
             // TODO: Make this wait configurable
-            while (true)
+            while (_options.RunIndefinitely)
             {
                 var key = System.Console.ReadKey(true);
                 if (key.Key == ConsoleKey.Enter)
