@@ -1,14 +1,8 @@
-﻿using McMaster.Extensions.CommandLineUtils;
-using Moq;
-using Regi.Extensions;
-using Regi.Models;
+﻿using Regi.Models;
 using Regi.Services;
-using Regi.Test.Utilities;
-using System;
-using System.Collections.Generic;
+using Regi.Test.Helpers;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using Xunit;
 using Xunit.Abstractions;
@@ -51,109 +45,109 @@ namespace Regi.Test.Services
         [Fact]
         public void TestProject_on_success_returns_status()
         {
-            DotnetProcess unitTest = _service.TestProject(_successfulTests);
+            AppProcess unitTest = _service.TestProject(_successfulTests);
 
-            Assert.Equal(DotnetTask.Test, unitTest.Task);
-            Assert.Equal(DotnetStatus.Success, unitTest.Status);
+            Assert.Equal(AppTask.Test, unitTest.Task);
+            Assert.Equal(AppStatus.Success, unitTest.Status);
         }
 
         [Fact]
         public void TestProject_verbose_on_success_prints_all_output()
         {
-            DotnetProcess unitTest = _service.TestProject(_successfulTests, true);
+            AppProcess unitTest = _service.TestProject(_successfulTests, true);
 
-            Assert.Equal(DotnetTask.Test, unitTest.Task);
-            Assert.Equal(DotnetStatus.Success, unitTest.Status);
+            Assert.Equal(AppTask.Test, unitTest.Task);
+            Assert.Equal(AppStatus.Success, unitTest.Status);
             Assert.NotEmpty(_console.LogOutput);
         }
 
         [Fact]
         public void TestProject_on_failure_prints_only_exception_info()
         {
-            DotnetProcess unitTest = _service.TestProject(_failedTests);
+            AppProcess unitTest = _service.TestProject(_failedTests);
 
-            Assert.Equal(DotnetTask.Test, unitTest.Task);
-            Assert.Equal(DotnetStatus.Failure, unitTest.Status);
+            Assert.Equal(AppTask.Test, unitTest.Task);
+            Assert.Equal(AppStatus.Failure, unitTest.Status);
             Assert.Contains("Test Run Failed.", _console.LogOutput);
         }
 
         [Fact]
         public void TestProject_verbose_on_failure_prints_all_output()
         {
-            DotnetProcess unitTest = _service.TestProject(_failedTests, true);
+            AppProcess unitTest = _service.TestProject(_failedTests, true);
 
-            Assert.Equal(DotnetTask.Test, unitTest.Task);
-            Assert.Equal(DotnetStatus.Failure, unitTest.Status);
+            Assert.Equal(AppTask.Test, unitTest.Task);
+            Assert.Equal(AppStatus.Failure, unitTest.Status);
             Assert.Contains("Total tests:", _console.LogOutput);
         }
 
         [Fact]
         public void RunProject_changes_status_from_running_to_success_on_exit()
         {
-            DotnetProcess app = _service.RunProject(_application);
+            AppProcess app = _service.RunProject(_application);
 
-            Assert.Equal(DotnetStatus.Running, app.Status);
+            Assert.Equal(AppStatus.Running, app.Status);
 
             app.Process.WaitForExit();
 
-            Assert.Equal(DotnetStatus.Success, app.Status);
+            Assert.Equal(AppStatus.Success, app.Status);
         }
 
         [Fact]
         public void RunProject_returns_failure_status_on_thrown_exception()
         {
-            DotnetProcess app = _service.RunProject(_applicationError);
+            AppProcess app = _service.RunProject(_applicationError);
 
             app.Process.WaitForExit();
 
-            Assert.Equal(DotnetStatus.Failure, app.Status);
+            Assert.Equal(AppStatus.Failure, app.Status);
         }
 
         [Fact]
         public void RunProject_starts_and_prints_nothing()
         {
-            DotnetProcess app = _service.RunProject(_application);
+            AppProcess app = _service.RunProject(_application);
 
             app.Process.WaitForExit();
 
-            Assert.Equal(DotnetTask.Run, app.Task);
-            Assert.Equal(DotnetStatus.Success, app.Status);
+            Assert.Equal(AppTask.Run, app.Task);
+            Assert.Equal(AppStatus.Success, app.Status);
             Assert.Null(_console.LogOutput);
         }
 
         [Fact]
         public void RunProject_verbose_starts_and_prints_all_output()
         {
-            DotnetProcess app = _service.RunProject(_application, true);
+            AppProcess app = _service.RunProject(_application, true);
 
             app.Process.WaitForExit();
 
-            Assert.Equal(DotnetTask.Run, app.Task);
-            Assert.Equal(DotnetStatus.Success, app.Status);
+            Assert.Equal(AppTask.Run, app.Task);
+            Assert.Equal(AppStatus.Success, app.Status);
             Assert.Contains("Hello World!", _console.LogOutput);
         }
 
         [Fact]
         public void RunProject_long_starts_and_prints_nothing()
         {
-            using (DotnetProcess app = _service.RunProject(_applicationLong, true))
+            using (AppProcess app = _service.RunProject(_applicationLong, true))
             {
                 Thread.Sleep(1000);
 
-                Assert.Equal(DotnetTask.Run, app.Task);
-                Assert.Equal(DotnetStatus.Running, app.Status);
+                Assert.Equal(AppTask.Run, app.Task);
+                Assert.Equal(AppStatus.Running, app.Status);
             }
         }
 
         [Fact]
         public void RunProject_will_start_custom_port_if_specified()
         {
-            using (DotnetProcess app = _service.RunProject(_applicationLong, true, 8080))
+            using (AppProcess app = _service.RunProject(_applicationLong, true, 8080))
             {
                 Thread.Sleep(1000);
 
-                Assert.Equal(DotnetTask.Run, app.Task);
-                Assert.Equal(DotnetStatus.Running, app.Status);
+                Assert.Equal(AppTask.Run, app.Task);
+                Assert.Equal(AppStatus.Running, app.Status);
                 Assert.Equal(8080, app.Port);
             }
         }

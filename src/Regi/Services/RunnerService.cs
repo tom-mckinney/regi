@@ -14,18 +14,20 @@ namespace Regi.Services
     public interface IRunnerService
     {
         StartupConfig GetStartupConfig(string path);
-        IList<DotnetProcess> RunAsync(string directoryName);
-        IList<DotnetProcess> TestAsync(string directoryName, ProjectType? type = null);
+        IList<AppProcess> RunAsync(string directoryName);
+        IList<AppProcess> TestAsync(string directoryName, ProjectType? type = null);
     }
 
     public class RunnerService : IRunnerService
     {
         private readonly IDotnetService _dotnetService;
+        private readonly INodeService _nodeService;
         private readonly IConsole _console;
 
-        public RunnerService(IDotnetService dotnetService, IConsole console)
+        public RunnerService(IDotnetService dotnetService, INodeService nodeService, IConsole console)
         {
             _dotnetService = dotnetService;
+            _nodeService = nodeService;
             _console = console;
         }
 
@@ -55,11 +57,11 @@ namespace Regi.Services
             }
         }
 
-        public IList<DotnetProcess> RunAsync(string directoryName)
+        public IList<AppProcess> RunAsync(string directoryName)
         {
             StartupConfig config = GetStartupConfig(directoryName);
 
-            IList<DotnetProcess> processes = new List<DotnetProcess>();
+            IList<AppProcess> processes = new List<AppProcess>();
 
 
             foreach (var project in config.Apps)
@@ -71,7 +73,21 @@ namespace Regi.Services
 
                     if (projectFile.Exists)
                     {
-                        processes.Add(_dotnetService.RunProject(projectFile, false, project.Port));
+                        AppProcess process = null;
+
+                        if (project.Framework == ProjectFramework.Dotnet)
+                        {
+                            process = _dotnetService.RunProject(projectFile, false, project.Port);
+                        }
+                        else if (project.Framework == ProjectFramework.Node)
+                        {
+                            process = _nodeService.StartProject(projectFile, false, project.Port);
+                        }
+
+                        if (process != null)
+                        {
+                            processes.Add(process);
+                        }
                     }
                 }
             }
@@ -87,11 +103,11 @@ namespace Regi.Services
             return processes;
         }
 
-        public IList<DotnetProcess> TestAsync(string directoryName, ProjectType? type = null)
+        public IList<AppProcess> TestAsync(string directoryName, ProjectType? type = null)
         {
             StartupConfig config = GetStartupConfig(directoryName);
 
-            IList<DotnetProcess> processes = new List<DotnetProcess>();
+            IList<AppProcess> processes = new List<AppProcess>();
 
             Console.CancelKeyPress += (o, e) =>
             {

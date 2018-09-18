@@ -1,15 +1,22 @@
 {
   "apps": [
     {
-      "name": "SampleApp",
+      "name": "SampleApp1",
       "path": "../SampleApp/SampleApp.csproj",
       "type": "web"
     },
     {
-      "name": "SampleApp",
+      "name": "SampleApp2",
       "path": "../SampleApp/SampleApp.csproj",
       "type": "web",
       "port": 9080
+    },
+    {
+      "name": "SampleNodeApp",
+      "path": "../SampleNodeApp/package.json",
+      "type": "web",
+      "framework": "node",
+      "port": 9081
     }
   ],
   "tests": [

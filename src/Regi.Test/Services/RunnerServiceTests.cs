@@ -2,7 +2,7 @@
 using Newtonsoft.Json;
 using Regi.Models;
 using Regi.Services;
-using Regi.Test.Utilities;
+using Regi.Test.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -16,16 +16,22 @@ namespace Regi.Test.Services
     public class RunnerServiceTests
     {
         private readonly Mock<IDotnetService> _dotnetServiceMock;
+        private readonly Mock<INodeService> _nodeServiceMock;
         private readonly IRunnerService _runnerService;
 
         private readonly string _startupConfigGood;
         private readonly string _startupConfigBad;
         private readonly char Slash = Path.DirectorySeparatorChar;
 
+        private const int dotnetAppCount = 2;
+        private const int nodeAppCount = 1;
+        private const int totalAppCount = dotnetAppCount + nodeAppCount;
+
         public RunnerServiceTests(ITestOutputHelper output)
         {
             _dotnetServiceMock = new Mock<IDotnetService>();
-            _runnerService = new RunnerService(_dotnetServiceMock.Object, new TestConsole(output));
+            _nodeServiceMock = new Mock<INodeService>();
+            _runnerService = new RunnerService(_dotnetServiceMock.Object, _nodeServiceMock.Object, new TestConsole(output));
 
             _startupConfigGood = SampleDirectoryPath("ConfigurationGood");
             _startupConfigBad = SampleDirectoryPath("ConfigurationBad");
@@ -57,7 +63,7 @@ namespace Regi.Test.Services
         {
             StartupConfig startupConfig = _runnerService.GetStartupConfig(_startupConfigGood);
 
-            Assert.Equal(2, startupConfig.Apps.Count);
+            Assert.Equal(totalAppCount, startupConfig.Apps.Count);
             Assert.Equal(2, startupConfig.Tests.Count);
             Assert.Empty(startupConfig.Services);
         }
@@ -66,22 +72,26 @@ namespace Regi.Test.Services
         public void RunAsync_returns_a_process_for_every_app_in_startup_config()
         {
             _dotnetServiceMock.Setup(m => m.RunProject(It.IsAny<FileInfo>(), It.IsAny<bool>(), It.IsAny<int?>()))
-                .Returns<FileInfo, bool, int?>((f, b, i) => new DotnetProcess(new Process(), DotnetTask.Run, DotnetStatus.Success, i))
+                .Returns<FileInfo, bool, int?>((f, b, i) => new AppProcess(new Process(), AppTask.Run, AppStatus.Success, i))
+                .Verifiable();
+            _nodeServiceMock.Setup(m => m.StartProject(It.IsAny<FileInfo>(), It.IsAny<bool>(), It.IsAny<int?>()))
+                .Returns<FileInfo, bool, int?>((f, b, i) => new AppProcess(new Process(), AppTask.Run, AppStatus.Success, i))
                 .Verifiable();
 
             var processes = _runnerService.RunAsync(_startupConfigGood);
 
-            Assert.Equal(2, processes.Count);
+            Assert.Equal(totalAppCount, processes.Count);
             Assert.Single(processes, p => p.Port == 9080);
 
-            _dotnetServiceMock.VerifyAll();
+            _dotnetServiceMock.Verify(m => m.RunProject(It.IsAny<FileInfo>(), It.IsAny<bool>(), It.IsAny<int?>()), Times.Exactly(dotnetAppCount));
+            _nodeServiceMock.Verify(m => m.StartProject(It.IsAny<FileInfo>(), It.IsAny<bool>(), It.IsAny<int?>()), Times.Exactly(nodeAppCount));
         }
 
         [Fact]
         public void TestAsync_returns_a_process_for_every_test_in_startup_config()
         {
             _dotnetServiceMock.Setup(m => m.TestProject(It.IsAny<FileInfo>(), It.IsAny<bool>()))
-                .Returns(new DotnetProcess(new Process(), DotnetTask.Run, DotnetStatus.Success))
+                .Returns(new AppProcess(new Process(), AppTask.Run, AppStatus.Success))
                 .Verifiable();
 
             var processes = _runnerService.TestAsync(_startupConfigGood);
@@ -97,7 +107,7 @@ namespace Regi.Test.Services
         public void TestAsync_will_only_run_tests_on_type_specified(ProjectType type, int expectedCount)
         {
             _dotnetServiceMock.Setup(m => m.TestProject(It.IsAny<FileInfo>(), It.IsAny<bool>()))
-                .Returns(new DotnetProcess(new Process(), DotnetTask.Run, DotnetStatus.Success))
+                .Returns(new AppProcess(new Process(), AppTask.Run, AppStatus.Success))
                 .Verifiable();
 
             var processes = _runnerService.TestAsync(_startupConfigGood, type);

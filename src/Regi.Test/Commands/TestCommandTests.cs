@@ -2,7 +2,7 @@
 using Regi.Commands;
 using Regi.Models;
 using Regi.Services;
-using Regi.Test.Utilities;
+using Regi.Test.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -30,10 +30,10 @@ namespace Regi.Test.Commands
         public void Will_run_all_test_if_no_name_or_type_is_specified()
         {
             _runnerServiceMock.Setup(m => m.TestAsync(It.IsAny<string>(), null))
-                .Returns(new List<DotnetProcess>
+                .Returns(new List<AppProcess>
                 {
-                    new DotnetProcess(new Process(), DotnetTask.Test, DotnetStatus.Success),
-                    new DotnetProcess(new Process(), DotnetTask.Test, DotnetStatus.Success)
+                    new AppProcess(new Process(), AppTask.Test, AppStatus.Success),
+                    new AppProcess(new Process(), AppTask.Test, AppStatus.Success)
                 })
                 .Verifiable();
 
@@ -56,9 +56,9 @@ namespace Regi.Test.Commands
         public void Will_only_run_tests_with_matching_type_if_specified(ProjectType? type)
         {
             _runnerServiceMock.Setup(m => m.TestAsync(It.IsAny<string>(), type))
-                .Returns(new List<DotnetProcess>
+                .Returns(new List<AppProcess>
                 {
-                    new DotnetProcess(new Process(), DotnetTask.Test, DotnetStatus.Success)
+                    new AppProcess(new Process(), AppTask.Test, AppStatus.Success)
                 })
                 .Verifiable();
 

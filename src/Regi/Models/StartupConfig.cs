@@ -21,6 +21,12 @@ namespace Regi.Models
         Integration
     }
 
+    public enum ProjectFramework
+    {
+        Dotnet = 1,
+        Node
+    }
+
     public class Project
     {
         public string Name { get; set; }
@@ -28,6 +34,8 @@ namespace Regi.Models
         public string Path { get; set; }
 
         public ProjectType Type { get; set; }
+
+        public ProjectFramework Framework { get; set; } = ProjectFramework.Dotnet;
 
         public int? Port { get; set; }
     }

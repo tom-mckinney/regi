@@ -6,7 +6,7 @@
 dotnet pack --output ./
 ```
 ``` bash
-dotnet tool uninstall -g regi --add-source ./
+dotnet tool uninstall -g regi
 ```
 ``` bash
 dotnet tool install -g regi --add-source ./

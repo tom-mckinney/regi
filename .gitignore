@@ -34,3 +34,5 @@ msbuild.wrn
 .vs/
 
 *.nupkg
+
+node_modules/

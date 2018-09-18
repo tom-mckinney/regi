@@ -3,7 +3,7 @@ using Moq;
 using Regi.Commands;
 using Regi.Models;
 using Regi.Services;
-using Regi.Test.Utilities;
+using Regi.Test.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -32,10 +32,10 @@ namespace Regi.Test.Commands
         public void Will_start_all_projects_by_default()
         {
             _runnerServiceMock.Setup(m => m.RunAsync(It.IsAny<string>()))
-                .Returns(new List<DotnetProcess>
+                .Returns(new List<AppProcess>
                 {
-                    new DotnetProcess(new Process(), DotnetTask.Run, DotnetStatus.Success),
-                    new DotnetProcess(new Process(), DotnetTask.Run, DotnetStatus.Success)
+                    new AppProcess(new Process(), AppTask.Run, AppStatus.Success),
+                    new AppProcess(new Process(), AppTask.Run, AppStatus.Success)
                 })
                 .Verifiable();
 

@@ -7,6 +7,7 @@ using Regi.Services;
 using McMaster.Extensions.CommandLineUtils.Abstractions;
 using Regi.Abstractions;
 using Regi.Models;
+using Regi.Extensions;
 
 namespace Regi
 {
@@ -24,6 +25,7 @@ namespace Regi
                     o.RunIndefinitely = true;
                 })
                 .AddSingleton<IDotnetService, DotnetService>()
+                .AddSingleton<INodeService, NodeService>()
                 .AddSingleton<IRunnerService, RunnerService>()
                 .AddSingleton<IFileService, FileService>()
                 .AddSingleton(console)
@@ -38,7 +40,23 @@ namespace Regi
 
             app.OnExecute(() => Main(new string[] { "--help" }));
 
-            return app.Execute(args);
+            try
+            {
+                return app.Execute(args);
+            }
+            catch (Newtonsoft.Json.JsonSerializationException e)
+            {
+                // TODO: add custom handling for serialization exceptions
+                console.WriteErrorLine(e.ToString());
+                return 1;
+            }
+            catch (Exception e)
+            {
+                string failureMessage = e.InnerException?.Message ?? e.Message;
+
+                console.WriteErrorLine(failureMessage);
+                return 1;
+            }
         }
     }
 }

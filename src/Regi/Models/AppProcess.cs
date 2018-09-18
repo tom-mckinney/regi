@@ -6,13 +6,13 @@ using System.Text;
 
 namespace Regi.Models
 {
-    public enum DotnetTask
+    public enum AppTask
     {
         Test = 1,
         Run,
     }
 
-    public enum DotnetStatus
+    public enum AppStatus
     {
         Unknown,
         Failure = 1,
@@ -20,9 +20,9 @@ namespace Regi.Models
         Running
     }
 
-    public class DotnetProcess : IDisposable
+    public class AppProcess : IDisposable
     {
-        public DotnetProcess(Process process, DotnetTask task, DotnetStatus status, int? port = null)
+        public AppProcess(Process process, AppTask task, AppStatus status, int? port = null)
         {
             Process = process;
             Task = task;
@@ -30,9 +30,9 @@ namespace Regi.Models
             Port = port;
         }
 
-        public DotnetTask Task { get; set; }
+        public AppTask Task { get; set; }
 
-        public DotnetStatus Status { get; set; }
+        public AppStatus Status { get; set; }
 
         public virtual Process Process { get; protected set; }
 

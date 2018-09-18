@@ -1,6 +1,6 @@
 ﻿using McMaster.Extensions.CommandLineUtils.Abstractions;
 using Regi.Services;
-using Regi.Test.Utilities;
+using Regi.Test.Helpers;
 using System;
 using System.Collections.Generic;
 using System.IO;

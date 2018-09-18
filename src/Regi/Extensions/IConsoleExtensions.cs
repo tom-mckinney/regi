@@ -7,16 +7,22 @@ namespace Regi.Extensions
 {
     public static class IConsoleExtensions
     {
-        public static IConsole WriteErrorLine(this IConsole console, string input)
+        public static void WriteEmphasizedLine(this IConsole console, string input)
         {
-            console.BackgroundColor = ConsoleColor.DarkRed;
-            console.ForegroundColor = ConsoleColor.White;
+            console.ForegroundColor = ConsoleColor.Cyan;
 
             console.WriteLine(input);
 
             console.ResetColor();
+        }
 
-            return console;
+        public static void WriteErrorLine(this IConsole console, string input)
+        {
+            console.ForegroundColor = ConsoleColor.Red;
+
+            console.WriteLine(input);
+
+            console.ResetColor();
         }
     }
 }

@@ -10,14 +10,17 @@
     <Compile Remove="_SampleProjects_\SampleAppLong\bin\**" />
     <Compile Remove="_SampleProjects_\SampleAppLong\obj\**" />
     <Compile Remove="_SampleProjects_\SampleApp\obj\**" />
+    <Compile Remove="_SampleProjects_\SampleNodeApp\node_modules\**" />
     <Compile Remove="_SampleProjects_\SampleTests\**" />
     <EmbeddedResource Remove="_SampleProjects_\SampleAppLong\bin\**" />
     <EmbeddedResource Remove="_SampleProjects_\SampleAppLong\obj\**" />
     <EmbeddedResource Remove="_SampleProjects_\SampleApp\obj\**" />
+    <EmbeddedResource Remove="_SampleProjects_\SampleNodeApp\node_modules\**" />
     <EmbeddedResource Remove="_SampleProjects_\SampleTests\**" />
     <None Remove="_SampleProjects_\SampleAppLong\bin\**" />
     <None Remove="_SampleProjects_\SampleAppLong\obj\**" />
     <None Remove="_SampleProjects_\SampleApp\obj\**" />
+    <None Remove="_SampleProjects_\SampleNodeApp\node_modules\**" />
     <None Remove="_SampleProjects_\SampleTests\**" />
   </ItemGroup>
 
@@ -85,6 +88,15 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="_SampleProjects_\ConfigurationGood\startup.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="_SampleProjects_\SampleNodeApp\index.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="_SampleProjects_\SampleNodeApp\package-lock.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="_SampleProjects_\SampleNodeApp\package.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

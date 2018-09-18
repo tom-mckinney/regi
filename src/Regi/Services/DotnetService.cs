@@ -11,16 +11,16 @@ namespace Regi.Services
 {
     public interface IDotnetService
     {
-        DotnetProcess TestProject(FileInfo projectFile, bool verbose = false);
-        DotnetProcess RunProject(FileInfo projectFile, bool verbose = false, int? port = null);
+        AppProcess RunProject(FileInfo projectFile, bool verbose = false, int? port = null);
+        AppProcess TestProject(FileInfo projectFile, bool verbose = false);
     }
 
-    public class DotnetService : IDotnetService
+    public class DotnetService : CLIBase, IDotnetService
     {
         private readonly IConsole _console;
         private readonly string _dotnetPath;
 
-        public DotnetService(IConsole console)
+        public DotnetService(IConsole console) : base(console)
         {
             _console = console;
 
@@ -32,7 +32,7 @@ namespace Regi.Services
             }
         }
 
-        public DotnetProcess RunProject(FileInfo projectFile, bool verbose = false, int? port = null)
+        public AppProcess RunProject(FileInfo projectFile, bool verbose = false, int? port = null)
         {
             Process process = new Process
             {
@@ -55,32 +55,14 @@ namespace Regi.Services
                 process.StartInfo.EnvironmentVariables.Add("ASPNETCORE_URLS", $"http://*:{port}");
             }
 
-            DotnetProcess output = new DotnetProcess(process, DotnetTask.Run, DotnetStatus.Running, port);
+            AppProcess output = new AppProcess(process, AppTask.Run, AppStatus.Running, port);
 
-            process.ErrorDataReceived += (o, e) =>
-            {
-                if (!string.IsNullOrWhiteSpace(e.Data))
-                {
-                    output.Status = DotnetStatus.Failure;
-                    _console.WriteErrorLine(e.Data);
-                }
-            };
-
+            process.ErrorDataReceived += DefaultErrorDataReceived(output);
+            process.Exited += DefaultExited(output);
             if (verbose)
             {
-                process.OutputDataReceived += (o, e) =>
-                {
-                    _console.WriteLine(e.Data);
-                };
+                process.OutputDataReceived += DefaultOutputDataRecieved();
             }
-
-            process.Exited += (o, e) =>
-            {
-                if (output.Status == DotnetStatus.Running)
-                {
-                    output.Status = DotnetStatus.Success;
-                }
-            };
 
             process.Start();
 
@@ -88,25 +70,21 @@ namespace Regi.Services
             if (verbose)
             {
                 process.BeginOutputReadLine();
-            }            
+            }
 
             return output;
         }
 
-        public DotnetProcess TestProject(FileInfo projectFile, bool verbose = false)
+        public AppProcess TestProject(FileInfo projectFile, bool verbose = false)
         {
-            _console.ForegroundColor = ConsoleColor.Cyan;
-            _console.WriteLine($"Starting tests for project {projectFile.Name}");
-            _console.ResetColor();
-
-            DotnetStatus status = DotnetStatus.Success;
+            _console.WriteEmphasizedLine($"Starting tests for project {projectFile.Name}");
 
             if (string.IsNullOrWhiteSpace(_dotnetPath))
             {
                 throw new Exception("Cannot find path to dotnet CLI");
             }
 
-            Process unitTest = new Process
+            Process process = new Process
             {
                 StartInfo = new ProcessStartInfo()
                 {
@@ -118,48 +96,35 @@ namespace Regi.Services
                 }
             };
 
-            unitTest.ErrorDataReceived += (o, e) =>
+            AppProcess output = new AppProcess(process, AppTask.Test, AppStatus.Running);
+
+            process.ErrorDataReceived += DefaultErrorDataReceived(output);
+            if (verbose)
             {
-                if (!string.IsNullOrWhiteSpace(e.Data))
-                {
-                    status = DotnetStatus.Failure;
+                process.OutputDataReceived += DefaultOutputDataRecieved();
+            }
 
-                    _console.BackgroundColor = ConsoleColor.DarkRed;
-                    _console.ForegroundColor = ConsoleColor.White;
+            process.Start();
 
-                    _console.WriteLine(e.Data);
-
-                    _console.ResetColor();
-                }
-            };
+            process.BeginErrorReadLine();
 
             if (verbose)
             {
-                unitTest.OutputDataReceived += (o, e) =>
-                {
-                    _console.WriteLine(e.Data);
-                };
+                process.BeginOutputReadLine();
             }
 
-            unitTest.Start();
+            process.WaitForExit();
 
-            unitTest.BeginErrorReadLine();
-
-            if (verbose)
+            // Todo: Determine why test doesn't call exit
+            output.End = DateTimeOffset.UtcNow;
+            if (output.Status == AppStatus.Running)
             {
-                unitTest.BeginOutputReadLine();
+                output.Status = AppStatus.Success;
             }
 
-            unitTest.WaitForExit();
+            _console.WriteEmphasizedLine($"Finished tests for project {projectFile.Name}");
 
-            _console.ForegroundColor = ConsoleColor.Cyan;
-            _console.WriteLine($"Finished tests for project {projectFile.Name}");
-            _console.ResetColor();
-
-            return new DotnetProcess(unitTest, DotnetTask.Test, status)
-            {
-                End = DateTimeOffset.UtcNow
-            };
+            return output;
         }
     }
 }

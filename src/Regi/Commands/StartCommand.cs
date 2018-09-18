@@ -36,7 +36,7 @@ namespace Regi.Commands
             // TODO: Make this wait configurable
             while (_options.RunIndefinitely)
             {
-                var key = System.Console.ReadKey(true);
+                var key = Console.ReadKey(true);
                 if (key.Key == ConsoleKey.Enter)
                 {
                     foreach (var p in projects)

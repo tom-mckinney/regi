@@ -5,7 +5,7 @@ using System.IO;
 using System.Text;
 using Xunit.Abstractions;
 
-namespace Regi.Test.Utilities
+namespace Regi.Test.Helpers
 {
     public class TestConsole : IConsole
     {

@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
-namespace Regi.Test.Utilities
+namespace Regi.Test.Helpers
 {
     internal class TestCommandLineContext : CommandLineContext
     {
