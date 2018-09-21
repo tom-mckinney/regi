@@ -8,6 +8,7 @@ using McMaster.Extensions.CommandLineUtils.Abstractions;
 using Regi.Abstractions;
 using Regi.Models;
 using Regi.Extensions;
+using Newtonsoft.Json;
 
 namespace Regi
 {
@@ -44,10 +45,16 @@ namespace Regi
             {
                 return app.Execute(args);
             }
-            catch (Newtonsoft.Json.JsonSerializationException e)
+            catch (JsonSerializationException jsonException)
             {
+                // TODO: do same thing as below
+                throw new NotImplementedException();
+            }
+            catch (Exception e) when (e.InnerException is JsonSerializationException jsonException)
+            {
+                console.WriteErrorLine("This is a serialization exception");
                 // TODO: add custom handling for serialization exceptions
-                console.WriteErrorLine(e.ToString());
+                console.WriteErrorLine(jsonException.ToString());
                 return 1;
             }
             catch (Exception e)
@@ -55,6 +62,7 @@ namespace Regi
                 string failureMessage = e.InnerException?.Message ?? e.Message;
 
                 console.WriteErrorLine(failureMessage);
+
                 return 1;
             }
         }
