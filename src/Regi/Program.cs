@@ -1,14 +1,13 @@
-using System;
-using System.ComponentModel.DataAnnotations;
-using Regi.Commands;
 using McMaster.Extensions.CommandLineUtils;
-using Microsoft.Extensions.DependencyInjection;
-using Regi.Services;
 using McMaster.Extensions.CommandLineUtils.Abstractions;
-using Regi.Abstractions;
-using Regi.Models;
-using Regi.Extensions;
+using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
+using Regi.Abstractions;
+using Regi.Commands;
+using Regi.Extensions;
+using Regi.Models;
+using Regi.Services;
+using System;
 
 namespace Regi
 {
@@ -29,6 +28,7 @@ namespace Regi
                 .AddSingleton<INodeService, NodeService>()
                 .AddSingleton<IRunnerService, RunnerService>()
                 .AddSingleton<IFileService, FileService>()
+                .AddTransient<IParallelService, ParallelService>()
                 .AddSingleton(console)
                 .AddSingleton<CommandLineContext, DefaultCommandLineContext>()
                 .BuildServiceProvider();
@@ -45,25 +45,17 @@ namespace Regi
             {
                 return app.Execute(args);
             }
-            catch (JsonSerializationException jsonException)
+            catch (JsonSerializationException e)
             {
-                // TODO: do same thing as below
-                throw new NotImplementedException();
+                return e.LogAndReturnStatus(console);
             }
             catch (Exception e) when (e.InnerException is JsonSerializationException jsonException)
             {
-                console.WriteErrorLine("This is a serialization exception");
-                // TODO: add custom handling for serialization exceptions
-                console.WriteErrorLine(jsonException.ToString());
-                return 1;
+                return jsonException.LogAndReturnStatus(console);
             }
             catch (Exception e)
             {
-                string failureMessage = e.InnerException?.Message ?? e.Message;
-
-                console.WriteErrorLine(failureMessage);
-
-                return 1;
+                return e.LogAndReturnStatus(console);
             }
         }
     }

@@ -13,6 +13,7 @@ namespace Regi.Services
     {
         AppProcess RunProject(FileInfo projectFile, bool verbose = false, int? port = null);
         AppProcess TestProject(FileInfo projectFile, bool verbose = false);
+        AppProcess RestoreProject(FileInfo projectFile, bool verbose = false);
     }
 
     public class DotnetService : CLIBase, IDotnetService
@@ -30,6 +31,11 @@ namespace Regi.Services
             {
                 throw new FileNotFoundException("Could not find path for .NET Core SDK");
             }
+        }
+
+        public AppProcess RestoreProject(FileInfo projectFile, bool verbose = false)
+        {
+            throw new NotImplementedException();
         }
 
         public AppProcess RunProject(FileInfo projectFile, bool verbose = false, int? port = null)
@@ -93,7 +99,8 @@ namespace Regi.Services
                     WorkingDirectory = projectFile.DirectoryName,
                     RedirectStandardOutput = verbose,
                     RedirectStandardError = true
-                }
+                },
+                EnableRaisingEvents = true
             };
 
             AppProcess output = new AppProcess(process, AppTask.Test, AppStatus.Running);

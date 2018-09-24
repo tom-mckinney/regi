@@ -93,6 +93,9 @@
     <None Update="_SampleProjects_\ConfigurationGood\startup.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="_SampleProjects_\ConfigurationWrongEnum\startup.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="_SampleProjects_\SampleNodeApp\failing.test.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

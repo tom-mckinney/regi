@@ -14,6 +14,7 @@ namespace Regi.Services
     {
         AppProcess StartProject(FileInfo projectFile, bool verbose = false, int? port = null);
         AppProcess TestProject(FileInfo project, string pathPattern = null, bool verbose = false);
+        AppProcess InstallProject(FileInfo projectFile, bool verbose = false);
     }
 
     public class NodeService : CLIBase, INodeService
@@ -31,6 +32,11 @@ namespace Regi.Services
             {
                 throw new FileNotFoundException("Could not find path for NPM CLI");
             }
+        }
+
+        public AppProcess InstallProject(FileInfo projectFile, bool verbose = false)
+        {
+            throw new NotImplementedException();
         }
 
         public AppProcess StartProject(FileInfo projectFile, bool verbose = false, int? port = null)
@@ -91,7 +97,8 @@ namespace Regi.Services
                     WorkingDirectory = projectFile.DirectoryName,
                     RedirectStandardOutput = verbose,
                     RedirectStandardError = true
-                }
+                },
+                EnableRaisingEvents = true
             };
 
             AppProcess output = new AppProcess(process, AppTask.Test, AppStatus.Running);

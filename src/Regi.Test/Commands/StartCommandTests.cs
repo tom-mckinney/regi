@@ -31,7 +31,7 @@ namespace Regi.Test.Commands
         [Fact]
         public void Will_start_all_projects_by_default()
         {
-            _runnerServiceMock.Setup(m => m.RunAsync(It.IsAny<string>()))
+            _runnerServiceMock.Setup(m => m.Run(It.IsAny<string>()))
                 .Returns(new List<AppProcess>
                 {
                     new AppProcess(new Process(), AppTask.Run, AppStatus.Success),

@@ -83,25 +83,5 @@ namespace Regi.Test.Services
                 Assert.Equal(expectedStatus, test.Status);
             }
         }
-
-        [Fact]
-        public void TestProject_will_return_success_on_passing_tests()
-        {
-            using (AppProcess test = _service.TestProject(_application, "passing", true))
-            {
-                Assert.Equal(AppTask.Test, test.Task);
-                Assert.Equal(AppStatus.Success, test.Status);
-            }
-        }
-
-        [Fact]
-        public void TestProject_will_return_failure_on_failing_tests()
-        {
-            using (AppProcess test = _service.TestProject(_application, "failing", true))
-            {
-                Assert.Equal(AppTask.Test, test.Task);
-                Assert.Equal(AppStatus.Failure, test.Status);
-            }
-        }
     }
 }

@@ -6,28 +6,29 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading;
 
 namespace Regi.Services
 {
     public interface IRunnerService
     {
         StartupConfig GetStartupConfig(string path);
-        IList<AppProcess> RunAsync(string directoryName);
-        IList<AppProcess> TestAsync(string directoryName, ProjectType? type = null);
+        IList<AppProcess> Run(string directoryName);
+        IList<AppProcess> Test(string directoryName, ProjectType? type = null);
+        IList<AppProcess> Install(string directoryName);
     }
 
     public class RunnerService : IRunnerService
     {
         private readonly IDotnetService _dotnetService;
         private readonly INodeService _nodeService;
+        private readonly IParallelService _parallelService;
         private readonly IConsole _console;
 
-        public RunnerService(IDotnetService dotnetService, INodeService nodeService, IConsole console)
+        public RunnerService(IDotnetService dotnetService, INodeService nodeService, IParallelService parallelService, IConsole console)
         {
             _dotnetService = dotnetService;
             _nodeService = nodeService;
+            _parallelService = parallelService;
             _console = console;
         }
 
@@ -53,26 +54,88 @@ namespace Regi.Services
                 var serializer = JsonSerializer.CreateDefault();
                 serializer.MissingMemberHandling = MissingMemberHandling.Error;
 
-                return serializer.Deserialize<StartupConfig>(reader);
+                try
+                {
+                    return serializer.Deserialize<StartupConfig>(reader);
+                }
+                catch (Exception e)
+                {
+                    throw new JsonSerializationException($@"Configuration file was not properly formatted: {startupFile.FullName}
+{e.Message}", e);
+                }
             }
         }
 
-        public IList<AppProcess> RunAsync(string directoryName)
+        public IList<AppProcess> Install(string directoryName)
         {
             StartupConfig config = GetStartupConfig(directoryName);
 
             IList<AppProcess> processes = new List<AppProcess>();
 
+            foreach (var project in config.Apps.Concat(config.Tests))
+            {
+                _parallelService.Queue(() =>
+                {
+                    string absolutePath = Path.GetFullPath(project.Path, directoryName);
+                    FileInfo projectFile = new FileInfo(absolutePath);
+
+                    if (!projectFile.Exists)
+                    {
+                        throw new FileNotFoundException($"Could not find project, {projectFile.FullName}");
+                    }
+
+                    AppProcess process = null;
+
+                    if (project.Framework == ProjectFramework.Dotnet)
+                    {
+                        process = _dotnetService.RestoreProject(projectFile, false);
+                    }
+                    else if (project.Framework == ProjectFramework.Node)
+                    {
+                        process = _nodeService.InstallProject(projectFile, false);
+                    }
+
+                    if (process != null)
+                    {
+                        processes.Add(process);
+                    }
+
+                });
+            }
+
+            Console.CancelKeyPress += (o, e) =>
+            {
+                foreach (var process in processes)
+                {
+                    process.Process.KillTree(TimeSpan.FromSeconds(10));
+                }
+            };
+
+            _parallelService.RunInParallel();
+
+            return processes;
+        }
+
+        public IList<AppProcess> Run(string directoryName)
+        {
+            StartupConfig config = GetStartupConfig(directoryName);
+
+            IList<AppProcess> processes = new List<AppProcess>();
 
             foreach (var project in config.Apps)
             {
                 if (project.Type == ProjectType.Web)
                 {
-                    string absolutePath = Path.GetFullPath(project.Path, directoryName);
-                    FileInfo projectFile = new FileInfo(absolutePath);
-
-                    if (projectFile.Exists)
+                    _parallelService.Queue(() =>
                     {
+                        string absolutePath = Path.GetFullPath(project.Path, directoryName);
+                        FileInfo projectFile = new FileInfo(absolutePath);
+
+                        if (!projectFile.Exists)
+                        {
+                            throw new FileNotFoundException($"Could not find project, {projectFile.FullName}");
+                        }
+
                         AppProcess process = null;
 
                         if (project.Framework == ProjectFramework.Dotnet)
@@ -88,7 +151,7 @@ namespace Regi.Services
                         {
                             processes.Add(process);
                         }
-                    }
+                    });
                 }
             }
 
@@ -100,10 +163,12 @@ namespace Regi.Services
                 }
             };
 
+            _parallelService.RunInParallel();
+
             return processes;
         }
 
-        public IList<AppProcess> TestAsync(string directoryName, ProjectType? type = null)
+        public IList<AppProcess> Test(string directoryName, ProjectType? type = null)
         {
             StartupConfig config = GetStartupConfig(directoryName);
 
@@ -121,11 +186,16 @@ namespace Regi.Services
             {
                 if (!type.HasValue || project.Type == type)
                 {
-                    string absolutePath = Path.GetFullPath(project.Path, directoryName);
-                    FileInfo projectFile = new FileInfo(absolutePath);
-
-                    if (projectFile.Exists)
+                    _parallelService.Queue(() =>
                     {
+                        string absolutePath = Path.GetFullPath(project.Path, directoryName);
+                        FileInfo projectFile = new FileInfo(absolutePath);
+
+                        if (!projectFile.Exists)
+                        {
+                            throw new FileNotFoundException($"Could not find project, {projectFile.FullName}");
+                        }
+
                         AppProcess process = null;
 
                         if (project.Framework == ProjectFramework.Dotnet)
@@ -142,9 +212,11 @@ namespace Regi.Services
                         {
                             processes.Add(process);
                         }
-                    }
+                    });
                 }
             }
+
+            _parallelService.RunInParallel();
 
             return processes;
         }

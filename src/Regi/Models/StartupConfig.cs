@@ -7,10 +7,13 @@ namespace Regi.Models
 {
     public class StartupConfig
     {
+        [JsonProperty("apps")]
         public List<Project> Apps { get; set; }
 
+        [JsonProperty("tests")]
         public List<Project> Tests { get; set; }
 
+        [JsonProperty("services")]
         public List<Project> Services { get; set; }
     }
 
@@ -33,6 +36,7 @@ namespace Regi.Models
 
         public string Path { get; set; }
 
+        [JsonProperty("type")]
         public ProjectType Type { get; set; }
 
         public ProjectFramework Framework { get; set; } = ProjectFramework.Dotnet;

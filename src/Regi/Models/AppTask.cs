@@ -8,5 +8,6 @@ namespace Regi.Models
     {
         Test = 1,
         Run,
+        Install,
     }
 }

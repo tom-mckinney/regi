@@ -11,7 +11,7 @@ using System.Text;
 namespace Regi.Commands
 {
     [Command("start")]
-    public class StartCommand
+    public class StartCommand : CommandBase
     {
         private readonly IRunnerService _runnerService;
         private readonly IConsole _console;
@@ -24,14 +24,11 @@ namespace Regi.Commands
             _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
         }
 
-        [Argument(0, Description = "Name of the project")]
-        public string Name { get; set; }
-
-        public int OnExecute()
+        public override int OnExecute()
         {
             string currentDirectory = Directory.GetCurrentDirectory();
 
-            var projects = _runnerService.RunAsync(currentDirectory);
+            var projects = _runnerService.Run(currentDirectory);
 
             // TODO: Make this wait configurable
             while (_options.RunIndefinitely)
