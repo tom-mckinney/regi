@@ -13,6 +13,7 @@ namespace Regi.Services
     public interface INodeService
     {
         AppProcess StartProject(FileInfo projectFile, bool verbose = false, int? port = null);
+        AppProcess TestProject(FileInfo project, string pathPattern = null, bool verbose = false);
     }
 
     public class NodeService : CLIBase, INodeService
@@ -68,6 +69,55 @@ namespace Regi.Services
             {
                 process.BeginOutputReadLine();
             }
+
+            return output;
+        }
+
+        public AppProcess TestProject(FileInfo projectFile, string pathPattern = null, bool verbose = false)
+        {
+            _console.WriteEmphasizedLine($"Starting tests for project {projectFile.DirectoryName}");
+
+            if (string.IsNullOrWhiteSpace(_npmPath))
+            {
+                throw new Exception("Cannot find path to dotnet CLI");
+            }
+
+            Process process = new Process
+            {
+                StartInfo = new ProcessStartInfo()
+                {
+                    FileName = _npmPath,
+                    Arguments = $"test {pathPattern}",
+                    WorkingDirectory = projectFile.DirectoryName,
+                    RedirectStandardOutput = verbose,
+                    RedirectStandardError = true
+                }
+            };
+
+            AppProcess output = new AppProcess(process, AppTask.Test, AppStatus.Running);
+
+            process.ErrorDataReceived += DefaultOutputDataRecieved();
+
+            if (verbose)
+            {
+                process.OutputDataReceived += DefaultOutputDataRecieved();
+            }
+
+            process.Start();
+
+            process.BeginErrorReadLine();
+
+            if (verbose)
+            {
+                process.BeginOutputReadLine();
+            }
+
+            process.WaitForExit();
+
+            output.Status = process.ExitCode > 0 ? AppStatus.Failure : AppStatus.Success;
+            output.End = DateTimeOffset.UtcNow;
+
+            _console.WriteEmphasizedLine($"Finished tests for project {projectFile.DirectoryName}");
 
             return output;
         }

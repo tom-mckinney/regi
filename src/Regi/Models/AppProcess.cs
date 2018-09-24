@@ -6,20 +6,6 @@ using System.Text;
 
 namespace Regi.Models
 {
-    public enum AppTask
-    {
-        Test = 1,
-        Run,
-    }
-
-    public enum AppStatus
-    {
-        Unknown,
-        Failure = 1,
-        Success,
-        Running
-    }
-
     public class AppProcess : IDisposable
     {
         public AppProcess(Process process, AppTask task, AppStatus status, int? port = null)

@@ -126,8 +126,22 @@ namespace Regi.Services
 
                     if (projectFile.Exists)
                     {
-                        _console.WriteLine(projectFile.FullName);
-                        processes.Add(_dotnetService.TestProject(projectFile));
+                        AppProcess process = null;
+
+                        if (project.Framework == ProjectFramework.Dotnet)
+                        {
+                            _console.WriteLine(projectFile.FullName);
+                            process = _dotnetService.TestProject(projectFile);
+                        }
+                        else if (project.Framework == ProjectFramework.Node)
+                        {
+                            process = _nodeService.TestProject(projectFile);
+                        }
+
+                        if (process != null)
+                        {
+                            processes.Add(process);
+                        }
                     }
                 }
             }
