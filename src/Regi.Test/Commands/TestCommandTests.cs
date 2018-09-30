@@ -3,10 +3,8 @@ using Regi.Commands;
 using Regi.Models;
 using Regi.Services;
 using Regi.Test.Helpers;
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Text;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -29,7 +27,7 @@ namespace Regi.Test.Commands
         [Fact]
         public void Will_run_all_test_if_no_name_or_type_is_specified()
         {
-            _runnerServiceMock.Setup(m => m.Test(It.IsAny<string>(), null))
+            _runnerServiceMock.Setup(m => m.Test(null))
                 .Returns(new List<AppProcess>
                 {
                     new AppProcess(new Process(), AppTask.Test, AppStatus.Success),
@@ -55,7 +53,7 @@ namespace Regi.Test.Commands
         [InlineData(null)]
         public void Will_only_run_tests_with_matching_type_if_specified(ProjectType? type)
         {
-            _runnerServiceMock.Setup(m => m.Test(It.IsAny<string>(), type))
+            _runnerServiceMock.Setup(m => m.Test(type))
                 .Returns(new List<AppProcess>
                 {
                     new AppProcess(new Process(), AppTask.Test, AppStatus.Success)

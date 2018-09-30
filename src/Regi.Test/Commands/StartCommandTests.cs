@@ -4,10 +4,8 @@ using Regi.Commands;
 using Regi.Models;
 using Regi.Services;
 using Regi.Test.Helpers;
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Text;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -31,7 +29,7 @@ namespace Regi.Test.Commands
         [Fact]
         public void Will_start_all_projects_by_default()
         {
-            _runnerServiceMock.Setup(m => m.Run(It.IsAny<string>()))
+            _runnerServiceMock.Setup(m => m.Run())
                 .Returns(new List<AppProcess>
                 {
                     new AppProcess(new Process(), AppTask.Run, AppStatus.Success),

@@ -33,7 +33,39 @@ namespace Regi.Services
 
         public AppProcess RestoreProject(Project project, bool verbose = false)
         {
-            throw new NotImplementedException();
+            Process process = new Process
+            {
+                StartInfo = new ProcessStartInfo()
+                {
+                    FileName = _dotnetPath,
+                    Arguments = "restore",
+                    WorkingDirectory = project.File.DirectoryName,
+                    RedirectStandardOutput = verbose,
+                    RedirectStandardError = true
+                },
+                EnableRaisingEvents = true
+            };
+
+            AppProcess output = new AppProcess(process, AppTask.Install, AppStatus.Running);
+
+            process.ErrorDataReceived += DefaultErrorDataReceived(project.Name, output);
+            process.Exited += DefaultExited(output);
+            if (verbose)
+            {
+                process.OutputDataReceived += DefaultOutputDataRecieved(project.Name);
+            }
+
+            process.Start();
+
+            process.BeginErrorReadLine();
+            if (verbose)
+            {
+                process.BeginOutputReadLine();
+            }
+
+            process.WaitForExit();
+
+            return output;
         }
 
         public AppProcess RunProject(Project project, bool verbose = false, int? port = null)

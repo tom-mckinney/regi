@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using Regi.Extensions;
 using Regi.Models;
+using Regi.Utilities;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -11,10 +12,10 @@ namespace Regi.Services
 {
     public interface IRunnerService
     {
-        StartupConfig GetStartupConfig(string path);
-        IList<AppProcess> Run(string directoryName);
-        IList<AppProcess> Test(string directoryName, ProjectType? type = null);
-        IList<AppProcess> Install(string directoryName);
+        StartupConfig GetStartupConfig();
+        IList<AppProcess> Run();
+        IList<AppProcess> Test(ProjectType? type = null);
+        IList<AppProcess> Install();
     }
 
     public class RunnerService : IRunnerService
@@ -32,9 +33,9 @@ namespace Regi.Services
             _console = console;
         }
 
-        public StartupConfig GetStartupConfig(string path)
+        public StartupConfig GetStartupConfig()
         {
-            DirectoryInfo directory = new DirectoryInfo(path);
+            DirectoryInfo directory = new DirectoryInfo(DirectoryUtility.TargetDirectoryPath);
 
             if (!directory.Exists)
             {
@@ -60,57 +61,14 @@ namespace Regi.Services
                 }
                 catch (Exception e)
                 {
-                    throw new JsonSerializationException($@"Configuration file was not properly formatted: {startupFile.FullName}
-{e.Message}", e);
+                    throw new JsonSerializationException($"Configuration file was not properly formatted: {startupFile.FullName}{Environment.NewLine}{e.Message}", e);
                 }
             }
         }
 
-        public IList<AppProcess> Install(string directoryName)
+        public IList<AppProcess> Run()
         {
-            StartupConfig config = GetStartupConfig(directoryName);
-
-            IList<AppProcess> processes = new List<AppProcess>();
-
-            foreach (var project in config.Apps.Concat(config.Tests))
-            {
-                _parallelService.Queue(() =>
-                {
-                    AppProcess process = null;
-
-                    if (project.Framework == ProjectFramework.Dotnet)
-                    {
-                        process = _dotnetService.RestoreProject(project, false);
-                    }
-                    else if (project.Framework == ProjectFramework.Node)
-                    {
-                        process = _nodeService.InstallProject(project, false);
-                    }
-
-                    if (process != null)
-                    {
-                        processes.Add(process);
-                    }
-
-                });
-            }
-
-            Console.CancelKeyPress += (o, e) =>
-            {
-                foreach (var process in processes)
-                {
-                    process.Process.KillTree(TimeSpan.FromSeconds(10));
-                }
-            };
-
-            _parallelService.RunInParallel();
-
-            return processes;
-        }
-
-        public IList<AppProcess> Run(string directoryName)
-        {
-            StartupConfig config = GetStartupConfig(directoryName);
+            StartupConfig config = GetStartupConfig();
 
             IList<AppProcess> processes = new List<AppProcess>();
 
@@ -152,9 +110,9 @@ namespace Regi.Services
             return processes;
         }
 
-        public IList<AppProcess> Test(string directoryName, ProjectType? type = null)
+        public IList<AppProcess> Test(ProjectType? type = null)
         {
-            StartupConfig config = GetStartupConfig(directoryName);
+            StartupConfig config = GetStartupConfig();
 
             IList<AppProcess> processes = new List<AppProcess>();
 
@@ -191,6 +149,48 @@ namespace Regi.Services
                     });
                 }
             }
+
+            _parallelService.RunInParallel();
+
+            return processes;
+        }
+
+        public IList<AppProcess> Install()
+        {
+            StartupConfig config = GetStartupConfig();
+
+            IList<AppProcess> processes = new List<AppProcess>();
+
+            foreach (var project in config.Apps.Concat(config.Tests))
+            {
+                _parallelService.Queue(() =>
+                {
+                    AppProcess process = null;
+
+                    if (project.Framework == ProjectFramework.Dotnet)
+                    {
+                        process = _dotnetService.RestoreProject(project, false);
+                    }
+                    else if (project.Framework == ProjectFramework.Node)
+                    {
+                        process = _nodeService.InstallProject(project, false);
+                    }
+
+                    if (process != null)
+                    {
+                        processes.Add(process);
+                    }
+
+                });
+            }
+
+            Console.CancelKeyPress += (o, e) =>
+            {
+                foreach (var process in processes)
+                {
+                    process.Process.KillTree(TimeSpan.FromSeconds(10));
+                }
+            };
 
             _parallelService.RunInParallel();
 

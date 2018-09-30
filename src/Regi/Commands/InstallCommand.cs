@@ -20,11 +20,9 @@ namespace Regi.Commands
 
         public override int OnExecute()
         {
-            string currentDirectory = Directory.GetCurrentDirectory();
+            var installations = _runnerService.Install();
 
-            var unitTests = _runnerService.Install(currentDirectory);
-
-            return unitTests.Count;
+            return installations.Count;
         }
     }
 }

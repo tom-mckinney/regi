@@ -36,6 +36,43 @@ namespace Regi.Services
 
         public AppProcess InstallProject(Project project, bool verbose = false)
         {
+            _console.WriteEmphasizedLine($"Starting install for project {project.Name} ({project.File.DirectoryName})");
+
+            Process process = new Process
+            {
+                StartInfo = new ProcessStartInfo()
+                {
+                    FileName = _npmPath,
+                    Arguments = $"install",
+                    WorkingDirectory = project.File.DirectoryName,
+                    RedirectStandardOutput = verbose,
+                    RedirectStandardError = true
+                },
+                EnableRaisingEvents = true
+            };
+
+            AppProcess output = new AppProcess(process, AppTask.Install, AppStatus.Running);
+
+            process.Exited += DefaultExited(output);
+            process.ErrorDataReceived += DefaultOutputDataRecieved(project.Name);
+            if (verbose)
+            {
+                process.OutputDataReceived += DefaultOutputDataRecieved(project.Name);
+            }
+
+            process.Start();
+
+            process.BeginErrorReadLine();
+            if (verbose)
+            {
+                process.BeginOutputReadLine();
+            }
+
+            process.WaitForExit();
+
+            _console.WriteEmphasizedLine($"Finished installing dependencies for project {project.Name} ({project.File.DirectoryName})");
+
+            return output;
             throw new NotImplementedException();
         }
 
@@ -61,8 +98,8 @@ namespace Regi.Services
 
             AppProcess output = new AppProcess(process, AppTask.Run, AppStatus.Running, port);
 
-            process.ErrorDataReceived += DefaultErrorDataReceived(project.Name, output);
             process.Exited += DefaultExited(output);
+            process.ErrorDataReceived += DefaultErrorDataReceived(project.Name, output);
             if (verbose)
             {
                 process.OutputDataReceived += DefaultOutputDataRecieved(project.Name);
@@ -83,11 +120,6 @@ namespace Regi.Services
         {
             _console.WriteEmphasizedLine($"Starting tests for project {project.Name} ({project.File.DirectoryName})");
 
-            if (string.IsNullOrWhiteSpace(_npmPath))
-            {
-                throw new Exception("Cannot find path to dotnet CLI");
-            }
-
             Process process = new Process
             {
                 StartInfo = new ProcessStartInfo()
@@ -104,7 +136,6 @@ namespace Regi.Services
             AppProcess output = new AppProcess(process, AppTask.Test, AppStatus.Running);
 
             process.ErrorDataReceived += DefaultOutputDataRecieved(project.Name);
-
             if (verbose)
             {
                 process.OutputDataReceived += DefaultOutputDataRecieved(project.Name);
@@ -113,7 +144,6 @@ namespace Regi.Services
             process.Start();
 
             process.BeginErrorReadLine();
-
             if (verbose)
             {
                 process.BeginOutputReadLine();

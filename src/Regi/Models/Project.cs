@@ -7,12 +7,13 @@ namespace Regi.Models
     {
         public Project() { }
 
-        public Project(string path)
+        public Project(string name, string path)
         {
+            Name = name;
             Path = path;
         }
 
-        public string Name { get; set; }
+        public string Name { get; set; } = "Unnamed Project";
 
         public string Path { get; set; }
 

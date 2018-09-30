@@ -54,15 +54,15 @@ namespace Regi.Test.Services
         [Fact]
         public void GetStatupConfig_throws_exception_when_directory_not_found()
         {
-            string bunkDirectory = SampleDirectoryPath("BUNK_DIRECTORY");
-            Assert.Throws<DirectoryNotFoundException>(() => _runnerService.GetStartupConfig(bunkDirectory));
+            DirectoryUtility.SetTargetDirectory(SampleDirectoryPath("BUNK_DIRECTORY"));
+            Assert.Throws<DirectoryNotFoundException>(() => _runnerService.GetStartupConfig());
         }
 
         [Fact]
         public void GetStatupConfig_throws_exception_when_startup_config_not_found()
         {
-            string directoryWithoutStartup = SampleDirectoryPath("SampleAppError");
-            Assert.Throws<FileNotFoundException>(() => _runnerService.GetStartupConfig(directoryWithoutStartup));
+            DirectoryUtility.SetTargetDirectory(SampleDirectoryPath("SampleAppError"));
+            Assert.Throws<FileNotFoundException>(() => _runnerService.GetStartupConfig());
         }
 
         [Theory]
@@ -70,17 +70,19 @@ namespace Regi.Test.Services
         [InlineData("ConfigurationWrongEnum")]
         public void GetStatupConfig_throws_exception_when_startup_config_has_bad_format(string configuration)
         {
-            string badConfigurationDirectory = SampleDirectoryPath(configuration);
-            var ex = Assert.Throws<JsonSerializationException>(() => _runnerService.GetStartupConfig(badConfigurationDirectory));
+            DirectoryUtility.SetTargetDirectory(SampleDirectoryPath(configuration));
+            var ex = Assert.Throws<JsonSerializationException>(() => _runnerService.GetStartupConfig());
 
-            _console.WriteErrorLine(nameof(Regi.Models.ProjectType));
+            _console.WriteErrorLine(nameof(ProjectType));
             ex.LogAndReturnStatus(_console);
         }
 
         [Fact]
         public void GetStartupConfig_returns_configuration_model_when_run_in_directory_with_startup_file()
         {
-            StartupConfig startupConfig = _runnerService.GetStartupConfig(_startupConfigGood);
+            DirectoryUtility.SetTargetDirectory(_startupConfigGood);
+
+            StartupConfig startupConfig = _runnerService.GetStartupConfig();
 
             Assert.Equal(totalAppCount, startupConfig.Apps.Count);
             Assert.Equal(totalTestCount, startupConfig.Tests.Count);
@@ -99,7 +101,7 @@ namespace Regi.Test.Services
 
             DirectoryUtility.SetTargetDirectory(_startupConfigGood);
 
-            var processes = _runnerService.Run(_startupConfigGood);
+            var processes = _runnerService.Run();
 
             Assert.Equal(totalAppCount, processes.Count);
             Assert.Single(processes, p => p.Port == 9080);
@@ -117,7 +119,7 @@ namespace Regi.Test.Services
 
             DirectoryUtility.SetTargetDirectory(_startupConfigGood);
 
-            var processes = _runnerService.Test(_startupConfigGood);
+            var processes = _runnerService.Test();
 
             Assert.Equal(totalTestCount, processes.Count);
 
@@ -135,7 +137,7 @@ namespace Regi.Test.Services
 
             DirectoryUtility.SetTargetDirectory(_startupConfigGood);
 
-            var processes = _runnerService.Test(_startupConfigGood, type);
+            var processes = _runnerService.Test(type);
 
             Assert.Equal(expectedCount, processes.Count);
 
@@ -152,7 +154,9 @@ namespace Regi.Test.Services
                 .Returns(new AppProcess(new Process(), AppTask.Install, AppStatus.Success))
                 .Verifiable();
 
-            var processes = _runnerService.Install(_startupConfigGood);
+            DirectoryUtility.SetTargetDirectory(_startupConfigGood);
+
+            var processes = _runnerService.Install();
 
             Assert.Equal(totalAppCount + totalTestCount, processes.Count);
 

@@ -30,7 +30,7 @@ namespace Regi.Test.Services
                 .GetDirectories("SampleNodeApp", SearchOption.AllDirectories)
                 .First();
 
-            _application = new Project(projectDir
+            _application = new Project("SampleNodeApp", projectDir
                 .GetFiles("package.json", SearchOption.AllDirectories)
                 .First()
                 .FullName);
@@ -48,7 +48,7 @@ namespace Regi.Test.Services
         //}
 
         [Fact]
-        public void RunProject_starts_and_returns_running_status()
+        public void RunProject_starts_and_returns_process()
         {
             using (AppProcess app = _service.StartProject(_application, true))
             {
@@ -82,6 +82,17 @@ namespace Regi.Test.Services
             {
                 Assert.Equal(AppTask.Test, test.Task);
                 Assert.Equal(expectedStatus, test.Status);
+            }
+        }
+
+        [Fact]
+        public void InstallProject_returns_process()
+        {
+            using (AppProcess process = _service.InstallProject(_application, true))
+            {
+                Assert.Equal(AppTask.Install, process.Task);
+                Assert.Equal(AppStatus.Success, process.Status);
+                Assert.Null(process.Port);
             }
         }
     }

@@ -25,23 +25,23 @@ namespace Regi.Test.Services
             _console = new TestConsole(testOutput);
             _service = new DotnetService(_console);
 
-            _successfulTests = new Project(new DirectoryInfo(Directory.GetCurrentDirectory())
+            _successfulTests = new Project("SampleSuccessfulTests", new DirectoryInfo(Directory.GetCurrentDirectory())
                 .GetFiles("SampleSuccessfulTests.csproj", SearchOption.AllDirectories)
                 .First()
                 .FullName);
-            _failedTests = new Project(new DirectoryInfo(Directory.GetCurrentDirectory())
+            _failedTests = new Project("SampleFailedTests", new DirectoryInfo(Directory.GetCurrentDirectory())
                 .GetFiles("SampleFailedTests.csproj", SearchOption.AllDirectories)
                 .First()
                 .FullName);
-            _application = new Project(new DirectoryInfo(Directory.GetCurrentDirectory())
+            _application = new Project("SampleApp", new DirectoryInfo(Directory.GetCurrentDirectory())
                 .GetFiles("SampleApp.csproj", SearchOption.AllDirectories)
                 .First()
                 .FullName);
-            _applicationError = new Project(new DirectoryInfo(Directory.GetCurrentDirectory())
+            _applicationError = new Project("SampleAppError", new DirectoryInfo(Directory.GetCurrentDirectory())
                 .GetFiles("SampleAppError.csproj", SearchOption.AllDirectories)
                 .First()
                 .FullName);
-            _applicationLong = new Project(new DirectoryInfo(Directory.GetCurrentDirectory())
+            _applicationLong = new Project("SampleAppLong", new DirectoryInfo(Directory.GetCurrentDirectory())
                 .GetFiles("SampleAppLong.csproj", SearchOption.AllDirectories)
                 .First()
                 .FullName);
@@ -154,6 +154,17 @@ namespace Regi.Test.Services
                 Assert.Equal(AppTask.Run, app.Task);
                 Assert.Equal(AppStatus.Running, app.Status);
                 Assert.Equal(8080, app.Port);
+            }
+        }
+
+        [Fact]
+        public void RestoreProject_returns_process()
+        {
+            using (AppProcess process = _service.RestoreProject(_application, true))
+            {
+                Assert.Equal(AppTask.Install, process.Task);
+                Assert.Equal(AppStatus.Success, process.Status);
+                Assert.Null(process.Port);
             }
         }
     }

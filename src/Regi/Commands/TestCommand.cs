@@ -1,13 +1,6 @@
 ﻿using McMaster.Extensions.CommandLineUtils;
-using McMaster.Extensions.CommandLineUtils.Abstractions;
 using Regi.Models;
 using Regi.Services;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Text;
 
 namespace Regi.Commands
 {
@@ -28,9 +21,7 @@ namespace Regi.Commands
 
         public override int OnExecute()
         {
-            string currentDirectory = Directory.GetCurrentDirectory();
-
-             var unitTests = _runnerService.Test(currentDirectory, Type);
+            var unitTests = _runnerService.Test(Type);
 
             return unitTests.Count;
         }

@@ -26,9 +26,7 @@ namespace Regi.Commands
 
         public override int OnExecute()
         {
-            string currentDirectory = Directory.GetCurrentDirectory();
-
-            var projects = _runnerService.Run(currentDirectory);
+            var projects = _runnerService.Run();
 
             // TODO: Make this wait configurable
             while (_options.RunIndefinitely)
