@@ -2,18 +2,16 @@
 using Regi.Extensions;
 using Regi.Models;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Text;
 
 namespace Regi.Services
 {
     public interface IDotnetService
     {
-        AppProcess RunProject(FileInfo projectFile, bool verbose = false, int? port = null);
-        AppProcess TestProject(FileInfo projectFile, bool verbose = false);
-        AppProcess RestoreProject(FileInfo projectFile, bool verbose = false);
+        AppProcess RunProject(Project project, bool verbose = false, int? port = null);
+        AppProcess TestProject(Project project, bool verbose = false);
+        AppProcess RestoreProject(Project project, bool verbose = false);
     }
 
     public class DotnetService : CLIBase, IDotnetService
@@ -33,12 +31,12 @@ namespace Regi.Services
             }
         }
 
-        public AppProcess RestoreProject(FileInfo projectFile, bool verbose = false)
+        public AppProcess RestoreProject(Project project, bool verbose = false)
         {
             throw new NotImplementedException();
         }
 
-        public AppProcess RunProject(FileInfo projectFile, bool verbose = false, int? port = null)
+        public AppProcess RunProject(Project project, bool verbose = false, int? port = null)
         {
             Process process = new Process
             {
@@ -46,7 +44,7 @@ namespace Regi.Services
                 {
                     FileName = _dotnetPath,
                     Arguments = "run",
-                    WorkingDirectory = projectFile.DirectoryName,
+                    WorkingDirectory = project.File.DirectoryName,
                     RedirectStandardOutput = verbose,
                     RedirectStandardError = true
                 },
@@ -63,11 +61,11 @@ namespace Regi.Services
 
             AppProcess output = new AppProcess(process, AppTask.Run, AppStatus.Running, port);
 
-            process.ErrorDataReceived += DefaultErrorDataReceived(output);
+            process.ErrorDataReceived += DefaultErrorDataReceived(project.Name, output);
             process.Exited += DefaultExited(output);
             if (verbose)
             {
-                process.OutputDataReceived += DefaultOutputDataRecieved();
+                process.OutputDataReceived += DefaultOutputDataRecieved(project.Name);
             }
 
             process.Start();
@@ -81,9 +79,9 @@ namespace Regi.Services
             return output;
         }
 
-        public AppProcess TestProject(FileInfo projectFile, bool verbose = false)
+        public AppProcess TestProject(Project project, bool verbose = false)
         {
-            _console.WriteEmphasizedLine($"Starting tests for project {projectFile.Name}");
+            _console.WriteEmphasizedLine($"Starting tests for project {project.Name} ({project.File.Name})");
 
             if (string.IsNullOrWhiteSpace(_dotnetPath))
             {
@@ -96,7 +94,7 @@ namespace Regi.Services
                 {
                     FileName = _dotnetPath,
                     Arguments = "test",
-                    WorkingDirectory = projectFile.DirectoryName,
+                    WorkingDirectory = project.File.DirectoryName,
                     RedirectStandardOutput = verbose,
                     RedirectStandardError = true
                 },
@@ -105,10 +103,10 @@ namespace Regi.Services
 
             AppProcess output = new AppProcess(process, AppTask.Test, AppStatus.Running);
 
-            process.ErrorDataReceived += DefaultErrorDataReceived(output);
+            process.ErrorDataReceived += DefaultErrorDataReceived(project.Name, output);
             if (verbose)
             {
-                process.OutputDataReceived += DefaultOutputDataRecieved();
+                process.OutputDataReceived += DefaultOutputDataRecieved(project.Name);
             }
 
             process.Start();
@@ -129,7 +127,7 @@ namespace Regi.Services
                 output.Status = AppStatus.Success;
             }
 
-            _console.WriteEmphasizedLine($"Finished tests for project {projectFile.Name}");
+            _console.WriteEmphasizedLine($"Finished tests for project {project.Name} ({project.File.Name})");
 
             return output;
         }

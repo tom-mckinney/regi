@@ -19,7 +19,7 @@ namespace Regi.Test.Services
         private readonly IConsole _console;
         private readonly INodeService _service;
 
-        private readonly FileInfo _application;
+        private readonly Project _application;
 
         public NodeServiceTests(ITestOutputHelper testOutput)
         {
@@ -30,9 +30,10 @@ namespace Regi.Test.Services
                 .GetDirectories("SampleNodeApp", SearchOption.AllDirectories)
                 .First();
 
-            _application = projectDir
+            _application = new Project(projectDir
                 .GetFiles("package.json", SearchOption.AllDirectories)
-                .First();
+                .First()
+                .FullName);
         }
 
         //[Fact]

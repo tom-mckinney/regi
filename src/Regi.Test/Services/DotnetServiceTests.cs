@@ -14,32 +14,37 @@ namespace Regi.Test.Services
         private readonly TestConsole _console;
         private readonly IDotnetService _service;
 
-        private readonly FileInfo _successfulTests;
-        private readonly FileInfo _failedTests;
-        private readonly FileInfo _application;
-        private readonly FileInfo _applicationError;
-        private readonly FileInfo _applicationLong;
+        private readonly Project _successfulTests;
+        private readonly Project _failedTests;
+        private readonly Project _application;
+        private readonly Project _applicationError;
+        private readonly Project _applicationLong;
 
         public DotnetServiceTests(ITestOutputHelper testOutput)
         {
             _console = new TestConsole(testOutput);
             _service = new DotnetService(_console);
 
-            _successfulTests = new DirectoryInfo(Directory.GetCurrentDirectory())
+            _successfulTests = new Project(new DirectoryInfo(Directory.GetCurrentDirectory())
                 .GetFiles("SampleSuccessfulTests.csproj", SearchOption.AllDirectories)
-                .First();
-            _failedTests = new DirectoryInfo(Directory.GetCurrentDirectory())
+                .First()
+                .FullName);
+            _failedTests = new Project(new DirectoryInfo(Directory.GetCurrentDirectory())
                 .GetFiles("SampleFailedTests.csproj", SearchOption.AllDirectories)
-                .First();
-            _application = new DirectoryInfo(Directory.GetCurrentDirectory())
+                .First()
+                .FullName);
+            _application = new Project(new DirectoryInfo(Directory.GetCurrentDirectory())
                 .GetFiles("SampleApp.csproj", SearchOption.AllDirectories)
-                .First();
-            _applicationError = new DirectoryInfo(Directory.GetCurrentDirectory())
+                .First()
+                .FullName);
+            _applicationError = new Project(new DirectoryInfo(Directory.GetCurrentDirectory())
                 .GetFiles("SampleAppError.csproj", SearchOption.AllDirectories)
-                .First();
-            _applicationLong = new DirectoryInfo(Directory.GetCurrentDirectory())
+                .First()
+                .FullName);
+            _applicationLong = new Project(new DirectoryInfo(Directory.GetCurrentDirectory())
                 .GetFiles("SampleAppLong.csproj", SearchOption.AllDirectories)
-                .First();
+                .First()
+                .FullName);
         }
 
         [Fact]

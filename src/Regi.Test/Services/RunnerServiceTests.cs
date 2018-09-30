@@ -4,6 +4,7 @@ using Regi.Extensions;
 using Regi.Models;
 using Regi.Services;
 using Regi.Test.Helpers;
+using Regi.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -89,28 +90,32 @@ namespace Regi.Test.Services
         [Fact]
         public void RunAsync_returns_a_process_for_every_app_in_startup_config()
         {
-            _dotnetServiceMock.Setup(m => m.RunProject(It.IsAny<FileInfo>(), It.IsAny<bool>(), It.IsAny<int?>()))
-                .Returns<FileInfo, bool, int?>((f, b, i) => new AppProcess(new Process(), AppTask.Run, AppStatus.Success, i))
+            _dotnetServiceMock.Setup(m => m.RunProject(It.IsAny<Project>(), It.IsAny<bool>(), It.IsAny<int?>()))
+                .Returns<Project, bool, int?>((p, b, i) => new AppProcess(new Process(), AppTask.Run, AppStatus.Success, i))
                 .Verifiable();
-            _nodeServiceMock.Setup(m => m.StartProject(It.IsAny<FileInfo>(), It.IsAny<bool>(), It.IsAny<int?>()))
-                .Returns<FileInfo, bool, int?>((f, b, i) => new AppProcess(new Process(), AppTask.Run, AppStatus.Success, i))
+            _nodeServiceMock.Setup(m => m.StartProject(It.IsAny<Project>(), It.IsAny<bool>(), It.IsAny<int?>()))
+                .Returns<Project, bool, int?>((p, b, i) => new AppProcess(new Process(), AppTask.Run, AppStatus.Success, i))
                 .Verifiable();
+
+            DirectoryUtility.SetTargetDirectory(_startupConfigGood);
 
             var processes = _runnerService.Run(_startupConfigGood);
 
             Assert.Equal(totalAppCount, processes.Count);
             Assert.Single(processes, p => p.Port == 9080);
 
-            _dotnetServiceMock.Verify(m => m.RunProject(It.IsAny<FileInfo>(), It.IsAny<bool>(), It.IsAny<int?>()), Times.Exactly(dotnetAppCount));
-            _nodeServiceMock.Verify(m => m.StartProject(It.IsAny<FileInfo>(), It.IsAny<bool>(), It.IsAny<int?>()), Times.Exactly(nodeAppCount));
+            _dotnetServiceMock.Verify(m => m.RunProject(It.IsAny<Project>(), It.IsAny<bool>(), It.IsAny<int?>()), Times.Exactly(dotnetAppCount));
+            _nodeServiceMock.Verify(m => m.StartProject(It.IsAny<Project>(), It.IsAny<bool>(), It.IsAny<int?>()), Times.Exactly(nodeAppCount));
         }
 
         [Fact]
         public void TestAsync_returns_a_process_for_every_test_in_startup_config()
         {
-            _dotnetServiceMock.Setup(m => m.TestProject(It.IsAny<FileInfo>(), It.IsAny<bool>()))
+            _dotnetServiceMock.Setup(m => m.TestProject(It.IsAny<Project>(), It.IsAny<bool>()))
                 .Returns(new AppProcess(new Process(), AppTask.Run, AppStatus.Success))
                 .Verifiable();
+
+            DirectoryUtility.SetTargetDirectory(_startupConfigGood);
 
             var processes = _runnerService.Test(_startupConfigGood);
 
@@ -124,9 +129,11 @@ namespace Regi.Test.Services
         [InlineData(ProjectType.Integration, 1)]
         public void TestAsync_will_only_run_tests_on_type_specified(ProjectType type, int expectedCount)
         {
-            _dotnetServiceMock.Setup(m => m.TestProject(It.IsAny<FileInfo>(), It.IsAny<bool>()))
+            _dotnetServiceMock.Setup(m => m.TestProject(It.IsAny<Project>(), It.IsAny<bool>()))
                 .Returns(new AppProcess(new Process(), AppTask.Run, AppStatus.Success))
                 .Verifiable();
+
+            DirectoryUtility.SetTargetDirectory(_startupConfigGood);
 
             var processes = _runnerService.Test(_startupConfigGood, type);
 
@@ -138,10 +145,10 @@ namespace Regi.Test.Services
         [Fact]
         public void InstallAsync_returns_a_process_for_every_app_and_test_project()
         {
-            _dotnetServiceMock.Setup(m => m.RestoreProject(It.IsAny<FileInfo>(), It.IsAny<bool>()))
+            _dotnetServiceMock.Setup(m => m.RestoreProject(It.IsAny<Project>(), It.IsAny<bool>()))
                 .Returns(new AppProcess(new Process(), AppTask.Install, AppStatus.Success))
                 .Verifiable();
-            _nodeServiceMock.Setup(m => m.InstallProject(It.IsAny<FileInfo>(), It.IsAny<bool>()))
+            _nodeServiceMock.Setup(m => m.InstallProject(It.IsAny<Project>(), It.IsAny<bool>()))
                 .Returns(new AppProcess(new Process(), AppTask.Install, AppStatus.Success))
                 .Verifiable();
 

@@ -76,23 +76,15 @@ namespace Regi.Services
             {
                 _parallelService.Queue(() =>
                 {
-                    string absolutePath = Path.GetFullPath(project.Path, directoryName);
-                    FileInfo projectFile = new FileInfo(absolutePath);
-
-                    if (!projectFile.Exists)
-                    {
-                        throw new FileNotFoundException($"Could not find project, {projectFile.FullName}");
-                    }
-
                     AppProcess process = null;
 
                     if (project.Framework == ProjectFramework.Dotnet)
                     {
-                        process = _dotnetService.RestoreProject(projectFile, false);
+                        process = _dotnetService.RestoreProject(project, false);
                     }
                     else if (project.Framework == ProjectFramework.Node)
                     {
-                        process = _nodeService.InstallProject(projectFile, false);
+                        process = _nodeService.InstallProject(project, false);
                     }
 
                     if (process != null)
@@ -128,23 +120,15 @@ namespace Regi.Services
                 {
                     _parallelService.Queue(() =>
                     {
-                        string absolutePath = Path.GetFullPath(project.Path, directoryName);
-                        FileInfo projectFile = new FileInfo(absolutePath);
-
-                        if (!projectFile.Exists)
-                        {
-                            throw new FileNotFoundException($"Could not find project, {projectFile.FullName}");
-                        }
-
                         AppProcess process = null;
 
                         if (project.Framework == ProjectFramework.Dotnet)
                         {
-                            process = _dotnetService.RunProject(projectFile, false, project.Port);
+                            process = _dotnetService.RunProject(project, false, project.Port);
                         }
                         else if (project.Framework == ProjectFramework.Node)
                         {
-                            process = _nodeService.StartProject(projectFile, false, project.Port);
+                            process = _nodeService.StartProject(project, false, project.Port);
                         }
 
                         if (process != null)
@@ -188,24 +172,16 @@ namespace Regi.Services
                 {
                     _parallelService.Queue(() =>
                     {
-                        string absolutePath = Path.GetFullPath(project.Path, directoryName);
-                        FileInfo projectFile = new FileInfo(absolutePath);
-
-                        if (!projectFile.Exists)
-                        {
-                            throw new FileNotFoundException($"Could not find project, {projectFile.FullName}");
-                        }
-
                         AppProcess process = null;
 
                         if (project.Framework == ProjectFramework.Dotnet)
                         {
-                            _console.WriteLine(projectFile.FullName);
-                            process = _dotnetService.TestProject(projectFile);
+                            _console.WriteLine(project.File.FullName);
+                            process = _dotnetService.TestProject(project);
                         }
                         else if (project.Framework == ProjectFramework.Node)
                         {
-                            process = _nodeService.TestProject(projectFile);
+                            process = _nodeService.TestProject(project);
                         }
 
                         if (process != null)
