@@ -16,6 +16,7 @@ namespace Regi.Services
         IList<AppProcess> Run();
         IList<AppProcess> Test(ProjectType? type = null);
         IList<AppProcess> Install();
+        void Initialize();
     }
 
     public class RunnerService : IRunnerService
@@ -23,13 +24,19 @@ namespace Regi.Services
         private readonly IDotnetService _dotnetService;
         private readonly INodeService _nodeService;
         private readonly IParallelService _parallelService;
+        private readonly IFileService _fileService;
         private readonly IConsole _console;
 
-        public RunnerService(IDotnetService dotnetService, INodeService nodeService, IParallelService parallelService, IConsole console)
+        public RunnerService(IDotnetService dotnetService,
+            INodeService nodeService,
+            IParallelService parallelService,
+            IFileService fileService,
+            IConsole console)
         {
             _dotnetService = dotnetService;
             _nodeService = nodeService;
             _parallelService = parallelService;
+            _fileService = fileService;
             _console = console;
         }
 
@@ -195,6 +202,11 @@ namespace Regi.Services
             _parallelService.RunInParallel();
 
             return processes;
+        }
+
+        public void Initialize()
+        {
+            _fileService.CreateConfigFile();
         }
     }
 }

@@ -21,6 +21,7 @@ namespace Regi.Test.Services
         private readonly TestConsole _console;
         private readonly Mock<IDotnetService> _dotnetServiceMock;
         private readonly Mock<INodeService> _nodeServiceMock;
+        private readonly Mock<IFileService> _fileServiceMock;
         private readonly IRunnerService _runnerService;
 
         private readonly string _startupConfigGood;
@@ -41,10 +42,12 @@ namespace Regi.Test.Services
             _console = new TestConsole(output);
             _dotnetServiceMock = new Mock<IDotnetService>();
             _nodeServiceMock = new Mock<INodeService>();
+            _fileServiceMock = new Mock<IFileService>();
             _runnerService = new RunnerService(
                 _dotnetServiceMock.Object,
                 _nodeServiceMock.Object,
                 new TestParallelService(),
+                _fileServiceMock.Object,
                 new TestConsole(output));
 
             _startupConfigGood = SampleDirectoryPath("ConfigurationGood");
@@ -90,7 +93,7 @@ namespace Regi.Test.Services
         }
 
         [Fact]
-        public void RunAsync_returns_a_process_for_every_app_in_startup_config()
+        public void Run_returns_a_process_for_every_app_in_startup_config()
         {
             _dotnetServiceMock.Setup(m => m.RunProject(It.IsAny<Project>(), It.IsAny<bool>(), It.IsAny<int?>()))
                 .Returns<Project, bool, int?>((p, b, i) => new AppProcess(new Process(), AppTask.Run, AppStatus.Success, i))
@@ -111,7 +114,7 @@ namespace Regi.Test.Services
         }
 
         [Fact]
-        public void TestAsync_returns_a_process_for_every_test_in_startup_config()
+        public void Test_returns_a_process_for_every_test_in_startup_config()
         {
             _dotnetServiceMock.Setup(m => m.TestProject(It.IsAny<Project>(), It.IsAny<bool>()))
                 .Returns(new AppProcess(new Process(), AppTask.Run, AppStatus.Success))
@@ -129,7 +132,7 @@ namespace Regi.Test.Services
         [Theory]
         [InlineData(ProjectType.Unit, 1)]
         [InlineData(ProjectType.Integration, 1)]
-        public void TestAsync_will_only_run_tests_on_type_specified(ProjectType type, int expectedCount)
+        public void Test_will_only_run_tests_on_type_specified(ProjectType type, int expectedCount)
         {
             _dotnetServiceMock.Setup(m => m.TestProject(It.IsAny<Project>(), It.IsAny<bool>()))
                 .Returns(new AppProcess(new Process(), AppTask.Run, AppStatus.Success))
@@ -145,7 +148,7 @@ namespace Regi.Test.Services
         }
 
         [Fact]
-        public void InstallAsync_returns_a_process_for_every_app_and_test_project()
+        public void Install_returns_a_process_for_every_app_and_test_project()
         {
             _dotnetServiceMock.Setup(m => m.RestoreProject(It.IsAny<Project>(), It.IsAny<bool>()))
                 .Returns(new AppProcess(new Process(), AppTask.Install, AppStatus.Success))
@@ -161,6 +164,20 @@ namespace Regi.Test.Services
             Assert.Equal(totalAppCount + totalTestCount, processes.Count);
 
             _dotnetServiceMock.VerifyAll();
+        }
+
+        [Fact]
+        public void Initialize_returns_a_single_process_and_creates_a_config_file()
+        {
+            _fileServiceMock.Setup(m => m.CreateConfigFile())
+                .Returns(new FileInfo("regi.json"))
+                .Verifiable();
+
+            DirectoryUtility.SetTargetDirectory(SampleDirectoryPath("ConfigurationNew"));
+
+            _runnerService.Initialize();
+
+            _fileServiceMock.VerifyAll();
         }
 
         internal string SampleDirectoryPath(string name)

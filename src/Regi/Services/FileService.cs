@@ -1,4 +1,8 @@
-﻿using McMaster.Extensions.CommandLineUtils.Abstractions;
+﻿using McMaster.Extensions.CommandLineUtils;
+using McMaster.Extensions.CommandLineUtils.Abstractions;
+using Regi.Extensions;
+using Regi.Models;
+using Regi.Utilities;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -9,6 +13,7 @@ namespace Regi.Services
 {
     public interface IFileService
     {
+        FileInfo CreateConfigFile();
         List<FileInfo> FindAllProjectFiles();
         string FindFileOrDirectory(string fileName);
     }
@@ -16,10 +21,34 @@ namespace Regi.Services
     public class FileService : IFileService
     {
         private readonly CommandLineContext _context;
+        private readonly IConsole _console;
 
-        public FileService(CommandLineContext context)
+        public FileService(CommandLineContext context, IConsole console)
         {
             _context = context;
+            _console = console;
+        }
+
+        public FileInfo CreateConfigFile()
+        {
+            string configFilePath = Path.Combine(DirectoryUtility.TargetDirectoryPath, "regi.json");
+
+            _console.WriteEmphasizedLine($"Creating config file: {configFilePath}");
+
+            FileInfo configFile = new FileInfo(configFilePath);
+            using (var stream = configFile.Create())
+            {
+                byte[] content = Encoding.UTF8.GetBytes(@"{
+  ""apps"": [],
+  ""tests"": [],
+  ""services"": []
+}");
+                stream.Write(content, 0, content.Length);
+            }
+
+            _console.WriteEmphasizedLine($"Success!");
+
+            return configFile;
         }
 
         public List<FileInfo> FindAllProjectFiles()

@@ -1,11 +1,13 @@
 ﻿using McMaster.Extensions.CommandLineUtils.Abstractions;
 using Regi.Services;
 using Regi.Test.Helpers;
+using Regi.Utilities;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Regi.Test.Services
 {
@@ -13,9 +15,9 @@ namespace Regi.Test.Services
     {
         private IFileService _service;
 
-        public FileServiceTests()
+        public FileServiceTests(ITestOutputHelper output)
         {
-            _service = new FileService(new TestCommandLineContext());
+            _service = new FileService(new TestCommandLineContext(), new TestConsole(output));
         }
 
         [Fact]
@@ -24,6 +26,16 @@ namespace Regi.Test.Services
             List<FileInfo> projectFiles = _service.FindAllProjectFiles();
 
             Assert.Equal(5, projectFiles.Count);
+        }
+
+        [Fact]
+        public void CreateConfigFile_creates_a_new_file()
+        {
+            DirectoryUtility.SetTargetDirectory(PathHelper.SampleDirectoryPath(string.Empty));
+
+            FileInfo configFile = _service.CreateConfigFile();
+
+            Assert.True(configFile.Exists, $"Config File does not exist: {configFile.FullName}");
         }
     }
 }

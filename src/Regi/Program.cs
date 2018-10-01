@@ -13,6 +13,8 @@ namespace Regi
 {
     [Subcommand("start", typeof(StartCommand))]
     [Subcommand("test", typeof(TestCommand))]
+    [Subcommand("install", typeof(InstallCommand))]
+    [Subcommand("init", typeof(InitalizeCommand))]
     public class Program
     {
         public static int Main(string[] args) => MainWithConsole(PhysicalConsole.Singleton, args);
