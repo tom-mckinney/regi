@@ -15,6 +15,7 @@ namespace Regi
     [Subcommand("test", typeof(TestCommand))]
     [Subcommand("install", typeof(InstallCommand))]
     [Subcommand("init", typeof(InitalizeCommand))]
+    [Subcommand("list", typeof(ListCommand))]
     public class Program
     {
         public static int Main(string[] args) => MainWithConsole(PhysicalConsole.Singleton, args);

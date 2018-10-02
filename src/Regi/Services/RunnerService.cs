@@ -16,6 +16,7 @@ namespace Regi.Services
         IList<AppProcess> Start(CommandOptions options);
         IList<AppProcess> Test(CommandOptions options);
         IList<AppProcess> Install(CommandOptions options);
+        void List(CommandOptions options);
         void Initialize(CommandOptions options);
     }
 
@@ -197,6 +198,23 @@ namespace Regi.Services
             _parallelService.RunInParallel();
 
             return processes;
+        }
+
+        public void List(CommandOptions options)
+        {
+            StartupConfig config = GetStartupConfig();
+
+            _console.WriteEmphasizedLine("Apps:");
+            foreach (var app in config.Apps.FilterByOptions(options))
+            {
+                _console.WriteLine("  " + app.Name);
+            }
+
+            _console.WriteEmphasizedLine("Tests:");
+            foreach (var app in config.Tests.FilterByOptions(options))
+            {
+                _console.WriteLine("  " + app.Name);
+            }
         }
 
         public void Initialize(CommandOptions options)
