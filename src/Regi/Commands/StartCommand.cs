@@ -26,7 +26,7 @@ namespace Regi.Commands
 
         public override int OnExecute()
         {
-            var projects = _runnerService.Run();
+            var projects = _runnerService.Start(Options);
 
             // TODO: Make this wait configurable
             while (_options.RunIndefinitely)

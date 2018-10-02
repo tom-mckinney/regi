@@ -13,10 +13,10 @@ namespace Regi.Services
     public interface IRunnerService
     {
         StartupConfig GetStartupConfig();
-        IList<AppProcess> Run();
-        IList<AppProcess> Test(ProjectType? type = null);
-        IList<AppProcess> Install();
-        void Initialize();
+        IList<AppProcess> Start(CommandOptions options);
+        IList<AppProcess> Test(CommandOptions options);
+        IList<AppProcess> Install(CommandOptions options);
+        void Initialize(CommandOptions options);
     }
 
     public class RunnerService : IRunnerService
@@ -73,35 +73,32 @@ namespace Regi.Services
             }
         }
 
-        public IList<AppProcess> Run()
+        public IList<AppProcess> Start(CommandOptions options)
         {
             StartupConfig config = GetStartupConfig();
 
             IList<AppProcess> processes = new List<AppProcess>();
 
-            foreach (var project in config.Apps)
+            foreach (var project in config.Apps.FilterByOptions(options))
             {
-                if (project.Type == ProjectType.Web)
+                _parallelService.Queue(() =>
                 {
-                    _parallelService.Queue(() =>
+                    AppProcess process = null;
+
+                    if (project.Framework == ProjectFramework.Dotnet)
                     {
-                        AppProcess process = null;
+                        process = _dotnetService.RunProject(project, false, project.Port);
+                    }
+                    else if (project.Framework == ProjectFramework.Node)
+                    {
+                        process = _nodeService.StartProject(project, false, project.Port);
+                    }
 
-                        if (project.Framework == ProjectFramework.Dotnet)
-                        {
-                            process = _dotnetService.RunProject(project, false, project.Port);
-                        }
-                        else if (project.Framework == ProjectFramework.Node)
-                        {
-                            process = _nodeService.StartProject(project, false, project.Port);
-                        }
-
-                        if (process != null)
-                        {
-                            processes.Add(process);
-                        }
-                    });
-                }
+                    if (process != null)
+                    {
+                        processes.Add(process);
+                    }
+                });
             }
 
             Console.CancelKeyPress += (o, e) =>
@@ -117,7 +114,7 @@ namespace Regi.Services
             return processes;
         }
 
-        public IList<AppProcess> Test(ProjectType? type = null)
+        public IList<AppProcess> Test(CommandOptions options)
         {
             StartupConfig config = GetStartupConfig();
 
@@ -131,30 +128,27 @@ namespace Regi.Services
                 }
             };
 
-            foreach (var project in config.Tests)
+            foreach (var project in config.Tests.FilterByOptions(options))
             {
-                if (!type.HasValue || project.Type == type)
+                _parallelService.Queue(() =>
                 {
-                    _parallelService.Queue(() =>
+                    AppProcess process = null;
+
+                    if (project.Framework == ProjectFramework.Dotnet)
                     {
-                        AppProcess process = null;
+                        _console.WriteLine(project.File.FullName);
+                        process = _dotnetService.TestProject(project);
+                    }
+                    else if (project.Framework == ProjectFramework.Node)
+                    {
+                        process = _nodeService.TestProject(project);
+                    }
 
-                        if (project.Framework == ProjectFramework.Dotnet)
-                        {
-                            _console.WriteLine(project.File.FullName);
-                            process = _dotnetService.TestProject(project);
-                        }
-                        else if (project.Framework == ProjectFramework.Node)
-                        {
-                            process = _nodeService.TestProject(project);
-                        }
-
-                        if (process != null)
-                        {
-                            processes.Add(process);
-                        }
-                    });
-                }
+                    if (process != null)
+                    {
+                        processes.Add(process);
+                    }
+                });
             }
 
             _parallelService.RunInParallel();
@@ -162,13 +156,14 @@ namespace Regi.Services
             return processes;
         }
 
-        public IList<AppProcess> Install()
+        public IList<AppProcess> Install(CommandOptions options)
         {
             StartupConfig config = GetStartupConfig();
 
             IList<AppProcess> processes = new List<AppProcess>();
 
-            foreach (var project in config.Apps.Concat(config.Tests))
+            IList<Project> appsAndTests = config.Apps.Concat(config.Tests).ToList();
+            foreach (var project in appsAndTests.FilterByOptions(options))
             {
                 _parallelService.Queue(() =>
                 {
@@ -204,7 +199,7 @@ namespace Regi.Services
             return processes;
         }
 
-        public void Initialize()
+        public void Initialize(CommandOptions options)
         {
             _fileService.CreateConfigFile();
         }

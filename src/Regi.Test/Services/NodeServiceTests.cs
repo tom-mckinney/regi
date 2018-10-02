@@ -54,7 +54,7 @@ namespace Regi.Test.Services
             {
                 Thread.Sleep(1000);
 
-                Assert.Equal(AppTask.Run, app.Task);
+                Assert.Equal(AppTask.Start, app.Task);
                 Assert.Equal(AppStatus.Running, app.Status);
             }
         }
@@ -66,7 +66,7 @@ namespace Regi.Test.Services
             {
                 Thread.Sleep(1000);
 
-                Assert.Equal(AppTask.Run, app.Task);
+                Assert.Equal(AppTask.Start, app.Task);
                 Assert.Equal(AppStatus.Running, app.Status);
                 Assert.Equal(8080, app.Port);
             }

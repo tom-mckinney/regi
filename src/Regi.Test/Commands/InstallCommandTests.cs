@@ -27,7 +27,7 @@ namespace Regi.Test.Commands
         [Fact]
         public void Will_install_dependencies_for_all_projects_by_default()
         {
-            _runnerServiceMock.Setup(m => m.Install())
+            _runnerServiceMock.Setup(m => m.Install(It.IsAny<CommandOptions>()))
                 .Returns(new List<AppProcess>
                 {
                     new AppProcess(new Process(), AppTask.Install, AppStatus.Success),

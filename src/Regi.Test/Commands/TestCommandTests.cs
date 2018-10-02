@@ -27,7 +27,7 @@ namespace Regi.Test.Commands
         [Fact]
         public void Will_run_all_test_if_no_name_or_type_is_specified()
         {
-            _runnerServiceMock.Setup(m => m.Test(null))
+            _runnerServiceMock.Setup(m => m.Test(It.IsAny<CommandOptions>()))
                 .Returns(new List<AppProcess>
                 {
                     new AppProcess(new Process(), AppTask.Test, AppStatus.Success),
@@ -53,7 +53,7 @@ namespace Regi.Test.Commands
         [InlineData(null)]
         public void Will_only_run_tests_with_matching_type_if_specified(ProjectType? type)
         {
-            _runnerServiceMock.Setup(m => m.Test(type))
+            _runnerServiceMock.Setup(m => m.Test(It.IsAny<CommandOptions>()))
                 .Returns(new List<AppProcess>
                 {
                     new AppProcess(new Process(), AppTask.Test, AppStatus.Success)

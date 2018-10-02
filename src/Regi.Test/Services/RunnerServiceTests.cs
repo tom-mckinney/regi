@@ -1,5 +1,6 @@
 ﻿using Moq;
 using Newtonsoft.Json;
+using Regi.Commands;
 using Regi.Extensions;
 using Regi.Models;
 using Regi.Services;
@@ -93,18 +94,18 @@ namespace Regi.Test.Services
         }
 
         [Fact]
-        public void Run_returns_a_process_for_every_app_in_startup_config()
+        public void Start_returns_a_process_for_every_app_in_startup_config()
         {
             _dotnetServiceMock.Setup(m => m.RunProject(It.IsAny<Project>(), It.IsAny<bool>(), It.IsAny<int?>()))
-                .Returns<Project, bool, int?>((p, b, i) => new AppProcess(new Process(), AppTask.Run, AppStatus.Success, i))
+                .Returns<Project, bool, int?>((p, b, i) => new AppProcess(new Process(), AppTask.Start, AppStatus.Success, i))
                 .Verifiable();
             _nodeServiceMock.Setup(m => m.StartProject(It.IsAny<Project>(), It.IsAny<bool>(), It.IsAny<int?>()))
-                .Returns<Project, bool, int?>((p, b, i) => new AppProcess(new Process(), AppTask.Run, AppStatus.Success, i))
+                .Returns<Project, bool, int?>((p, b, i) => new AppProcess(new Process(), AppTask.Start, AppStatus.Success, i))
                 .Verifiable();
 
             DirectoryUtility.SetTargetDirectory(_startupConfigGood);
 
-            var processes = _runnerService.Run();
+            var processes = _runnerService.Start(new CommandOptions());
 
             Assert.Equal(totalAppCount, processes.Count);
             Assert.Single(processes, p => p.Port == 9080);
@@ -117,12 +118,12 @@ namespace Regi.Test.Services
         public void Test_returns_a_process_for_every_test_in_startup_config()
         {
             _dotnetServiceMock.Setup(m => m.TestProject(It.IsAny<Project>(), It.IsAny<bool>()))
-                .Returns(new AppProcess(new Process(), AppTask.Run, AppStatus.Success))
+                .Returns(new AppProcess(new Process(), AppTask.Start, AppStatus.Success))
                 .Verifiable();
 
             DirectoryUtility.SetTargetDirectory(_startupConfigGood);
 
-            var processes = _runnerService.Test();
+            var processes = _runnerService.Test(new CommandOptions());
 
             Assert.Equal(totalTestCount, processes.Count);
 
@@ -134,13 +135,13 @@ namespace Regi.Test.Services
         [InlineData(ProjectType.Integration, 1)]
         public void Test_will_only_run_tests_on_type_specified(ProjectType type, int expectedCount)
         {
-            _dotnetServiceMock.Setup(m => m.TestProject(It.IsAny<Project>(), It.IsAny<bool>()))
-                .Returns(new AppProcess(new Process(), AppTask.Run, AppStatus.Success))
+            _dotnetServiceMock.Setup(m => m.TestProject(It.Is<Project>(p => p.Type == type), It.IsAny<bool>()))
+                .Returns(new AppProcess(new Process(), AppTask.Start, AppStatus.Success))
                 .Verifiable();
 
             DirectoryUtility.SetTargetDirectory(_startupConfigGood);
 
-            var processes = _runnerService.Test(type);
+            var processes = _runnerService.Test(new CommandOptions { Type = type });
 
             Assert.Equal(expectedCount, processes.Count);
 
@@ -159,7 +160,7 @@ namespace Regi.Test.Services
 
             DirectoryUtility.SetTargetDirectory(_startupConfigGood);
 
-            var processes = _runnerService.Install();
+            var processes = _runnerService.Install(new CommandOptions());
 
             Assert.Equal(totalAppCount + totalTestCount, processes.Count);
 
@@ -175,7 +176,7 @@ namespace Regi.Test.Services
 
             DirectoryUtility.SetTargetDirectory(SampleDirectoryPath("ConfigurationNew"));
 
-            _runnerService.Initialize();
+            _runnerService.Initialize(new CommandOptions());
 
             _fileServiceMock.VerifyAll();
         }

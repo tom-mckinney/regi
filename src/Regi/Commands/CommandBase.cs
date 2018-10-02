@@ -1,17 +1,17 @@
-﻿using McMaster.Extensions.CommandLineUtils;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using Regi.Models;
 
 namespace Regi.Commands
 {
-    public abstract class CommandBase
+    public abstract class CommandBase : CommandOptions
     {
-        [Argument(0, Description = "Name of the project")]
-        public string Name { get; set; }
-
-        [Option(Description = "Search pattern")]
-        public string SearchPattern { get; set; }
+        public CommandOptions Options
+        {
+            get => new CommandOptions
+            {
+                Name = this.Name,
+                SearchPattern = this.SearchPattern
+            };
+        }
 
         public abstract int OnExecute();
     }

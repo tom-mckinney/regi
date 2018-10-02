@@ -7,7 +7,7 @@ namespace Regi.Models
     public enum AppTask
     {
         Test = 1,
-        Run,
+        Start,
         Install,
     }
 }

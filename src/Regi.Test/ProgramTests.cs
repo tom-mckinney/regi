@@ -1,4 +1,5 @@
 using Regi.Test.Helpers;
+using Regi.Utilities;
 using System.Linq;
 using Xunit;
 using Xunit.Abstractions;
@@ -16,7 +17,10 @@ namespace Regi.Test
 
         [Theory]
         [InlineData]
+        [InlineData("start")]
         [InlineData("test")]
+        [InlineData("install")]
+        [InlineData("init")]
         public void All_commands_have_accurate_help_response(params string[] args)
         {
             args = args.Concat(new string[] { "--help" }).ToArray();
@@ -24,17 +28,6 @@ namespace Regi.Test
             int response = Program.MainWithConsole(_console, args);
 
             Assert.Equal(0, response);
-        }
-
-        [Fact]
-        public void Exceptions_are_handled_by_displaying_user_friendly_message()
-        {
-            var args = new string[] { "start" };
-
-            int response = Program.MainWithConsole(_console, args);
-
-            Assert.Equal(1, response);
-            Assert.StartsWith("Could not find startup.json in directory:", _console.LogOutput);
         }
     }
 }

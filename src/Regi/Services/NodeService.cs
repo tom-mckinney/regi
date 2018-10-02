@@ -96,7 +96,7 @@ namespace Regi.Services
                 process.StartInfo.EnvironmentVariables.Add("PORT", port.Value.ToString());
             }
 
-            AppProcess output = new AppProcess(process, AppTask.Run, AppStatus.Running, port);
+            AppProcess output = new AppProcess(process, AppTask.Start, AppStatus.Running, port);
 
             process.Exited += DefaultExited(output);
             process.ErrorDataReceived += DefaultErrorDataReceived(project.Name, output);

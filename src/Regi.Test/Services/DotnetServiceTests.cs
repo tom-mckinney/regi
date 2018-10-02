@@ -115,7 +115,7 @@ namespace Regi.Test.Services
 
             app.Process.WaitForExit();
 
-            Assert.Equal(AppTask.Run, app.Task);
+            Assert.Equal(AppTask.Start, app.Task);
             Assert.Equal(AppStatus.Success, app.Status);
             Assert.Null(_console.LogOutput);
         }
@@ -127,7 +127,7 @@ namespace Regi.Test.Services
 
             app.Process.WaitForExit();
 
-            Assert.Equal(AppTask.Run, app.Task);
+            Assert.Equal(AppTask.Start, app.Task);
             Assert.Equal(AppStatus.Success, app.Status);
             Assert.Contains("Hello World!", _console.LogOutput);
         }
@@ -139,7 +139,7 @@ namespace Regi.Test.Services
             {
                 Thread.Sleep(1000);
 
-                Assert.Equal(AppTask.Run, app.Task);
+                Assert.Equal(AppTask.Start, app.Task);
                 Assert.Equal(AppStatus.Running, app.Status);
             }
         }
@@ -151,7 +151,7 @@ namespace Regi.Test.Services
             {
                 Thread.Sleep(1000);
 
-                Assert.Equal(AppTask.Run, app.Task);
+                Assert.Equal(AppTask.Start, app.Task);
                 Assert.Equal(AppStatus.Running, app.Status);
                 Assert.Equal(8080, app.Port);
             }

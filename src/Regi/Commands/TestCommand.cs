@@ -16,12 +16,9 @@ namespace Regi.Commands
             _console = console;
         }
 
-        [Option(Description = "Type of tests to run", ShortName = "t", LongName = "type")]
-        public ProjectType? Type { get; set; }
-
         public override int OnExecute()
         {
-            var unitTests = _runnerService.Test(Type);
+            var unitTests = _runnerService.Test(Options);
 
             return unitTests.Count;
         }

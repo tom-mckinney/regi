@@ -1,4 +1,5 @@
-﻿using Regi.Services;
+﻿using Regi.Models;
+using Regi.Services;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -16,7 +17,7 @@ namespace Regi.Commands
 
         public override int OnExecute()
         {
-            _runnerService.Initialize();
+            _runnerService.Initialize(Options);
 
             return 0;
         }

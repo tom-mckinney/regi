@@ -1,4 +1,5 @@
 ﻿using McMaster.Extensions.CommandLineUtils;
+using Regi.Models;
 using Regi.Services;
 using System;
 using System.Collections.Generic;
@@ -20,7 +21,7 @@ namespace Regi.Commands
 
         public override int OnExecute()
         {
-            var installations = _runnerService.Install();
+            var installations = _runnerService.Install(Options);
 
             return installations.Count;
         }

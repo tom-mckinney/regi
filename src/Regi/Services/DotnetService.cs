@@ -91,7 +91,7 @@ namespace Regi.Services
                 process.StartInfo.EnvironmentVariables.Add("ASPNETCORE_URLS", $"http://*:{port}");
             }
 
-            AppProcess output = new AppProcess(process, AppTask.Run, AppStatus.Running, port);
+            AppProcess output = new AppProcess(process, AppTask.Start, AppStatus.Running, port);
 
             process.ErrorDataReceived += DefaultErrorDataReceived(project.Name, output);
             process.Exited += DefaultExited(output);
