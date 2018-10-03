@@ -89,46 +89,46 @@ namespace Regi.Test.Services
         [Fact]
         public void RunProject_changes_status_from_running_to_success_on_exit()
         {
-            AppProcess app = _service.RunProject(_application);
+            AppProcess process = _service.RunProject(_application);
 
-            Assert.Equal(AppStatus.Running, app.Status);
+            Assert.Equal(AppStatus.Running, process.Status);
 
-            app.Process.WaitForExit();
+            process.Process.WaitForExit();
 
-            Assert.Equal(AppStatus.Success, app.Status);
+            Assert.Equal(AppStatus.Success, process.Status);
         }
 
         [Fact]
         public void RunProject_returns_failure_status_on_thrown_exception()
         {
-            AppProcess app = _service.RunProject(_applicationError);
+            AppProcess process = _service.RunProject(_applicationError);
 
-            app.Process.WaitForExit();
+            process.Process.WaitForExit();
 
-            Assert.Equal(AppStatus.Failure, app.Status);
+            Assert.Equal(AppStatus.Failure, process.Status);
         }
 
         [Fact]
         public void RunProject_starts_and_prints_nothing()
         {
-            AppProcess app = _service.RunProject(_application);
+            AppProcess process = _service.RunProject(_application);
 
-            app.Process.WaitForExit();
+            process.Process.WaitForExit();
 
-            Assert.Equal(AppTask.Start, app.Task);
-            Assert.Equal(AppStatus.Success, app.Status);
+            Assert.Equal(AppTask.Start, process.Task);
+            Assert.Equal(AppStatus.Success, process.Status);
             Assert.Null(_console.LogOutput);
         }
 
         [Fact]
         public void RunProject_verbose_starts_and_prints_all_output()
         {
-            AppProcess app = _service.RunProject(_application, true);
+            AppProcess process = _service.RunProject(_application, true);
 
-            app.Process.WaitForExit();
+            process.Process.WaitForExit();
 
-            Assert.Equal(AppTask.Start, app.Task);
-            Assert.Equal(AppStatus.Success, app.Status);
+            Assert.Equal(AppTask.Start, process.Task);
+            Assert.Equal(AppStatus.Success, process.Status);
             Assert.Contains("Hello World!", _console.LogOutput);
         }
 

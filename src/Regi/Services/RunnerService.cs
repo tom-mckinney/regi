@@ -13,10 +13,10 @@ namespace Regi.Services
     public interface IRunnerService
     {
         StartupConfig GetStartupConfig();
-        IList<AppProcess> Start(CommandOptions options);
+        IList<Project> Start(CommandOptions options);
         IList<AppProcess> Test(CommandOptions options);
         IList<AppProcess> Install(CommandOptions options);
-        void List(CommandOptions options);
+        OutputSummary List(CommandOptions options);
         void Initialize(CommandOptions options);
     }
 
@@ -74,45 +74,56 @@ namespace Regi.Services
             }
         }
 
-        public IList<AppProcess> Start(CommandOptions options)
+        public IList<Project> Start(CommandOptions options)
         {
             StartupConfig config = GetStartupConfig();
 
-            IList<AppProcess> processes = new List<AppProcess>();
+            IList<Project> projects = config.Apps.FilterByOptions(options); //new List<AppProcess>();
 
-            foreach (var project in config.Apps.FilterByOptions(options))
+            foreach (var project in projects)
             {
                 _parallelService.Queue(() =>
                 {
-                    AppProcess process = null;
-
-                    if (project.Framework == ProjectFramework.Dotnet)
-                    {
-                        process = _dotnetService.RunProject(project, false, project.Port);
-                    }
-                    else if (project.Framework == ProjectFramework.Node)
-                    {
-                        process = _nodeService.StartProject(project, false, project.Port);
-                    }
-
-                    if (process != null)
-                    {
-                        processes.Add(process);
-                    }
+                    StartProject(project, new List<AppProcess>());
                 });
             }
 
             Console.CancelKeyPress += (o, e) =>
             {
-                foreach (var process in processes)
+                foreach (var project in projects)
                 {
-                    process.Process.KillTree(TimeSpan.FromSeconds(10));
+                    project.Process.Dispose();
                 }
             };
 
             _parallelService.RunInParallel();
 
-            return processes;
+            return projects;
+        }
+
+        private void StartProject(Project project, IList<AppProcess> processes)
+        {
+            if (project.Port.HasValue)
+            {
+                string url = $"http://localhost:{project.Port.ToString()}";
+                Environment.SetEnvironmentVariable($"{project.Name.ToUnderscoreCase()}_PORT", url);
+            }
+
+            AppProcess process = null;
+            if (project.Framework == ProjectFramework.Dotnet)
+            {
+                process = _dotnetService.RunProject(project, false, project.Port);
+            }
+            else if (project.Framework == ProjectFramework.Node)
+            {
+                process = _nodeService.StartProject(project, false, project.Port);
+            }
+
+            if (process != null)
+            {
+                project.Process = process;
+                processes.Add(process);
+            }
         }
 
         public IList<AppProcess> Test(CommandOptions options)
@@ -125,7 +136,7 @@ namespace Regi.Services
             {
                 foreach (var process in processes)
                 {
-                    process.Process.KillTree(TimeSpan.FromSeconds(10));
+                    process.Dispose();
                 }
             };
 
@@ -133,6 +144,21 @@ namespace Regi.Services
             {
                 _parallelService.Queue(() =>
                 {
+                    if (project.Requires.Any())
+                    {
+                        foreach (var r in project.Requires)
+                        {
+                            Project requiredProject = config.Apps
+                                .Concat(config.Services)
+                                .FirstOrDefault(p => p.Name.Contains(r, StringComparison.InvariantCultureIgnoreCase));
+
+                            if (requiredProject != null)
+                            {
+                                StartProject(requiredProject, processes);
+                            }
+                        }
+                    }
+
                     AppProcess process = null;
 
                     if (project.Framework == ProjectFramework.Dotnet)
@@ -191,7 +217,7 @@ namespace Regi.Services
             {
                 foreach (var process in processes)
                 {
-                    process.Process.KillTree(TimeSpan.FromSeconds(10));
+                    process.Dispose();
                 }
             };
 
@@ -200,21 +226,35 @@ namespace Regi.Services
             return processes;
         }
 
-        public void List(CommandOptions options)
+        public OutputSummary List(CommandOptions options)
         {
             StartupConfig config = GetStartupConfig();
 
-            _console.WriteEmphasizedLine("Apps:");
-            foreach (var app in config.Apps.FilterByOptions(options))
+            OutputSummary output = new OutputSummary();
+
+            var apps = config.Apps.FilterByOptions(options);
+            if (apps.Any())
             {
-                _console.WriteLine("  " + app.Name);
+                _console.WriteEmphasizedLine("Apps:");
+                foreach (var app in apps)
+                {
+                    output.Apps.Add(app);
+                    _console.WriteLine("  " + app.Name);
+                }
             }
 
-            _console.WriteEmphasizedLine("Tests:");
-            foreach (var app in config.Tests.FilterByOptions(options))
+            var tests = config.Tests.FilterByOptions(options);
+            if (tests.Any())
             {
-                _console.WriteLine("  " + app.Name);
+                _console.WriteEmphasizedLine("Tests:");
+                foreach (var app in tests)
+                {
+                    output.Tests.Add(app);
+                    _console.WriteLine("  " + app.Name);
+                }
             }
+
+            return output;
         }
 
         public void Initialize(CommandOptions options)

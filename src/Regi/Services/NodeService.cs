@@ -152,7 +152,7 @@ namespace Regi.Services
             process.WaitForExit();
 
             output.Status = process.ExitCode > 0 ? AppStatus.Failure : AppStatus.Success;
-            output.End = DateTimeOffset.UtcNow;
+            output.EndTime = DateTimeOffset.UtcNow;
 
             _console.WriteEmphasizedLine($"Finished tests for project {project.Name} ({project.File.DirectoryName})");
 

@@ -1,4 +1,6 @@
-﻿using Regi.Utilities;
+﻿using Newtonsoft.Json;
+using Regi.Utilities;
+using System.Collections.Generic;
 using System.IO;
 
 namespace Regi.Models
@@ -21,6 +23,8 @@ namespace Regi.Models
 
         public ProjectFramework Framework { get; set; } = ProjectFramework.Dotnet;
 
+        public IList<string> Requires { get; set; } = new List<string>();
+
         public int? Port { get; set; }
 
         private FileInfo _file;
@@ -42,5 +46,8 @@ namespace Regi.Models
                 return _file;
             }
         }
+
+        [JsonIgnore]
+        public AppProcess Process { get; set; }
     }
 }

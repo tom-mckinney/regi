@@ -41,7 +41,7 @@ namespace Regi.Services
         {
             return new EventHandler((o, e) =>
             {
-                output.End = DateTimeOffset.UtcNow;
+                output.EndTime = DateTimeOffset.UtcNow;
 
                 if (output.Status == AppStatus.Running)
                 {

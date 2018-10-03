@@ -90,6 +90,9 @@
     <None Update="_SampleProjects_\ConfigurationComplete\startup.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="_SampleProjects_\ConfigurationRequires\startup.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="_SampleProjects_\ConfigurationGood\startup.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

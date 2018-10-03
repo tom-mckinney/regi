@@ -30,10 +30,16 @@ namespace Regi.Test.Commands
         public void Will_start_all_projects_by_default()
         {
             _runnerServiceMock.Setup(m => m.Start(It.IsAny<CommandOptions>()))
-                .Returns(new List<AppProcess>
+                .Returns(new List<Project>
                 {
-                    new AppProcess(new Process(), AppTask.Start, AppStatus.Success),
-                    new AppProcess(new Process(), AppTask.Start, AppStatus.Success)
+                    new Project
+                    {
+                        Process = new AppProcess(new Process(), AppTask.Start, AppStatus.Success)
+                    },
+                    new Project
+                    {
+                        Process = new AppProcess(new Process(), AppTask.Start, AppStatus.Success)
+                    }
                 })
                 .Verifiable();
 

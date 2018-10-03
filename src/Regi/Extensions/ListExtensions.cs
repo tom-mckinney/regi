@@ -9,14 +9,13 @@ namespace Regi.Extensions
     {
         public static IList<Project> FilterByOptions(this IList<Project> projects, CommandOptions options)
         {
-            if (string.IsNullOrWhiteSpace(options.Name))
+            if (!string.IsNullOrWhiteSpace(options.Name))
             {
-                return projects;
+                projects = projects
+                    .Where(p => p.Name.Contains(options.Name, StringComparison.CurrentCultureIgnoreCase))
+                    .ToList();
             }
 
-            projects = projects
-                .Where(p => p.Name.Contains(options.Name, StringComparison.CurrentCultureIgnoreCase))
-                .ToList();
 
             if (options.Type.HasValue)
             {

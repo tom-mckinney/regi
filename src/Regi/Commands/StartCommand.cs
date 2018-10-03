@@ -36,7 +36,7 @@ namespace Regi.Commands
                 {
                     foreach (var p in projects)
                     {
-                        p.Process.KillTree(TimeSpan.FromSeconds(10));
+                        p.Process.Dispose();
                     }
                     break;
                 }

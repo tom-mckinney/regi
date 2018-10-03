@@ -83,6 +83,8 @@ namespace Regi.Services
                 EnableRaisingEvents = true
             };
 
+            AppProcess output = new AppProcess(process, AppTask.Start, AppStatus.Running, port);
+
             process.StartInfo.EnvironmentVariables.Add("END_TO_END_TESTING", true.ToString());
             process.StartInfo.EnvironmentVariables.Add("IN_MEMORY_DATABASE", true.ToString());
 
@@ -91,7 +93,7 @@ namespace Regi.Services
                 process.StartInfo.EnvironmentVariables.Add("ASPNETCORE_URLS", $"http://*:{port}");
             }
 
-            AppProcess output = new AppProcess(process, AppTask.Start, AppStatus.Running, port);
+            //AppProcess output = new AppProcess(process, AppTask.Start, AppStatus.Running, port);
 
             process.ErrorDataReceived += DefaultErrorDataReceived(project.Name, output);
             process.Exited += DefaultExited(output);
@@ -153,7 +155,7 @@ namespace Regi.Services
             process.WaitForExit();
 
             // Todo: Determine why test doesn't call exit
-            output.End = DateTimeOffset.UtcNow;
+            output.EndTime = DateTimeOffset.UtcNow;
             if (output.Status == AppStatus.Running)
             {
                 output.Status = AppStatus.Success;

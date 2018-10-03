@@ -1,8 +1,6 @@
 ﻿using Regi.Extensions;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Text;
 
 namespace Regi.Models
 {
@@ -24,7 +22,7 @@ namespace Regi.Models
 
         public int? Port { get; set; }
 
-        public DateTimeOffset? Start
+        public DateTimeOffset? StartTime
         {
             get
             {
@@ -39,11 +37,14 @@ namespace Regi.Models
             }
         }
 
-        public DateTimeOffset? End { get; set; }
+        public DateTimeOffset? EndTime { get; set; }
 
         public void Dispose()
         {
-            Process.KillTree(TimeSpan.FromSeconds(2));
+            if (Process != null && !Process.HasExited)
+            {
+                Process.KillTree(TimeSpan.FromSeconds(2));
+            }
         }
     }
 }
