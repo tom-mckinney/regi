@@ -1,6 +1,7 @@
 ﻿using Regi.Models;
 using Regi.Services;
 using Regi.Test.Helpers;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -59,7 +60,7 @@ namespace Regi.Test.Services
         [Fact]
         public void TestProject_verbose_on_success_prints_all_output()
         {
-            AppProcess unitTest = _service.TestProject(_successfulTests, true);
+            AppProcess unitTest = _service.TestProject(_successfulTests, null, true);
 
             Assert.Equal(AppTask.Test, unitTest.Task);
             Assert.Equal(AppStatus.Success, unitTest.Status);
@@ -79,7 +80,7 @@ namespace Regi.Test.Services
         [Fact]
         public void TestProject_verbose_on_failure_prints_all_output()
         {
-            AppProcess unitTest = _service.TestProject(_failedTests, true);
+            AppProcess unitTest = _service.TestProject(_failedTests, null, true);
 
             Assert.Equal(AppTask.Test, unitTest.Task);
             Assert.Equal(AppStatus.Failure, unitTest.Status);
@@ -123,7 +124,7 @@ namespace Regi.Test.Services
         [Fact]
         public void RunProject_verbose_starts_and_prints_all_output()
         {
-            AppProcess process = _service.RunProject(_application, true);
+            AppProcess process = _service.RunProject(_application, null, true);
 
             process.Process.WaitForExit();
 
@@ -135,25 +136,50 @@ namespace Regi.Test.Services
         [Fact]
         public void RunProject_long_starts_and_prints_nothing()
         {
-            using (AppProcess app = _service.RunProject(_applicationLong, true))
+            using (AppProcess appProcess = _service.RunProject(_applicationLong, null, true))
             {
                 Thread.Sleep(1000);
 
-                Assert.Equal(AppTask.Start, app.Task);
-                Assert.Equal(AppStatus.Running, app.Status);
+                Assert.Equal(AppTask.Start, appProcess.Task);
+                Assert.Equal(AppStatus.Running, appProcess.Status);
+                Assert.Null(appProcess.Port);
             }
         }
 
         [Fact]
         public void RunProject_will_start_custom_port_if_specified()
         {
-            using (AppProcess app = _service.RunProject(_applicationLong, true, 8080))
+            _applicationLong.Port = 8080;
+
+            using (AppProcess appProcess = _service.RunProject(_applicationLong, null, true))
             {
                 Thread.Sleep(1000);
 
-                Assert.Equal(AppTask.Start, app.Task);
-                Assert.Equal(AppStatus.Running, app.Status);
-                Assert.Equal(8080, app.Port);
+                Assert.Equal(AppTask.Start, appProcess.Task);
+                Assert.Equal(AppStatus.Running, appProcess.Status);
+                Assert.Equal(8080, appProcess.Port);
+            }
+        }
+
+        [Fact]
+        public void RunProject_will_add_all_variables_passed_to_process()
+        {
+            _applicationLong.Port = 8080;
+
+            VariableList varList = new VariableList
+            {
+                { "foo", "bar" }
+            };
+
+            using (AppProcess appProcess = _service.RunProject(_applicationLong, varList, true))
+            {
+                Thread.Sleep(500);
+
+                Assert.Equal(AppTask.Start, appProcess.Task);
+                Assert.Equal(AppStatus.Running, appProcess.Status);
+                Assert.Equal(8080, appProcess.Port);
+                Assert.True(appProcess.Process.StartInfo.EnvironmentVariables.ContainsKey("foo"), "Environment variable \"foo\" has not been set.");
+                Assert.Equal("bar", appProcess.Process.StartInfo.EnvironmentVariables["foo"]);
             }
         }
 

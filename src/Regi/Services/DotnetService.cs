@@ -2,15 +2,17 @@
 using Regi.Extensions;
 using Regi.Models;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 
 namespace Regi.Services
 {
     public interface IDotnetService
     {
-        AppProcess RunProject(Project project, bool verbose = false, int? port = null);
-        AppProcess TestProject(Project project, bool verbose = false);
+        AppProcess RunProject(Project project, VariableList varList = null, bool verbose = false);
+        AppProcess TestProject(Project project, VariableList varList = null, bool verbose = false);
         AppProcess RestoreProject(Project project, bool verbose = false);
     }
 
@@ -68,7 +70,7 @@ namespace Regi.Services
             return output;
         }
 
-        public AppProcess RunProject(Project project, bool verbose = false, int? port = null)
+        public AppProcess RunProject(Project project, VariableList varList = null, bool verbose = false)
         {
             Process process = new Process
             {
@@ -83,17 +85,16 @@ namespace Regi.Services
                 EnableRaisingEvents = true
             };
 
-            AppProcess output = new AppProcess(process, AppTask.Start, AppStatus.Running, port);
+            AppProcess output = new AppProcess(process, AppTask.Start, AppStatus.Running, project.Port);
 
             process.StartInfo.EnvironmentVariables.Add("END_TO_END_TESTING", true.ToString());
             process.StartInfo.EnvironmentVariables.Add("IN_MEMORY_DATABASE", true.ToString());
 
-            if (port.HasValue)
+            process.StartInfo.CopyEnvironmentVariables(varList);
+            if (project.Port.HasValue)
             {
-                process.StartInfo.EnvironmentVariables.Add("ASPNETCORE_URLS", $"http://*:{port}");
+                process.StartInfo.EnvironmentVariables.Add("ASPNETCORE_URLS", $"http://*:{project.Port}"); // Default .NET Core URL variable
             }
-
-            //AppProcess output = new AppProcess(process, AppTask.Start, AppStatus.Running, port);
 
             process.ErrorDataReceived += DefaultErrorDataReceived(project.Name, output);
             process.Exited += DefaultExited(output);
@@ -113,7 +114,7 @@ namespace Regi.Services
             return output;
         }
 
-        public AppProcess TestProject(Project project, bool verbose = false)
+        public AppProcess TestProject(Project project, VariableList varList = null, bool verbose = false)
         {
             _console.WriteEmphasizedLine($"Starting tests for project {project.Name} ({project.File.Name})");
 
@@ -136,6 +137,8 @@ namespace Regi.Services
             };
 
             AppProcess output = new AppProcess(process, AppTask.Test, AppStatus.Running);
+
+            process.StartInfo.CopyEnvironmentVariables(varList);
 
             process.ErrorDataReceived += DefaultErrorDataReceived(project.Name, output);
             if (verbose)

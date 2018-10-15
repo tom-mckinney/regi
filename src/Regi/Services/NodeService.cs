@@ -6,14 +6,15 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Text;
 
 namespace Regi.Services
 {
     public interface INodeService
     {
-        AppProcess StartProject(Project project, bool verbose = false, int? port = null);
-        AppProcess TestProject(Project project, string pathPattern = null, bool verbose = false);
+        AppProcess StartProject(Project project, VariableList varList = null, bool verbose = false);
+        AppProcess TestProject(Project project, string pathPattern = null, VariableList varList = null, bool verbose = false);
         AppProcess InstallProject(Project project, bool verbose = false);
     }
 
@@ -76,7 +77,7 @@ namespace Regi.Services
             throw new NotImplementedException();
         }
 
-        public AppProcess StartProject(Project project, bool verbose = false, int? port = null)
+        public AppProcess StartProject(Project project, VariableList varList = null, bool verbose = false)
         {
             Process process = new Process
             {
@@ -91,12 +92,13 @@ namespace Regi.Services
                 EnableRaisingEvents = true
             };
 
-            if (port.HasValue)
+            process.StartInfo.CopyEnvironmentVariables(varList);
+            if (project.Port.HasValue)
             {
-                process.StartInfo.EnvironmentVariables.Add("PORT", port.Value.ToString());
+                process.StartInfo.EnvironmentVariables.Add("PORT", project.Port.Value.ToString()); // Default NodeJS port variable
             }
 
-            AppProcess output = new AppProcess(process, AppTask.Start, AppStatus.Running, port);
+            AppProcess output = new AppProcess(process, AppTask.Start, AppStatus.Running, project.Port);
 
             process.Exited += DefaultExited(output);
             process.ErrorDataReceived += DefaultErrorDataReceived(project.Name, output);
@@ -116,7 +118,7 @@ namespace Regi.Services
             return output;
         }
 
-        public AppProcess TestProject(Project project, string pathPattern = null, bool verbose = false)
+        public AppProcess TestProject(Project project, string pathPattern = null, VariableList varList = null, bool verbose = false)
         {
             _console.WriteEmphasizedLine($"Starting tests for project {project.Name} ({project.File.DirectoryName})");
 
@@ -134,6 +136,8 @@ namespace Regi.Services
             };
 
             AppProcess output = new AppProcess(process, AppTask.Test, AppStatus.Running);
+
+            process.StartInfo.CopyEnvironmentVariables(varList);
 
             process.ErrorDataReceived += DefaultOutputDataRecieved(project.Name);
             if (verbose)

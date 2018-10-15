@@ -50,7 +50,7 @@ namespace Regi.Test.Services
         [Fact]
         public void RunProject_starts_and_returns_process()
         {
-            using (AppProcess app = _service.StartProject(_application, true))
+            using (AppProcess app = _service.StartProject(_application, null, true))
             {
                 Thread.Sleep(1000);
 
@@ -62,7 +62,9 @@ namespace Regi.Test.Services
         [Fact]
         public void RunProject_will_start_custom_port_if_specified()
         {
-            using (AppProcess app = _service.StartProject(_application, true, 8080))
+            _application.Port = 8080;
+
+            using (AppProcess app = _service.StartProject(_application, null, true))
             {
                 Thread.Sleep(1000);
 
@@ -72,13 +74,35 @@ namespace Regi.Test.Services
             }
         }
 
+        [Fact]
+        public void RunProject_will_add_all_variables_passed_to_process()
+        {
+            _application.Port = 8080;
+
+            VariableList varList = new VariableList
+            {
+                { "foo", "bar" }
+            };
+
+            using (AppProcess appProcess = _service.StartProject(_application, varList, true))
+            {
+                Thread.Sleep(500);
+
+                Assert.Equal(AppTask.Start, appProcess.Task);
+                Assert.Equal(AppStatus.Running, appProcess.Status);
+                Assert.Equal(8080, appProcess.Port);
+                Assert.True(appProcess.Process.StartInfo.EnvironmentVariables.ContainsKey("foo"), "Environment variable \"foo\" has not been set.");
+                Assert.Equal("bar", appProcess.Process.StartInfo.EnvironmentVariables["foo"]);
+            }
+        }
+
         [Theory]
         [InlineData(null, AppStatus.Failure)]
         [InlineData("passing", AppStatus.Success)]
         [InlineData("failing", AppStatus.Failure)]
         public void TestProject_will_return_test_for_path_pattern_and_expected_status(string pathPattern, AppStatus expectedStatus)
         {
-            using (AppProcess test = _service.TestProject(_application, pathPattern, true))
+            using (AppProcess test = _service.TestProject(_application, pathPattern, null, true))
             {
                 Assert.Equal(AppTask.Test, test.Task);
                 Assert.Equal(expectedStatus, test.Status);

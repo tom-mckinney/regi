@@ -74,17 +74,34 @@ namespace Regi.Services
             }
         }
 
+        private IDictionary<string, string> GetEnvironmentVariables(IList<Project> projects)
+        {
+            IDictionary<string, string> output = new Dictionary<string, string>();
+
+            foreach (var p in projects)
+            {
+                if (p.Port.HasValue)
+                {
+                    output.Add($"{p.Name}_PORT".ToUnderscoreCase(), p.Port.ToString());
+                }
+            }
+
+            return output;
+        }
+
         public IList<Project> Start(CommandOptions options)
         {
             StartupConfig config = GetStartupConfig();
 
             IList<Project> projects = config.Apps.FilterByOptions(options);
 
+            VariableList varList = new VariableList(projects);
+
             foreach (var project in projects)
             {
                 _parallelService.Queue(() =>
                 {
-                    StartProject(project, new List<AppProcess>());
+                    StartProject(project, new List<AppProcess>(), varList);
                 });
             }
 
@@ -101,22 +118,16 @@ namespace Regi.Services
             return projects;
         }
 
-        private void StartProject(Project project, IList<AppProcess> processes)
+        private void StartProject(Project project, IList<AppProcess> processes, VariableList varList = null)
         {
-            if (project.Port.HasValue)
-            {
-                string url = $"http://localhost:{project.Port.ToString()}";
-                Environment.SetEnvironmentVariable($"{project.Name.ToUnderscoreCase()}_PORT", url);
-            }
-
             AppProcess process = null;
             if (project.Framework == ProjectFramework.Dotnet)
             {
-                process = _dotnetService.RunProject(project, false, project.Port);
+                process = _dotnetService.RunProject(project, varList, false);
             }
             else if (project.Framework == ProjectFramework.Node)
             {
-                process = _nodeService.StartProject(project, false, project.Port);
+                process = _nodeService.StartProject(project, varList, false);
             }
 
             if (process != null)
@@ -140,7 +151,11 @@ namespace Regi.Services
                 }
             };
 
-            foreach (var project in config.Tests.FilterByOptions(options))
+            IList<Project> projects = config.Tests.FilterByOptions(options);
+
+            VariableList varList = new VariableList(projects);
+
+            foreach (var project in projects)
             {
                 _parallelService.Queue(() =>
                 {
@@ -154,7 +169,7 @@ namespace Regi.Services
 
                             if (requiredProject != null)
                             {
-                                StartProject(requiredProject, processes);
+                                StartProject(requiredProject, processes, varList);
                             }
                         }
                     }
