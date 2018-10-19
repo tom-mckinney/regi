@@ -95,13 +95,13 @@ namespace Regi.Services
 
             IList<Project> projects = config.Apps.FilterByOptions(options);
 
-            VariableList varList = new VariableList(projects);
+            options.VariableList = new VariableList(projects);
 
             foreach (var project in projects)
             {
                 _parallelService.Queue(() =>
                 {
-                    StartProject(project, new List<AppProcess>(), varList);
+                    StartProject(project, new List<AppProcess>(), options);
                 });
             }
 
@@ -118,16 +118,16 @@ namespace Regi.Services
             return projects;
         }
 
-        private void StartProject(Project project, IList<AppProcess> processes, VariableList varList = null)
+        private void StartProject(Project project, IList<AppProcess> processes, CommandOptions options)
         {
             AppProcess process = null;
             if (project.Framework == ProjectFramework.Dotnet)
             {
-                process = _dotnetService.RunProject(project, varList, false);
+                process = _dotnetService.RunProject(project, options);
             }
             else if (project.Framework == ProjectFramework.Node)
             {
-                process = _nodeService.StartProject(project, varList, false);
+                process = _nodeService.StartProject(project, options);
             }
 
             if (process != null)
@@ -153,7 +153,7 @@ namespace Regi.Services
 
             IList<Project> projects = config.Tests.FilterByOptions(options);
 
-            VariableList varList = new VariableList(projects);
+            options.VariableList = new VariableList(projects);
 
             foreach (var project in projects)
             {
@@ -169,7 +169,12 @@ namespace Regi.Services
 
                             if (requiredProject != null)
                             {
-                                StartProject(requiredProject, processes, varList);
+                                options.VariableList.AddProject(requiredProject);
+
+                                _console.WriteLine(requiredProject.Name);
+                                _console.WriteLine(requiredProject.Port);
+                                _console.WriteLine(options.VariableList.Count);
+                                StartProject(requiredProject, processes, options);
                             }
                         }
                     }
@@ -179,11 +184,11 @@ namespace Regi.Services
                     if (project.Framework == ProjectFramework.Dotnet)
                     {
                         _console.WriteLine(project.File.FullName);
-                        process = _dotnetService.TestProject(project);
+                        process = _dotnetService.TestProject(project, options);
                     }
                     else if (project.Framework == ProjectFramework.Node)
                     {
-                        process = _nodeService.TestProject(project);
+                        process = _nodeService.TestProject(project, options);
                     }
 
                     if (process != null)
@@ -213,11 +218,11 @@ namespace Regi.Services
 
                     if (project.Framework == ProjectFramework.Dotnet)
                     {
-                        process = _dotnetService.RestoreProject(project, false);
+                        process = _dotnetService.RestoreProject(project, options);
                     }
                     else if (project.Framework == ProjectFramework.Node)
                     {
-                        process = _nodeService.InstallProject(project, false);
+                        process = _nodeService.InstallProject(project, new CommandOptions { Verbose = true });
                     }
 
                     if (process != null)

@@ -23,7 +23,34 @@ namespace Regi.Extensions
         }
 
         private static readonly bool _isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
-        private static readonly TimeSpan _defaultTimeout = TimeSpan.FromSeconds(30);
+        private static readonly TimeSpan _defaultTimeout = TimeSpan.FromSeconds(10);
+
+        public static void KillAllOfType(this Process process)
+        {
+            process.KillAllOfType(_defaultTimeout);
+        }
+
+        public static void KillAllOfType(this Process process, TimeSpan timeout)
+        {
+            if (_isWindows)
+            {
+                RunProcessAndWaitForExit(
+                    "taskkill",
+                    $"/F /IM {AddExtension(process.ProcessName)}",
+                    timeout,
+                    out string stdout);
+            }
+            else
+            {
+                var children = new HashSet<int>();
+                GetAllChildIdsUnix(process.Id, children, timeout);
+                foreach (var childId in children)
+                {
+                    KillProcessUnix(childId, timeout);
+                }
+                KillProcessUnix(process.Id, timeout);
+            }
+        }
 
         public static void KillTree(this Process process)
         {
@@ -117,6 +144,16 @@ namespace Regi.Extensions
             }
 
             return process.ExitCode;
+        }
+
+        private static string AddExtension(string name, string extension = ".exe")
+        {
+            if (name.EndsWith(extension, StringComparison.InvariantCultureIgnoreCase))
+            {
+                return name;
+            }
+
+            return name + extension;
         }
     }
 }

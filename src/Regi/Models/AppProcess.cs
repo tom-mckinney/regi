@@ -43,7 +43,7 @@ namespace Regi.Models
         {
             if (Process != null && !Process.HasExited)
             {
-                Process.KillTree(TimeSpan.FromSeconds(2));
+                Process.KillAllOfType();
             }
         }
     }

@@ -12,5 +12,10 @@ namespace Regi.Models
 
         [Option(Description = "Project type")]
         public ProjectType? Type { get; set; }
+
+        [Option(CommandOptionType.NoValue, Description = "Print all output")]
+        public bool Verbose { get; set; }
+
+        public VariableList VariableList { get; set; }
     }
 }

@@ -13,9 +13,9 @@ namespace Regi.Services
 {
     public interface INodeService
     {
-        AppProcess StartProject(Project project, VariableList varList = null, bool verbose = false);
-        AppProcess TestProject(Project project, string pathPattern = null, VariableList varList = null, bool verbose = false);
-        AppProcess InstallProject(Project project, bool verbose = false);
+        AppProcess StartProject(Project project, CommandOptions options);
+        AppProcess TestProject(Project project, CommandOptions options);
+        AppProcess InstallProject(Project project, CommandOptions options);
     }
 
     public class NodeService : CLIBase, INodeService
@@ -35,7 +35,7 @@ namespace Regi.Services
             }
         }
 
-        public AppProcess InstallProject(Project project, bool verbose = false)
+        public AppProcess InstallProject(Project project, CommandOptions options)
         {
             _console.WriteEmphasizedLine($"Starting install for project {project.Name} ({project.File.DirectoryName})");
 
@@ -46,7 +46,7 @@ namespace Regi.Services
                     FileName = _npmPath,
                     Arguments = $"install",
                     WorkingDirectory = project.File.DirectoryName,
-                    RedirectStandardOutput = verbose,
+                    RedirectStandardOutput = options.Verbose,
                     RedirectStandardError = true
                 },
                 EnableRaisingEvents = true
@@ -56,7 +56,7 @@ namespace Regi.Services
 
             process.Exited += DefaultExited(output);
             process.ErrorDataReceived += DefaultOutputDataRecieved(project.Name);
-            if (verbose)
+            if (options.Verbose)
             {
                 process.OutputDataReceived += DefaultOutputDataRecieved(project.Name);
             }
@@ -64,7 +64,7 @@ namespace Regi.Services
             process.Start();
 
             process.BeginErrorReadLine();
-            if (verbose)
+            if (options.Verbose)
             {
                 process.BeginOutputReadLine();
             }
@@ -77,7 +77,7 @@ namespace Regi.Services
             throw new NotImplementedException();
         }
 
-        public AppProcess StartProject(Project project, VariableList varList = null, bool verbose = false)
+        public AppProcess StartProject(Project project, CommandOptions options)
         {
             Process process = new Process
             {
@@ -86,13 +86,13 @@ namespace Regi.Services
                     FileName = _npmPath,
                     Arguments = "start",
                     WorkingDirectory = project.File.DirectoryName,
-                    RedirectStandardOutput = verbose,
+                    RedirectStandardOutput = options.Verbose,
                     RedirectStandardError = true
                 },
                 EnableRaisingEvents = true
             };
 
-            process.StartInfo.CopyEnvironmentVariables(varList);
+            process.StartInfo.CopyEnvironmentVariables(options.VariableList);
             if (project.Port.HasValue)
             {
                 process.StartInfo.EnvironmentVariables.Add("PORT", project.Port.Value.ToString()); // Default NodeJS port variable
@@ -102,7 +102,7 @@ namespace Regi.Services
 
             process.Exited += DefaultExited(output);
             process.ErrorDataReceived += DefaultErrorDataReceived(project.Name, output);
-            if (verbose)
+            if (options.Verbose)
             {
                 process.OutputDataReceived += DefaultOutputDataRecieved(project.Name);
             }
@@ -110,7 +110,7 @@ namespace Regi.Services
             process.Start();
 
             process.BeginErrorReadLine();
-            if (verbose)
+            if (options.Verbose)
             {
                 process.BeginOutputReadLine();
             }
@@ -118,7 +118,7 @@ namespace Regi.Services
             return output;
         }
 
-        public AppProcess TestProject(Project project, string pathPattern = null, VariableList varList = null, bool verbose = false)
+        public AppProcess TestProject(Project project, CommandOptions options)
         {
             _console.WriteEmphasizedLine($"Starting tests for project {project.Name} ({project.File.DirectoryName})");
 
@@ -127,9 +127,9 @@ namespace Regi.Services
                 StartInfo = new ProcessStartInfo()
                 {
                     FileName = _npmPath,
-                    Arguments = $"test {pathPattern}",
+                    Arguments = $"test {options.SearchPattern}",
                     WorkingDirectory = project.File.DirectoryName,
-                    RedirectStandardOutput = verbose,
+                    RedirectStandardOutput = options.Verbose,
                     RedirectStandardError = true
                 },
                 EnableRaisingEvents = true
@@ -137,10 +137,10 @@ namespace Regi.Services
 
             AppProcess output = new AppProcess(process, AppTask.Test, AppStatus.Running);
 
-            process.StartInfo.CopyEnvironmentVariables(varList);
+            process.StartInfo.CopyEnvironmentVariables(options.VariableList);
 
             process.ErrorDataReceived += DefaultOutputDataRecieved(project.Name);
-            if (verbose)
+            if (options.Verbose)
             {
                 process.OutputDataReceived += DefaultOutputDataRecieved(project.Name);
             }
@@ -148,7 +148,7 @@ namespace Regi.Services
             process.Start();
 
             process.BeginErrorReadLine();
-            if (verbose)
+            if (options.Verbose)
             {
                 process.BeginOutputReadLine();
             }

@@ -17,13 +17,18 @@ namespace Regi.Models
 
             foreach (var project in projects)
             {
-                if (project.Port.HasValue)
-                {
-                    string underscoreName = project?.Name.ToUnderscoreCase();
+                AddProject(project);
+            }
+        }
 
-                    TryAdd($"{underscoreName}_PORT", project.Port.ToString());
-                    TryAdd($"{underscoreName}_URL", $"http://localhost:{project.Port}");
-                }
+        public void AddProject(Project project)
+        {
+            if (project.Port.HasValue)
+            {
+                string underscoreName = project?.Name.ToUnderscoreCase();
+
+                TryAdd($"{underscoreName}_PORT", project.Port.ToString());
+                TryAdd($"{underscoreName}_URL", $"http://localhost:{project.Port}");
             }
         }
     }

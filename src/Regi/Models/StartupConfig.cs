@@ -1,5 +1,7 @@
 ﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Regi.Models
 {
@@ -13,5 +15,13 @@ namespace Regi.Models
 
         [JsonProperty("services")]
         public List<Project> Services { get; set; }
+
+        public IList<Project> GetRequirements(Project project)
+        {
+            var requirements = from r in project.Requires
+                               select Apps.Concat(Services)
+                               .FirstOrDefault(p => p.Name.Contains(r, StringComparison.InvariantCultureIgnoreCase));
+            return requirements.ToList();
+        }
     }
 }

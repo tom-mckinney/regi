@@ -50,7 +50,7 @@ namespace Regi.Test.Services
         [Fact]
         public void RunProject_starts_and_returns_process()
         {
-            using (AppProcess app = _service.StartProject(_application, null, true))
+            using (AppProcess app = _service.StartProject(_application, TestOptions.Create()))
             {
                 Thread.Sleep(1000);
 
@@ -64,7 +64,7 @@ namespace Regi.Test.Services
         {
             _application.Port = 8080;
 
-            using (AppProcess app = _service.StartProject(_application, null, true))
+            using (AppProcess app = _service.StartProject(_application, TestOptions.Create()))
             {
                 Thread.Sleep(1000);
 
@@ -84,7 +84,7 @@ namespace Regi.Test.Services
                 { "foo", "bar" }
             };
 
-            using (AppProcess appProcess = _service.StartProject(_application, varList, true))
+            using (AppProcess appProcess = _service.StartProject(_application, TestOptions.Create(varList)))
             {
                 Thread.Sleep(500);
 
@@ -102,7 +102,7 @@ namespace Regi.Test.Services
         [InlineData("failing", AppStatus.Failure)]
         public void TestProject_will_return_test_for_path_pattern_and_expected_status(string pathPattern, AppStatus expectedStatus)
         {
-            using (AppProcess test = _service.TestProject(_application, pathPattern, null, true))
+            using (AppProcess test = _service.TestProject(_application, TestOptions.Create(null, pathPattern)))
             {
                 Assert.Equal(AppTask.Test, test.Task);
                 Assert.Equal(expectedStatus, test.Status);
@@ -112,7 +112,7 @@ namespace Regi.Test.Services
         [Fact]
         public void InstallProject_returns_process()
         {
-            using (AppProcess process = _service.InstallProject(_application, true))
+            using (AppProcess process = _service.InstallProject(_application, TestOptions.Create()))
             {
                 Assert.Equal(AppTask.Install, process.Task);
                 Assert.Equal(AppStatus.Success, process.Status);

@@ -11,9 +11,9 @@ namespace Regi.Services
 {
     public interface IDotnetService
     {
-        AppProcess RunProject(Project project, VariableList varList = null, bool verbose = false);
-        AppProcess TestProject(Project project, VariableList varList = null, bool verbose = false);
-        AppProcess RestoreProject(Project project, bool verbose = false);
+        AppProcess RunProject(Project project, CommandOptions options);
+        AppProcess TestProject(Project project, CommandOptions options);
+        AppProcess RestoreProject(Project project, CommandOptions options);
     }
 
     public class DotnetService : CLIBase, IDotnetService
@@ -33,7 +33,7 @@ namespace Regi.Services
             }
         }
 
-        public AppProcess RestoreProject(Project project, bool verbose = false)
+        public AppProcess RestoreProject(Project project, CommandOptions options)
         {
             Process process = new Process
             {
@@ -42,7 +42,7 @@ namespace Regi.Services
                     FileName = _dotnetPath,
                     Arguments = "restore",
                     WorkingDirectory = project.File.DirectoryName,
-                    RedirectStandardOutput = verbose,
+                    RedirectStandardOutput = options.Verbose,
                     RedirectStandardError = true
                 },
                 EnableRaisingEvents = true
@@ -52,7 +52,7 @@ namespace Regi.Services
 
             process.ErrorDataReceived += DefaultErrorDataReceived(project.Name, output);
             process.Exited += DefaultExited(output);
-            if (verbose)
+            if (options.Verbose)
             {
                 process.OutputDataReceived += DefaultOutputDataRecieved(project.Name);
             }
@@ -60,7 +60,7 @@ namespace Regi.Services
             process.Start();
 
             process.BeginErrorReadLine();
-            if (verbose)
+            if (options.Verbose)
             {
                 process.BeginOutputReadLine();
             }
@@ -70,7 +70,7 @@ namespace Regi.Services
             return output;
         }
 
-        public AppProcess RunProject(Project project, VariableList varList = null, bool verbose = false)
+        public AppProcess RunProject(Project project, CommandOptions options)
         {
             Process process = new Process
             {
@@ -79,7 +79,7 @@ namespace Regi.Services
                     FileName = _dotnetPath,
                     Arguments = "run",
                     WorkingDirectory = project.File.DirectoryName,
-                    RedirectStandardOutput = verbose,
+                    RedirectStandardOutput = options.Verbose,
                     RedirectStandardError = true
                 },
                 EnableRaisingEvents = true
@@ -90,7 +90,7 @@ namespace Regi.Services
             process.StartInfo.EnvironmentVariables.Add("END_TO_END_TESTING", true.ToString());
             process.StartInfo.EnvironmentVariables.Add("IN_MEMORY_DATABASE", true.ToString());
 
-            process.StartInfo.CopyEnvironmentVariables(varList);
+            process.StartInfo.CopyEnvironmentVariables(options.VariableList);
             if (project.Port.HasValue)
             {
                 process.StartInfo.EnvironmentVariables.Add("ASPNETCORE_URLS", $"http://*:{project.Port}"); // Default .NET Core URL variable
@@ -98,7 +98,7 @@ namespace Regi.Services
 
             process.ErrorDataReceived += DefaultErrorDataReceived(project.Name, output);
             process.Exited += DefaultExited(output);
-            if (verbose)
+            if (options.Verbose)
             {
                 process.OutputDataReceived += DefaultOutputDataRecieved(project.Name);
             }
@@ -106,7 +106,7 @@ namespace Regi.Services
             process.Start();
 
             process.BeginErrorReadLine();
-            if (verbose)
+            if (options.Verbose)
             {
                 process.BeginOutputReadLine();
             }
@@ -114,7 +114,7 @@ namespace Regi.Services
             return output;
         }
 
-        public AppProcess TestProject(Project project, VariableList varList = null, bool verbose = false)
+        public AppProcess TestProject(Project project, CommandOptions options)
         {
             _console.WriteEmphasizedLine($"Starting tests for project {project.Name} ({project.File.Name})");
 
@@ -130,7 +130,7 @@ namespace Regi.Services
                     FileName = _dotnetPath,
                     Arguments = "test",
                     WorkingDirectory = project.File.DirectoryName,
-                    RedirectStandardOutput = verbose,
+                    RedirectStandardOutput = options.Verbose,
                     RedirectStandardError = true
                 },
                 EnableRaisingEvents = true
@@ -138,10 +138,10 @@ namespace Regi.Services
 
             AppProcess output = new AppProcess(process, AppTask.Test, AppStatus.Running);
 
-            process.StartInfo.CopyEnvironmentVariables(varList);
+            process.StartInfo.CopyEnvironmentVariables(options.VariableList);
 
             process.ErrorDataReceived += DefaultErrorDataReceived(project.Name, output);
-            if (verbose)
+            if (options.Verbose)
             {
                 process.OutputDataReceived += DefaultOutputDataRecieved(project.Name);
             }
@@ -150,7 +150,7 @@ namespace Regi.Services
 
             process.BeginErrorReadLine();
 
-            if (verbose)
+            if (options.Verbose)
             {
                 process.BeginOutputReadLine();
             }
