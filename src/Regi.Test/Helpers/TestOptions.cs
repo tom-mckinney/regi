@@ -13,7 +13,8 @@ namespace Regi.Test.Helpers
             {
                 VariableList = varList,
                 SearchPattern = searchPattern,
-                Verbose = true
+                Verbose = true,
+                KillProcessesOnExit = false
             };
         }
     }

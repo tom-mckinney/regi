@@ -11,6 +11,7 @@ namespace Regi.Commands
         private readonly IRunnerService _runnerService;
 
         public InitalizeCommand(IRunnerService runnerService)
+            : base(null)
         {
             _runnerService = runnerService;
         }

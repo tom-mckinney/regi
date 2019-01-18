@@ -48,7 +48,10 @@ namespace Regi.Services
                 EnableRaisingEvents = true
             };
 
-            AppProcess output = new AppProcess(process, AppTask.Install, AppStatus.Running);
+            AppProcess output = new AppProcess(process, AppTask.Install, AppStatus.Running)
+            {
+                KillOnExit = options.KillProcessesOnExit
+            };
 
             process.ErrorDataReceived += DefaultErrorDataReceived(project.Name, output);
             process.Exited += DefaultExited(output);
@@ -85,7 +88,10 @@ namespace Regi.Services
                 EnableRaisingEvents = true
             };
 
-            AppProcess output = new AppProcess(process, AppTask.Start, AppStatus.Running, project.Port);
+            AppProcess output = new AppProcess(process, AppTask.Start, AppStatus.Running, project.Port)
+            {
+                KillOnExit = options.KillProcessesOnExit
+            };
 
             process.StartInfo.EnvironmentVariables.Add("END_TO_END_TESTING", true.ToString());
             process.StartInfo.EnvironmentVariables.Add("IN_MEMORY_DATABASE", true.ToString());
@@ -136,7 +142,10 @@ namespace Regi.Services
                 EnableRaisingEvents = true
             };
 
-            AppProcess output = new AppProcess(process, AppTask.Test, AppStatus.Running);
+            AppProcess output = new AppProcess(process, AppTask.Test, AppStatus.Running)
+            {
+                KillOnExit = options.KillProcessesOnExit
+            };
 
             process.StartInfo.CopyEnvironmentVariables(options.VariableList);
 

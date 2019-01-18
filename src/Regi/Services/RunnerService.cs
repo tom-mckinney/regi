@@ -14,8 +14,8 @@ namespace Regi.Services
     {
         StartupConfig GetStartupConfig();
         IList<Project> Start(CommandOptions options);
-        IList<AppProcess> Test(CommandOptions options);
-        IList<AppProcess> Install(CommandOptions options);
+        IList<Project> Test(CommandOptions options);
+        IList<Project> Install(CommandOptions options);
         OutputSummary List(CommandOptions options);
         void Initialize(CommandOptions options);
     }
@@ -101,7 +101,7 @@ namespace Regi.Services
             {
                 _parallelService.Queue(() =>
                 {
-                    StartProject(project, new List<AppProcess>(), options);
+                    StartProject(project, null, options);
                 });
             }
 
@@ -118,7 +118,7 @@ namespace Regi.Services
             return projects;
         }
 
-        private void StartProject(Project project, IList<AppProcess> processes, CommandOptions options)
+        private void StartProject(Project project, IList<Project> projects, CommandOptions options)
         {
             AppProcess process = null;
             if (project.Framework == ProjectFramework.Dotnet)
@@ -133,11 +133,14 @@ namespace Regi.Services
             if (process != null)
             {
                 project.Process = process;
-                processes.Add(process);
+                if (projects != null)
+                {
+                    projects.Add(project);
+                }
             }
         }
 
-        public IList<AppProcess> Test(CommandOptions options)
+        public IList<Project> Test(CommandOptions options)
         {
             StartupConfig config = GetStartupConfig();
 
@@ -174,43 +177,40 @@ namespace Regi.Services
                                 _console.WriteLine(requiredProject.Name);
                                 _console.WriteLine(requiredProject.Port);
                                 _console.WriteLine(options.VariableList.Count);
-                                StartProject(requiredProject, processes, options);
+                                StartProject(requiredProject, projects, options);
                             }
                         }
                     }
 
-                    AppProcess process = null;
-
                     if (project.Framework == ProjectFramework.Dotnet)
                     {
                         _console.WriteLine(project.File.FullName);
-                        process = _dotnetService.TestProject(project, options);
+                        project.Process = _dotnetService.TestProject(project, options);
                     }
                     else if (project.Framework == ProjectFramework.Node)
                     {
-                        process = _nodeService.TestProject(project, options);
+                        project.Process = _nodeService.TestProject(project, options);
                     }
 
-                    if (process != null)
+                    if (project.Process != null)
                     {
-                        processes.Add(process);
+                        processes.Add(project.Process);
                     }
                 });
             }
 
             _parallelService.RunInParallel();
 
-            return processes;
+            return projects;
         }
 
-        public IList<AppProcess> Install(CommandOptions options)
+        public IList<Project> Install(CommandOptions options)
         {
             StartupConfig config = GetStartupConfig();
 
-            IList<AppProcess> processes = new List<AppProcess>();
+            IList<Project> projects = config.Apps.Concat(config.Tests).FilterByOptions(options);
 
-            IList<Project> appsAndTests = config.Apps.Concat(config.Tests).ToList();
-            foreach (var project in appsAndTests.FilterByOptions(options))
+            foreach (var project in projects)
             {
                 _parallelService.Queue(() =>
                 {
@@ -227,23 +227,15 @@ namespace Regi.Services
 
                     if (process != null)
                     {
-                        processes.Add(process);
+                        project.Process = process;
                     }
 
                 });
             }
 
-            Console.CancelKeyPress += (o, e) =>
-            {
-                foreach (var process in processes)
-                {
-                    process.Dispose();
-                }
-            };
-
             _parallelService.RunInParallel();
 
-            return processes;
+            return projects;
         }
 
         public OutputSummary List(CommandOptions options)

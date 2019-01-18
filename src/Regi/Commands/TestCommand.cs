@@ -11,6 +11,7 @@ namespace Regi.Commands
         private readonly IConsole _console;
 
         public TestCommand(IRunnerService runnerService, IConsole console)
+            : base(console)
         {
             _runnerService = runnerService;
             _console = console;
@@ -18,9 +19,9 @@ namespace Regi.Commands
 
         public override int OnExecute()
         {
-            var unitTests = _runnerService.Test(Options);
+            Projects = _runnerService.Test(Options);
 
-            return unitTests.Count;
+            return Projects.Count;
         }
     }
 }

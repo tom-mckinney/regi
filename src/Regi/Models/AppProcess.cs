@@ -39,11 +39,13 @@ namespace Regi.Models
 
         public DateTimeOffset? EndTime { get; set; }
 
+        public bool KillOnExit { get; set; } = true;
+
         public void Dispose()
         {
-            if (Process != null && !Process.HasExited)
+            if (KillOnExit && Process != null)
             {
-                Process.KillAllOfType();
+                Process.KillTree();
             }
         }
     }

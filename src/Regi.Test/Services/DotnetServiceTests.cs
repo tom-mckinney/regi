@@ -21,15 +21,6 @@ namespace Regi.Test.Services
         private readonly Project _applicationError;
         private readonly Project _applicationLong;
 
-        private CommandOptions TestCommandOptions(VariableList varList = null)
-        {
-            return new CommandOptions
-            {
-                VariableList = varList ?? new VariableList(),
-                Verbose = true
-            };
-        }
-
         public DotnetServiceTests(ITestOutputHelper testOutput)
         {
             _console = new TestConsole(testOutput);
@@ -60,7 +51,7 @@ namespace Regi.Test.Services
         [Fact]
         public void TestProject_on_success_returns_status()
         {
-            AppProcess unitTest = _service.TestProject(_successfulTests, TestCommandOptions());
+            AppProcess unitTest = _service.TestProject(_successfulTests, TestOptions.Create());
 
             Assert.Equal(AppTask.Test, unitTest.Task);
             Assert.Equal(AppStatus.Success, unitTest.Status);
@@ -69,7 +60,7 @@ namespace Regi.Test.Services
         [Fact]
         public void TestProject_verbose_on_success_prints_all_output()
         {
-            AppProcess unitTest = _service.TestProject(_successfulTests, TestCommandOptions());
+            AppProcess unitTest = _service.TestProject(_successfulTests, TestOptions.Create());
 
             Assert.Equal(AppTask.Test, unitTest.Task);
             Assert.Equal(AppStatus.Success, unitTest.Status);
@@ -79,7 +70,7 @@ namespace Regi.Test.Services
         [Fact]
         public void TestProject_on_failure_prints_only_exception_info()
         {
-            AppProcess unitTest = _service.TestProject(_failedTests, TestCommandOptions());
+            AppProcess unitTest = _service.TestProject(_failedTests, TestOptions.Create());
 
             Assert.Equal(AppTask.Test, unitTest.Task);
             Assert.Equal(AppStatus.Failure, unitTest.Status);
@@ -89,7 +80,7 @@ namespace Regi.Test.Services
         [Fact]
         public void TestProject_verbose_on_failure_prints_all_output()
         {
-            AppProcess unitTest = _service.TestProject(_failedTests, TestCommandOptions());
+            AppProcess unitTest = _service.TestProject(_failedTests, TestOptions.Create());
 
             Assert.Equal(AppTask.Test, unitTest.Task);
             Assert.Equal(AppStatus.Failure, unitTest.Status);
@@ -99,7 +90,7 @@ namespace Regi.Test.Services
         [Fact]
         public void RunProject_changes_status_from_running_to_success_on_exit()
         {
-            AppProcess process = _service.RunProject(_application, TestCommandOptions());
+            AppProcess process = _service.RunProject(_application, TestOptions.Create());
 
             Assert.Equal(AppStatus.Running, process.Status);
 
@@ -111,7 +102,7 @@ namespace Regi.Test.Services
         [Fact]
         public void RunProject_returns_failure_status_on_thrown_exception()
         {
-            AppProcess process = _service.RunProject(_applicationError, TestCommandOptions());
+            AppProcess process = _service.RunProject(_applicationError, TestOptions.Create());
 
             process.Process.WaitForExit();
 
@@ -135,7 +126,7 @@ namespace Regi.Test.Services
         [Fact]
         public void RunProject_verbose_starts_and_prints_all_output()
         {
-            AppProcess process = _service.RunProject(_application, TestCommandOptions());
+            AppProcess process = _service.RunProject(_application, TestOptions.Create());
 
             process.Process.WaitForExit();
 
@@ -147,7 +138,7 @@ namespace Regi.Test.Services
         [Fact]
         public void RunProject_long_starts_and_prints_nothing()
         {
-            using (AppProcess appProcess = _service.RunProject(_applicationLong, TestCommandOptions()))
+            using (AppProcess appProcess = _service.RunProject(_applicationLong, TestOptions.Create()))
             {
                 Thread.Sleep(1000);
 
@@ -162,7 +153,7 @@ namespace Regi.Test.Services
         {
             _applicationLong.Port = 8080;
 
-            using (AppProcess appProcess = _service.RunProject(_applicationLong, TestCommandOptions()))
+            using (AppProcess appProcess = _service.RunProject(_applicationLong, TestOptions.Create()))
             {
                 Thread.Sleep(1000);
 
@@ -182,7 +173,7 @@ namespace Regi.Test.Services
                 { "foo", "bar" }
             };
 
-            using (AppProcess appProcess = _service.RunProject(_applicationLong, TestCommandOptions(varList)))
+            using (AppProcess appProcess = _service.RunProject(_applicationLong, TestOptions.Create(varList)))
             {
                 Thread.Sleep(500);
 
@@ -197,7 +188,7 @@ namespace Regi.Test.Services
         [Fact]
         public void RestoreProject_returns_process()
         {
-            using (AppProcess process = _service.RestoreProject(_application, TestCommandOptions()))
+            using (AppProcess process = _service.RestoreProject(_application, TestOptions.Create()))
             {
                 Assert.Equal(AppTask.Install, process.Task);
                 Assert.Equal(AppStatus.Success, process.Status);

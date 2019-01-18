@@ -12,6 +12,7 @@ namespace Regi.Commands
         private IRunnerService _runnerService;
 
         public ListCommand(IRunnerService runnerService)
+            : base(null)
         {
             _runnerService = runnerService;
         }

@@ -14,6 +14,7 @@ namespace Regi.Commands
         private readonly IConsole _console;
 
         public InstallCommand(IRunnerService runnerService, IConsole console)
+            : base(console)
         {
             _runnerService = runnerService;
             _console = console;
@@ -21,9 +22,9 @@ namespace Regi.Commands
 
         public override int OnExecute()
         {
-            var installations = _runnerService.Install(Options);
+            Projects = _runnerService.Install(Options);
 
-            return installations.Count;
+            return Projects.Count;
         }
     }
 }

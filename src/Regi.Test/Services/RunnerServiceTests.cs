@@ -91,7 +91,7 @@ namespace Regi.Test.Services
         }
 
         [Fact]
-        public void Start_returns_a_process_for_every_app_in_startup_config()
+        public void Start_returns_a_project_for_every_app_in_startup_config()
         {
             _dotnetServiceMock.Setup(m => m.RunProject(It.IsAny<Project>(), It.IsAny<CommandOptions>()))
                 .Returns<Project, CommandOptions>((p, o) => new AppProcess(new Process(), AppTask.Start, AppStatus.Success, p?.Port))
@@ -137,10 +137,10 @@ namespace Regi.Test.Services
         }
 
         [Fact]
-        public void Test_returns_a_process_for_every_test_in_startup_config()
+        public void Test_returns_a_project_for_every_test_in_startup_config()
         {
             _dotnetServiceMock.Setup(m => m.TestProject(It.IsAny<Project>(), It.IsAny<CommandOptions>()))
-                .Returns(new AppProcess(new Process(), AppTask.Test, AppStatus.Success))
+                .Returns<Project, CommandOptions>((p, o) => new AppProcess(new Process(), AppTask.Start, AppStatus.Success, p?.Port))
                 .Verifiable();
 
             DirectoryUtility.SetTargetDirectory(_startupConfigGood);
@@ -167,8 +167,8 @@ namespace Regi.Test.Services
             var processes = _runnerService.Test(new CommandOptions());
 
             Assert.Equal(totalTestCount + 1, processes.Count);
-            Assert.Single(processes, p => p.Task == AppTask.Start);
-            Assert.Equal(2, processes.Where(p => p.Task == AppTask.Test).Count());
+            Assert.Single(processes, p => p.Process.Task == AppTask.Start);
+            Assert.Equal(2, processes.Where(p => p.Process.Task == AppTask.Test).Count());
 
             _dotnetServiceMock.VerifyAll();
         }

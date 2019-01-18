@@ -17,5 +17,7 @@ namespace Regi.Models
         public bool Verbose { get; set; }
 
         public VariableList VariableList { get; set; }
+
+        public bool KillProcessesOnExit { get; set; } = true;
     }
 }

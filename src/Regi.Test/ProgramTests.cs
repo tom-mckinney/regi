@@ -16,7 +16,6 @@ namespace Regi.Test
         }
 
         [Theory]
-        [InlineData]
         [InlineData("start")]
         [InlineData("test")]
         [InlineData("install")]

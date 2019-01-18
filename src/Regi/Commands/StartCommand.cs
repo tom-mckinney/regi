@@ -18,6 +18,7 @@ namespace Regi.Commands
         private readonly Settings _options;
 
         public StartCommand(IRunnerService runnerService, IConsole console, IOptions<Settings> options)
+            : base(console)
         {
             _runnerService = runnerService;
             _console = console;
@@ -26,23 +27,19 @@ namespace Regi.Commands
 
         public override int OnExecute()
         {
-            var projects = _runnerService.Start(Options);
+            Projects = _runnerService.Start(Options);
 
-            // TODO: Make this wait configurable
             while (_options.RunIndefinitely)
             {
                 var key = Console.ReadKey(true);
                 if (key.Key == ConsoleKey.Enter)
                 {
-                    foreach (var p in projects)
-                    {
-                        p.Process.Dispose();
-                    }
+                    ShutdownProccesses();
                     break;
                 }
             }
 
-            return projects.Count;
+            return Projects.Count;
         }
     }
 }

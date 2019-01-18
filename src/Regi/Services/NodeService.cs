@@ -52,7 +52,10 @@ namespace Regi.Services
                 EnableRaisingEvents = true
             };
 
-            AppProcess output = new AppProcess(process, AppTask.Install, AppStatus.Running);
+            AppProcess output = new AppProcess(process, AppTask.Install, AppStatus.Running)
+            {
+                KillOnExit = options.KillProcessesOnExit
+            };
 
             process.Exited += DefaultExited(output);
             process.ErrorDataReceived += DefaultOutputDataRecieved(project.Name);
@@ -98,7 +101,10 @@ namespace Regi.Services
                 process.StartInfo.EnvironmentVariables.Add("PORT", project.Port.Value.ToString()); // Default NodeJS port variable
             }
 
-            AppProcess output = new AppProcess(process, AppTask.Start, AppStatus.Running, project.Port);
+            AppProcess output = new AppProcess(process, AppTask.Start, AppStatus.Running, project.Port)
+            {
+                KillOnExit = options.KillProcessesOnExit
+            };
 
             process.Exited += DefaultExited(output);
             process.ErrorDataReceived += DefaultErrorDataReceived(project.Name, output);
@@ -135,7 +141,10 @@ namespace Regi.Services
                 EnableRaisingEvents = true
             };
 
-            AppProcess output = new AppProcess(process, AppTask.Test, AppStatus.Running);
+            AppProcess output = new AppProcess(process, AppTask.Test, AppStatus.Running)
+            {
+                KillOnExit = options.KillProcessesOnExit
+            };
 
             process.StartInfo.CopyEnvironmentVariables(options.VariableList);
 
