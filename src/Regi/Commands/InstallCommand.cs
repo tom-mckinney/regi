@@ -8,6 +8,7 @@ using System.Text;
 
 namespace Regi.Commands
 {
+    [Command("install")]
     public class InstallCommand : CommandBase
     {
         private readonly IRunnerService _runnerService;

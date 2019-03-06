@@ -1,4 +1,5 @@
 ﻿using McMaster.Extensions.CommandLineUtils;
+using Regi.Constants;
 using Regi.Extensions;
 using Regi.Models;
 using System;
@@ -9,14 +10,11 @@ using System.Linq;
 
 namespace Regi.Services
 {
-    public interface IDotnetService
+    public interface IDotnetService : IFrameworkService
     {
-        AppProcess RunProject(Project project, CommandOptions options);
-        AppProcess TestProject(Project project, CommandOptions options);
-        AppProcess RestoreProject(Project project, CommandOptions options);
     }
 
-    public class DotnetService : CLIBase, IDotnetService
+    public class DotnetService : FrameworkService, IDotnetService
     {
         private readonly IConsole _console;
         private readonly string _dotnetPath;
@@ -33,14 +31,19 @@ namespace Regi.Services
             }
         }
 
-        public AppProcess RestoreProject(Project project, CommandOptions options)
+        protected override IDictionary<string, IList<string>> FrameworkDefaultOptions => new Dictionary<string, IList<string>>
+        {
+            { FrameworkCommands.Dotnet.Start, new List<string> { "--no-launch-profile" } }
+        };
+
+        public override AppProcess InstallProject(Project project, CommandOptions options)
         {
             Process process = new Process
             {
                 StartInfo = new ProcessStartInfo()
                 {
                     FileName = _dotnetPath,
-                    Arguments = "restore",
+                    Arguments = BuildCommand("restore", project, options),
                     WorkingDirectory = project.File.DirectoryName,
                     RedirectStandardOutput = options.Verbose,
                     RedirectStandardError = true
@@ -73,14 +76,26 @@ namespace Regi.Services
             return output;
         }
 
-        public AppProcess RunProject(Project project, CommandOptions options)
+        public override AppProcess StartProject(Project project, CommandOptions options)
         {
+            if (project.Port.HasValue)
+            {
+                if (project.Options.ContainsKey(FrameworkCommands.Dotnet.Start) && project.Options[FrameworkCommands.Dotnet.Start] != null)
+                {
+                    
+                }
+                else
+                {
+                    project.Options[FrameworkCommands.Dotnet.Start] = new List<string> { "--no-launch-profile" };
+                }
+            }
+
             Process process = new Process
             {
                 StartInfo = new ProcessStartInfo()
                 {
                     FileName = _dotnetPath,
-                    Arguments = "run",
+                    Arguments = BuildCommand(FrameworkCommands.Dotnet.Start, project, options),
                     WorkingDirectory = project.File.DirectoryName,
                     RedirectStandardOutput = options.Verbose,
                     RedirectStandardError = true
@@ -120,7 +135,7 @@ namespace Regi.Services
             return output;
         }
 
-        public AppProcess TestProject(Project project, CommandOptions options)
+        public override AppProcess TestProject(Project project, CommandOptions options)
         {
             _console.WriteEmphasizedLine($"Starting tests for project {project.Name} ({project.File.Name})");
 
@@ -134,7 +149,7 @@ namespace Regi.Services
                 StartInfo = new ProcessStartInfo()
                 {
                     FileName = _dotnetPath,
-                    Arguments = "test",
+                    Arguments = BuildCommand("test", project, options),
                     WorkingDirectory = project.File.DirectoryName,
                     RedirectStandardOutput = options.Verbose,
                     RedirectStandardError = true

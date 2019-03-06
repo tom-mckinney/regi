@@ -90,7 +90,7 @@ namespace Regi.Test.Services
         [Fact]
         public void RunProject_changes_status_from_running_to_success_on_exit()
         {
-            AppProcess process = _service.RunProject(_application, TestOptions.Create());
+            AppProcess process = _service.StartProject(_application, TestOptions.Create());
 
             Assert.Equal(AppStatus.Running, process.Status);
 
@@ -102,7 +102,7 @@ namespace Regi.Test.Services
         [Fact]
         public void RunProject_returns_failure_status_on_thrown_exception()
         {
-            AppProcess process = _service.RunProject(_applicationError, TestOptions.Create());
+            AppProcess process = _service.StartProject(_applicationError, TestOptions.Create());
 
             process.Process.WaitForExit();
 
@@ -114,7 +114,7 @@ namespace Regi.Test.Services
         {
             CommandOptions optionsWithoutVerbose = new CommandOptions { Verbose = false, KillProcessesOnExit = false };
 
-            AppProcess process = _service.RunProject(_application, optionsWithoutVerbose);
+            AppProcess process = _service.StartProject(_application, optionsWithoutVerbose);
 
             process.Process.WaitForExit();
 
@@ -126,7 +126,7 @@ namespace Regi.Test.Services
         [Fact]
         public void RunProject_verbose_starts_and_prints_all_output()
         {
-            AppProcess process = _service.RunProject(_application, TestOptions.Create());
+            AppProcess process = _service.StartProject(_application, TestOptions.Create());
 
             process.Process.WaitForExit();
 
@@ -138,7 +138,7 @@ namespace Regi.Test.Services
         [Fact]
         public void RunProject_long_starts_and_prints_nothing()
         {
-            using (AppProcess appProcess = _service.RunProject(_applicationLong, TestOptions.Create()))
+            using (AppProcess appProcess = _service.StartProject(_applicationLong, TestOptions.Create()))
             {
                 Thread.Sleep(1000);
 
@@ -153,7 +153,7 @@ namespace Regi.Test.Services
         {
             _applicationLong.Port = 8080;
 
-            using (AppProcess appProcess = _service.RunProject(_applicationLong, TestOptions.Create()))
+            using (AppProcess appProcess = _service.StartProject(_applicationLong, TestOptions.Create()))
             {
                 Thread.Sleep(1000);
 
@@ -173,7 +173,7 @@ namespace Regi.Test.Services
                 { "foo", "bar" }
             };
 
-            using (AppProcess appProcess = _service.RunProject(_applicationLong, TestOptions.Create(varList)))
+            using (AppProcess appProcess = _service.StartProject(_applicationLong, TestOptions.Create(varList)))
             {
                 Thread.Sleep(500);
 
@@ -188,7 +188,7 @@ namespace Regi.Test.Services
         [Fact]
         public void RestoreProject_returns_process()
         {
-            using (AppProcess process = _service.RestoreProject(_application, TestOptions.Create()))
+            using (AppProcess process = _service.InstallProject(_application, TestOptions.Create()))
             {
                 Assert.Equal(AppTask.Install, process.Task);
                 Assert.Equal(AppStatus.Success, process.Status);

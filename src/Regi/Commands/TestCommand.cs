@@ -4,7 +4,7 @@ using Regi.Services;
 
 namespace Regi.Commands
 {
-    [Command("unit")]
+    [Command("test")]
     public class TestCommand : CommandBase
     {
         private readonly IRunnerService _runnerService;

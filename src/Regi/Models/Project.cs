@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using Regi.Utilities;
+using System;
 using System.Collections.Generic;
 using System.IO;
 
@@ -23,9 +24,11 @@ namespace Regi.Models
 
         public ProjectFramework Framework { get; set; } = ProjectFramework.Dotnet;
 
-        public string Command { get; set; }
+        public IDictionary<string, string> Commands { get; set; } = new Dictionary<string, string>();
 
         public IList<string> Requires { get; set; } = new List<string>();
+
+        public IDictionary<string, IList<string>> Options { get; set; } = new Dictionary<string, IList<string>>();
 
         public int? Port { get; set; }
 
@@ -51,5 +54,13 @@ namespace Regi.Models
 
         [JsonIgnore]
         public AppProcess Process { get; set; }
+    }
+
+    public class ProjectOptions : Dictionary<string, IList<string>>
+    {
+        public void AddOptionGroup(string command, params string[] options)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.NetworkInformation;
 
 namespace Regi.Services
 {
@@ -123,7 +124,7 @@ namespace Regi.Services
             AppProcess process = null;
             if (project.Framework == ProjectFramework.Dotnet)
             {
-                process = _dotnetService.RunProject(project, options);
+                process = _dotnetService.StartProject(project, options);
             }
             else if (project.Framework == ProjectFramework.Node)
             {
@@ -164,6 +165,8 @@ namespace Regi.Services
                 {
                     if (project.Requires.Any())
                     {
+                        IList<int> requiredPorts = new List<int>();
+
                         foreach (var r in project.Requires)
                         {
                             Project requiredProject = config.Apps
@@ -177,7 +180,27 @@ namespace Regi.Services
                                 _console.WriteLine(requiredProject.Name);
                                 _console.WriteLine(requiredProject.Port);
                                 _console.WriteLine(options.VariableList.Count);
+
+                                if (project.Port.HasValue)
+                                    requiredPorts.Add(project.Port.Value);
+
                                 StartProject(requiredProject, projects, options);
+                            }
+                        }
+
+                        IPGlobalProperties ipGlobalProperties = IPGlobalProperties.GetIPGlobalProperties();
+                        var listeningConnections = ipGlobalProperties.GetActiveTcpListeners();
+
+                        _console.WriteLine(listeningConnections);
+
+                        while (requiredPorts.Count > 0)
+                        {
+                            foreach (var connection in listeningConnections)
+                            {
+                                if (requiredPorts.Contains(connection.Port))
+                                {
+                                    requiredPorts.Remove(connection.Port);
+                                }
                             }
                         }
                     }
@@ -218,7 +241,7 @@ namespace Regi.Services
 
                     if (project.Framework == ProjectFramework.Dotnet)
                     {
-                        process = _dotnetService.RestoreProject(project, options);
+                        process = _dotnetService.InstallProject(project, options);
                     }
                     else if (project.Framework == ProjectFramework.Node)
                     {
@@ -269,7 +292,7 @@ namespace Regi.Services
                         if (options.Verbose)
                         {
                             WritePropertyIfSpecified("Framework", app.Framework);
-                            WritePropertyIfSpecified("Command", app.Command);
+                            WritePropertyIfSpecified("Command", app.Commands);
                             WritePropertyIfSpecified("Path", app.Path);
                             WritePropertyIfSpecified("Port", app.Port);
 

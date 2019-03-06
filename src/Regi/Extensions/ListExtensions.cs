@@ -15,6 +15,20 @@ namespace Regi.Extensions
                     .Where(p => p.Name.Contains(options.Name, StringComparison.CurrentCultureIgnoreCase));
             }
 
+            if (options.Exclude != null && options.Exclude.Any())
+            {
+                projects = projects
+                    .Where(p =>
+                    {
+                        foreach (var exclusion in options.Exclude)
+                        {
+                            if (p.Name.Contains(exclusion, StringComparison.CurrentCultureIgnoreCase))
+                                return false;
+                        }
+
+                        return true;
+                    });
+            }
 
             if (options.Type.HasValue)
             {

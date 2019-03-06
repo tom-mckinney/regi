@@ -11,11 +11,11 @@ using System;
 
 namespace Regi
 {
-    [Subcommand("start", typeof(StartCommand))]
-    [Subcommand("test", typeof(TestCommand))]
-    [Subcommand("install", typeof(InstallCommand))]
-    [Subcommand("init", typeof(InitalizeCommand))]
-    [Subcommand("list", typeof(ListCommand))]
+    [Subcommand(typeof(StartCommand))]
+    [Subcommand(typeof(TestCommand))]
+    [Subcommand(typeof(InstallCommand))]
+    [Subcommand(typeof(InitalizeCommand))]
+    [Subcommand(typeof(ListCommand))]
     public class Program
     {
         public static int Main(string[] args) => MainWithConsole(PhysicalConsole.Singleton, args);

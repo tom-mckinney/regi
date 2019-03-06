@@ -93,7 +93,7 @@ namespace Regi.Test.Services
         [Fact]
         public void Start_returns_a_project_for_every_app_in_startup_config()
         {
-            _dotnetServiceMock.Setup(m => m.RunProject(It.IsAny<Project>(), It.IsAny<CommandOptions>()))
+            _dotnetServiceMock.Setup(m => m.StartProject(It.IsAny<Project>(), It.IsAny<CommandOptions>()))
                 .Returns<Project, CommandOptions>((p, o) => new AppProcess(new Process(), AppTask.Start, AppStatus.Success, p?.Port))
                 .Verifiable();
             _nodeServiceMock.Setup(m => m.StartProject(It.IsAny<Project>(), It.IsAny<CommandOptions>()))
@@ -107,14 +107,14 @@ namespace Regi.Test.Services
             Assert.Equal(totalAppCount, processes.Count);
             Assert.Single(processes, p => p.Port == 9080);
 
-            _dotnetServiceMock.Verify(m => m.RunProject(It.IsAny<Project>(), It.IsAny<CommandOptions>()), Times.Exactly(dotnetAppCount));
+            _dotnetServiceMock.Verify(m => m.StartProject(It.IsAny<Project>(), It.IsAny<CommandOptions>()), Times.Exactly(dotnetAppCount));
             _nodeServiceMock.Verify(m => m.StartProject(It.IsAny<Project>(), It.IsAny<CommandOptions>()), Times.Exactly(nodeAppCount));
         }
 
         [Fact]
         public void Start_sets_port_and_url_variables_for_every_app()
         {
-            _dotnetServiceMock.Setup(m => m.RunProject(It.IsAny<Project>(), It.IsAny<CommandOptions>()))
+            _dotnetServiceMock.Setup(m => m.StartProject(It.IsAny<Project>(), It.IsAny<CommandOptions>()))
                 .Returns<Project, CommandOptions>((p, o) => new AppProcess(new Process(), AppTask.Start, AppStatus.Success, p?.Port))
                 .Verifiable();
             _nodeServiceMock.Setup(m => m.StartProject(It.IsAny<Project>(), It.IsAny<CommandOptions>()))
@@ -129,7 +129,7 @@ namespace Regi.Test.Services
             {
                 if (p.Port.HasValue)
                 {
-                    _dotnetServiceMock.Verify(m => m.RunProject(It.IsAny<Project>(),
+                    _dotnetServiceMock.Verify(m => m.StartProject(It.IsAny<Project>(),
                         It.Is<CommandOptions>(o => o.VariableList.ContainsKey($"{p.Name}_PORT".ToUnderscoreCase()) &&
                         o.VariableList.ContainsKey($"{p.Name}_URL".ToUnderscoreCase()))));
                 }
@@ -158,7 +158,7 @@ namespace Regi.Test.Services
             _dotnetServiceMock.Setup(m => m.TestProject(It.IsAny<Project>(), It.IsAny<CommandOptions>()))
                 .Returns(new AppProcess(new Process(), AppTask.Test, AppStatus.Success))
                 .Verifiable();
-            _dotnetServiceMock.Setup(m => m.RunProject(It.IsAny<Project>(), It.IsAny<CommandOptions>()))
+            _dotnetServiceMock.Setup(m => m.StartProject(It.IsAny<Project>(), It.IsAny<CommandOptions>()))
                 .Returns(new AppProcess(new Process(), AppTask.Start, AppStatus.Success))
                 .Verifiable();
 
@@ -194,7 +194,7 @@ namespace Regi.Test.Services
         [Fact]
         public void Install_returns_a_process_for_every_app_and_test_project()
         {
-            _dotnetServiceMock.Setup(m => m.RestoreProject(It.IsAny<Project>(), It.IsAny<CommandOptions>()))
+            _dotnetServiceMock.Setup(m => m.InstallProject(It.IsAny<Project>(), It.IsAny<CommandOptions>()))
                 .Returns(new AppProcess(new Process(), AppTask.Install, AppStatus.Success))
                 .Verifiable();
             _nodeServiceMock.Setup(m => m.InstallProject(It.IsAny<Project>(), It.IsAny<CommandOptions>()))

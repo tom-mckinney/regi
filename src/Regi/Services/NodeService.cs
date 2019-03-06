@@ -11,14 +11,11 @@ using System.Text;
 
 namespace Regi.Services
 {
-    public interface INodeService
+    public interface INodeService : IFrameworkService
     {
-        AppProcess StartProject(Project project, CommandOptions options);
-        AppProcess TestProject(Project project, CommandOptions options);
-        AppProcess InstallProject(Project project, CommandOptions options);
     }
 
-    public class NodeService : CLIBase, INodeService
+    public class NodeService : FrameworkService, INodeService
     {
         private readonly IConsole _console;
         private readonly string _npmPath;
@@ -35,7 +32,7 @@ namespace Regi.Services
             }
         }
 
-        public AppProcess InstallProject(Project project, CommandOptions options)
+        public override AppProcess InstallProject(Project project, CommandOptions options)
         {
             _console.WriteEmphasizedLine($"Starting install for project {project.Name} ({project.File.DirectoryName})");
 
@@ -44,7 +41,7 @@ namespace Regi.Services
                 StartInfo = new ProcessStartInfo()
                 {
                     FileName = _npmPath,
-                    Arguments = $"install",
+                    Arguments = BuildCommand("install", project, options),
                     WorkingDirectory = project.File.DirectoryName,
                     RedirectStandardOutput = options.Verbose,
                     RedirectStandardError = true
@@ -80,14 +77,14 @@ namespace Regi.Services
             throw new NotImplementedException();
         }
 
-        public AppProcess StartProject(Project project, CommandOptions options)
+        public override AppProcess StartProject(Project project, CommandOptions options)
         {
             Process process = new Process
             {
                 StartInfo = new ProcessStartInfo()
                 {
                     FileName = _npmPath,
-                    Arguments = "start",
+                    Arguments = BuildCommand("start", project, options),
                     WorkingDirectory = project.File.DirectoryName,
                     RedirectStandardOutput = options.Verbose,
                     RedirectStandardError = true
@@ -124,7 +121,7 @@ namespace Regi.Services
             return output;
         }
 
-        public AppProcess TestProject(Project project, CommandOptions options)
+        public override AppProcess TestProject(Project project, CommandOptions options)
         {
             _console.WriteEmphasizedLine($"Starting tests for project {project.Name} ({project.File.DirectoryName})");
 
@@ -133,7 +130,7 @@ namespace Regi.Services
                 StartInfo = new ProcessStartInfo()
                 {
                     FileName = _npmPath,
-                    Arguments = $"test {options.SearchPattern}",
+                    Arguments = BuildCommand("test", project, options),
                     WorkingDirectory = project.File.DirectoryName,
                     RedirectStandardOutput = options.Verbose,
                     RedirectStandardError = true
@@ -170,6 +167,11 @@ namespace Regi.Services
             _console.WriteEmphasizedLine($"Finished tests for project {project.Name} ({project.File.DirectoryName})");
 
             return output;
+        }
+
+        protected override string FormatAdditionalArguments(string args)
+        {
+            return $"-- {args}";
         }
     }
 }

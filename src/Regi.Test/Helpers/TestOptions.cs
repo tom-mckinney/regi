@@ -12,7 +12,7 @@ namespace Regi.Test.Helpers
             return new CommandOptions
             {
                 VariableList = varList,
-                SearchPattern = searchPattern,
+                Arguments = searchPattern,
                 Verbose = true,
                 KillProcessesOnExit = false
             };
