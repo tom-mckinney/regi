@@ -23,6 +23,8 @@ namespace Regi.Models
 
         public ProjectFramework Framework { get; set; } = ProjectFramework.Dotnet;
 
+        public string Command { get; set; }
+
         public IList<string> Requires { get; set; } = new List<string>();
 
         public int? Port { get; set; }

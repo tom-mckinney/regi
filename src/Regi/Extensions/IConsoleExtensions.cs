@@ -24,5 +24,20 @@ namespace Regi.Extensions
 
             console.ResetColor();
         }
+
+        public static void WriteIndentedLine(this IConsole console, string input, int indentCount, ConsoleColor? color = null)
+        {
+            if (color.HasValue)
+            {
+                console.ForegroundColor = color.Value;
+            }
+
+            console.WriteLine(new string(' ', indentCount * 2) + input);
+
+            if (color.HasValue)
+            {
+                console.ResetColor();
+            }
+        }
     }
 }

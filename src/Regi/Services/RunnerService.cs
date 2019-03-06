@@ -238,6 +238,11 @@ namespace Regi.Services
             return projects;
         }
 
+        public void Initialize(CommandOptions options)
+        {
+            _fileService.CreateConfigFile();
+        }
+
         public OutputSummary List(CommandOptions options)
         {
             StartupConfig config = GetStartupConfig();
@@ -245,33 +250,47 @@ namespace Regi.Services
             OutputSummary output = new OutputSummary();
 
             var apps = config.Apps.FilterByOptions(options);
-            if (apps.Any())
-            {
-                _console.WriteEmphasizedLine("Apps:");
-                foreach (var app in apps)
-                {
-                    output.Apps.Add(app);
-                    _console.WriteLine("  " + app.Name);
-                }
-            }
-
             var tests = config.Tests.FilterByOptions(options);
-            if (tests.Any())
+
+            PrintAppGroupDetails(apps, output.Apps, "Apps");
+            PrintAppGroupDetails(tests, output.Tests, "Tests");
+
+            void PrintAppGroupDetails(IList<Project> inputApps, IList<Project> outputApps, string groupName)
             {
-                _console.WriteEmphasizedLine("Tests:");
-                foreach (var app in tests)
+                if (inputApps != null && inputApps.Any())
                 {
-                    output.Tests.Add(app);
-                    _console.WriteLine("  " + app.Name);
+                    _console.WriteEmphasizedLine($"{groupName}:");
+                    foreach (var app in inputApps)
+                    {
+                        outputApps.Add(app);
+
+                        _console.WriteLine("  " + app.Name);
+
+                        if (options.Verbose)
+                        {
+                            WritePropertyIfSpecified("Framework", app.Framework);
+                            WritePropertyIfSpecified("Command", app.Command);
+                            WritePropertyIfSpecified("Path", app.Path);
+                            WritePropertyIfSpecified("Port", app.Port);
+
+                            if (app.Requires != null && app.Requires.Count > 0)
+                            {
+                                WritePropertyIfSpecified("Requires", string.Join(", ", app.Requires));
+                            }
+                        }
+                    }
+                }
+
+                void WritePropertyIfSpecified(string propertyName, object propertyValue)
+                {
+                    if (propertyValue == null || propertyValue is string propertyValueString && string.IsNullOrWhiteSpace(propertyValueString))
+                        return;
+
+                    _console.WriteIndentedLine($"{propertyName}: {propertyValue}", 2, ConsoleColor.DarkGreen);
                 }
             }
 
             return output;
-        }
-
-        public void Initialize(CommandOptions options)
-        {
-            _fileService.CreateConfigFile();
         }
     }
 }

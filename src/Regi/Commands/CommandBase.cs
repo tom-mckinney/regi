@@ -36,12 +36,13 @@ namespace Regi.Commands
 
         public CommandOptions Options
         {
-            get => new CommandOptions
-            {
-                Name = this.Name,
-                SearchPattern = this.SearchPattern,
-                Verbose = this.Verbose
-            };
+            get => this;
+            //get => new CommandOptions
+            //{
+            //    Name = this.Name,
+            //    SearchPattern = this.SearchPattern,
+            //    Verbose = this.Verbose
+            //};
         }
 
         public abstract int OnExecute();
