@@ -45,7 +45,7 @@ namespace Regi.Models
         {
             if (KillOnExit && Process != null)
             {
-                Process.KillTree();
+                Process.KillAllOfType();
             }
         }
     }

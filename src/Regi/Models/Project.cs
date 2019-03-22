@@ -28,7 +28,8 @@ namespace Regi.Models
 
         public IList<string> Requires { get; set; } = new List<string>();
 
-        public IDictionary<string, IList<string>> Options { get; set; } = new Dictionary<string, IList<string>>();
+        //public IDictionary<string, IList<string>> Options { get; set; } = new Dictionary<string, IList<string>>();
+        public ProjectOptions Options { get; set; } = new ProjectOptions();
 
         public int? Port { get; set; }
 
@@ -54,13 +55,5 @@ namespace Regi.Models
 
         [JsonIgnore]
         public AppProcess Process { get; set; }
-    }
-
-    public class ProjectOptions : Dictionary<string, IList<string>>
-    {
-        public void AddOptionGroup(string command, params string[] options)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

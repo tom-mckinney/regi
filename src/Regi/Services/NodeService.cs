@@ -1,4 +1,5 @@
 ﻿using McMaster.Extensions.CommandLineUtils;
+using Regi.Constants;
 using Regi.Extensions;
 using Regi.Models;
 using Regi.Utilities;
@@ -32,22 +33,12 @@ namespace Regi.Services
             }
         }
 
+        protected override ProjectOptions FrameworkDefaultOptions => new ProjectOptions();
+
         public override AppProcess InstallProject(Project project, CommandOptions options)
         {
             _console.WriteEmphasizedLine($"Starting install for project {project.Name} ({project.File.DirectoryName})");
-
-            Process process = new Process
-            {
-                StartInfo = new ProcessStartInfo()
-                {
-                    FileName = _npmPath,
-                    Arguments = BuildCommand("install", project, options),
-                    WorkingDirectory = project.File.DirectoryName,
-                    RedirectStandardOutput = options.Verbose,
-                    RedirectStandardError = true
-                },
-                EnableRaisingEvents = true
-            };
+            Process process = DefaultProcess(_npmPath, FrameworkCommands.Node.Install, project, options);
 
             AppProcess output = new AppProcess(process, AppTask.Install, AppStatus.Running)
             {
@@ -77,20 +68,11 @@ namespace Regi.Services
             throw new NotImplementedException();
         }
 
+        
+
         public override AppProcess StartProject(Project project, CommandOptions options)
         {
-            Process process = new Process
-            {
-                StartInfo = new ProcessStartInfo()
-                {
-                    FileName = _npmPath,
-                    Arguments = BuildCommand("start", project, options),
-                    WorkingDirectory = project.File.DirectoryName,
-                    RedirectStandardOutput = options.Verbose,
-                    RedirectStandardError = true
-                },
-                EnableRaisingEvents = true
-            };
+            Process process = DefaultProcess(_npmPath, FrameworkCommands.Node.Start, project, options);
 
             process.StartInfo.CopyEnvironmentVariables(options.VariableList);
             if (project.Port.HasValue)
@@ -125,18 +107,7 @@ namespace Regi.Services
         {
             _console.WriteEmphasizedLine($"Starting tests for project {project.Name} ({project.File.DirectoryName})");
 
-            Process process = new Process
-            {
-                StartInfo = new ProcessStartInfo()
-                {
-                    FileName = _npmPath,
-                    Arguments = BuildCommand("test", project, options),
-                    WorkingDirectory = project.File.DirectoryName,
-                    RedirectStandardOutput = options.Verbose,
-                    RedirectStandardError = true
-                },
-                EnableRaisingEvents = true
-            };
+            Process process = DefaultProcess(_npmPath, FrameworkCommands.Node.Test, project, options);
 
             AppProcess output = new AppProcess(process, AppTask.Test, AppStatus.Running)
             {

@@ -1,0 +1,30 @@
+{
+  "apps": [
+    {
+      "name": "Frontend",
+      "path": "./SampleNodeApp/package.json",
+      "framework": "node",
+      "port": 9080
+    },
+    {
+      "name": "Backend",
+      "path": "./SampleAppLong/SampleAppLong.csproj",
+      "framework": "dotnet",
+      "port": 5000
+    }
+  ],
+  "tests": [
+    {
+      "name": "SampleSuccessfulTests",
+      "path": "./SampleSuccessfulTests/SampleSuccessfulTests.csproj",
+      "framework": "dotnet",
+      "type": "unit"
+    },
+    {
+      "name": "NodeApp",
+      "path": "./SampleNodeApp/package.json",
+      "framework": "node"
+    }
+  ],
+  "services": []
+}

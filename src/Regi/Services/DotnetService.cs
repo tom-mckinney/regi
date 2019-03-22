@@ -31,7 +31,7 @@ namespace Regi.Services
             }
         }
 
-        protected override IDictionary<string, IList<string>> FrameworkDefaultOptions => new Dictionary<string, IList<string>>
+        protected override ProjectOptions FrameworkDefaultOptions => new ProjectOptions
         {
             { FrameworkCommands.Dotnet.Start, new List<string> { "--no-launch-profile" } }
         };

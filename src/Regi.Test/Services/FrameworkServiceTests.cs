@@ -10,6 +10,36 @@ using Xunit.Abstractions;
 
 namespace Regi.Test.Services
 {
+    internal class WumboService : FrameworkService
+    {
+        public WumboService(IConsole console) : base(console) {}
+
+        protected override ProjectOptions FrameworkDefaultOptions => new ProjectOptions
+        {
+            { "super-wumbo", new List<string> { "--do-the-thing" } }
+        };
+
+        protected override string FormatAdditionalArguments(string args)
+        {
+            return $"***{args}***";
+        }
+
+        public override AppProcess InstallProject(Project project, CommandOptions options)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override AppProcess StartProject(Project project, CommandOptions options)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override AppProcess TestProject(Project project, CommandOptions options)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
     public class FrameworkServiceTests
     {
         private readonly IConsole _console;
@@ -22,7 +52,7 @@ namespace Regi.Test.Services
         [Fact]
         public void BuildCommand_returns_default_command_by_default()
         {
-            var service = new WidgetService(_console);
+            var service = new WumboService(_console);
 
             Assert.Equal("foo", service.BuildCommand("foo", null, null));
         }
@@ -30,7 +60,7 @@ namespace Regi.Test.Services
         [Fact]
         public void BuildCommand_returns_command_if_project_overrides_default_command()
         {
-            var service = new WidgetService(_console);
+            var service = new WumboService(_console);
 
             var project = new Project
             {
@@ -43,11 +73,11 @@ namespace Regi.Test.Services
         [Fact]
         public void BuildCommand_joins_all_options_if_specified_with_wildcards()
         {
-            var service = new WidgetService(_console);
+            var service = new WumboService(_console);
 
             var project = new Project
             {
-                Options = new Dictionary<string, IList<string>>
+                Options = new ProjectOptions
                 {
                     { "*", new List<string> { "-v", "--runtime ubuntu.18.04-x64" } }
                 }
@@ -59,11 +89,11 @@ namespace Regi.Test.Services
         [Fact]
         public void BuildCommand_joins_any_options_where_key_matches_the_command()
         {
-            var service = new WidgetService(_console);
+            var service = new WumboService(_console);
 
             var project = new Project
             {
-                Options = new Dictionary<string, IList<string>>
+                Options = new ProjectOptions
                 {
                     { "*", new List<string> { "--wumbo" } },
                     { "foo", new List<string> { "--t bar" } },
@@ -75,9 +105,17 @@ namespace Regi.Test.Services
         }
 
         [Fact]
+        public void BuildCommand_applys_any_framework_default_options_for_command()
+        {
+            var service = new WumboService(_console);
+
+            Assert.Equal("super-wumbo --do-the-thing", service.BuildCommand("super-wumbo", null, null));
+        }
+
+        [Fact]
         public void BuildCommand_formats_additional_arguments_custom_format_if_overwritten()
         {
-            var service = new WidgetService(_console);
+            var service = new WumboService(_console);
 
             var options = new CommandOptions
             {
@@ -85,33 +123,6 @@ namespace Regi.Test.Services
             };
 
             Assert.Equal("foo ***very good wumbo***", service.BuildCommand("foo", null, options));
-        }
-
-        class WidgetService : FrameworkService
-        {
-            public WidgetService(IConsole console) : base(console)
-            {
-            }
-
-            protected override string FormatAdditionalArguments(string args)
-            {
-                return $"***{args}***";
-            }
-
-            public override AppProcess InstallProject(Project project, CommandOptions options)
-            {
-                throw new NotImplementedException();
-            }
-
-            public override AppProcess StartProject(Project project, CommandOptions options)
-            {
-                throw new NotImplementedException();
-            }
-
-            public override AppProcess TestProject(Project project, CommandOptions options)
-            {
-                throw new NotImplementedException();
-            }
         }
     }
 }

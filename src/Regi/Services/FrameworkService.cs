@@ -4,6 +4,7 @@ using Regi.Models;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Text;
 
 namespace Regi.Services
@@ -27,6 +28,22 @@ namespace Regi.Services
         public abstract AppProcess InstallProject(Project project, CommandOptions options);
         public abstract AppProcess StartProject(Project project, CommandOptions options);
         public abstract AppProcess TestProject(Project project, CommandOptions options);
+
+        public virtual Process DefaultProcess(string exePath, string command, Project project, CommandOptions options)
+        {
+            return new Process
+            {
+                StartInfo = new ProcessStartInfo()
+                {
+                    FileName = exePath,
+                    Arguments = BuildCommand(command, project, options),
+                    WorkingDirectory = project.File.DirectoryName,
+                    RedirectStandardOutput = options.Verbose,
+                    RedirectStandardError = true
+                },
+                EnableRaisingEvents = true
+            };
+        }
 
         public virtual DataReceivedEventHandler DefaultOutputDataRecieved(string name)
         {
@@ -84,6 +101,8 @@ namespace Regi.Services
                 }
             }
 
+            ApplyFrameworkDefaults(builder, command, project, options);
+
             if (!string.IsNullOrWhiteSpace(options?.Arguments))
             {
                 builder.Append(' ').Append(FormatAdditionalArguments(options.Arguments));
@@ -92,16 +111,22 @@ namespace Regi.Services
             return builder.ToString();
         }
 
+        protected abstract ProjectOptions FrameworkDefaultOptions { get; }
+
+        protected virtual void ApplyFrameworkDefaults(StringBuilder builder, string command, Project project, CommandOptions options)
+        {
+            if (FrameworkDefaultOptions != null && FrameworkDefaultOptions.Any())
+            {
+                if (FrameworkDefaultOptions.TryGetValue(command, out IList<string> defaultOptions))
+                {
+                    builder.Append(' ').AppendJoin(' ', defaultOptions);
+                }
+            }
+        }
+
         protected virtual string FormatAdditionalArguments(string args)
         {
             return args;
-        }
-
-        protected abstract IDictionary<string, IList<string>> FrameworkDefaultOptions { get; }
-
-        protected virtual void ApplyFrameworkDefaults(Project project)
-        {
-
         }
     }
 }
