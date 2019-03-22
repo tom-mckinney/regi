@@ -50,7 +50,7 @@ namespace Regi.Services
                 throw new DirectoryNotFoundException($"Could not find directory: {directory.FullName}");
             }
 
-            FileInfo startupFile = directory.GetFiles("startup.json").FirstOrDefault();
+            FileInfo startupFile = directory.GetOneOfFiles("regi.json", "startup.json");
 
             if (startupFile == null || !startupFile.Exists)
             {
@@ -78,7 +78,7 @@ namespace Regi.Services
         {
             StartupConfig config = GetStartupConfig();
 
-            IList<Project> projects = config.Apps.FilterByOptions(options); //new List<AppProcess>();
+            IList<Project> projects = config.Apps.FilterByOptions(options);
 
             foreach (var project in projects)
             {
