@@ -1,4 +1,5 @@
 ﻿using McMaster.Extensions.CommandLineUtils;
+using Regi.Constants;
 using Regi.Extensions;
 using Regi.Models;
 using System;
@@ -29,9 +30,29 @@ namespace Regi.Services
         public abstract AppProcess StartProject(Project project, CommandOptions options);
         public abstract AppProcess TestProject(Project project, CommandOptions options);
 
-        public virtual Process DefaultProcess(string exePath, string command, Project project, CommandOptions options)
+        protected abstract void SetEnvironmentVariables(Process process, Project project);
+
+        protected abstract ProjectOptions FrameworkDefaultOptions { get; }
+
+        protected virtual void ApplyFrameworkDefaultOptions(StringBuilder builder, string command, Project project, CommandOptions options)
         {
-            return new Process
+            if (FrameworkDefaultOptions != null && FrameworkDefaultOptions.Any())
+            {
+                if (FrameworkDefaultOptions.TryGetValue(command, out IList<string> defaultOptions))
+                {
+                    builder.Append(' ').AppendJoin(' ', defaultOptions);
+                }
+            }
+        }
+
+        protected virtual string FormatAdditionalArguments(string args)
+        {
+            return args;
+        }
+
+        public virtual AppProcess CreateProcess(string exePath, string command, Project project, CommandOptions options)
+        {
+            Process process = new Process
             {
                 StartInfo = new ProcessStartInfo()
                 {
@@ -43,39 +64,25 @@ namespace Regi.Services
                 },
                 EnableRaisingEvents = true
             };
-        }
 
-        public virtual DataReceivedEventHandler DefaultOutputDataRecieved(string name)
-        {
-            return new DataReceivedEventHandler((o, e) =>
+            AppProcess output = new AppProcess(process, FrameworkCommands.GetAppTask(command), AppStatus.Running, project.Port)
             {
-                _console.WriteLine(name + ": " + e.Data);
-            });
-        }
+                KillOnExit = options.KillProcessesOnExit,
+                Verbose = options.Verbose
+            };
 
-        public virtual DataReceivedEventHandler DefaultErrorDataReceived(string name, AppProcess output)
-        {
-            return new DataReceivedEventHandler((o, e) =>
+            process.StartInfo.CopyEnvironmentVariables(options.VariableList);
+            SetEnvironmentVariables(process, project);
+
+            process.ErrorDataReceived += HandleErrorDataReceived(project.Name, output);
+            process.Exited += HandleExited(output);
+
+            if (options.Verbose)
             {
-                if (!string.IsNullOrWhiteSpace(e.Data))
-                {
-                    output.Status = AppStatus.Failure;
-                    _console.WriteErrorLine(name + ": " + e.Data);
-                }
-            });
-        }
+                process.OutputDataReceived += HandleOutputDataRecieved(project.Name);
+            }
 
-        public virtual EventHandler DefaultExited(AppProcess output)
-        {
-            return new EventHandler((o, e) =>
-            {
-                output.EndTime = DateTimeOffset.UtcNow;
-
-                if (output.Status == AppStatus.Running)
-                {
-                    output.Status = AppStatus.Success;
-                }
-            });
+            return output;
         }
 
         public virtual string BuildCommand(string command, Project project, CommandOptions options)
@@ -101,7 +108,7 @@ namespace Regi.Services
                 }
             }
 
-            ApplyFrameworkDefaults(builder, command, project, options);
+            ApplyFrameworkDefaultOptions(builder, command, project, options);
 
             if (!string.IsNullOrWhiteSpace(options?.Arguments))
             {
@@ -111,22 +118,37 @@ namespace Regi.Services
             return builder.ToString();
         }
 
-        protected abstract ProjectOptions FrameworkDefaultOptions { get; }
-
-        protected virtual void ApplyFrameworkDefaults(StringBuilder builder, string command, Project project, CommandOptions options)
+        public virtual DataReceivedEventHandler HandleOutputDataRecieved(string name)
         {
-            if (FrameworkDefaultOptions != null && FrameworkDefaultOptions.Any())
+            return new DataReceivedEventHandler((o, e) =>
             {
-                if (FrameworkDefaultOptions.TryGetValue(command, out IList<string> defaultOptions))
-                {
-                    builder.Append(' ').AppendJoin(' ', defaultOptions);
-                }
-            }
+                _console.WriteLine(name + ": " + e.Data);
+            });
         }
 
-        protected virtual string FormatAdditionalArguments(string args)
+        public virtual DataReceivedEventHandler HandleErrorDataReceived(string name, AppProcess output)
         {
-            return args;
+            return new DataReceivedEventHandler((o, e) =>
+            {
+                if (!string.IsNullOrWhiteSpace(e.Data))
+                {
+                    output.Status = AppStatus.Failure;
+                    _console.WriteErrorLine(name + ": " + e.Data);
+                }
+            });
+        }
+
+        public virtual EventHandler HandleExited(AppProcess output)
+        {
+            return new EventHandler((o, e) =>
+            {
+                output.EndTime = DateTimeOffset.UtcNow;
+
+                if (output.Status == AppStatus.Running)
+                {
+                    output.Status = AppStatus.Success;
+                }
+            });
         }
     }
 }

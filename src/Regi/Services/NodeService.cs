@@ -35,114 +35,63 @@ namespace Regi.Services
 
         protected override ProjectOptions FrameworkDefaultOptions => new ProjectOptions();
 
-        public override AppProcess InstallProject(Project project, CommandOptions options)
+        protected override void SetEnvironmentVariables(Process process, Project project)
         {
-            _console.WriteEmphasizedLine($"Starting install for project {project.Name} ({project.File.DirectoryName})");
-            Process process = DefaultProcess(_npmPath, FrameworkCommands.Node.Install, project, options);
-
-            AppProcess output = new AppProcess(process, AppTask.Install, AppStatus.Running)
-            {
-                KillOnExit = options.KillProcessesOnExit
-            };
-
-            process.Exited += DefaultExited(output);
-            process.ErrorDataReceived += DefaultOutputDataRecieved(project.Name);
-            if (options.Verbose)
-            {
-                process.OutputDataReceived += DefaultOutputDataRecieved(project.Name);
-            }
-
-            process.Start();
-
-            process.BeginErrorReadLine();
-            if (options.Verbose)
-            {
-                process.BeginOutputReadLine();
-            }
-
-            process.WaitForExit();
-
-            _console.WriteEmphasizedLine($"Finished installing dependencies for project {project.Name} ({project.File.DirectoryName})");
-
-            return output;
-            throw new NotImplementedException();
-        }
-
-        
-
-        public override AppProcess StartProject(Project project, CommandOptions options)
-        {
-            Process process = DefaultProcess(_npmPath, FrameworkCommands.Node.Start, project, options);
-
-            process.StartInfo.CopyEnvironmentVariables(options.VariableList);
             if (project.Port.HasValue)
             {
                 process.StartInfo.EnvironmentVariables.Add("PORT", project.Port.Value.ToString()); // Default NodeJS port variable
             }
+        }
 
-            AppProcess output = new AppProcess(process, AppTask.Start, AppStatus.Running, project.Port)
-            {
-                KillOnExit = options.KillProcessesOnExit
-            };
+        protected override string FormatAdditionalArguments(string args)
+        {
+            return $"-- {args}";
+        }
 
-            process.Exited += DefaultExited(output);
-            process.ErrorDataReceived += DefaultErrorDataReceived(project.Name, output);
-            if (options.Verbose)
-            {
-                process.OutputDataReceived += DefaultOutputDataRecieved(project.Name);
-            }
+        public override AppProcess InstallProject(Project project, CommandOptions options)
+        {
+            _console.WriteEmphasizedLine($"Starting install for project {project.Name} ({project.File.DirectoryName})");
 
-            process.Start();
+            AppProcess install = CreateProcess(_npmPath, FrameworkCommands.Node.Install, project, options);
 
-            process.BeginErrorReadLine();
-            if (options.Verbose)
-            {
-                process.BeginOutputReadLine();
-            }
+            //process.ErrorDataReceived += DefaultOutputDataRecieved(project.Name); // TODO: do we need this?
 
-            return output;
+            install.Start();
+
+            install.WaitForExit();
+
+            _console.WriteEmphasizedLine($"Finished installing dependencies for project {project.Name} ({project.File.DirectoryName})");
+
+            return install;
+        }
+
+        public override AppProcess StartProject(Project project, CommandOptions options)
+        {
+            AppProcess start = CreateProcess(_npmPath, FrameworkCommands.Node.Start, project, options);
+
+            start.Start();
+
+            return start;
         }
 
         public override AppProcess TestProject(Project project, CommandOptions options)
         {
             _console.WriteEmphasizedLine($"Starting tests for project {project.Name} ({project.File.DirectoryName})");
 
-            Process process = DefaultProcess(_npmPath, FrameworkCommands.Node.Test, project, options);
+            AppProcess test = CreateProcess(_npmPath, FrameworkCommands.Node.Test, project, options);
 
-            AppProcess output = new AppProcess(process, AppTask.Test, AppStatus.Running)
-            {
-                KillOnExit = options.KillProcessesOnExit
-            };
+            //process.StartInfo.CopyEnvironmentVariables(options.VariableList);
 
-            process.StartInfo.CopyEnvironmentVariables(options.VariableList);
+            test.Start();
 
-            process.ErrorDataReceived += DefaultOutputDataRecieved(project.Name);
-            if (options.Verbose)
-            {
-                process.OutputDataReceived += DefaultOutputDataRecieved(project.Name);
-            }
+            test.WaitForExit();
 
-            process.Start();
-
-            process.BeginErrorReadLine();
-            if (options.Verbose)
-            {
-                process.BeginOutputReadLine();
-            }
-
-            process.WaitForExit();
-
-            output.Status = process.ExitCode > 0 ? AppStatus.Failure : AppStatus.Success;
-            output.EndTime = DateTimeOffset.UtcNow;
+            test.Status = test.Process.ExitCode > 0 ? AppStatus.Failure : AppStatus.Success;
+            test.EndTime = DateTimeOffset.UtcNow;
 
             _console.WriteEmphasizedLine($"Finished tests for project {project.Name} ({project.File.DirectoryName})");
 
-            return output;
-        }
-
-        protected override string FormatAdditionalArguments(string args)
-        {
-            return $"-- {args}";
+            return test;
         }
     }
 }

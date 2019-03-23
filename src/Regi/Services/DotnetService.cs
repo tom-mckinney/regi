@@ -33,164 +33,60 @@ namespace Regi.Services
 
         protected override ProjectOptions FrameworkDefaultOptions => new ProjectOptions
         {
-            { FrameworkCommands.Dotnet.Start, new List<string> { "--no-launch-profile" } }
+            { FrameworkCommands.Dotnet.Run, new List<string> { "--no-launch-profile" } }
         };
 
-        public override AppProcess InstallProject(Project project, CommandOptions options)
+        protected override void SetEnvironmentVariables(Process process, Project project)
         {
-            Process process = new Process
-            {
-                StartInfo = new ProcessStartInfo()
-                {
-                    FileName = _dotnetPath,
-                    Arguments = BuildCommand("restore", project, options),
-                    WorkingDirectory = project.File.DirectoryName,
-                    RedirectStandardOutput = options.Verbose,
-                    RedirectStandardError = true
-                },
-                EnableRaisingEvents = true
-            };
-
-            AppProcess output = new AppProcess(process, AppTask.Install, AppStatus.Running)
-            {
-                KillOnExit = options.KillProcessesOnExit
-            };
-
-            process.ErrorDataReceived += DefaultErrorDataReceived(project.Name, output);
-            process.Exited += DefaultExited(output);
-            if (options.Verbose)
-            {
-                process.OutputDataReceived += DefaultOutputDataRecieved(project.Name);
-            }
-
-            process.Start();
-
-            process.BeginErrorReadLine();
-            if (options.Verbose)
-            {
-                process.BeginOutputReadLine();
-            }
-
-            process.WaitForExit();
-
-            return output;
-        }
-
-        public override AppProcess StartProject(Project project, CommandOptions options)
-        {
-            if (project.Port.HasValue)
-            {
-                if (project.Options.ContainsKey(FrameworkCommands.Dotnet.Start) && project.Options[FrameworkCommands.Dotnet.Start] != null)
-                {
-                    
-                }
-                else
-                {
-                    project.Options[FrameworkCommands.Dotnet.Start] = new List<string> { "--no-launch-profile" };
-                }
-            }
-
-            Process process = new Process
-            {
-                StartInfo = new ProcessStartInfo()
-                {
-                    FileName = _dotnetPath,
-                    Arguments = BuildCommand(FrameworkCommands.Dotnet.Start, project, options),
-                    WorkingDirectory = project.File.DirectoryName,
-                    RedirectStandardOutput = options.Verbose,
-                    RedirectStandardError = true
-                },
-                EnableRaisingEvents = true
-            };
-
-            AppProcess output = new AppProcess(process, AppTask.Start, AppStatus.Running, project.Port)
-            {
-                KillOnExit = options.KillProcessesOnExit
-            };
-
             process.StartInfo.EnvironmentVariables.Add("END_TO_END_TESTING", true.ToString());
             process.StartInfo.EnvironmentVariables.Add("IN_MEMORY_DATABASE", true.ToString());
 
-            process.StartInfo.CopyEnvironmentVariables(options.VariableList);
             if (project.Port.HasValue)
             {
                 process.StartInfo.EnvironmentVariables.Add("ASPNETCORE_URLS", $"http://*:{project.Port}"); // Default .NET Core URL variable
             }
+        }
 
-            process.ErrorDataReceived += DefaultErrorDataReceived(project.Name, output);
-            process.Exited += DefaultExited(output);
-            if (options.Verbose)
-            {
-                process.OutputDataReceived += DefaultOutputDataRecieved(project.Name);
-            }
+        public override AppProcess InstallProject(Project project, CommandOptions options)
+        {
+            AppProcess install = CreateProcess(_dotnetPath, FrameworkCommands.Dotnet.Restore, project, options);
 
-            process.Start();
+            install.Start();
 
-            process.BeginErrorReadLine();
-            if (options.Verbose)
-            {
-                process.BeginOutputReadLine();
-            }
+            install.WaitForExit();
 
-            return output;
+            return install;
+        }
+
+        public override AppProcess StartProject(Project project, CommandOptions options)
+        {
+            AppProcess start = CreateProcess(_dotnetPath, FrameworkCommands.Dotnet.Run, project, options);
+
+            start.Start();
+
+            return start;
         }
 
         public override AppProcess TestProject(Project project, CommandOptions options)
         {
             _console.WriteEmphasizedLine($"Starting tests for project {project.Name} ({project.File.Name})");
 
-            if (string.IsNullOrWhiteSpace(_dotnetPath))
-            {
-                throw new Exception("Cannot find path to dotnet CLI");
-            }
+            AppProcess test = CreateProcess(_dotnetPath, FrameworkCommands.Dotnet.Test, project, options);
 
-            Process process = new Process
-            {
-                StartInfo = new ProcessStartInfo()
-                {
-                    FileName = _dotnetPath,
-                    Arguments = BuildCommand("test", project, options),
-                    WorkingDirectory = project.File.DirectoryName,
-                    RedirectStandardOutput = options.Verbose,
-                    RedirectStandardError = true
-                },
-                EnableRaisingEvents = true
-            };
+            test.Start();
 
-            AppProcess output = new AppProcess(process, AppTask.Test, AppStatus.Running)
-            {
-                KillOnExit = options.KillProcessesOnExit
-            };
-
-            process.StartInfo.CopyEnvironmentVariables(options.VariableList);
-
-            process.ErrorDataReceived += DefaultErrorDataReceived(project.Name, output);
-            if (options.Verbose)
-            {
-                process.OutputDataReceived += DefaultOutputDataRecieved(project.Name);
-            }
-
-            process.Start();
-
-            process.BeginErrorReadLine();
-
-            if (options.Verbose)
-            {
-                process.BeginOutputReadLine();
-            }
-
-            process.WaitForExit();
+            test.WaitForExit();
 
             // Todo: Determine why test doesn't call exit
-            output.EndTime = DateTimeOffset.UtcNow;
-            if (output.Status == AppStatus.Running)
+            test.EndTime = DateTimeOffset.UtcNow;
+            if (test.Status == AppStatus.Running)
             {
-                output.Status = AppStatus.Success;
+                test.Status = AppStatus.Success;
             }
 
             _console.WriteEmphasizedLine($"Finished tests for project {project.Name} ({project.File.Name})");
 
-            return output;
+            return test;
         }
     }
 }

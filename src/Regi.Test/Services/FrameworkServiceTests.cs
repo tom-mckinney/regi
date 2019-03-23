@@ -4,6 +4,7 @@ using Regi.Services;
 using Regi.Test.Helpers;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 using Xunit;
 using Xunit.Abstractions;
@@ -35,6 +36,11 @@ namespace Regi.Test.Services
         }
 
         public override AppProcess TestProject(Project project, CommandOptions options)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override void SetEnvironmentVariables(Process process, Project project)
         {
             throw new NotImplementedException();
         }

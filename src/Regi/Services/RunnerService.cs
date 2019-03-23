@@ -177,10 +177,6 @@ namespace Regi.Services
                             {
                                 options.VariableList.AddProject(requiredProject);
 
-                                _console.WriteLine(requiredProject.Name);
-                                _console.WriteLine(requiredProject.Port);
-                                _console.WriteLine(options.VariableList.Count);
-
                                 if (project.Port.HasValue)
                                     requiredPorts.Add(project.Port.Value);
 
