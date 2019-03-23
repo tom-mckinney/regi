@@ -13,7 +13,10 @@
       "name": "Backend",
       "path": "./Backend/Backend.csproj",
       "framework": "dotnet",
-      "port": 5000
+      "port": 5000,
+      "options": {
+        "*": ["--foo bar"]
+      }
     }
   ],
   "tests": [

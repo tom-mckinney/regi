@@ -55,7 +55,7 @@ namespace Regi.Services
 
             if (startupFile == null || !startupFile.Exists)
             {
-                throw new FileNotFoundException($"Could not find startup.json in directory: {directory.FullName}");
+                throw new FileNotFoundException($"Could not find regi.json or startup.json in directory: {directory.FullName}");
             }
 
             using (StreamReader sr = new StreamReader(startupFile.OpenRead()))
@@ -287,25 +287,15 @@ namespace Regi.Services
 
                         if (options.Verbose)
                         {
-                            WritePropertyIfSpecified("Framework", app.Framework);
-                            WritePropertyIfSpecified("Command", app.Commands);
-                            WritePropertyIfSpecified("Path", app.Path);
-                            WritePropertyIfSpecified("Port", app.Port);
-
-                            if (app.Requires != null && app.Requires.Count > 0)
-                            {
-                                WritePropertyIfSpecified("Requires", string.Join(", ", app.Requires));
-                            }
+                            _console.WritePropertyIfSpecified("Framework", app.Framework);
+                            _console.WritePropertyIfSpecified("Path", app.Path);
+                            _console.WritePropertyIfSpecified("Port", app.Port);
+                            _console.WritePropertyIfSpecified("Commands", app.Commands);
+                            _console.WritePropertyIfSpecified("Requires", app.Requires);
+                            _console.WritePropertyIfSpecified("Options", app.Options);
+                            _console.WritePropertyIfSpecified("Environment", app.Environment);
                         }
                     }
-                }
-
-                void WritePropertyIfSpecified(string propertyName, object propertyValue)
-                {
-                    if (propertyValue == null || propertyValue is string propertyValueString && string.IsNullOrWhiteSpace(propertyValueString))
-                        return;
-
-                    _console.WriteIndentedLine($"{propertyName}: {propertyValue}", 2, ConsoleColor.DarkGreen);
                 }
             }
 
