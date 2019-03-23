@@ -4,11 +4,7 @@ using Regi.Extensions;
 using Regi.Models;
 using Regi.Utilities;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Text;
 
 namespace Regi.Services
 {
@@ -18,19 +14,8 @@ namespace Regi.Services
 
     public class NodeService : FrameworkService, INodeService
     {
-        private readonly IConsole _console;
-        private readonly string _npmPath;
-
-        public NodeService(IConsole console) : base(console)
+        public NodeService(IConsole console) : base(console, NpmExe.FullPathOrDefault())
         {
-            _console = console;
-
-            _npmPath = NpmExe.FullPathOrDefault();
-
-            if (string.IsNullOrWhiteSpace(_npmPath))
-            {
-                throw new FileNotFoundException("Could not find path for NPM CLI");
-            }
         }
 
         protected override ProjectOptions FrameworkDefaultOptions => new ProjectOptions();
@@ -43,16 +28,13 @@ namespace Regi.Services
             }
         }
 
-        protected override string FormatAdditionalArguments(string args)
-        {
-            return $"-- {args}";
-        }
+        protected override string FormatAdditionalArguments(string args) => $"-- {args}";
 
         public override AppProcess InstallProject(Project project, CommandOptions options)
         {
             _console.WriteEmphasizedLine($"Starting install for project {project.Name} ({project.File.DirectoryName})");
 
-            AppProcess install = CreateProcess(_npmPath, FrameworkCommands.Node.Install, project, options);
+            AppProcess install = CreateProcess(FrameworkCommands.Node.Install, project, options);
 
             //process.ErrorDataReceived += DefaultOutputDataRecieved(project.Name); // TODO: do we need this?
 
@@ -67,7 +49,7 @@ namespace Regi.Services
 
         public override AppProcess StartProject(Project project, CommandOptions options)
         {
-            AppProcess start = CreateProcess(_npmPath, FrameworkCommands.Node.Start, project, options);
+            AppProcess start = CreateProcess(FrameworkCommands.Node.Start, project, options);
 
             start.Start();
 
@@ -78,9 +60,7 @@ namespace Regi.Services
         {
             _console.WriteEmphasizedLine($"Starting tests for project {project.Name} ({project.File.DirectoryName})");
 
-            AppProcess test = CreateProcess(_npmPath, FrameworkCommands.Node.Test, project, options);
-
-            //process.StartInfo.CopyEnvironmentVariables(options.VariableList);
+            AppProcess test = CreateProcess(FrameworkCommands.Node.Test, project, options);
 
             test.Start();
 

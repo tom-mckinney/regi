@@ -19,11 +19,19 @@ namespace Regi.Services
 
     public abstract class FrameworkService : IFrameworkService
     {
-        private IConsole _console;
+        protected readonly IConsole _console;
+        protected readonly string _frameworkExePath;
 
-        public FrameworkService(IConsole console)
+        public FrameworkService(IConsole console, string frameworkExePath)
         {
             _console = console;
+
+            if (string.IsNullOrWhiteSpace(frameworkExePath))
+            {
+                throw new ArgumentException("Cannot have a null or empty framework executable path.", nameof(frameworkExePath));
+            }
+
+            _frameworkExePath = frameworkExePath;
         }
 
         public abstract AppProcess InstallProject(Project project, CommandOptions options);
@@ -45,18 +53,15 @@ namespace Regi.Services
             }
         }
 
-        protected virtual string FormatAdditionalArguments(string args)
-        {
-            return args;
-        }
+        protected virtual string FormatAdditionalArguments(string args) => args;
 
-        public virtual AppProcess CreateProcess(string exePath, string command, Project project, CommandOptions options)
+        public virtual AppProcess CreateProcess(string command, Project project, CommandOptions options)
         {
             Process process = new Process
             {
                 StartInfo = new ProcessStartInfo()
                 {
-                    FileName = exePath,
+                    FileName = _frameworkExePath,
                     Arguments = BuildCommand(command, project, options),
                     WorkingDirectory = project.File.DirectoryName,
                     RedirectStandardOutput = options.Verbose,
@@ -118,37 +123,28 @@ namespace Regi.Services
             return builder.ToString();
         }
 
-        public virtual DataReceivedEventHandler HandleOutputDataRecieved(string name)
+        public virtual DataReceivedEventHandler HandleOutputDataRecieved(string name) => new DataReceivedEventHandler((o, e) =>
         {
-            return new DataReceivedEventHandler((o, e) =>
-            {
-                _console.WriteLine(name + ": " + e.Data);
-            });
-        }
+            _console.WriteLine(name + ": " + e.Data);
+        });
 
-        public virtual DataReceivedEventHandler HandleErrorDataReceived(string name, AppProcess output)
+        public virtual DataReceivedEventHandler HandleErrorDataReceived(string name, AppProcess output) => new DataReceivedEventHandler((o, e) =>
         {
-            return new DataReceivedEventHandler((o, e) =>
+            if (!string.IsNullOrWhiteSpace(e.Data))
             {
-                if (!string.IsNullOrWhiteSpace(e.Data))
-                {
-                    output.Status = AppStatus.Failure;
-                    _console.WriteErrorLine(name + ": " + e.Data);
-                }
-            });
-        }
+                output.Status = AppStatus.Failure;
+                _console.WriteErrorLine(name + ": " + e.Data);
+            }
+        });
 
-        public virtual EventHandler HandleExited(AppProcess output)
+        public virtual EventHandler HandleExited(AppProcess output) => new EventHandler((o, e) =>
         {
-            return new EventHandler((o, e) =>
-            {
-                output.EndTime = DateTimeOffset.UtcNow;
+            output.EndTime = DateTimeOffset.UtcNow;
 
-                if (output.Status == AppStatus.Running)
-                {
-                    output.Status = AppStatus.Success;
-                }
-            });
-        }
+            if (output.Status == AppStatus.Running)
+            {
+                output.Status = AppStatus.Success;
+            }
+        });
     }
 }

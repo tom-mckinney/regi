@@ -29,7 +29,7 @@ namespace Regi.Utilities
         /// <summary>
         /// Finds the full filepath to the NPM CLI executable,
         /// or returns a string containing the default name of the NPM muxer ('npm').
-        /// <returns>The path or a string named 'dotnet'</returns>
+        /// <returns>The path or a string named 'npm'</returns>
         /// </summary>
         public static string FullPathOrDefault() => FullPath ?? FileName;
 

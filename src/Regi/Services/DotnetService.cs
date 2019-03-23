@@ -5,8 +5,6 @@ using Regi.Models;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
 
 namespace Regi.Services
 {
@@ -16,19 +14,8 @@ namespace Regi.Services
 
     public class DotnetService : FrameworkService, IDotnetService
     {
-        private readonly IConsole _console;
-        private readonly string _dotnetPath;
-
-        public DotnetService(IConsole console) : base(console)
+        public DotnetService(IConsole console) : base(console, DotNetExe.FullPathOrDefault())
         {
-            _console = console;
-
-            _dotnetPath = DotNetExe.FullPathOrDefault();
-
-            if (string.IsNullOrWhiteSpace(_dotnetPath))
-            {
-                throw new FileNotFoundException("Could not find path for .NET Core SDK");
-            }
         }
 
         protected override ProjectOptions FrameworkDefaultOptions => new ProjectOptions
@@ -49,7 +36,7 @@ namespace Regi.Services
 
         public override AppProcess InstallProject(Project project, CommandOptions options)
         {
-            AppProcess install = CreateProcess(_dotnetPath, FrameworkCommands.Dotnet.Restore, project, options);
+            AppProcess install = CreateProcess(FrameworkCommands.Dotnet.Restore, project, options);
 
             install.Start();
 
@@ -60,7 +47,7 @@ namespace Regi.Services
 
         public override AppProcess StartProject(Project project, CommandOptions options)
         {
-            AppProcess start = CreateProcess(_dotnetPath, FrameworkCommands.Dotnet.Run, project, options);
+            AppProcess start = CreateProcess(FrameworkCommands.Dotnet.Run, project, options);
 
             start.Start();
 
@@ -71,7 +58,7 @@ namespace Regi.Services
         {
             _console.WriteEmphasizedLine($"Starting tests for project {project.Name} ({project.File.Name})");
 
-            AppProcess test = CreateProcess(_dotnetPath, FrameworkCommands.Dotnet.Test, project, options);
+            AppProcess test = CreateProcess(FrameworkCommands.Dotnet.Test, project, options);
 
             test.Start();
 

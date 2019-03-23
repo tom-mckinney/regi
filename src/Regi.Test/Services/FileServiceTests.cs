@@ -25,7 +25,7 @@ namespace Regi.Test.Services
         {
             List<FileInfo> projectFiles = _service.FindAllProjectFiles();
 
-            Assert.Equal(5, projectFiles.Count);
+            Assert.Equal(6, projectFiles.Count);
         }
 
         [Fact]

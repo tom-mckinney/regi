@@ -13,7 +13,7 @@ namespace Regi.Test.Services
 {
     internal class WumboService : FrameworkService
     {
-        public WumboService(IConsole console) : base(console) {}
+        public WumboService(IConsole console) : base(console, "wumbo") {}
 
         protected override ProjectOptions FrameworkDefaultOptions => new ProjectOptions
         {
