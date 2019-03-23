@@ -7,16 +7,25 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="_SampleProjects_\Backend\bin\**" />
+    <Compile Remove="_SampleProjects_\Backend\obj\**" />
+    <Compile Remove="_SampleProjects_\Frontend\node_modules\**" />
     <Compile Remove="_SampleProjects_\SampleAppLong\bin\**" />
     <Compile Remove="_SampleProjects_\SampleAppLong\obj\**" />
     <Compile Remove="_SampleProjects_\SampleApp\obj\**" />
     <Compile Remove="_SampleProjects_\SampleNodeApp\node_modules\**" />
     <Compile Remove="_SampleProjects_\SampleTests\**" />
+    <EmbeddedResource Remove="_SampleProjects_\Backend\bin\**" />
+    <EmbeddedResource Remove="_SampleProjects_\Backend\obj\**" />
+    <EmbeddedResource Remove="_SampleProjects_\Frontend\node_modules\**" />
     <EmbeddedResource Remove="_SampleProjects_\SampleAppLong\bin\**" />
     <EmbeddedResource Remove="_SampleProjects_\SampleAppLong\obj\**" />
     <EmbeddedResource Remove="_SampleProjects_\SampleApp\obj\**" />
     <EmbeddedResource Remove="_SampleProjects_\SampleNodeApp\node_modules\**" />
     <EmbeddedResource Remove="_SampleProjects_\SampleTests\**" />
+    <None Remove="_SampleProjects_\Backend\bin\**" />
+    <None Remove="_SampleProjects_\Backend\obj\**" />
+    <None Remove="_SampleProjects_\Frontend\node_modules\**" />
     <None Remove="_SampleProjects_\SampleAppLong\bin\**" />
     <None Remove="_SampleProjects_\SampleAppLong\obj\**" />
     <None Remove="_SampleProjects_\SampleApp\obj\**" />
@@ -25,6 +34,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Remove="_SampleProjects_\Backend\Program.cs" />
+    <Compile Remove="_SampleProjects_\Backend\Startup.cs" />
     <Compile Remove="_SampleProjects_\SampleAppError\Program.cs" />
     <Compile Remove="_SampleProjects_\SampleAppLong\Program.cs" />
     <Compile Remove="_SampleProjects_\SampleAppLong\Startup.cs" />
@@ -44,6 +55,15 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="_SampleProjects_\Backend\Backend.csproj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="_SampleProjects_\Backend\Program.cs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="_SampleProjects_\Backend\Startup.cs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="_SampleProjects_\SampleAppError\Program.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -84,6 +104,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="_SampleProjects_\Backend\Properties\launchSettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="_SampleProjects_\ConfigurationBad\startup.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

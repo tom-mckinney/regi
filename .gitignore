@@ -36,3 +36,4 @@ msbuild.wrn
 *.nupkg
 
 node_modules/
+.next/

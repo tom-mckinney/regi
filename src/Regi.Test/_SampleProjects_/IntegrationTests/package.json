@@ -1,0 +1,20 @@
+{
+  "name": "integration-tests",
+  "scripts": {
+    "test": "jest"
+  },
+  "dependencies": {
+    "jest": "^24.5.0",
+    "jest-puppeteer": "^4.1.0",
+    "puppeteer": "^1.13.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.4.0",
+    "@babel/preset-env": "^7.4.2",
+    "babel-jest": "^24.5.0"
+  },
+  "jest": {
+    "preset": "jest-puppeteer",
+    "testRegex": "./*\\.test\\.js$"
+  }
+}

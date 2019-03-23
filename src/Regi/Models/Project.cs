@@ -28,10 +28,11 @@ namespace Regi.Models
 
         public IList<string> Requires { get; set; } = new List<string>();
 
-        //public IDictionary<string, IList<string>> Options { get; set; } = new Dictionary<string, IList<string>>();
         public ProjectOptions Options { get; set; } = new ProjectOptions();
 
         public int? Port { get; set; }
+
+        public IDictionary<string, string> Environment { get; set; } = new Dictionary<string, string>();
 
         private FileInfo _file;
         public FileInfo File

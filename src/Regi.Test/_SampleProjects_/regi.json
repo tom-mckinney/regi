@@ -2,13 +2,16 @@
   "apps": [
     {
       "name": "Frontend",
-      "path": "./SampleNodeApp/package.json",
+      "path": "./Frontend/package.json",
       "framework": "node",
-      "port": 9080
+      "port": 3000,
+      "commands": {
+        "start": "run dev"
+      }
     },
     {
       "name": "Backend",
-      "path": "./SampleAppLong/SampleAppLong.csproj",
+      "path": "./Backend/Backend.csproj",
       "framework": "dotnet",
       "port": 5000
     }
@@ -24,6 +27,15 @@
       "name": "NodeApp",
       "path": "./SampleNodeApp/package.json",
       "framework": "node"
+    },
+    {
+      "name": "IntegrationTests",
+      "path": "./IntegrationTests/package.json",
+      "framework": "node",
+      "requires": ["Frontend", "Backend"],
+      "environment": {
+        "HEADLESS": false
+      }
     }
   ],
   "services": []

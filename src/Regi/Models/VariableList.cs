@@ -23,6 +23,14 @@ namespace Regi.Models
 
         public void AddProject(Project project)
         {
+            if (project.Environment?.Count > 0)
+            {
+                foreach (var env in project.Environment)
+                {
+                    TryAdd(env.Key, env.Value);
+                }
+            }
+
             if (project.Port.HasValue)
             {
                 string underscoreName = project?.Name.ToUnderscoreCase();
