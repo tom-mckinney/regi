@@ -157,7 +157,7 @@ namespace Regi.Services
 
             IList<Project> projects = config.Tests.FilterByOptions(options);
 
-            options.VariableList = new VariableList(projects);
+            options.VariableList = new VariableList(projects, config);
 
             foreach (var project in projects)
             {
@@ -175,8 +175,6 @@ namespace Regi.Services
 
                             if (requiredProject != null)
                             {
-                                options.VariableList.AddProject(requiredProject);
-
                                 if (project.Port.HasValue)
                                     requiredPorts.Add(project.Port.Value);
 
@@ -184,21 +182,7 @@ namespace Regi.Services
                             }
                         }
 
-                        IPGlobalProperties ipGlobalProperties = IPGlobalProperties.GetIPGlobalProperties();
-                        var listeningConnections = ipGlobalProperties.GetActiveTcpListeners();
-
-                        _console.WriteLine(listeningConnections);
-
-                        while (requiredPorts.Count > 0)
-                        {
-                            foreach (var connection in listeningConnections)
-                            {
-                                if (requiredPorts.Contains(connection.Port))
-                                {
-                                    requiredPorts.Remove(connection.Port);
-                                }
-                            }
-                        }
+                        WaitOnPorts(requiredPorts);
                     }
 
                     if (project.Framework == ProjectFramework.Dotnet)
@@ -300,6 +284,27 @@ namespace Regi.Services
             }
 
             return output;
+        }
+
+        private void WaitOnPorts(IList<int> requiredPorts)
+        {
+            IPGlobalProperties ipGlobalProperties = IPGlobalProperties.GetIPGlobalProperties();
+            var listeningConnections = ipGlobalProperties.GetActiveTcpListeners();
+
+            while (requiredPorts.Count > 0)
+            {
+                foreach (var connection in listeningConnections)
+                {
+                    string portPluralization = requiredPorts.Count > 1 ? "ports" : "port";
+
+                    _console.WriteEmphasizedLine($"Waiting for someone to start listening on {portPluralization} {string.Join(", ", requiredPorts)}");
+
+                    if (requiredPorts.Contains(connection.Port))
+                    {
+                        requiredPorts.Remove(connection.Port);
+                    }
+                }
+            }
         }
     }
 }
