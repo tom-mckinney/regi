@@ -1,81 +1,58 @@
-﻿using Regi.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace Regi.Extensions
+namespace Regi.Utilities
 {
-    public static class ProcessExtensions
+    public static class ProcessUtility
     {
-        public static void CopyEnvironmentVariables(this ProcessStartInfo startInfo, VariableList varList)
-        {
-            if (varList != null && varList.Any())
-            {
-                foreach (var env in varList)
-                {
-                    startInfo.EnvironmentVariables.Add(env.Key, env.Value);
-                }
-            }
-        }
-
         private static readonly bool _isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
         private static readonly TimeSpan _defaultTimeout = TimeSpan.FromSeconds(10);
 
-        public static void KillAllOfType(this Process process)
+        public static void KillAllOfType(string processName)
         {
-            process.KillAllOfType(_defaultTimeout);
+            KillAllOfType(processName, _defaultTimeout);
         }
 
-        public static void KillAllOfType(this Process process, TimeSpan timeout)
+        public static void KillAllOfType(string processName, TimeSpan timeout)
+        {
+            if (_isWindows)
+            {
+                RunProcessAndWaitForExit("taskkill", $"/F /IM {AddExtension(processName)}", timeout, out _);
+            }
+            else
+            {
+                RunProcessAndWaitForExit("killall", $"-KILL {processName}", timeout, out _);
+            }
+        }
+
+        public static void KillTree(int processId)
+        {
+            KillTree(processId, _defaultTimeout);
+        }
+
+        public static void KillTree(int processId, TimeSpan timeout)
         {
             if (_isWindows)
             {
                 RunProcessAndWaitForExit(
                     "taskkill",
-                    $"/F /IM {AddExtension(process.ProcessName)}",
+                    $"/T /F /PID {processId}",
                     timeout,
                     out string stdout);
             }
             else
             {
                 var children = new HashSet<int>();
-                GetAllChildIdsUnix(process.Id, children, timeout);
+                GetAllChildIdsUnix(processId, children, timeout);
                 foreach (var childId in children)
                 {
                     KillProcessUnix(childId, timeout);
                 }
-                KillProcessUnix(process.Id, timeout);
-            }
-        }
-
-        public static void KillTree(this Process process)
-        {
-            process.KillTree(_defaultTimeout);
-        }
-
-        public static void KillTree(this Process process, TimeSpan timeout)
-        {
-            if (_isWindows)
-            {
-                RunProcessAndWaitForExit(
-                    "taskkill",
-                    $"/T /F /PID {process.Id}",
-                    timeout,
-                    out string stdout);
-            }
-            else
-            {
-                var children = new HashSet<int>();
-                GetAllChildIdsUnix(process.Id, children, timeout);
-                foreach (var childId in children)
-                {
-                    KillProcessUnix(childId, timeout);
-                }
-                KillProcessUnix(process.Id, timeout);
+                KillProcessUnix(processId, timeout);
             }
         }
 
@@ -127,8 +104,8 @@ namespace Regi.Extensions
             {
                 FileName = fileName,
                 Arguments = arguments,
-                RedirectStandardOutput = true,
-                UseShellExecute = true
+                //UseShellExecute = true,
+                RedirectStandardOutput = true
             };
 
             var process = Process.Start(startInfo);

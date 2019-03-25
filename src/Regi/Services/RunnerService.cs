@@ -121,6 +121,8 @@ namespace Regi.Services
 
         private void StartProject(Project project, IList<Project> projects, CommandOptions options)
         {
+            _console.WriteEmphasizedLine($"Starting project {project.Name} ({project.File.DirectoryName})");
+
             AppProcess process = null;
             if (project.Framework == ProjectFramework.Dotnet)
             {
@@ -185,9 +187,10 @@ namespace Regi.Services
                         WaitOnPorts(requiredPorts);
                     }
 
+                    _console.WriteEmphasizedLine($"Starting tests for project {project.Name} ({project.File.DirectoryName})");
+
                     if (project.Framework == ProjectFramework.Dotnet)
                     {
-                        _console.WriteLine(project.File.FullName);
                         project.Process = _dotnetService.TestProject(project, options);
                     }
                     else if (project.Framework == ProjectFramework.Node)
@@ -198,6 +201,8 @@ namespace Regi.Services
                     if (project.Process != null)
                     {
                         processes.Add(project.Process);
+
+                        _console.WriteEmphasizedLine($"Finished tests for project {project.Name} ({project.File.DirectoryName})");
                     }
                 });
             }
@@ -217,6 +222,8 @@ namespace Regi.Services
             {
                 _parallelService.Queue(() =>
                 {
+                    _console.WriteEmphasizedLine($"Starting install for project {project.Name}");
+
                     AppProcess process = null;
 
                     if (project.Framework == ProjectFramework.Dotnet)

@@ -65,7 +65,8 @@ namespace Regi.Services
                     Arguments = BuildCommand(command, project, options),
                     WorkingDirectory = project.File.DirectoryName,
                     RedirectStandardOutput = options.Verbose,
-                    RedirectStandardError = true
+                    RedirectStandardError = true,
+                    CreateNoWindow = true
                 },
                 EnableRaisingEvents = true
             };

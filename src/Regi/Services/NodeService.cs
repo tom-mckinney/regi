@@ -58,8 +58,6 @@ namespace Regi.Services
 
         public override AppProcess TestProject(Project project, CommandOptions options)
         {
-            _console.WriteEmphasizedLine($"Starting tests for project {project.Name} ({project.File.DirectoryName})");
-
             AppProcess test = CreateProcess(FrameworkCommands.Node.Test, project, options);
 
             test.Start();
@@ -68,8 +66,6 @@ namespace Regi.Services
 
             test.Status = test.Process.ExitCode > 0 ? AppStatus.Failure : AppStatus.Success;
             test.EndTime = DateTimeOffset.UtcNow;
-
-            _console.WriteEmphasizedLine($"Finished tests for project {project.Name} ({project.File.DirectoryName})");
 
             return test;
         }

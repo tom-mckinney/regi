@@ -1,4 +1,5 @@
 ﻿using Regi.Extensions;
+using Regi.Utilities;
 using System;
 using System.Diagnostics;
 
@@ -19,6 +20,9 @@ namespace Regi.Models
         public AppStatus Status { get; set; }
 
         public virtual Process Process { get; protected set; }
+
+        public int ProcessId { get; private set; }
+        public string ProcessName { get; private set; }
 
         public int? Port { get; set; }
 
@@ -54,6 +58,9 @@ namespace Regi.Models
                 {
                     Process.BeginOutputReadLine();
                 }
+
+                ProcessId = Process.Id;
+                ProcessName = Process.ProcessName;
             }
         }
 
@@ -67,9 +74,9 @@ namespace Regi.Models
 
         public void Dispose()
         {
-            if (KillOnExit && Process != null)
+            if (KillOnExit)
             {
-                Process.KillAllOfType();
+                ProcessUtility.KillTree(ProcessId);
             }
         }
     }
