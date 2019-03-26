@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.NetworkInformation;
 
 namespace Regi.Services
@@ -94,9 +95,9 @@ namespace Regi.Services
         {
             StartupConfig config = GetStartupConfig();
 
-            IList<Project> projects = config.Apps.FilterByOptions(options);
+            options.VariableList = new VariableList(config);
 
-            options.VariableList = new VariableList(projects);
+            IList<Project> projects = config.Apps.FilterByOptions(options);
 
             foreach (var project in projects)
             {
@@ -115,6 +116,8 @@ namespace Regi.Services
             };
 
             _parallelService.RunInParallel();
+
+            WaitOnPorts(projects);
 
             return projects;
         }
@@ -157,9 +160,9 @@ namespace Regi.Services
                 }
             };
 
-            IList<Project> projects = config.Tests.FilterByOptions(options);
+            options.VariableList = new VariableList(config);
 
-            options.VariableList = new VariableList(projects, config);
+            IList<Project> projects = config.Tests.FilterByOptions(options);
 
             foreach (var project in projects)
             {
@@ -167,7 +170,7 @@ namespace Regi.Services
                 {
                     if (project.Requires.Any())
                     {
-                        IList<int> requiredPorts = new List<int>();
+                        IDictionary<int, Project> requiredProjectsWithPorts = new Dictionary<int, Project>();
 
                         foreach (var r in project.Requires)
                         {
@@ -178,13 +181,13 @@ namespace Regi.Services
                             if (requiredProject != null)
                             {
                                 if (project.Port.HasValue)
-                                    requiredPorts.Add(project.Port.Value);
+                                    requiredProjectsWithPorts.Add(project.Port.Value, project);
 
                                 StartProject(requiredProject, projects, options);
                             }
                         }
 
-                        WaitOnPorts(requiredPorts);
+                        WaitOnPorts(requiredProjectsWithPorts);
                     }
 
                     _console.WriteEmphasizedLine($"Starting tests for project {project.Name} ({project.File.DirectoryName})");
@@ -293,22 +296,33 @@ namespace Regi.Services
             return output;
         }
 
-        private void WaitOnPorts(IList<int> requiredPorts)
+        private void WaitOnPorts(IList<Project> projects)
         {
-            IPGlobalProperties ipGlobalProperties = IPGlobalProperties.GetIPGlobalProperties();
-            var listeningConnections = ipGlobalProperties.GetActiveTcpListeners();
+            IDictionary<int, Project> projectsWithPorts = projects
+                .Where(p => p.Port.HasValue)
+                .ToDictionary(p => p.Port.Value);
 
-            while (requiredPorts.Count > 0)
+            WaitOnPorts(projectsWithPorts);
+        }
+
+        private void WaitOnPorts(IDictionary<int, Project> projects)
+        {
+            string projectPluralization = projects.Count > 1 ? "projects" : "project";
+            _console.WriteEmphasizedLine($"Waiting for {projectPluralization} to start: {string.Join(", ", projects.Select(p => $"{p.Value.Name} ({p.Key})"))}");
+
+            IPGlobalProperties ipGlobalProperties = IPGlobalProperties.GetIPGlobalProperties();
+
+            while (projects.Count > 0)
             {
+                IPEndPoint[] listeningConnections = ipGlobalProperties.GetActiveTcpListeners();
+
                 foreach (var connection in listeningConnections)
                 {
-                    string portPluralization = requiredPorts.Count > 1 ? "ports" : "port";
-
-                    _console.WriteEmphasizedLine($"Waiting for someone to start listening on {portPluralization} {string.Join(", ", requiredPorts)}");
-
-                    if (requiredPorts.Contains(connection.Port))
+                    if (projects.TryGetValue(connection.Port, out Project p))
                     {
-                        requiredPorts.Remove(connection.Port);
+                        _console.WriteEmphasizedLine($"{p.Name} is now listening on port {connection.Port}");
+
+                        projects.Remove(connection.Port);
                     }
                 }
             }

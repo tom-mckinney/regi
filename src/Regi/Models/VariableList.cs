@@ -10,52 +10,20 @@ namespace Regi.Models
         public VariableList() : base() { }
 
         /// <summary>
-        /// Initializes variable list from only specified projects
-        /// </summary>
-        /// <param name="projects"></param>
-        public VariableList(IList<Project> projects) : base()
-        {
-            if (projects == null)
-            {
-                throw new NullReferenceException("Project list cannot be null when creating VariableList");
-            }
-
-            foreach (var project in projects)
-            {
-                AddProject(project);
-            }
-        }
-
-        /// <summary>
-        /// Initializes variable list from projects and all required projects
+        /// Initializes variable list from all apps and services
         /// </summary>
         /// <param name="projects"></param>
         /// <param name="config"></param>
-        public VariableList(IList<Project> projects, StartupConfig config) : base()
+        public VariableList(StartupConfig config) : base()
         {
-            if (projects == null)
+            if (config == null)
             {
-                throw new NullReferenceException("Project list cannot be null when creating VariableList");
+                throw new ArgumentException("Project list cannot be null when creating VariableList", nameof(config));
             }
 
-            foreach (var project in projects)
+            foreach (var project in config.Apps.Concat(config.Services))
             {
                 AddProject(project);
-
-                if (project.Requires?.Count > 0)
-                {
-                    foreach (var r in project.Requires)
-                    {
-                        Project requiredProject = config.Apps
-                            .Concat(config.Services)
-                            .FirstOrDefault(p => p.Name.Contains(r, StringComparison.InvariantCultureIgnoreCase));
-
-                        if (requiredProject != null)
-                        {
-                            AddProject(requiredProject);
-                        }
-                    }
-                }
             }
         }
 

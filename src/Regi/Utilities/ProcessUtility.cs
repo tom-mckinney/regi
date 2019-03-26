@@ -21,11 +21,11 @@ namespace Regi.Utilities
         {
             if (_isWindows)
             {
-                RunProcessAndWaitForExit("taskkill", $"/F /IM {AddExtension(processName)}", timeout, out _);
+                RunProcessAndWaitForExit("taskkill", $"/F /IM {AddExtension(processName)}", timeout);
             }
             else
             {
-                RunProcessAndWaitForExit("killall", $"-KILL {processName}", timeout, out _);
+                RunProcessAndWaitForExit("killall", $"-KILL {processName}", timeout);
             }
         }
 
@@ -41,8 +41,7 @@ namespace Regi.Utilities
                 RunProcessAndWaitForExit(
                     "taskkill",
                     $"/T /F /PID {processId}",
-                    timeout,
-                    out string stdout);
+                    timeout);
             }
             else
             {
@@ -62,60 +61,52 @@ namespace Regi.Utilities
             var exitCode = RunProcessAndWaitForExit(
                 "pgrep",
                 $"-P {parentId}",
-                timeout,
-                out stdout);
+                timeout);
 
-            if (exitCode == 0 && !string.IsNullOrEmpty(stdout))
-            {
-                using (var reader = new StringReader(stdout))
-                {
-                    while (true)
-                    {
-                        var text = reader.ReadLine();
-                        if (text == null)
-                        {
-                            return;
-                        }
+            //if (exitCode == 0)
+            //{
+            //    using (var reader = new StringReader(stdout))
+            //    {
+            //        while (true)
+            //        {
+            //            var text = reader.ReadLine();
+            //            if (text == null)
+            //            {
+            //                return;
+            //            }
 
-                        if (int.TryParse(text, out int id))
-                        {
-                            children.Add(id);
-                            // Recursively get the children
-                            GetAllChildIdsUnix(id, children, timeout);
-                        }
-                    }
-                }
-            }
+            //            if (int.TryParse(text, out int id))
+            //            {
+            //                children.Add(id);
+            //                // Recursively get the children
+            //                GetAllChildIdsUnix(id, children, timeout);
+            //            }
+            //        }
+            //    }
+            //}
         }
 
         private static void KillProcessUnix(int processId, TimeSpan timeout)
         {
-            string stdout;
             RunProcessAndWaitForExit(
                 "kill",
                 $"-TERM {processId}",
-                timeout,
-                out stdout);
+                timeout);
         }
 
-        private static int RunProcessAndWaitForExit(string fileName, string arguments, TimeSpan timeout, out string stdout)
+        private static int RunProcessAndWaitForExit(string fileName, string arguments, TimeSpan timeout)
         {
             var startInfo = new ProcessStartInfo
             {
                 FileName = fileName,
                 Arguments = arguments,
-                //UseShellExecute = true,
-                RedirectStandardOutput = true
+                UseShellExecute = true,
+                CreateNoWindow = true
             };
 
             var process = Process.Start(startInfo);
 
-            stdout = null;
-            if (process.WaitForExit((int)timeout.TotalMilliseconds))
-            {
-                stdout = process.StandardOutput.ReadToEnd();
-            }
-            else
+            if (!process.WaitForExit((int)timeout.TotalMilliseconds))
             {
                 process.Kill();
             }

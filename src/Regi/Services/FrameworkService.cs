@@ -74,7 +74,8 @@ namespace Regi.Services
             AppProcess output = new AppProcess(process, FrameworkCommands.GetAppTask(command), AppStatus.Running, project.Port)
             {
                 KillOnExit = options.KillProcessesOnExit,
-                Verbose = options.Verbose
+                Verbose = options.Verbose,
+                OnDispose = () => HandleDispose(project)
             };
 
             process.StartInfo.CopyEnvironmentVariables(options.VariableList);
@@ -147,5 +148,10 @@ namespace Regi.Services
                 output.Status = AppStatus.Success;
             }
         });
+
+        protected virtual void HandleDispose(Project project)
+        {
+            _console.WriteEmphasizedLine($"Disposing process for project {project.Name} ({project.Path})");
+        }
     }
 }

@@ -72,8 +72,12 @@ namespace Regi.Models
             }
         }
 
+        public Action OnDispose { get; set; }
+
         public void Dispose()
         {
+            OnDispose?.Invoke();
+
             if (KillOnExit)
             {
                 ProcessUtility.KillTree(ProcessId);
