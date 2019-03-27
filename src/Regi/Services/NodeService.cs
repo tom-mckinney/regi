@@ -5,6 +5,7 @@ using Regi.Models;
 using Regi.Utilities;
 using System;
 using System.Diagnostics;
+using System.Text;
 
 namespace Regi.Services
 {

@@ -9,7 +9,8 @@
       "name": "SampleApp2",
       "path": "../SampleApp/SampleApp.csproj",
       "type": "web",
-      "port": 9080
+      "port": 9080,
+      "serial": true
     },
     {
       "name": "SampleNodeApp",
@@ -28,7 +29,8 @@
     {
       "name": "SampleSuccessfulTests",
       "path": "../SampleSuccessfulTests/SampleSuccessfulTests.csproj",
-      "type": "integration"
+      "type": "integration",
+      "serial": true
     }
   ],
   "services": []

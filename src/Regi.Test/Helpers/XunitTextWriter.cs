@@ -8,6 +8,7 @@ namespace Regi.Test.Helpers
 {
     public class XunitTextWriter : TextWriter
     {
+        private readonly object _writerLock = new object();
         private readonly ITestOutputHelper _testOutput;
         private readonly Action<string> _callback;
         private readonly StringBuilder _sb = new StringBuilder();
@@ -24,16 +25,21 @@ namespace Regi.Test.Helpers
 
         public override void Write(char ch)
         {
-            if (ch == '\n')
+            lock (_writerLock)
             {
-                _callback?.Invoke(_sb.ToString());
+                if (ch == '\n')
+                {
+                    string output = _sb?.ToString();
 
-                _testOutput.WriteLine(_sb.ToString());
-                _sb.Clear();
-            }
-            else
-            {
-                _sb.Append(ch);
+                    _testOutput.WriteLine(output);
+                    _callback?.Invoke(output);
+
+                    _sb.Clear();
+                }
+                else
+                {
+                    _sb.Append(ch);
+                }
             }
         }
 

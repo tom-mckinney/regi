@@ -13,9 +13,11 @@ namespace Regi.Services
 {
     public interface IParallelService
     {
-        void Queue(Action action);
+        void Queue(bool isSerial, Action action);
+        void QueueParallel(Action action);
+        void QueueSerial(Action action);
 
-        void RunInParallel();
+        void RunAll();
 
         void WaitOnPorts(IList<Project> projects);
 
@@ -24,7 +26,6 @@ namespace Regi.Services
 
     public class ParallelService : IParallelService
     {
-        private readonly IList<Action> actions = new List<Action>();
         private readonly IConsole _console;
         private readonly INetworkingService _networkingService;
 
@@ -34,14 +35,35 @@ namespace Regi.Services
             _networkingService = networkingService;
         }
 
-        public void Queue(Action action)
+        public IList<Action> ParallelActions { get; } = new List<Action>();
+        public IList<Action> SerialActions { get; } = new List<Action>();
+
+        public void Queue(bool isSerial, Action action)
         {
-            actions.Add(action);
+            if (isSerial)
+                QueueSerial(action);
+            else
+                QueueParallel(action);
         }
 
-        public void RunInParallel()
+        public void QueueParallel(Action action)
         {
-            Parallel.Invoke(actions.ToArray());
+            ParallelActions.Add(action);
+        }
+
+        public void QueueSerial(Action action)
+        {
+            SerialActions.Add(action);
+        }
+
+        public void RunAll()
+        {
+            Parallel.Invoke(ParallelActions.ToArray());
+
+            foreach (var action in SerialActions)
+            {
+                action();
+            }
         }
 
         public void WaitOnPorts(IList<Project> projects)
@@ -53,7 +75,7 @@ namespace Regi.Services
             WaitOnPorts(projectsWithPorts);
         }
 
-        public void WaitOnPorts(IDictionary<int, Project> projects)
+        public virtual void WaitOnPorts(IDictionary<int, Project> projects)
         {
             string projectPluralization = projects.Count > 1 ? "projects" : "project";
             _console.WriteEmphasizedLine($"Waiting for {projectPluralization} to start: {string.Join(", ", projects.Select(p => $"{p.Value.Name} ({p.Key})"))}");

@@ -101,7 +101,7 @@ namespace Regi.Services
 
             foreach (var project in projects)
             {
-                _parallelService.Queue(() =>
+                _parallelService.Queue(project.Serial, () =>
                 {
                     StartProject(project, null, options);
                 });
@@ -115,14 +115,14 @@ namespace Regi.Services
                 }
             };
 
-            _parallelService.RunInParallel();
+            _parallelService.RunAll();
 
             _parallelService.WaitOnPorts(projects);
 
             return projects;
         }
 
-        private void StartProject(Project project, IList<Project> projects, CommandOptions options)
+        private AppProcess StartProject(Project project, IList<Project> projects, CommandOptions options)
         {
             _console.WriteEmphasizedLine($"Starting project {project.Name} ({project.File.DirectoryName})");
 
@@ -144,6 +144,8 @@ namespace Regi.Services
                     projects.Add(project);
                 }
             }
+
+            return process;
         }
 
         public IList<Project> Test(CommandOptions options)
@@ -166,8 +168,10 @@ namespace Regi.Services
 
             foreach (var project in projects)
             {
-                _parallelService.Queue(() =>
+                _parallelService.Queue(project.Serial, () =>
                 {
+                    IList<AppProcess> associatedProcesses = new List<AppProcess>();
+
                     if (project.Requires.Any())
                     {
                         IDictionary<int, Project> requiredProjectsWithPorts = new Dictionary<int, Project>();
@@ -183,14 +187,15 @@ namespace Regi.Services
                                 if (requiredProject.Port.HasValue)
                                     requiredProjectsWithPorts.Add(requiredProject.Port.Value, requiredProject);
 
-                                StartProject(requiredProject, projects, options);
+                                var requiredProccess = StartProject(requiredProject, projects, options);
+                                associatedProcesses.Add(requiredProccess);
                             }
                         }
 
                         _parallelService.WaitOnPorts(requiredProjectsWithPorts);
                     }
 
-                    _console.WriteEmphasizedLine($"Starting tests for project {project.Name} ({project.File.DirectoryName})");
+                    _console.WriteEmphasizedLine($"Starting tests for project {project.Name}");
 
                     if (project.Framework == ProjectFramework.Dotnet)
                     {
@@ -203,14 +208,22 @@ namespace Regi.Services
 
                     if (project.Process != null)
                     {
+                        string outputMessage = $"Finished tests for project {project.Name} with status {project.Process?.Status}";
+                        if (project.Process?.Status == AppStatus.Success)
+                            _console.WriteSuccessLine(outputMessage, ConsoleLineStyle.LineBeforeAndAfter);
+                        else
+                            _console.WriteErrorLine(outputMessage, ConsoleLineStyle.LineBeforeAndAfter);
+
                         processes.Add(project.Process);
 
-                        _console.WriteEmphasizedLine($"Finished tests for project {project.Name} ({project.File.DirectoryName})");
+                        associatedProcesses.DisposeAll();
                     }
                 });
             }
 
-            _parallelService.RunInParallel();
+            _parallelService.RunAll();
+
+            processes.DisposeAll();
 
             return projects;
         }
@@ -223,7 +236,7 @@ namespace Regi.Services
 
             foreach (var project in projects)
             {
-                _parallelService.Queue(() =>
+                _parallelService.QueueParallel(() =>
                 {
                     _console.WriteEmphasizedLine($"Starting install for project {project.Name}");
 
@@ -246,7 +259,7 @@ namespace Regi.Services
                 });
             }
 
-            _parallelService.RunInParallel();
+            _parallelService.RunAll();
 
             return projects;
         }

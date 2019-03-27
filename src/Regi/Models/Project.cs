@@ -34,6 +34,8 @@ namespace Regi.Models
 
         public IDictionary<string, string> Environment { get; set; } = new Dictionary<string, string>();
 
+        public bool Serial { get; set; } = false;
+
         private FileInfo _file;
         public FileInfo File
         {

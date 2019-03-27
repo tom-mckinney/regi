@@ -24,22 +24,95 @@ namespace Regi.Test.Services
         }
 
         [Fact]
-        public void Queue_can_add_and_run_all_tasks()
+        public void Queue_adds_to_parallel_by_default_and_serial_if_specified()
+        {
+            int taskCount = 5;
+            int parallelExecutions = 0;
+            int serialExecutions = 0;
+
+            for (int i = 0; i < taskCount; i++)
+            {
+                _service.Queue(false, () =>
+                {
+                    parallelExecutions++;
+                });
+
+                _service.Queue(true, () =>
+                {
+                    serialExecutions++;
+                });
+            }
+
+            _service.RunAll();
+
+            Assert.Equal(taskCount, parallelExecutions);
+            Assert.Equal(taskCount, ((ParallelService)_service).ParallelActions.Count);
+
+            Assert.Equal(taskCount, serialExecutions);
+            Assert.Equal(taskCount, ((ParallelService)_service).SerialActions.Count);
+        }
+
+        [Fact]
+        public void QueueParallel_can_add_and_run_all_tasks()
         {
             int taskCount = 5;
             int executions = 0;
 
             for (int i = 0; i < taskCount; i++)
             {
-                _service.Queue(() =>
+                _service.QueueParallel(() =>
                 {
                     executions++;
                 });
             }
 
-            _service.RunInParallel();
+            _service.RunAll();
 
             Assert.Equal(taskCount, executions);
+            Assert.Equal(taskCount, ((ParallelService)_service).ParallelActions.Count);
+        }
+
+        [Fact]
+        public void QueueSerial_can_add_and_run_all_tasks()
+        {
+            int taskCount = 5;
+            int executions = 0;
+
+            for (int i = 0; i < taskCount; i++)
+            {
+                _service.QueueSerial(() =>
+                {
+                    executions++;
+                });
+            }
+
+            _service.RunAll();
+
+            Assert.Equal(taskCount, executions);
+            Assert.Equal(taskCount, ((ParallelService)_service).SerialActions.Count);
+        }
+
+        [Theory]
+        [InlineData(3)]
+        [InlineData(4)]
+        [InlineData(5)]
+        public void Queue_adds_and_runs_serial_actions_after_parallel_actions(int taskCount)
+        {
+            int parallelRunCount = 0;
+            int serialRunCount = 0;
+
+            _service.QueueParallel(() => parallelRunCount++);
+            _service.QueueParallel(() => parallelRunCount++);
+
+            for (int i = 0; i < taskCount; i++)
+            {
+                _service.QueueSerial(() => serialRunCount++);
+            }
+
+            _service.RunAll();
+
+            Assert.Equal(2, parallelRunCount);
+            Assert.Equal(taskCount, serialRunCount);
         }
 
         [Theory]

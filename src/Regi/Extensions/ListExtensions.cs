@@ -38,5 +38,16 @@ namespace Regi.Extensions
 
             return projects.ToList();
         }
+
+        public static void DisposeAll(this IEnumerable<AppProcess> processes)
+        {
+            if (processes?.Count() > 0)
+            {
+                foreach (var p in processes)
+                {
+                    p.Dispose();
+                }
+            }
+        }
     }
 }

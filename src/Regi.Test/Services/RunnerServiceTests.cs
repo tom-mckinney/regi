@@ -43,7 +43,7 @@ namespace Regi.Test.Services
             _console = new TestConsole(output);
             _dotnetServiceMock = new Mock<IDotnetService>();
             _nodeServiceMock = new Mock<INodeService>();
-            _parallelService = new TestParallelService();
+            _parallelService = new TestParallelService(_console);
             _fileServiceMock = new Mock<IFileService>();
             _runnerService = new RunnerService(
                 _dotnetServiceMock.Object,
@@ -144,6 +144,24 @@ namespace Regi.Test.Services
         }
 
         [Fact]
+        public void Start_adds_serial_projects_to_serial_queue_and_all_others_to_parallel_queue()
+        {
+            _dotnetServiceMock.Setup(m => m.StartProject(It.IsAny<Project>(), It.IsAny<CommandOptions>()))
+                .Returns<Project, CommandOptions>((p, o) => new AppProcess(new Process(), AppTask.Start, AppStatus.Success, p?.Port))
+                .Verifiable();
+            _nodeServiceMock.Setup(m => m.StartProject(It.IsAny<Project>(), It.IsAny<CommandOptions>()))
+                .Returns<Project, CommandOptions>((p, b) => new AppProcess(new Process(), AppTask.Start, AppStatus.Success, p?.Port))
+                .Verifiable();
+
+            DirectoryUtility.SetTargetDirectory(_startupConfigGood);
+
+            var projects = _runnerService.Start(TestOptions.Create());
+
+            Assert.Equal(2, _parallelService.ParallelActions.Count);
+            Assert.Single(_parallelService.SerialActions);
+        }
+
+        [Fact]
         public void Test_returns_a_project_for_every_test_in_startup_config()
         {
             _dotnetServiceMock.Setup(m => m.TestProject(It.IsAny<Project>(), It.IsAny<CommandOptions>()))
@@ -197,6 +215,21 @@ namespace Regi.Test.Services
             Assert.Equal(expectedCount, processes.Count);
 
             _dotnetServiceMock.VerifyAll();
+        }
+
+        [Fact]
+        public void Test_adds_serial_projects_to_serial_queue_and_all_others_to_parallel_queue()
+        {
+            _dotnetServiceMock.Setup(m => m.TestProject(It.IsAny<Project>(), It.IsAny<CommandOptions>()))
+                .Returns<Project, CommandOptions>((p, o) => new AppProcess(new Process(), AppTask.Start, AppStatus.Success, p?.Port))
+                .Verifiable();
+
+            DirectoryUtility.SetTargetDirectory(_startupConfigGood);
+
+            var processes = _runnerService.Test(TestOptions.Create());
+
+            Assert.Single(_parallelService.ParallelActions);
+            Assert.Single(_parallelService.SerialActions);
         }
 
         [Fact]
