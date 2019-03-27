@@ -73,9 +73,7 @@ namespace Regi.Services
                 }
             }
 
-            _console.WriteLine();
-            _console.WriteSuccessLine("All projects started");
-            _console.WriteLine();
+            _console.WriteSuccessLine("All projects started", ConsoleLineStyle.LineBeforeAndAfter);
         }
     }
 }

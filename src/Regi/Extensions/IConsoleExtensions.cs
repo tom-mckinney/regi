@@ -7,31 +7,39 @@ using System.Text;
 
 namespace Regi.Extensions
 {
+    public enum ConsoleLineStyle
+    {
+        Normal = 0,
+        LineBefore,
+        LineAfter,
+        LineBeforeAndAfter
+    }
+
     public static class IConsoleExtensions
     {
-        public static void WriteEmphasizedLine(this IConsole console, string input)
+        public static void WriteEmphasizedLine(this IConsole console, string input, ConsoleLineStyle style = ConsoleLineStyle.Normal)
         {
             console.ForegroundColor = ConsoleColor.Cyan;
 
-            console.WriteLine(input);
+            WriteLineWithStyle(console, input, style);
 
             console.ResetColor();
         }
 
-        public static void WriteSuccessLine(this IConsole console, string input)
+        public static void WriteSuccessLine(this IConsole console, string input, ConsoleLineStyle style = ConsoleLineStyle.Normal)
         {
             console.ForegroundColor = ConsoleColor.Green;
 
-            console.WriteLine(input);
+            WriteLineWithStyle(console, input, style);
 
             console.ResetColor();
         }
 
-        public static void WriteErrorLine(this IConsole console, string input)
+        public static void WriteErrorLine(this IConsole console, string input, ConsoleLineStyle style = ConsoleLineStyle.Normal)
         {
             console.ForegroundColor = ConsoleColor.Red;
 
-            console.WriteLine(input);
+            WriteLineWithStyle(console, input, style);
 
             console.ResetColor();
         }
@@ -98,5 +106,32 @@ namespace Regi.Extensions
         }
 
         private static string Indent(int indentCount) => new string(' ', indentCount * 2);
+
+        private static void WriteLineWithStyle(IConsole console, string input, ConsoleLineStyle style)
+        {
+            switch (style)
+            {
+                case ConsoleLineStyle.LineBefore:
+                case ConsoleLineStyle.LineBeforeAndAfter:
+                    console.WriteLine();
+                    break;
+                case ConsoleLineStyle.Normal:
+                default:
+                    break;
+            }
+
+            console.WriteLine(input);
+
+            switch (style)
+            {
+                case ConsoleLineStyle.LineAfter:
+                case ConsoleLineStyle.LineBeforeAndAfter:
+                    console.WriteLine();
+                    break;
+                case ConsoleLineStyle.Normal:
+                default:
+                    break;
+            }
+        }
     }
 }
