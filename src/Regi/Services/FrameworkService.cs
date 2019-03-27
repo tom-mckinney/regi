@@ -75,7 +75,7 @@ namespace Regi.Services
             {
                 KillOnExit = options.KillProcessesOnExit,
                 Verbose = options.Verbose,
-                OnDispose = () => HandleDispose(project)
+                OnDispose = (processId) => HandleDispose(project, processId)
             };
 
             process.StartInfo.CopyEnvironmentVariables(options.VariableList);
@@ -149,9 +149,9 @@ namespace Regi.Services
             }
         });
 
-        protected virtual void HandleDispose(Project project)
+        protected virtual void HandleDispose(Project project, int processId)
         {
-            _console.WriteEmphasizedLine($"Disposing process for project {project.Name} ({project.Path})");
+            _console.WriteEmphasizedLine($"Disposing process for project {project.Name} ({processId})");
         }
     }
 }

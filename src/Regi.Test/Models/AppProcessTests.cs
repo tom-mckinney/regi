@@ -16,7 +16,7 @@ namespace Regi.Test.Models
 
             AppProcess model = new AppProcess(new System.Diagnostics.Process(), AppTask.Test, AppStatus.Running)
             {
-                OnDispose = () => callCount++
+                OnDispose = (processId) => callCount++
             };
 
             model.Dispose();

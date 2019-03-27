@@ -10,6 +10,7 @@
     <Compile Remove="_SampleProjects_\Backend\bin\**" />
     <Compile Remove="_SampleProjects_\Backend\obj\**" />
     <Compile Remove="_SampleProjects_\Frontend\node_modules\**" />
+    <Compile Remove="_SampleProjects_\IntegrationTests\node_modules\**" />
     <Compile Remove="_SampleProjects_\SampleAppLong\bin\**" />
     <Compile Remove="_SampleProjects_\SampleAppLong\obj\**" />
     <Compile Remove="_SampleProjects_\SampleApp\obj\**" />
@@ -18,6 +19,7 @@
     <EmbeddedResource Remove="_SampleProjects_\Backend\bin\**" />
     <EmbeddedResource Remove="_SampleProjects_\Backend\obj\**" />
     <EmbeddedResource Remove="_SampleProjects_\Frontend\node_modules\**" />
+    <EmbeddedResource Remove="_SampleProjects_\IntegrationTests\node_modules\**" />
     <EmbeddedResource Remove="_SampleProjects_\SampleAppLong\bin\**" />
     <EmbeddedResource Remove="_SampleProjects_\SampleAppLong\obj\**" />
     <EmbeddedResource Remove="_SampleProjects_\SampleApp\obj\**" />
@@ -26,6 +28,7 @@
     <None Remove="_SampleProjects_\Backend\bin\**" />
     <None Remove="_SampleProjects_\Backend\obj\**" />
     <None Remove="_SampleProjects_\Frontend\node_modules\**" />
+    <None Remove="_SampleProjects_\IntegrationTests\node_modules\**" />
     <None Remove="_SampleProjects_\SampleAppLong\bin\**" />
     <None Remove="_SampleProjects_\SampleAppLong\obj\**" />
     <None Remove="_SampleProjects_\SampleApp\obj\**" />

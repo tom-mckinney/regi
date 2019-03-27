@@ -18,6 +18,15 @@ namespace Regi.Extensions
             console.ResetColor();
         }
 
+        public static void WriteSuccessLine(this IConsole console, string input)
+        {
+            console.ForegroundColor = ConsoleColor.Green;
+
+            console.WriteLine(input);
+
+            console.ResetColor();
+        }
+
         public static void WriteErrorLine(this IConsole console, string input)
         {
             console.ForegroundColor = ConsoleColor.Red;

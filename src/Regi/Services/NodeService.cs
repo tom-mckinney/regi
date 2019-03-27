@@ -36,8 +36,6 @@ namespace Regi.Services
 
             AppProcess install = CreateProcess(FrameworkCommands.Node.Install, project, options);
 
-            //process.ErrorDataReceived += DefaultOutputDataRecieved(project.Name); // TODO: do we need this?
-
             install.Start();
 
             install.WaitForExit();
@@ -69,5 +67,14 @@ namespace Regi.Services
 
             return test;
         }
+
+        public override DataReceivedEventHandler HandleErrorDataReceived(string name, AppProcess output) => new DataReceivedEventHandler((o, e) =>
+        {
+            if (!string.IsNullOrWhiteSpace(e.Data) && !e.Data.StartsWith("npm warn", StringComparison.InvariantCultureIgnoreCase))
+            {
+                output.Status = AppStatus.Failure;
+                _console.WriteErrorLine(name + ": " + e.Data);
+            }
+        });
     }
 }

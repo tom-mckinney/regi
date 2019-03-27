@@ -22,6 +22,9 @@ namespace Regi
 
         public static int MainWithConsole(IConsole console, string[] args)
         {
+            Console.InputEncoding = System.Text.Encoding.Unicode;
+            Console.OutputEncoding = System.Text.Encoding.Unicode;
+
             var services = new ServiceCollection()
                 .Configure<Settings>(o =>
                 {
@@ -32,6 +35,7 @@ namespace Regi
                 .AddSingleton<IRunnerService, RunnerService>()
                 .AddSingleton<IFileService, FileService>()
                 .AddTransient<IParallelService, ParallelService>()
+                .AddTransient<INetworkingService, NetworkingService>()
                 .AddSingleton(console)
                 .AddSingleton<CommandLineContext, DefaultCommandLineContext>()
                 .BuildServiceProvider();

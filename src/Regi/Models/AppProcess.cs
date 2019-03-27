@@ -72,11 +72,11 @@ namespace Regi.Models
             }
         }
 
-        public Action OnDispose { get; set; }
+        public Action<int> OnDispose { get; set; }
 
         public void Dispose()
         {
-            OnDispose?.Invoke();
+            OnDispose?.Invoke(ProcessId);
 
             if (KillOnExit)
             {

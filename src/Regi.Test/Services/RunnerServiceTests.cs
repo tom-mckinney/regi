@@ -5,6 +5,8 @@ using Regi.Models;
 using Regi.Services;
 using Regi.Test.Helpers;
 using Regi.Utilities;
+using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -19,6 +21,7 @@ namespace Regi.Test.Services
         private readonly TestConsole _console;
         private readonly Mock<IDotnetService> _dotnetServiceMock;
         private readonly Mock<INodeService> _nodeServiceMock;
+        private readonly TestParallelService _parallelService;
         private readonly Mock<IFileService> _fileServiceMock;
         private readonly IRunnerService _runnerService;
 
@@ -40,11 +43,12 @@ namespace Regi.Test.Services
             _console = new TestConsole(output);
             _dotnetServiceMock = new Mock<IDotnetService>();
             _nodeServiceMock = new Mock<INodeService>();
+            _parallelService = new TestParallelService();
             _fileServiceMock = new Mock<IFileService>();
             _runnerService = new RunnerService(
                 _dotnetServiceMock.Object,
                 _nodeServiceMock.Object,
-                new TestParallelService(),
+                _parallelService,
                 _fileServiceMock.Object,
                 _console);
 
@@ -102,17 +106,18 @@ namespace Regi.Test.Services
 
             DirectoryUtility.SetTargetDirectory(_startupConfigGood);
 
-            var processes = _runnerService.Start(new CommandOptions());
+            var processes = _runnerService.Start(TestOptions.Create());
 
             Assert.Equal(totalAppCount, processes.Count);
             Assert.Single(processes, p => p.Port == 9080);
+            Assert.Equal(processes.Count(p => p.Port.HasValue), _parallelService.ActivePorts.Count);
 
             _dotnetServiceMock.Verify(m => m.StartProject(It.IsAny<Project>(), It.IsAny<CommandOptions>()), Times.Exactly(dotnetAppCount));
             _nodeServiceMock.Verify(m => m.StartProject(It.IsAny<Project>(), It.IsAny<CommandOptions>()), Times.Exactly(nodeAppCount));
         }
 
         [Fact]
-        public void Start_sets_port_and_url_variables_for_every_app()
+        public void Start_sets_port_and_url_variables_for_every_app_and_waits_on_port()
         {
             _dotnetServiceMock.Setup(m => m.StartProject(It.IsAny<Project>(), It.IsAny<CommandOptions>()))
                 .Returns<Project, CommandOptions>((p, o) => new AppProcess(new Process(), AppTask.Start, AppStatus.Success, p?.Port))
@@ -123,7 +128,7 @@ namespace Regi.Test.Services
 
             DirectoryUtility.SetTargetDirectory(_startupConfigGood);
 
-            var projects = _runnerService.Start(new CommandOptions());
+            var projects = _runnerService.Start(TestOptions.Create());
 
             foreach (var p in projects)
             {
@@ -132,6 +137,8 @@ namespace Regi.Test.Services
                     _dotnetServiceMock.Verify(m => m.StartProject(It.IsAny<Project>(),
                         It.Is<CommandOptions>(o => o.VariableList.ContainsKey($"{p.Name}_PORT".ToUnderscoreCase()) &&
                         o.VariableList.ContainsKey($"{p.Name}_URL".ToUnderscoreCase()))));
+
+                    Assert.Contains(p.Port.Value, _parallelService.ActivePorts);
                 }
             }
         }
@@ -145,7 +152,7 @@ namespace Regi.Test.Services
 
             DirectoryUtility.SetTargetDirectory(_startupConfigGood);
 
-            var processes = _runnerService.Test(new CommandOptions());
+            var processes = _runnerService.Test(TestOptions.Create());
 
             Assert.Equal(totalTestCount, processes.Count);
 
@@ -164,11 +171,12 @@ namespace Regi.Test.Services
 
             DirectoryUtility.SetTargetDirectory(SampleDirectoryPath("ConfigurationRequires"));
 
-            var processes = _runnerService.Test(new CommandOptions());
+            var processes = _runnerService.Test(TestOptions.Create());
 
             Assert.Equal(totalTestCount + 1, processes.Count);
-            Assert.Single(processes, p => p.Process.Task == AppTask.Start);
             Assert.Equal(2, processes.Where(p => p.Process.Task == AppTask.Test).Count());
+            var requiredApp = Assert.Single(processes, p => p.Process.Task == AppTask.Start);
+            Assert.Contains(requiredApp.Port.Value, _parallelService.ActivePorts);
 
             _dotnetServiceMock.VerifyAll();
         }
@@ -203,7 +211,7 @@ namespace Regi.Test.Services
 
             DirectoryUtility.SetTargetDirectory(_startupConfigGood);
 
-            var processes = _runnerService.Install(new CommandOptions());
+            var processes = _runnerService.Install(TestOptions.Create());
 
             Assert.Equal(totalAppCount + totalTestCount, processes.Count);
 
@@ -219,7 +227,7 @@ namespace Regi.Test.Services
 
             DirectoryUtility.SetTargetDirectory(SampleDirectoryPath("ConfigurationNew"));
 
-            _runnerService.Initialize(new CommandOptions());
+            _runnerService.Initialize(TestOptions.Create());
 
             _fileServiceMock.VerifyAll();
         }
@@ -229,7 +237,7 @@ namespace Regi.Test.Services
         {
             DirectoryUtility.SetTargetDirectory(_startupConfigGood);
 
-            var output = _runnerService.List(new CommandOptions());
+            var output = _runnerService.List(TestOptions.Create());
 
             Assert.Equal(totalAppCount, output.Apps.Count);
             Assert.Equal(totalTestCount, output.Tests.Count);

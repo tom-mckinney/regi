@@ -3,7 +3,8 @@
     {
       "name": "SampleApp1",
       "path": "../SampleApp/SampleApp.csproj",
-      "type": "web"
+      "type": "web",
+      "port": 8000
     },
     {
       "name": "SampleApp2",

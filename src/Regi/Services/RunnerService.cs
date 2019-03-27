@@ -117,7 +117,7 @@ namespace Regi.Services
 
             _parallelService.RunInParallel();
 
-            WaitOnPorts(projects);
+            _parallelService.WaitOnPorts(projects);
 
             return projects;
         }
@@ -180,14 +180,14 @@ namespace Regi.Services
 
                             if (requiredProject != null)
                             {
-                                if (project.Port.HasValue)
-                                    requiredProjectsWithPorts.Add(project.Port.Value, project);
+                                if (requiredProject.Port.HasValue)
+                                    requiredProjectsWithPorts.Add(requiredProject.Port.Value, requiredProject);
 
                                 StartProject(requiredProject, projects, options);
                             }
                         }
 
-                        WaitOnPorts(requiredProjectsWithPorts);
+                        _parallelService.WaitOnPorts(requiredProjectsWithPorts);
                     }
 
                     _console.WriteEmphasizedLine($"Starting tests for project {project.Name} ({project.File.DirectoryName})");
@@ -294,38 +294,6 @@ namespace Regi.Services
             }
 
             return output;
-        }
-
-        private void WaitOnPorts(IList<Project> projects)
-        {
-            IDictionary<int, Project> projectsWithPorts = projects
-                .Where(p => p.Port.HasValue)
-                .ToDictionary(p => p.Port.Value);
-
-            WaitOnPorts(projectsWithPorts);
-        }
-
-        private void WaitOnPorts(IDictionary<int, Project> projects)
-        {
-            string projectPluralization = projects.Count > 1 ? "projects" : "project";
-            _console.WriteEmphasizedLine($"Waiting for {projectPluralization} to start: {string.Join(", ", projects.Select(p => $"{p.Value.Name} ({p.Key})"))}");
-
-            IPGlobalProperties ipGlobalProperties = IPGlobalProperties.GetIPGlobalProperties();
-
-            while (projects.Count > 0)
-            {
-                IPEndPoint[] listeningConnections = ipGlobalProperties.GetActiveTcpListeners();
-
-                foreach (var connection in listeningConnections)
-                {
-                    if (projects.TryGetValue(connection.Port, out Project p))
-                    {
-                        _console.WriteEmphasizedLine($"{p.Name} is now listening on port {connection.Port}");
-
-                        projects.Remove(connection.Port);
-                    }
-                }
-            }
         }
     }
 }
