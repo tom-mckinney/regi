@@ -252,6 +252,26 @@ namespace Regi.Test.Services
         }
 
         [Fact]
+        public void Install_sets_package_repo_to_value_configured_startup_file()
+        {
+            _dotnetServiceMock.Setup(m => m.InstallProject(It.IsAny<Project>(), It.IsAny<CommandOptions>()))
+                .Returns(new AppProcess(new Process(), AppTask.Install, AppStatus.Success))
+                .Verifiable();
+            _nodeServiceMock.Setup(m => m.InstallProject(It.IsAny<Project>(), It.IsAny<CommandOptions>()))
+                .Returns(new AppProcess(new Process(), AppTask.Install, AppStatus.Success))
+                .Verifiable();
+
+            DirectoryUtility.SetTargetDirectory(_startupConfigGood);
+
+            var processes = _runnerService.Install(TestOptions.Create());
+
+            var dotnetApp = Assert.Single(processes, p => p.Framework == ProjectFramework.Dotnet && p.Type == ProjectType.Web && p.Port.HasValue);
+            var nodeApp = Assert.Single(processes, p => p.Framework == ProjectFramework.Node && p.Type == ProjectType.Web && p.Port.HasValue);
+
+            Assert.Equal("http://nuget.org/api", dotnetApp.Source);
+            Assert.Equal("http://npmjs.org", nodeApp.Source);
+        }
+        [Fact]
         public void Initialize_returns_a_single_process_and_creates_a_config_file()
         {
             _fileServiceMock.Setup(m => m.CreateConfigFile())

@@ -186,13 +186,27 @@ namespace Regi.Test.Services
         }
 
         [Fact]
-        public void RestoreProject_returns_process()
+        public void InstallProject_returns_process()
         {
+            _application.Source = "http://artifactory.org/nuget";
+
             using (AppProcess process = _service.InstallProject(_application, TestOptions.Create()))
             {
                 Assert.Equal(AppTask.Install, process.Task);
                 Assert.Equal(AppStatus.Success, process.Status);
                 Assert.Null(process.Port);
+            }
+        }
+
+        [Fact]
+        public void InstallProject_sets_source_if_specified()
+        {
+            string source = "http://artifactory.org/nuget";
+            _application.Source = source;
+
+            using (AppProcess process = _service.InstallProject(_application, TestOptions.Create()))
+            {
+                Assert.Contains($"--source {source}", process.Process.StartInfo.Arguments);
             }
         }
     }

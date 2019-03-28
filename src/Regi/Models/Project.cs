@@ -36,6 +36,23 @@ namespace Regi.Models
 
         public bool Serial { get; set; } = false;
 
+        public string Source { get; set; }
+
+        public void TryAddSource(CommandOptions options, StartupConfig config)
+        {
+            if (string.IsNullOrWhiteSpace(Source))
+            {
+                if (!string.IsNullOrWhiteSpace(options.Source))
+                {
+                    Source = options.Source;
+                }
+                else if ((config.Sources.TryGetValue(Framework, out string source) || config.Sources.TryGetValue(ProjectFramework.Any, out source)) && (!string.IsNullOrWhiteSpace(source)))
+                {
+                    Source = source;
+                }
+            }
+        }
+
         private FileInfo _file;
         public FileInfo File
         {

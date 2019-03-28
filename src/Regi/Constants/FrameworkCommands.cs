@@ -7,7 +7,8 @@ namespace Regi.Constants
 {
     public static class FrameworkCommands
     {
-        private const string Test = "test";
+        public const string Any = "*";
+        public const string Test = "test";
 
         public static class Dotnet
         {

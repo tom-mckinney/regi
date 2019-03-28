@@ -38,20 +38,18 @@ namespace Regi.Utilities
         {
             if (_isWindows)
             {
-                RunProcessAndWaitForExit(
-                    "taskkill",
-                    $"/T /F /PID {processId}",
-                    timeout);
+                RunProcessAndWaitForExit("taskkill", $"/T /F /PID {processId}", timeout);
             }
             else
             {
-                var children = new HashSet<int>();
-                GetAllChildIdsUnix(processId, children, timeout);
-                foreach (var childId in children)
-                {
-                    KillProcessUnix(childId, timeout);
-                }
-                KillProcessUnix(processId, timeout);
+                RunProcessAndWaitForExit("pkill", $"-P {processId}", timeout); // TODO: find better method of doing this on unix
+                //var children = new HashSet<int>();
+                //GetAllChildIdsUnix(processId, children, timeout);
+                //foreach (var childId in children)
+                //{
+                //    KillProcessUnix(childId, timeout);
+                //}
+                //KillProcessUnix(processId, timeout);
             }
         }
 
@@ -101,7 +99,8 @@ namespace Regi.Utilities
                 FileName = fileName,
                 Arguments = arguments,
                 UseShellExecute = true,
-                CreateNoWindow = true
+                CreateNoWindow = true,
+                WindowStyle = ProcessWindowStyle.Hidden
             };
 
             var process = Process.Start(startInfo);

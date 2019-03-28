@@ -17,45 +17,59 @@ namespace Regi.Extensions
 
     public static class IConsoleExtensions
     {
+        private static readonly object _consoleLock = new object();
+
         public static void WriteEmphasizedLine(this IConsole console, string input, ConsoleLineStyle style = ConsoleLineStyle.Normal)
         {
-            console.ForegroundColor = ConsoleColor.Cyan;
+            lock (_consoleLock)
+            {
+                console.ForegroundColor = ConsoleColor.Cyan;
 
-            WriteLineWithStyle(console, input, style);
+                WriteLineWithStyle(console, input, style);
 
-            console.ResetColor();
+                console.ResetColor();
+            }
         }
 
         public static void WriteSuccessLine(this IConsole console, string input, ConsoleLineStyle style = ConsoleLineStyle.Normal)
         {
-            console.ForegroundColor = ConsoleColor.Green;
+            lock (_consoleLock)
+            {
+                console.ForegroundColor = ConsoleColor.Green;
 
-            WriteLineWithStyle(console, input, style);
+                WriteLineWithStyle(console, input, style);
 
-            console.ResetColor();
+                console.ResetColor();
+            }
         }
 
         public static void WriteErrorLine(this IConsole console, string input, ConsoleLineStyle style = ConsoleLineStyle.Normal)
         {
-            console.ForegroundColor = ConsoleColor.Red;
+            lock (_consoleLock)
+            {
+                console.ForegroundColor = ConsoleColor.Red;
 
-            WriteLineWithStyle(console, input, style);
+                WriteLineWithStyle(console, input, style);
 
-            console.ResetColor();
+                console.ResetColor();
+            }
         }
 
         public static void WriteIndentedLine(this IConsole console, string input, int indentCount, ConsoleColor? color = null)
         {
-            if (color.HasValue)
+            lock (_consoleLock)
             {
-                console.ForegroundColor = color.Value;
-            }
+                if (color.HasValue)
+                {
+                    console.ForegroundColor = color.Value;
+                }
 
-            console.WriteLine(Indent(indentCount) + input);
+                console.WriteLine(Indent(indentCount) + input);
 
-            if (color.HasValue)
-            {
-                console.ResetColor();
+                if (color.HasValue)
+                {
+                    console.ResetColor();
+                }
             }
         }
 
@@ -109,28 +123,31 @@ namespace Regi.Extensions
 
         private static void WriteLineWithStyle(IConsole console, string input, ConsoleLineStyle style)
         {
-            switch (style)
+            lock (_consoleLock)
             {
-                case ConsoleLineStyle.LineBefore:
-                case ConsoleLineStyle.LineBeforeAndAfter:
-                    console.WriteLine();
-                    break;
-                case ConsoleLineStyle.Normal:
-                default:
-                    break;
-            }
+                switch (style)
+                {
+                    case ConsoleLineStyle.LineBefore:
+                    case ConsoleLineStyle.LineBeforeAndAfter:
+                        console.WriteLine();
+                        break;
+                    case ConsoleLineStyle.Normal:
+                    default:
+                        break;
+                }
 
-            console.WriteLine(input);
+                console.WriteLine(input);
 
-            switch (style)
-            {
-                case ConsoleLineStyle.LineAfter:
-                case ConsoleLineStyle.LineBeforeAndAfter:
-                    console.WriteLine();
-                    break;
-                case ConsoleLineStyle.Normal:
-                default:
-                    break;
+                switch (style)
+                {
+                    case ConsoleLineStyle.LineAfter:
+                    case ConsoleLineStyle.LineBeforeAndAfter:
+                        console.WriteLine();
+                        break;
+                    case ConsoleLineStyle.Normal:
+                    default:
+                        break;
+                }
             }
         }
     }

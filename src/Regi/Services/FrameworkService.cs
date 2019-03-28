@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace Regi.Services
@@ -21,6 +22,7 @@ namespace Regi.Services
     {
         protected readonly IConsole _console;
         protected readonly string _frameworkExePath;
+        protected readonly bool _isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
 
         public FrameworkService(IConsole console, string frameworkExePath)
         {
@@ -40,15 +42,20 @@ namespace Regi.Services
 
         protected abstract void SetEnvironmentVariables(Process process, Project project);
 
-        protected abstract ProjectOptions FrameworkDefaultOptions { get; }
+        protected abstract ProjectOptions FrameworkOptions { get; }
 
-        protected virtual void ApplyFrameworkDefaultOptions(StringBuilder builder, string command, Project project, CommandOptions options)
+        protected virtual void ApplyFrameworkOptions(StringBuilder builder, string command, Project project, CommandOptions options)
         {
-            if (FrameworkDefaultOptions != null && FrameworkDefaultOptions.Any())
+            if (FrameworkOptions != null && FrameworkOptions.Any())
             {
-                if (FrameworkDefaultOptions.TryGetValue(command, out IList<string> defaultOptions))
+                if (FrameworkOptions.TryGetValue(command, out IList<string> defaultOptions))
                 {
                     builder.Append(' ').AppendJoin(' ', defaultOptions);
+                }
+
+                if (FrameworkOptions.TryGetValue(FrameworkCommands.Any, out IList<string> anyCommandOptions))
+                {
+                    builder.Append(' ').AppendJoin(' ', anyCommandOptions);
                 }
             }
         }
@@ -57,14 +64,19 @@ namespace Regi.Services
 
         public virtual AppProcess CreateProcess(string command, Project project, CommandOptions options)
         {
+            string args = BuildCommand(command, project, options);
+
+            if (options.Verbose)
+                _console.WriteEmphasizedLine($"Executing: {_frameworkExePath} {args}");
+
             Process process = new Process
             {
                 StartInfo = new ProcessStartInfo()
                 {
                     FileName = _frameworkExePath,
-                    Arguments = BuildCommand(command, project, options),
+                    Arguments = args,
                     WorkingDirectory = project.File.DirectoryName,
-                    RedirectStandardOutput = options.Verbose,
+                    RedirectStandardOutput = _isWindows ? options.Verbose : true,
                     RedirectStandardError = true,
                     CreateNoWindow = true
                 },
@@ -115,7 +127,7 @@ namespace Regi.Services
                 }
             }
 
-            ApplyFrameworkDefaultOptions(builder, command, project, options);
+            ApplyFrameworkOptions(builder, command, project, options);
 
             if (!string.IsNullOrWhiteSpace(options?.Arguments))
             {

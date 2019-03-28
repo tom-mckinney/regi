@@ -4,6 +4,7 @@ using Regi.Extensions;
 using Regi.Models;
 using Regi.Utilities;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 
@@ -19,10 +20,22 @@ namespace Regi.Services
         {
         }
 
-        protected override ProjectOptions FrameworkDefaultOptions => new ProjectOptions();
+        protected override ProjectOptions FrameworkOptions { get; } = new ProjectOptions();
+
+        protected override void ApplyFrameworkOptions(StringBuilder builder, string command, Project project, CommandOptions options)
+        {
+            if (!string.IsNullOrWhiteSpace(project.Source))
+            {
+                FrameworkOptions.AddOptions(FrameworkCommands.Any, $"--registry {project.Source}");
+            }
+
+            base.ApplyFrameworkOptions(builder, command, project, options);
+        }
 
         protected override void SetEnvironmentVariables(Process process, Project project)
         {
+            process.StartInfo.EnvironmentVariables.Add("CI", bool.TrueString);
+
             if (project.Port.HasValue)
             {
                 process.StartInfo.EnvironmentVariables.Add("PORT", project.Port.Value.ToString()); // Default NodeJS port variable
@@ -33,15 +46,11 @@ namespace Regi.Services
 
         public override AppProcess InstallProject(Project project, CommandOptions options)
         {
-            _console.WriteEmphasizedLine($"Starting install for project {project.Name} ({project.File.DirectoryName})");
-
             AppProcess install = CreateProcess(FrameworkCommands.Node.Install, project, options);
 
             install.Start();
 
             install.WaitForExit();
-
-            _console.WriteEmphasizedLine($"Finished installing dependencies for project {project.Name} ({project.File.DirectoryName})");
 
             return install;
         }

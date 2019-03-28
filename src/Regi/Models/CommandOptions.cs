@@ -1,4 +1,6 @@
 ﻿using McMaster.Extensions.CommandLineUtils;
+using System.Collections;
+using System.Collections.Generic;
 
 namespace Regi.Models
 {
@@ -17,7 +19,13 @@ namespace Regi.Models
         public ProjectType? Type { get; set; }
 
         [Option(CommandOptionType.NoValue, Description = "Print all output")]
-        public bool Verbose { get; set; }
+        public bool Verbose { get; set; } = false;
+
+        [Option(CommandOptionType.SingleValue, Description = "Source to install dependencies from")]
+        public string Source { get; set; }
+
+        [Option(CommandOptionType.NoValue, ShortName = "n", LongName = "no-parallel")]
+        public bool NoParallel { get; set; } = false;
 
         public VariableList VariableList { get; set; }
 

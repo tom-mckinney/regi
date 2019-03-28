@@ -99,21 +99,24 @@ namespace Regi.Services
 
             IList<Project> projects = config.Apps.FilterByOptions(options);
 
-            foreach (var project in projects)
-            {
-                _parallelService.Queue(project.Serial, () =>
-                {
-                    StartProject(project, null, options);
-                });
-            }
-
             Console.CancelKeyPress += (o, e) =>
             {
                 foreach (var project in projects)
                 {
-                    project.Process.Dispose();
+                    project.Process?.Dispose();
                 }
             };
+
+            if (projects.Count <= 0)
+                _console.WriteEmphasizedLine("No projects found");
+
+            foreach (var project in projects)
+            {
+                _parallelService.Queue(project.Serial || options.NoParallel, () =>
+                {
+                    StartProject(project, null, options);
+                });
+            }
 
             _parallelService.RunAll();
 
@@ -166,9 +169,12 @@ namespace Regi.Services
 
             IList<Project> projects = config.Tests.FilterByOptions(options);
 
+            if (projects.Count <= 0)
+                _console.WriteEmphasizedLine("No projects found");
+
             foreach (var project in projects)
             {
-                _parallelService.Queue(project.Serial, () =>
+                _parallelService.Queue(project.Serial || options.NoParallel, () =>
                 {
                     IList<AppProcess> associatedProcesses = new List<AppProcess>();
 
@@ -234,6 +240,17 @@ namespace Regi.Services
 
             IList<Project> projects = config.Apps.Concat(config.Tests).FilterByOptions(options);
 
+            Console.CancelKeyPress += (o, e) =>
+            {
+                foreach (var project in projects)
+                {
+                    project.Process?.Dispose();
+                }
+            };
+
+            if (projects.Count <= 0)
+                _console.WriteEmphasizedLine("No projects found");
+
             foreach (var project in projects)
             {
                 _parallelService.QueueParallel(() =>
@@ -242,13 +259,15 @@ namespace Regi.Services
 
                     AppProcess process = null;
 
+                    project.TryAddSource(options, config);
+
                     if (project.Framework == ProjectFramework.Dotnet)
                     {
                         process = _dotnetService.InstallProject(project, options);
                     }
                     else if (project.Framework == ProjectFramework.Node)
                     {
-                        process = _nodeService.InstallProject(project, new CommandOptions { Verbose = true });
+                        process = _nodeService.InstallProject(project, options);
                     }
 
                     if (process != null)

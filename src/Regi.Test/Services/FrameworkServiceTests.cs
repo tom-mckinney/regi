@@ -15,7 +15,7 @@ namespace Regi.Test.Services
     {
         public WumboService(IConsole console) : base(console, "wumbo") {}
 
-        protected override ProjectOptions FrameworkDefaultOptions => new ProjectOptions
+        protected override ProjectOptions FrameworkOptions => new ProjectOptions
         {
             { "super-wumbo", new List<string> { "--do-the-thing" } }
         };

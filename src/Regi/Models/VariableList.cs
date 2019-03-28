@@ -10,7 +10,7 @@ namespace Regi.Models
         public VariableList() : base() { }
 
         /// <summary>
-        /// Initializes variable list from all apps and services
+        /// Initializes variable list from all apps, tests, and services
         /// </summary>
         /// <param name="projects"></param>
         /// <param name="config"></param>
@@ -21,7 +21,11 @@ namespace Regi.Models
                 throw new ArgumentException("Project list cannot be null when creating VariableList", nameof(config));
             }
 
-            foreach (var project in config.Apps.Concat(config.Services))
+            var allProjects = config.Apps
+                .Concat(config.Tests)
+                .Concat(config.Services);
+
+            foreach (var project in allProjects)
             {
                 AddProject(project);
             }

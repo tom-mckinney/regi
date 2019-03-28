@@ -2,7 +2,8 @@
 {
     public enum ProjectFramework
     {
-        Dotnet = 1,
-        Node
+        Any = 1,
+        Dotnet,
+        Node,
     }
 }

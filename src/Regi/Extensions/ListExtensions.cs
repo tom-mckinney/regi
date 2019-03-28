@@ -1,6 +1,7 @@
 ﻿using Regi.Models;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 
 namespace Regi.Extensions
@@ -12,7 +13,8 @@ namespace Regi.Extensions
             if (!string.IsNullOrWhiteSpace(options.Name))
             {
                 projects = projects
-                    .Where(p => p.Name.Contains(options.Name, StringComparison.CurrentCultureIgnoreCase));
+                    .Where(p => p.Name.Contains(options.Name, StringComparison.InvariantCultureIgnoreCase));
+                
             }
 
             if (options.Exclude != null && options.Exclude.Any())
@@ -22,7 +24,7 @@ namespace Regi.Extensions
                     {
                         foreach (var exclusion in options.Exclude)
                         {
-                            if (p.Name.Contains(exclusion, StringComparison.CurrentCultureIgnoreCase))
+                            if (p.Name.Contains(exclusion, StringComparison.InvariantCultureIgnoreCase))
                                 return false;
                         }
 

@@ -22,8 +22,8 @@ namespace Regi
 
         public static int MainWithConsole(IConsole console, string[] args)
         {
-            Console.InputEncoding = System.Text.Encoding.Unicode;
-            Console.OutputEncoding = System.Text.Encoding.Unicode;
+            //Console.InputEncoding = System.Text.Encoding.Unicode;
+            //Console.OutputEncoding = System.Text.Encoding.Unicode;
 
             var services = new ServiceCollection()
                 .Configure<Settings>(o =>

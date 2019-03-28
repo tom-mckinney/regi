@@ -33,5 +33,9 @@
       "serial": true
     }
   ],
-  "services": []
+  "services": [],
+  "sources": {
+      "Dotnet": "http://nuget.org/api",
+      "Node":  "http://npmjs.org"
+  }
 }

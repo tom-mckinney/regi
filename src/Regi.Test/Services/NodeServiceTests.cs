@@ -110,6 +110,26 @@ namespace Regi.Test.Services
         }
 
         [Fact]
+        public void TestProject_will_add_all_variables_passed_to_process()
+        {
+            _application.Port = 8080;
+
+            VariableList varList = new VariableList
+            {
+                { "foo", "bar" }
+            };
+
+            using (AppProcess testProcess = _service.TestProject(_application, TestOptions.Create(varList)))
+            {
+                Assert.Equal(AppTask.Test, testProcess.Task);
+                Assert.Equal(AppStatus.Failure, testProcess.Status);
+                Assert.Equal(8080, testProcess.Port);
+                Assert.True(testProcess.Process.StartInfo.EnvironmentVariables.ContainsKey("foo"), "Environment variable \"foo\" has not been set.");
+                Assert.Equal("bar", testProcess.Process.StartInfo.EnvironmentVariables["foo"]);
+            }
+        }
+
+        [Fact]
         public void InstallProject_returns_process()
         {
             using (AppProcess process = _service.InstallProject(_application, TestOptions.Create()))
@@ -117,6 +137,18 @@ namespace Regi.Test.Services
                 Assert.Equal(AppTask.Install, process.Task);
                 Assert.Equal(AppStatus.Success, process.Status);
                 Assert.Null(process.Port);
+            }
+        }
+
+        [Fact]
+        public void InstallProjects_sets_registry_url_if_specified()
+        {
+            string source = "https://artifactory.org/npm";
+            _application.Source = source;
+
+            using (AppProcess process = _service.InstallProject(_application, TestOptions.Create()))
+            {
+                Assert.Contains($"--registry {source}", process.Process.StartInfo.Arguments);
             }
         }
     }

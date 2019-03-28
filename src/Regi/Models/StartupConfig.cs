@@ -16,6 +16,9 @@ namespace Regi.Models
         [JsonProperty("services")]
         public List<Project> Services { get; set; }
 
+        [JsonProperty("sources")]
+        public IDictionary<ProjectFramework, string> Sources { get; set; }
+
         public IList<Project> GetRequirements(Project project)
         {
             var requirements = from r in project.Requires

@@ -5,6 +5,7 @@ using Regi.Models;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Text;
 
 namespace Regi.Services
 {
@@ -18,10 +19,20 @@ namespace Regi.Services
         {
         }
 
-        protected override ProjectOptions FrameworkDefaultOptions => new ProjectOptions
+        protected override ProjectOptions FrameworkOptions { get; } = new ProjectOptions
         {
             { FrameworkCommands.Dotnet.Run, new List<string> { "--no-launch-profile" } }
         };
+
+        protected override void ApplyFrameworkOptions(StringBuilder builder, string command, Project project, CommandOptions options)
+        {
+            if (!string.IsNullOrWhiteSpace(project.Source))
+            {
+                FrameworkOptions.AddOptions(FrameworkCommands.Any, $"--source {project.Source}");
+            }
+
+            base.ApplyFrameworkOptions(builder, command, project, options);
+        }
 
         protected override void SetEnvironmentVariables(Process process, Project project)
         {
@@ -56,8 +67,6 @@ namespace Regi.Services
 
         public override AppProcess TestProject(Project project, CommandOptions options)
         {
-            _console.WriteEmphasizedLine($"Starting tests for project {project.Name} ({project.File.Name})");
-
             AppProcess test = CreateProcess(FrameworkCommands.Dotnet.Test, project, options);
 
             test.Start();
@@ -70,8 +79,6 @@ namespace Regi.Services
             {
                 test.Status = AppStatus.Success;
             }
-
-            _console.WriteEmphasizedLine($"Finished tests for project {project.Name} ({project.File.Name})");
 
             return test;
         }
