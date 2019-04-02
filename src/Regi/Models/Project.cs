@@ -38,6 +38,8 @@ namespace Regi.Models
 
         public string Source { get; set; }
 
+        public bool RawOutput { get; set; }
+
         public void TryAddSource(CommandOptions options, StartupConfig config)
         {
             if (string.IsNullOrWhiteSpace(Source))

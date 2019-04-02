@@ -47,16 +47,22 @@ namespace Regi.Models
 
         public bool Verbose { get; set; } = false;
 
+        public bool RawOutput { get; internal set; }
+
         public void Start()
         {
             if (Process != null)
             {
                 Process.Start();
-                Process.BeginErrorReadLine();
 
-                if (Verbose)
+                if (!RawOutput)
                 {
-                    Process.BeginOutputReadLine();
+                    Process.BeginErrorReadLine();
+
+                    if (Verbose)
+                    {
+                        Process.BeginOutputReadLine();
+                    }
                 }
 
                 ProcessId = Process.Id;

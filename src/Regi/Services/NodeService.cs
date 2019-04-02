@@ -34,6 +34,8 @@ namespace Regi.Services
 
         protected override void SetEnvironmentVariables(Process process, Project project)
         {
+            base.SetEnvironmentVariables(process, project);
+
             process.StartInfo.EnvironmentVariables.Add("CI", bool.TrueString);
 
             if (project.Port.HasValue)

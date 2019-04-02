@@ -40,7 +40,12 @@ namespace Regi.Services
         public abstract AppProcess StartProject(Project project, CommandOptions options);
         public abstract AppProcess TestProject(Project project, CommandOptions options);
 
-        protected abstract void SetEnvironmentVariables(Process process, Project project);
+        protected virtual void SetEnvironmentVariables(Process process, Project project)
+        {
+            process.StartInfo.EnvironmentVariables.Add("END_TO_END_TESTING", bool.TrueString);
+            process.StartInfo.EnvironmentVariables.Add("IN_MEMORY_DATABASE", bool.TrueString);
+            process.StartInfo.EnvironmentVariables.Add("DONT_STUB_PLAID", bool.FalseString);
+        }
 
         protected abstract ProjectOptions FrameworkOptions { get; }
 
@@ -89,6 +94,17 @@ namespace Regi.Services
                 Verbose = options.Verbose,
                 OnDispose = (processId) => HandleDispose(project, processId)
             };
+
+            if (project.RawOutput)
+            {
+                output.RawOutput = true;
+                process.StartInfo.CreateNoWindow = false;
+                process.StartInfo.WindowStyle = ProcessWindowStyle.Normal;
+                process.StartInfo.RedirectStandardInput = true;
+                process.StartInfo.RedirectStandardOutput = false;
+                process.StartInfo.RedirectStandardError = false;
+                return output;
+            }
 
             process.StartInfo.CopyEnvironmentVariables(options.VariableList);
             SetEnvironmentVariables(process, project);

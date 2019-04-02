@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Regi.Models;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -25,7 +26,7 @@ namespace Regi.Utilities
             }
             else
             {
-                RunProcessAndWaitForExit("killall", $"-KILL {processName}", timeout);
+                RunProcessAndWaitForExit("killall", $"{processName}", timeout);
             }
         }
 
@@ -55,33 +56,10 @@ namespace Regi.Utilities
 
         private static void GetAllChildIdsUnix(int parentId, ISet<int> children, TimeSpan timeout)
         {
-            string stdout;
             var exitCode = RunProcessAndWaitForExit(
                 "pgrep",
                 $"-P {parentId}",
                 timeout);
-
-            //if (exitCode == 0)
-            //{
-            //    using (var reader = new StringReader(stdout))
-            //    {
-            //        while (true)
-            //        {
-            //            var text = reader.ReadLine();
-            //            if (text == null)
-            //            {
-            //                return;
-            //            }
-
-            //            if (int.TryParse(text, out int id))
-            //            {
-            //                children.Add(id);
-            //                // Recursively get the children
-            //                GetAllChildIdsUnix(id, children, timeout);
-            //            }
-            //        }
-            //    }
-            //}
         }
 
         private static void KillProcessUnix(int processId, TimeSpan timeout)

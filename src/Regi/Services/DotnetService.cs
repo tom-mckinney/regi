@@ -36,8 +36,7 @@ namespace Regi.Services
 
         protected override void SetEnvironmentVariables(Process process, Project project)
         {
-            process.StartInfo.EnvironmentVariables.Add("END_TO_END_TESTING", true.ToString());
-            process.StartInfo.EnvironmentVariables.Add("IN_MEMORY_DATABASE", true.ToString());
+            base.SetEnvironmentVariables(process, project);
 
             if (project.Port.HasValue)
             {
