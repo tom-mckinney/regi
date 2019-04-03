@@ -91,7 +91,7 @@ namespace Regi.Utilities
             return process.ExitCode;
         }
 
-        private static string AddExtension(string name, string extension = ".exe")
+        public static string AddExtension(string name, string extension = ".exe")
         {
             if (name.EndsWith(extension, StringComparison.InvariantCultureIgnoreCase))
             {

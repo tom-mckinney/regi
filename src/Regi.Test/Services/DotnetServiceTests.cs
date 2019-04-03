@@ -1,9 +1,11 @@
-﻿using Regi.Models;
+﻿using Moq;
+using Regi.Models;
 using Regi.Services;
 using Regi.Test.Helpers;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading;
 using Xunit;
 using Xunit.Abstractions;
@@ -14,6 +16,7 @@ namespace Regi.Test.Services
     {
         private readonly TestConsole _console;
         private readonly IDotnetService _service;
+        private readonly Mock<IRuntimeInfo> _runtimeInfoMock = new Mock<IRuntimeInfo>();
 
         private readonly Project _successfulTests;
         private readonly Project _failedTests;
@@ -24,7 +27,7 @@ namespace Regi.Test.Services
         public DotnetServiceTests(ITestOutputHelper testOutput)
         {
             _console = new TestConsole(testOutput);
-            _service = new DotnetService(_console);
+            _service = new DotnetService(_console, new PlatformService(_console, _runtimeInfoMock.Object));
 
             _successfulTests = new Project("SampleSuccessfulTests", new DirectoryInfo(Directory.GetCurrentDirectory())
                 .GetFiles("SampleSuccessfulTests.csproj", SearchOption.AllDirectories)
@@ -208,6 +211,25 @@ namespace Regi.Test.Services
             {
                 Assert.Contains($"--source {source}", process.Process.StartInfo.Arguments);
             }
+        }
+
+        [Theory]
+        [InlineData(true, "taskkill", "/F /IM dotnet.exe")]
+        [InlineData(false, "killall", "dotnet")]
+        public void KillProcesses_kills_all_dotnet_processes(bool isWindows, string expectedFileName, string expectedArguments)
+        {
+            _runtimeInfoMock.Setup(m => m.IsWindows).Returns(isWindows).Verifiable();
+
+            AppProcess process = _service.KillProcesses(TestOptions.Create());
+
+            Assert.Equal(AppStatus.Success, process.Status);
+            Assert.Equal(AppTask.Kill, process.Task);
+
+            var startInfo = process.Process.StartInfo;
+            Assert.Equal(expectedFileName, startInfo.FileName);
+            Assert.Equal(expectedArguments, startInfo.Arguments);
+
+            _runtimeInfoMock.Verify();
         }
     }
 }

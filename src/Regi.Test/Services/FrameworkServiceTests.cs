@@ -13,7 +13,8 @@ namespace Regi.Test.Services
 {
     internal class WumboService : FrameworkService
     {
-        public WumboService(IConsole console) : base(console, "wumbo") {}
+
+        public WumboService(IConsole console) : base(console, new PlatformService(console, new RuntimeInfo()), "wumbo") {}
 
         protected override ProjectOptions FrameworkOptions => new ProjectOptions
         {
@@ -41,6 +42,11 @@ namespace Regi.Test.Services
         }
 
         protected override void SetEnvironmentVariables(Process process, Project project)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override AppProcess KillProcesses(CommandOptions options)
         {
             throw new NotImplementedException();
         }

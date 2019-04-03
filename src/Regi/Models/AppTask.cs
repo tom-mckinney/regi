@@ -9,5 +9,6 @@ namespace Regi.Models
         Test = 1,
         Start,
         Install,
+        Kill,
     }
 }

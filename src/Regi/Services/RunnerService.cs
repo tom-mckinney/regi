@@ -19,6 +19,7 @@ namespace Regi.Services
         IList<Project> Test(CommandOptions options);
         IList<Project> Install(CommandOptions options);
         OutputSummary List(CommandOptions options);
+        void Kill(CommandOptions options);
         void Initialize(CommandOptions options);
     }
 
@@ -326,6 +327,44 @@ namespace Regi.Services
             }
 
             return output;
+        }
+
+        public void Kill(CommandOptions options)
+        {
+            StartupConfig config = GetStartupConfig();
+
+            IList<Project> projects = config.Apps
+                .Concat(config.Tests)
+                .FilterByOptions(options);
+
+            IEnumerable<ProjectFramework> frameworks = projects.Select(p => p.Framework).Distinct();
+
+            int errorCount = 0;
+            foreach (var framework in frameworks)
+            {
+                _console.WriteEmphasizedLine($"Killing processes for framework: {framework}");
+
+                AppStatus status;
+                switch (framework)
+                {
+                    case ProjectFramework.Dotnet:
+                        status = _dotnetService.KillProcesses(options).Status;
+                        break;
+                    case ProjectFramework.Node:
+                        status = _nodeService.KillProcesses(options).Status;
+                        break;
+                    default:
+                        continue;
+                }
+
+                if (status == AppStatus.Failure)
+                    errorCount++;
+            }
+
+            if (errorCount > 0)
+                _console.WriteErrorLine($"Finished killing processes with {errorCount} failures", ConsoleLineStyle.LineBeforeAndAfter);
+            else
+                _console.WriteSuccessLine("Finished killing processess successfuly", ConsoleLineStyle.LineBeforeAndAfter);
         }
     }
 }

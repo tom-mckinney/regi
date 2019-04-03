@@ -286,6 +286,26 @@ namespace Regi.Test.Services
         }
 
         [Fact]
+        public void Kill_calls_service_to_kill_for_each_ProjectFramework()
+        {
+            _nodeServiceMock.Setup(m => m.KillProcesses(It.IsAny<CommandOptions>()))
+                .Returns(new AppProcess(null, AppTask.Kill, AppStatus.Success))
+                .Verifiable();
+            _dotnetServiceMock.Setup(m => m.KillProcesses(It.IsAny<CommandOptions>()))
+                .Returns(new AppProcess(null, AppTask.Kill, AppStatus.Success))
+                .Verifiable();
+
+            DirectoryUtility.SetTargetDirectory(_startupConfigGood);
+
+            var options = TestOptions.Create();
+
+            _runnerService.Kill(options);
+
+            _nodeServiceMock.Verify(m => m.KillProcesses(options), Times.Once);
+            _dotnetServiceMock.Verify(m => m.KillProcesses(options), Times.Once);
+        }
+
+        [Fact]
         public void List_prints_all_apps_and_tests()
         {
             DirectoryUtility.SetTargetDirectory(_startupConfigGood);

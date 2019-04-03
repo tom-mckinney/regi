@@ -16,17 +16,19 @@ namespace Regi.Services
         AppProcess InstallProject(Project project, CommandOptions options);
         AppProcess StartProject(Project project, CommandOptions options);
         AppProcess TestProject(Project project, CommandOptions options);
+        AppProcess KillProcesses(CommandOptions options);
     }
 
     public abstract class FrameworkService : IFrameworkService
     {
         protected readonly IConsole _console;
+        protected readonly IPlatformService _platformService;
         protected readonly string _frameworkExePath;
-        protected readonly bool _isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
 
-        public FrameworkService(IConsole console, string frameworkExePath)
+        public FrameworkService(IConsole console, IPlatformService platformService, string frameworkExePath)
         {
             _console = console;
+            _platformService = platformService;
 
             if (string.IsNullOrWhiteSpace(frameworkExePath))
             {
@@ -67,7 +69,7 @@ namespace Regi.Services
 
         protected virtual string FormatAdditionalArguments(string args) => args;
 
-        public virtual AppProcess CreateProcess(string command, Project project, CommandOptions options)
+        public virtual AppProcess CreateProcess(string command, Project project, CommandOptions options, string fileName = null)
         {
             string args = BuildCommand(command, project, options);
 
@@ -78,10 +80,10 @@ namespace Regi.Services
             {
                 StartInfo = new ProcessStartInfo()
                 {
-                    FileName = _frameworkExePath,
+                    FileName = fileName ?? _frameworkExePath,
                     Arguments = args,
                     WorkingDirectory = project.File.DirectoryName,
-                    RedirectStandardOutput = _isWindows ? options.Verbose : true,
+                    RedirectStandardOutput = _platformService.RuntimeInfo.IsWindows ? options.Verbose : true,
                     RedirectStandardError = true,
                     CreateNoWindow = true
                 },
@@ -181,5 +183,7 @@ namespace Regi.Services
         {
             _console.WriteEmphasizedLine($"Disposing process for project {project.Name} ({processId})");
         }
+
+        public abstract AppProcess KillProcesses(CommandOptions options);
     }
 }

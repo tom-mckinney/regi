@@ -16,7 +16,7 @@ namespace Regi.Services
 
     public class NodeService : FrameworkService, INodeService
     {
-        public NodeService(IConsole console) : base(console, NpmExe.FullPathOrDefault())
+        public NodeService(IConsole console, IPlatformService platformService) : base(console, platformService, NpmExe.FullPathOrDefault())
         {
         }
 
@@ -88,5 +88,29 @@ namespace Regi.Services
                 _console.WriteErrorLine(name + ": " + e.Data);
             }
         });
+
+        public override AppProcess KillProcesses(CommandOptions options)
+        {
+            AppProcess process = new AppProcess(_platformService.GetKillProcess("node"),
+                AppTask.Kill,
+                AppStatus.Running);
+
+            try
+            {
+                if (options.KillProcessesOnExit)
+                {
+                    process.Start();
+                    process.WaitForExit();
+                }
+
+                process.Status = AppStatus.Success;
+            }
+            catch
+            {
+                process.Status = AppStatus.Failure;
+            }
+
+            return process;
+        }
     }
 }

@@ -15,7 +15,7 @@ namespace Regi.Services
 
     public class DotnetService : FrameworkService, IDotnetService
     {
-        public DotnetService(IConsole console) : base(console, DotNetExe.FullPathOrDefault())
+        public DotnetService(IConsole console, IPlatformService platformService) : base(console, platformService, DotNetExe.FullPathOrDefault())
         {
         }
 
@@ -80,6 +80,30 @@ namespace Regi.Services
             }
 
             return test;
+        }
+
+        public override AppProcess KillProcesses(CommandOptions options)
+        {
+            AppProcess process = new AppProcess(_platformService.GetKillProcess("dotnet"), 
+                AppTask.Kill, 
+                AppStatus.Running);
+
+            try
+            {
+                if (options.KillProcessesOnExit)
+                {
+                    process.Start();
+                    process.WaitForExit();
+                }
+
+                process.Status = AppStatus.Success;
+            }
+            catch
+            {
+                process.Status = AppStatus.Failure;
+            }
+
+            return process;
         }
     }
 }

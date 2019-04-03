@@ -1,4 +1,5 @@
 ﻿using McMaster.Extensions.CommandLineUtils;
+using Moq;
 using Regi.Extensions;
 using Regi.Models;
 using Regi.Services;
@@ -17,6 +18,7 @@ namespace Regi.Test.Services
     public class NodeServiceTests
     {
         private readonly IConsole _console;
+        private readonly Mock<IRuntimeInfo> _runtimeInfoMock = new Mock<IRuntimeInfo>();
         private readonly INodeService _service;
 
         private readonly Project _application;
@@ -24,7 +26,7 @@ namespace Regi.Test.Services
         public NodeServiceTests(ITestOutputHelper testOutput)
         {
             _console = new TestConsole(testOutput);
-            _service = new NodeService(_console);
+            _service = new NodeService(_console, new PlatformService(_console, _runtimeInfoMock.Object));
 
             DirectoryInfo projectDir = new DirectoryInfo(Directory.GetCurrentDirectory())
                 .GetDirectories("SampleNodeApp", SearchOption.AllDirectories)
@@ -150,6 +152,25 @@ namespace Regi.Test.Services
             {
                 Assert.Contains($"--registry {source}", process.Process.StartInfo.Arguments);
             }
+        }
+
+        [Theory]
+        [InlineData(true, "taskkill", "/F /IM node.exe")]
+        [InlineData(false, "killall", "node")]
+        public void KillProcesses_kills_all_node_processes(bool isWindows, string expectedFileName, string expectedArguments)
+        {
+            _runtimeInfoMock.Setup(m => m.IsWindows).Returns(isWindows).Verifiable();
+
+            AppProcess process = _service.KillProcesses(TestOptions.Create());
+
+            Assert.Equal(AppStatus.Success, process.Status);
+            Assert.Equal(AppTask.Kill, process.Task);
+
+            var startInfo = process.Process.StartInfo;
+            Assert.Equal(expectedFileName, startInfo.FileName);
+            Assert.Equal(expectedArguments, startInfo.Arguments);
+
+            _runtimeInfoMock.Verify();
         }
     }
 }
