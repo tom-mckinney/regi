@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
-namespace Regi.Test.Helpers
+namespace Regi.Test
 {
-    public static class PathHelper
+    public abstract class SampleProjectTest
     {
-        internal static readonly char Slash = Path.DirectorySeparatorChar;
+        protected readonly char Slash = Path.DirectorySeparatorChar;
 
-        static internal string SampleDirectoryPath(string name)
+        protected virtual string SampleDirectoryPath(string name)
         {
             string path = $"{Directory.GetCurrentDirectory()}{Slash}_SampleProjects_{Slash}{name}";
 

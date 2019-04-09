@@ -55,23 +55,38 @@ namespace Regi.Models
             }
         }
 
-        private FileInfo _file;
-        public FileInfo File
+        private FileSystemInfo _fileOrDirectory;
+        public FileSystemInfo FileOrDirectory
         {
             get
             {
-                if (_file == null)
+                if (_fileOrDirectory == null)
                 {
-                    string absolutePath = System.IO.Path.GetFullPath(Path, DirectoryUtility.TargetDirectoryPath);
-                    _file = new FileInfo(absolutePath);
+                    _fileOrDirectory = FileSystemUtility.GetFileOrDirectory(Path);
+                }
 
-                    if (!_file.Exists)
+                return _fileOrDirectory;
+            }
+        }
+
+        private string _directoryPath;
+        public string DirectoryPath
+        {
+            get
+            {
+                if (string.IsNullOrWhiteSpace(_directoryPath))
+                {
+                    if (FileOrDirectory is FileInfo file)
                     {
-                        throw new FileNotFoundException($"Could not find project, {_file.FullName}");
+                        _directoryPath = file.DirectoryName;
+                    }
+                    else if (FileOrDirectory is DirectoryInfo directory)
+                    {
+                        _directoryPath = directory.Name;
                     }
                 }
 
-                return _file;
+                return _directoryPath;
             }
         }
 

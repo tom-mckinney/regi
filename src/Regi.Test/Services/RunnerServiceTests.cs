@@ -5,8 +5,6 @@ using Regi.Models;
 using Regi.Services;
 using Regi.Test.Helpers;
 using Regi.Utilities;
-using System.Collections;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -27,7 +25,6 @@ namespace Regi.Test.Services
 
         private readonly string _startupConfigGood;
         private readonly string _startupConfigBad;
-        private readonly char Slash = Path.DirectorySeparatorChar;
 
         private const int dotnetAppCount = 2;
         private const int nodeAppCount = 1;
@@ -52,21 +49,21 @@ namespace Regi.Test.Services
                 _fileServiceMock.Object,
                 _console);
 
-            _startupConfigGood = SampleDirectoryPath("ConfigurationGood");
-            _startupConfigBad = SampleDirectoryPath("ConfigurationBad");
+            _startupConfigGood = PathHelper.SampleDirectoryPath("ConfigurationGood");
+            _startupConfigBad = PathHelper.SampleDirectoryPath("ConfigurationBad");
         }
 
         [Fact]
         public void GetStatupConfig_throws_exception_when_directory_not_found()
         {
-            DirectoryUtility.SetTargetDirectory(SampleDirectoryPath("BUNK_DIRECTORY"));
+            FileSystemUtility.SetTargetDirectory(PathHelper.SampleDirectoryPath("BUNK_DIRECTORY"));
             Assert.Throws<DirectoryNotFoundException>(() => _runnerService.GetStartupConfig());
         }
 
         [Fact]
         public void GetStatupConfig_throws_exception_when_startup_config_not_found()
         {
-            DirectoryUtility.SetTargetDirectory(SampleDirectoryPath("SampleAppError"));
+            FileSystemUtility.SetTargetDirectory(PathHelper.SampleDirectoryPath("SampleAppError"));
             Assert.Throws<FileNotFoundException>(() => _runnerService.GetStartupConfig());
         }
 
@@ -75,7 +72,7 @@ namespace Regi.Test.Services
         [InlineData("ConfigurationWrongEnum")]
         public void GetStatupConfig_throws_exception_when_startup_config_has_bad_format(string configuration)
         {
-            DirectoryUtility.SetTargetDirectory(SampleDirectoryPath(configuration));
+            FileSystemUtility.SetTargetDirectory(PathHelper.SampleDirectoryPath(configuration));
             var ex = Assert.Throws<JsonSerializationException>(() => _runnerService.GetStartupConfig());
 
             _console.WriteErrorLine(nameof(ProjectType));
@@ -85,7 +82,7 @@ namespace Regi.Test.Services
         [Fact]
         public void GetStartupConfig_returns_configuration_model_when_run_in_directory_with_startup_file()
         {
-            DirectoryUtility.SetTargetDirectory(_startupConfigGood);
+            FileSystemUtility.SetTargetDirectory(_startupConfigGood);
 
             StartupConfig startupConfig = _runnerService.GetStartupConfig();
 
@@ -104,7 +101,7 @@ namespace Regi.Test.Services
                 .Returns<Project, CommandOptions>((p, o) => new AppProcess(new Process(), AppTask.Start, AppStatus.Success, p?.Port))
                 .Verifiable();
 
-            DirectoryUtility.SetTargetDirectory(_startupConfigGood);
+            FileSystemUtility.SetTargetDirectory(_startupConfigGood);
 
             var processes = _runnerService.Start(TestOptions.Create());
 
@@ -126,7 +123,7 @@ namespace Regi.Test.Services
                 .Returns<Project, CommandOptions>((p, b) => new AppProcess(new Process(), AppTask.Start, AppStatus.Success, p?.Port))
                 .Verifiable();
 
-            DirectoryUtility.SetTargetDirectory(_startupConfigGood);
+            FileSystemUtility.SetTargetDirectory(_startupConfigGood);
 
             var projects = _runnerService.Start(TestOptions.Create());
 
@@ -153,7 +150,7 @@ namespace Regi.Test.Services
                 .Returns<Project, CommandOptions>((p, b) => new AppProcess(new Process(), AppTask.Start, AppStatus.Success, p?.Port))
                 .Verifiable();
 
-            DirectoryUtility.SetTargetDirectory(_startupConfigGood);
+            FileSystemUtility.SetTargetDirectory(_startupConfigGood);
 
             var projects = _runnerService.Start(TestOptions.Create());
 
@@ -168,7 +165,7 @@ namespace Regi.Test.Services
                 .Returns<Project, CommandOptions>((p, o) => new AppProcess(new Process(), AppTask.Start, AppStatus.Success, p?.Port))
                 .Verifiable();
 
-            DirectoryUtility.SetTargetDirectory(_startupConfigGood);
+            FileSystemUtility.SetTargetDirectory(_startupConfigGood);
 
             var processes = _runnerService.Test(TestOptions.Create());
 
@@ -187,7 +184,7 @@ namespace Regi.Test.Services
                 .Returns(new AppProcess(new Process(), AppTask.Start, AppStatus.Success))
                 .Verifiable();
 
-            DirectoryUtility.SetTargetDirectory(SampleDirectoryPath("ConfigurationRequires"));
+            FileSystemUtility.SetTargetDirectory(PathHelper.SampleDirectoryPath("ConfigurationRequires"));
 
             var processes = _runnerService.Test(TestOptions.Create());
 
@@ -208,7 +205,7 @@ namespace Regi.Test.Services
                 .Returns(new AppProcess(new Process(), AppTask.Test, AppStatus.Success))
                 .Verifiable();
 
-            DirectoryUtility.SetTargetDirectory(_startupConfigGood);
+            FileSystemUtility.SetTargetDirectory(_startupConfigGood);
 
             var processes = _runnerService.Test(new CommandOptions { Type = type });
 
@@ -224,7 +221,7 @@ namespace Regi.Test.Services
                 .Returns<Project, CommandOptions>((p, o) => new AppProcess(new Process(), AppTask.Start, AppStatus.Success, p?.Port))
                 .Verifiable();
 
-            DirectoryUtility.SetTargetDirectory(_startupConfigGood);
+            FileSystemUtility.SetTargetDirectory(_startupConfigGood);
 
             var processes = _runnerService.Test(TestOptions.Create());
 
@@ -242,7 +239,7 @@ namespace Regi.Test.Services
                 .Returns(new AppProcess(new Process(), AppTask.Install, AppStatus.Success))
                 .Verifiable();
 
-            DirectoryUtility.SetTargetDirectory(_startupConfigGood);
+            FileSystemUtility.SetTargetDirectory(_startupConfigGood);
 
             var processes = _runnerService.Install(TestOptions.Create());
 
@@ -261,7 +258,7 @@ namespace Regi.Test.Services
                 .Returns(new AppProcess(new Process(), AppTask.Install, AppStatus.Success))
                 .Verifiable();
 
-            DirectoryUtility.SetTargetDirectory(_startupConfigGood);
+            FileSystemUtility.SetTargetDirectory(_startupConfigGood);
 
             var processes = _runnerService.Install(TestOptions.Create());
 
@@ -278,7 +275,7 @@ namespace Regi.Test.Services
                 .Returns(new FileInfo("regi.json"))
                 .Verifiable();
 
-            DirectoryUtility.SetTargetDirectory(SampleDirectoryPath("ConfigurationNew"));
+            FileSystemUtility.SetTargetDirectory(PathHelper.SampleDirectoryPath("ConfigurationNew"));
 
             _runnerService.Initialize(TestOptions.Create());
 
@@ -295,7 +292,7 @@ namespace Regi.Test.Services
                 .Returns(new AppProcess(null, AppTask.Kill, AppStatus.Success))
                 .Verifiable();
 
-            DirectoryUtility.SetTargetDirectory(_startupConfigGood);
+            FileSystemUtility.SetTargetDirectory(_startupConfigGood);
 
             var options = TestOptions.Create();
 
@@ -308,7 +305,7 @@ namespace Regi.Test.Services
         [Fact]
         public void List_prints_all_apps_and_tests()
         {
-            DirectoryUtility.SetTargetDirectory(_startupConfigGood);
+            FileSystemUtility.SetTargetDirectory(_startupConfigGood);
 
             var output = _runnerService.List(TestOptions.Create());
 
@@ -325,7 +322,7 @@ namespace Regi.Test.Services
         [InlineData("SampleApp1", 1, 0)]
         public void List_prints_only_apps_or_tests_that_match_name_if_specified(string name, int appCount, int testCount)
         {
-            DirectoryUtility.SetTargetDirectory(_startupConfigGood);
+            FileSystemUtility.SetTargetDirectory(_startupConfigGood);
 
             var output = _runnerService.List(new CommandOptions { Name = name });
 
@@ -336,13 +333,6 @@ namespace Regi.Test.Services
                 Assert.DoesNotContain("Apps:", _console.LogOutput);
             if (testCount <= 0)
                 Assert.DoesNotContain("Tests:", _console.LogOutput);
-        }
-
-        internal string SampleDirectoryPath(string name)
-        {
-            string path = $"{Directory.GetCurrentDirectory()}{Slash}_SampleProjects_{Slash}{name}";
-
-            return path;
         }
     }
 }

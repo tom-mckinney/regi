@@ -46,7 +46,7 @@ namespace Regi.Services
 
         public StartupConfig GetStartupConfig()
         {
-            DirectoryInfo directory = new DirectoryInfo(DirectoryUtility.TargetDirectoryPath);
+            DirectoryInfo directory = new DirectoryInfo(FileSystemUtility.TargetDirectoryPath);
 
             if (!directory.Exists)
             {
@@ -128,7 +128,7 @@ namespace Regi.Services
 
         private AppProcess StartProject(Project project, IList<Project> projects, CommandOptions options)
         {
-            _console.WriteEmphasizedLine($"Starting project {project.Name} ({project.File.DirectoryName})");
+            _console.WriteEmphasizedLine($"Starting project {project.Name} ({project.FileOrDirectory.DirectoryName})");
 
             AppProcess process = null;
             if (project.Framework == ProjectFramework.Dotnet)

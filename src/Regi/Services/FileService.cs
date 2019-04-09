@@ -31,7 +31,7 @@ namespace Regi.Services
 
         public FileInfo CreateConfigFile()
         {
-            string configFilePath = Path.Combine(DirectoryUtility.TargetDirectoryPath, "regi.json");
+            string configFilePath = Path.Combine(FileSystemUtility.TargetDirectoryPath, "regi.json");
 
             _console.WriteEmphasizedLine($"Creating config file: {configFilePath}");
 
