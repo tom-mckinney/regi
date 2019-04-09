@@ -97,7 +97,7 @@ namespace Regi.Services
                 OnDispose = (processId) => HandleDispose(project, processId)
             };
 
-            if (project.RawOutput)
+            if (project.RawOutput || options.RawOutput)
             {
                 output.RawOutput = true;
                 process.StartInfo.CreateNoWindow = false;

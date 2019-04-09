@@ -179,6 +179,8 @@ namespace Regi.Services
                 {
                     IList<AppProcess> associatedProcesses = new List<AppProcess>();
 
+                    CommandOptions requiredOptions = options.CloneForRequiredProjects();
+
                     if (project.Requires.Any())
                     {
                         IDictionary<int, Project> requiredProjectsWithPorts = new Dictionary<int, Project>();
@@ -194,7 +196,7 @@ namespace Regi.Services
                                 if (requiredProject.Port.HasValue)
                                     requiredProjectsWithPorts.Add(requiredProject.Port.Value, requiredProject);
 
-                                var requiredProccess = StartProject(requiredProject, projects, options);
+                                var requiredProccess = StartProject(requiredProject, projects, requiredOptions);
                                 associatedProcesses.Add(requiredProccess);
                             }
                         }

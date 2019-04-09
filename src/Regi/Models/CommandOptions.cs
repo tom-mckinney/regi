@@ -1,4 +1,5 @@
 ﻿using McMaster.Extensions.CommandLineUtils;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -24,11 +25,27 @@ namespace Regi.Models
         [Option(CommandOptionType.SingleValue, Description = "Source to install dependencies from")]
         public string Source { get; set; }
 
-        [Option(CommandOptionType.NoValue, ShortName = "n", LongName = "no-parallel")]
+        [Option(CommandOptionType.NoValue, Description = "Do not run any processes in parallel")]
         public bool NoParallel { get; set; } = false;
+
+        [Option(CommandOptionType.NoValue, Description = "Return raw output without any formatting or verbosity settings")]
+        public bool RawOutput { get; set; } = false;
 
         public VariableList VariableList { get; set; }
 
         public bool KillProcessesOnExit { get; set; } = true;
+
+        /// <summary>
+        /// Clones options and sets Arguments to null. This is used when omitting arguments for required project.
+        /// </summary>
+        /// <returns></returns>
+        public CommandOptions CloneForRequiredProjects()
+        {
+            CommandOptions clone = (CommandOptions)MemberwiseClone();
+
+            clone.Arguments = null;
+
+            return clone;
+        }
     }
 }
