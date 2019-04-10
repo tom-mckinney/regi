@@ -82,7 +82,7 @@ namespace Regi.Models
                     }
                     else if (FileOrDirectory is DirectoryInfo directory)
                     {
-                        _directoryPath = directory.Name;
+                        _directoryPath = directory.FullName;
                     }
                 }
 

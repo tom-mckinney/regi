@@ -82,7 +82,7 @@ namespace Regi.Services
                 {
                     FileName = fileName ?? _frameworkExePath,
                     Arguments = args,
-                    WorkingDirectory = project.FileOrDirectory.DirectoryName,
+                    WorkingDirectory = project.DirectoryPath,
                     RedirectStandardOutput = _platformService.RuntimeInfo.IsWindows ? options.Verbose : true,
                     RedirectStandardError = true,
                     CreateNoWindow = true

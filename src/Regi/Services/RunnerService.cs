@@ -128,7 +128,7 @@ namespace Regi.Services
 
         private AppProcess StartProject(Project project, IList<Project> projects, CommandOptions options)
         {
-            _console.WriteEmphasizedLine($"Starting project {project.Name} ({project.FileOrDirectory.DirectoryName})");
+            _console.WriteEmphasizedLine($"Starting project {project.Name} ({project.DirectoryPath})");
 
             AppProcess process = null;
             if (project.Framework == ProjectFramework.Dotnet)
