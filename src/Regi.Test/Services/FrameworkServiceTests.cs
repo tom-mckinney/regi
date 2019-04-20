@@ -21,9 +21,9 @@ namespace Regi.Test.Services
             { "super-wumbo", new List<string> { "--do-the-thing" } }
         };
 
-        protected override string FormatAdditionalArguments(string args)
+        protected override string FormatAdditionalArguments(string[] args)
         {
-            return $"***{args}***";
+            return $"***{string.Join(' ', args)}***";
         }
 
         public override AppProcess InstallProject(Project project, CommandOptions options)
@@ -131,10 +131,10 @@ namespace Regi.Test.Services
 
             var options = new CommandOptions
             {
-                Arguments = "very good wumbo"
+                RemainingArguments = new [] {"--wumbo good", "--verbose"}
             };
 
-            Assert.Equal("foo ***very good wumbo***", service.BuildCommand("foo", null, options));
+            Assert.Equal("foo ***--wumbo good --verbose***", service.BuildCommand("foo", null, options));
         }
     }
 }

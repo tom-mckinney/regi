@@ -64,7 +64,9 @@ namespace Regi.Test.Services
         [Fact]
         public void RunProject_will_start_custom_port_if_specified()
         {
-            _application.Port = 8080;
+            int expectedPort = new Random().Next(1000, 9999);
+
+            _application.Port = expectedPort;
 
             using (AppProcess app = _service.StartProject(_application, TestOptions.Create()))
             {
@@ -72,7 +74,7 @@ namespace Regi.Test.Services
 
                 Assert.Equal(AppTask.Start, app.Task);
                 Assert.Equal(AppStatus.Running, app.Status);
-                Assert.Equal(8080, app.Port);
+                Assert.Equal(expectedPort, app.Port);
             }
         }
 

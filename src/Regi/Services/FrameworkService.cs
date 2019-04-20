@@ -67,7 +67,7 @@ namespace Regi.Services
             }
         }
 
-        protected virtual string FormatAdditionalArguments(string args) => args;
+        protected virtual string FormatAdditionalArguments(string[] args) => string.Join(' ', args);
 
         public virtual AppProcess CreateProcess(string command, Project project, CommandOptions options, string fileName = null)
         {
@@ -83,7 +83,7 @@ namespace Regi.Services
                     FileName = fileName ?? _frameworkExePath,
                     Arguments = args,
                     WorkingDirectory = project.File.DirectoryName,
-                    RedirectStandardOutput = _platformService.RuntimeInfo.IsWindows ? options.Verbose : true,
+                    RedirectStandardOutput = !_platformService.RuntimeInfo.IsWindows || options.Verbose,
                     RedirectStandardError = true,
                     CreateNoWindow = true
                 },
@@ -147,9 +147,9 @@ namespace Regi.Services
 
             ApplyFrameworkOptions(builder, command, project, options);
 
-            if (!string.IsNullOrWhiteSpace(options?.Arguments))
+            if (options?.RemainingArguments?.Count() > 0)
             {
-                builder.Append(' ').Append(FormatAdditionalArguments(options.Arguments));
+                builder.Append(' ').Append(FormatAdditionalArguments(options.RemainingArguments));
             }
 
             return builder.ToString();

@@ -44,7 +44,7 @@ namespace Regi.Services
             }
         }
 
-        protected override string FormatAdditionalArguments(string args) => $"-- {args}";
+        protected override string FormatAdditionalArguments(string[] args) => $"-- {string.Join(' ', args)}";
 
         public override AppProcess InstallProject(Project project, CommandOptions options)
         {

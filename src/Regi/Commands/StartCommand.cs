@@ -10,7 +10,7 @@ using System.Text;
 
 namespace Regi.Commands
 {
-    [Command("start")]
+    [Command("start", AllowArgumentSeparator = true)]
     public class StartCommand : CommandBase
     {
         private readonly IRunnerService _runnerService;

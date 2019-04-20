@@ -51,31 +51,28 @@ namespace Regi.Models
 
         public void Start()
         {
-            if (Process != null)
+            if (Process == null)
+                throw new InvalidOperationException("Process cannot be null when starting");
+
+            Process.Start();
+
+            if (!RawOutput)
             {
-                Process.Start();
+                Process.BeginErrorReadLine();
 
-                if (!RawOutput)
+                if (Verbose)
                 {
-                    Process.BeginErrorReadLine();
-
-                    if (Verbose)
-                    {
-                        Process.BeginOutputReadLine();
-                    }
+                    Process.BeginOutputReadLine();
                 }
-
-                ProcessId = Process.Id;
-                ProcessName = Process.ProcessName;
             }
+
+            ProcessId = Process.Id;
+            ProcessName = Process.ProcessName;
         }
 
         public void WaitForExit()
         {
-            if (Process != null)
-            {
-                Process.WaitForExit();
-            }
+            Process?.WaitForExit();
         }
 
         public Action<int> OnDispose { get; set; }

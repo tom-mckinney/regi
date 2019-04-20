@@ -77,21 +77,6 @@ namespace Regi.Services
             }
         }
 
-        private IDictionary<string, string> GetEnvironmentVariables(IList<Project> projects)
-        {
-            IDictionary<string, string> output = new Dictionary<string, string>();
-
-            foreach (var p in projects)
-            {
-                if (p.Port.HasValue)
-                {
-                    output.Add($"{p.Name}_PORT".ToUnderscoreCase(), p.Port.ToString());
-                }
-            }
-
-            return output;
-        }
-
         public IList<Project> Start(CommandOptions options)
         {
             StartupConfig config = GetStartupConfig();

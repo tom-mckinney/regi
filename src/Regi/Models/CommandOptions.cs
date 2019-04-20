@@ -10,8 +10,7 @@ namespace Regi.Models
         [Argument(0, Description = "Name of the project")]
         public string Name { get; set; }
 
-        [Argument(1, Name = "Additional arguments", Description = "Additional arguments to include in the framework-level command")]
-        public string Arguments { get; set; }
+        public string[] RemainingArguments { get; set; }
 
         [Option(CommandOptionType.MultipleValue, Description = "Search pattern to exclude from the command")]
         public string[] Exclude { get; set; }
@@ -43,7 +42,7 @@ namespace Regi.Models
         {
             CommandOptions clone = (CommandOptions)MemberwiseClone();
 
-            clone.Arguments = null;
+            clone.RemainingArguments = null;
 
             return clone;
         }

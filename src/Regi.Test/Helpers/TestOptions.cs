@@ -7,12 +7,12 @@ namespace Regi.Test.Helpers
 {
     public static class TestOptions
     {
-        public static CommandOptions Create(VariableList varList = null, string searchPattern = null)
+        public static CommandOptions Create(VariableList varList = null, params string[] otherArguments)
         {
             return new CommandOptions
             {
                 VariableList = varList,
-                Arguments = searchPattern,
+                RemainingArguments = otherArguments,
                 Verbose = true,
                 KillProcessesOnExit = false
             };
