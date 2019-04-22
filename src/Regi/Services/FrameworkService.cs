@@ -24,6 +24,7 @@ namespace Regi.Services
         protected readonly IConsole _console;
         protected readonly IPlatformService _platformService;
         protected readonly string _frameworkExePath;
+        protected readonly object _lock = new object();
 
         public FrameworkService(IConsole console, IPlatformService platformService, string frameworkExePath)
         {
@@ -53,16 +54,19 @@ namespace Regi.Services
 
         protected virtual void ApplyFrameworkOptions(StringBuilder builder, string command, Project project, CommandOptions options)
         {
-            if (FrameworkOptions != null && FrameworkOptions.Any())
+            lock (_lock)
             {
-                if (FrameworkOptions.TryGetValue(command, out IList<string> defaultOptions))
+                if (FrameworkOptions != null && FrameworkOptions.Any())
                 {
-                    builder.Append(' ').AppendJoin(' ', defaultOptions);
-                }
+                    if (FrameworkOptions.TryGetValue(command, out IList<string> defaultOptions))
+                    {
+                        builder.Append(' ').AppendJoin(' ', defaultOptions);
+                    }
 
-                if (FrameworkOptions.TryGetValue(FrameworkCommands.Any, out IList<string> anyCommandOptions))
-                {
-                    builder.Append(' ').AppendJoin(' ', anyCommandOptions);
+                    if (FrameworkOptions.TryGetValue(FrameworkCommands.Any, out IList<string> anyCommandOptions))
+                    {
+                        builder.Append(' ').AppendJoin(' ', anyCommandOptions);
+                    }
                 }
             }
         }
@@ -124,58 +128,67 @@ namespace Regi.Services
 
         public virtual string BuildCommand(string command, Project project, CommandOptions options)
         {
-            if (project?.Commands != null && project.Commands.TryGetValue(command, out string customCommand))
+            lock (_lock)
             {
-                command = customCommand;
-            }
-
-            StringBuilder builder = new StringBuilder();
-
-            builder.Append(command);
-
-            if (project?.Options?.Count > 0)
-            {
-                foreach (var commandOption in project.Options)
+                if (project?.Commands != null && project.Commands.TryGetValue(command, out string customCommand))
                 {
-                    if (commandOption.Key == "*" || commandOption.Key == command)
-                    {
+                    command = customCommand;
+                }
 
-                        builder.Append(' ').AppendJoin(' ', commandOption.Value);
+                StringBuilder builder = new StringBuilder();
+
+                builder.Append(command);
+
+                if (project?.Options?.Count > 0)
+                {
+                    foreach (var commandOption in project.Options)
+                    {
+                        if (commandOption.Key == "*" || commandOption.Key == command)
+                        {
+
+                            builder.Append(' ').AppendJoin(' ', commandOption.Value);
+                        }
                     }
                 }
+
+                ApplyFrameworkOptions(builder, command, project, options);
+
+                if (options?.RemainingArguments?.Count() > 0)
+                {
+                    builder.Append(' ').Append(FormatAdditionalArguments(options.RemainingArguments));
+                }
+
+                return builder.ToString();
             }
-
-            ApplyFrameworkOptions(builder, command, project, options);
-
-            if (options?.RemainingArguments?.Count() > 0)
-            {
-                builder.Append(' ').Append(FormatAdditionalArguments(options.RemainingArguments));
-            }
-
-            return builder.ToString();
         }
 
         public virtual DataReceivedEventHandler HandleOutputDataRecieved(string name) => new DataReceivedEventHandler((o, e) =>
         {
-            _console.WriteLine(name + ": " + e.Data);
+            _console.WriteDefaultLine(name + ": " + e.Data, ConsoleLineStyle.Normal);
         });
 
         public virtual DataReceivedEventHandler HandleErrorDataReceived(string name, AppProcess output) => new DataReceivedEventHandler((o, e) =>
         {
-            if (!string.IsNullOrWhiteSpace(e.Data))
+            lock (_lock)
             {
-                output.Status = AppStatus.Failure;
-                _console.WriteErrorLine(name + ": " + e.Data);
+                if (!string.IsNullOrWhiteSpace(e.Data))
+                {
+                    output.Status = AppStatus.Failure;
+                    _console.WriteErrorLine(name + ": " + e.Data);
+                }
             }
         });
 
         public virtual EventHandler HandleExited(AppProcess output) => new EventHandler((o, e) =>
         {
-            output.EndTime = DateTimeOffset.UtcNow;
-
-            if (output.Status == AppStatus.Running)
+            lock (_lock)
             {
-                output.Status = AppStatus.Success;
+                output.EndTime = DateTimeOffset.UtcNow;
+
+                if (output.Status == AppStatus.Running)
+                {
+                    output.Status = AppStatus.Success;
+                }
             }
         });
 

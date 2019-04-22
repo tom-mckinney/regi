@@ -72,16 +72,21 @@ namespace Regi.Utilities
 
         private static int RunProcessAndWaitForExit(string fileName, string arguments, TimeSpan timeout)
         {
-            var startInfo = new ProcessStartInfo
+            var process = new Process
             {
-                FileName = fileName,
-                Arguments = arguments,
-                UseShellExecute = true,
-                CreateNoWindow = true,
-                WindowStyle = ProcessWindowStyle.Hidden
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = fileName,
+                    Arguments = arguments,
+                    CreateNoWindow = false,
+                    WindowStyle = ProcessWindowStyle.Normal,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true
+                },
+                EnableRaisingEvents = true
             };
 
-            var process = Process.Start(startInfo);
+            process.Start();
 
             if (!process.WaitForExit((int)timeout.TotalMilliseconds))
             {

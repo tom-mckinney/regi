@@ -7,6 +7,7 @@ using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Regi.Services
@@ -80,19 +81,21 @@ namespace Regi.Services
             string projectPluralization = projects.Count > 1 ? "projects" : "project";
             _console.WriteEmphasizedLine($"Waiting for {projectPluralization} to start: {string.Join(", ", projects.Select(p => $"{p.Value.Name} ({p.Key})"))}");
 
-            while (projects.Count > 0)
+            IList<int> activePorts = new List<int>();
+
+            while (projects.Count > activePorts.Count)
             {
-                IPEndPoint[] listeningConnections = _networkingService.GetListeningPorts();
-
-                foreach (var connection in listeningConnections)
+                foreach (var port in projects.Keys.Where(k => !activePorts.Contains(k)))
                 {
-                    if (projects.TryGetValue(connection.Port, out Project p))
+                    if (_networkingService.IsPortListening(port))
                     {
-                        _console.WriteEmphasizedLine($"{p.Name} is now listening on port {connection.Port}");
+                        activePorts.Add(port);
 
-                        projects.Remove(connection.Port);
+                        _console.WriteEmphasizedLine($"{projects[port].Name} is now listening on port {port}");
                     }
                 }
+
+                Thread.Sleep(100);
             }
 
             _console.WriteSuccessLine("All projects started", ConsoleLineStyle.LineBeforeAndAfter);

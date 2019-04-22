@@ -15,7 +15,7 @@ namespace Regi.Extensions
         /// <returns></returns>
         public static string ToUnderscoreCase(this string str)
         {
-            return string.Concat(str.Select((x, i) => char.IsWhiteSpace(x) ? "_" : x.ToString())).ToUpperInvariant();
+            return string.Concat(str.Select((x, i) => char.IsWhiteSpace(x) || char.IsPunctuation(x) ? "_" : x.ToString())).ToUpperInvariant();
         }
     }
 }

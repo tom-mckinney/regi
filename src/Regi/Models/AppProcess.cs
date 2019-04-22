@@ -7,6 +7,8 @@ namespace Regi.Models
 {
     public class AppProcess : IDisposable
     {
+        private object _lock = new object();
+
         public AppProcess(Process process, AppTask task, AppStatus status, int? port = null)
         {
             Process = process;
@@ -54,20 +56,23 @@ namespace Regi.Models
             if (Process == null)
                 throw new InvalidOperationException("Process cannot be null when starting");
 
-            Process.Start();
-
-            if (!RawOutput)
+            lock (_lock)
             {
-                Process.BeginErrorReadLine();
+                Process.Start();
 
-                if (Verbose)
+                if (!RawOutput)
                 {
-                    Process.BeginOutputReadLine();
-                }
-            }
+                    Process.BeginErrorReadLine();
 
-            ProcessId = Process.Id;
-            ProcessName = Process.ProcessName;
+                    if (Verbose)
+                    {
+                        Process.BeginOutputReadLine();
+                    }
+                }
+
+                ProcessId = Process.Id;
+                ProcessName = Process.ProcessName;
+            }
         }
 
         public void WaitForExit()

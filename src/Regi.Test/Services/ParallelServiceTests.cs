@@ -12,13 +12,11 @@ namespace Regi.Test.Services
     public class ParallelServiceTests
     {
         private readonly IParallelService _service;
-        private readonly Mock<INetworkingService> _networkingServiceMock;
+        private readonly Mock<INetworkingService> _networkingServiceMock = new Mock<INetworkingService>(MockBehavior.Strict);
         private readonly TestConsole _console;
 
         public ParallelServiceTests(ITestOutputHelper output)
         {
-            _networkingServiceMock = new Mock<INetworkingService>();
-
             _console = new TestConsole(output);
             _service = new ParallelService(new TestConsole(output), _networkingServiceMock.Object);
         }
@@ -121,21 +119,23 @@ namespace Regi.Test.Services
         [InlineData(3)]
         public void WaitOnPorts_waits_until_all_required_ports_are_being_listened_on(int expectedCallCount)
         {
+            int port = 9080;
+
             int callCount = 0;
-            _networkingServiceMock.Setup(m => m.GetListeningPorts())
+            _networkingServiceMock.Setup(m => m.IsPortListening(port))
                 .Callback(() => callCount++)
                 .Returns(() =>
                 {
                     if (callCount < expectedCallCount)
-                        return new IPEndPoint[] { };
+                        return false;
                     else
-                        return new IPEndPoint[] { new IPEndPoint(00000, 9080) };
+                        return true;
                 })
                 .Verifiable();
 
-            _service.WaitOnPorts(new List<Project> { new Project { Name = "TestProject", Port = 9080 } });
+            _service.WaitOnPorts(new List<Project> { new Project { Name = "TestProject", Port = port } });
 
-            _networkingServiceMock.Verify(m => m.GetListeningPorts(), Times.Exactly(expectedCallCount));
+            _networkingServiceMock.Verify(m => m.IsPortListening(port), Times.Exactly(expectedCallCount));
             Assert.Equal(callCount, expectedCallCount);
         }
     }

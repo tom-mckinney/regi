@@ -19,6 +19,16 @@ namespace Regi.Extensions
     {
         private static readonly object _consoleLock = new object();
 
+        public static void WriteDefaultLine(this IConsole console, string input, ConsoleLineStyle style = ConsoleLineStyle.Normal)
+        {
+            lock (_consoleLock)
+            {
+                console.ResetColor();
+
+                WriteLineWithStyle(console, input, style);
+            }
+        }
+
         public static void WriteEmphasizedLine(this IConsole console, string input, ConsoleLineStyle style = ConsoleLineStyle.Normal)
         {
             lock (_consoleLock)

@@ -26,12 +26,15 @@ namespace Regi.Services
 
         protected override void ApplyFrameworkOptions(StringBuilder builder, string command, Project project, CommandOptions options)
         {
-            if (!string.IsNullOrWhiteSpace(project.Source))
+            lock (_lock)
             {
-                FrameworkOptions.AddOptions(FrameworkCommands.Any, $"--source {project.Source}");
-            }
+                if (!string.IsNullOrWhiteSpace(project.Source))
+                {
+                    FrameworkOptions.AddOptions(FrameworkCommands.Any, $"--source {project.Source}");
+                }
 
-            base.ApplyFrameworkOptions(builder, command, project, options);
+                base.ApplyFrameworkOptions(builder, command, project, options);
+            }
         }
 
         protected override void SetEnvironmentVariables(Process process, Project project)

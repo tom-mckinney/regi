@@ -12,6 +12,9 @@ namespace Regi.Test.Extensions
         [InlineData("Project", "PROJECT")]
         [InlineData("TestProject", "TESTPROJECT")]
         [InlineData("Test Project", "TEST_PROJECT")]
+        [InlineData("Test.Project", "TEST_PROJECT")]
+        [InlineData("Test-Project", "TEST_PROJECT")]
+        [InlineData("Test, Project", "TEST__PROJECT")]
         public void ToUnderscoreCase_converts_input_to_expected_output(string input, string output)
         {
             Assert.Equal(output, input.ToUnderscoreCase());

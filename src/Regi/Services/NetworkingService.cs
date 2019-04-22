@@ -3,86 +3,95 @@ using Regi.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace Regi.Services
 {
     public interface INetworkingService
     {
-        IPEndPoint[] GetListeningPorts();
+        bool IsPortListening(int port);
     }
 
     public class NetworkingService : INetworkingService
     {
         private readonly IConsole _console;
+        private readonly IRuntimeInfo _runtime;
         private readonly IPGlobalProperties _ipGlobalProperties;
-        private static readonly bool _isLinux = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
 
-        public NetworkingService(IConsole console)
+        private object _lock = new object();
+
+        public NetworkingService(IConsole console, IRuntimeInfo runtime)
         {
             _console = console;
-            _ipGlobalProperties = IPGlobalProperties.GetIPGlobalProperties();
+            _runtime = runtime;
+            
+            if (_runtime.IsWindows)
+            {
+                _ipGlobalProperties = IPGlobalProperties.GetIPGlobalProperties();
+            }
         }
 
-        public IPEndPoint[] GetListeningPorts()
+        public bool IsPortListening(int port)
         {
-            try
+            if (_runtime.IsWindows && _ipGlobalProperties != null)
             {
-                return _ipGlobalProperties.GetActiveTcpListeners();
+                var activeTcpPorts = _ipGlobalProperties.GetActiveTcpListeners();
+
+                return activeTcpPorts.Any(p => p.Port == port);
             }
-            catch
+
+            Process netstat = new Process
             {
-                _console.WriteErrorLine("Could not get active Tcp listeners. Are you running in Windows Subsystem for Linux? This is currently not supported.");
+                StartInfo =
+                {
+                    FileName =  _runtime.IsWindows || _runtime.IsWindowsLinux ? "netstat.exe" : "netstat",
+                    Arguments = "-tna",
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    RedirectStandardInput = true
+                }
+            };
 
-                throw;
+            var output = string.Empty;
 
-                //if (_isLinux)
-                //{
-                //    Console.WriteLine("Very wumbo");
-                //    Process netstat = new Process
-                //    {
-                //        StartInfo = new ProcessStartInfo
-                //        {
-                //            FileName = "netstat",
-                //            Arguments = $"-tna",
-                //            RedirectStandardOutput = true
-                //        }
-                //    };
+            netstat.OutputDataReceived += (o, e) =>
+            {
+                output += e.Data;
+            };
 
-                //    netstat.StandardOutput.ReadToEnd();
+            netstat.Start();
+            netstat.BeginOutputReadLine();
 
-                //    Process grep1 = new Process
-                //    {
-                //        StartInfo = new ProcessStartInfo
-                //        {
-                //            FileName = "grep",
-                //            Arguments = $"LISTEN",
-                //            RedirectStandardOutput = true,
-                //            RedirectStandardInput = true,
-                            
-                //        }
-                //    };
+            netstat.WaitForExit(2000);
 
-                    
-                //    netstat.Start();
-                //    netstat.WaitForExit();
+            return ContainsNetstatPort(output, port);
+        }
 
-                //    grep1.Start();
-                //    grep1.StandardInput.WriteAsync(netstat.StandardOutput.ReadToEnd());
+        public bool ContainsNetstatPort(string netstatResponse, int port)
+        {
+            return netstatResponse
+                .Split(_runtime.NewLine)
+                .Any(o =>
+                {
+                    bool isListening = o.Contains("LISTEN");
 
-                //    Console.WriteLine(grep1.StandardOutput.ReadToEnd());
-                //    grep1.WaitForExit();
+                    if (_runtime.IsMac)
+                    {
+                        isListening = isListening && Regex.IsMatch(o, $"[.:]{port}");
+                    }
+                    else
+                    {
+                        isListening = isListening && o.Contains($":{port}");
+                    }
 
-                //    return new IPEndPoint[] { };
-                //}
-                //else
-                //{
-                //    throw;
-                //}
-            }
+                    return isListening;
+                });
         }
     }
 }

@@ -1,6 +1,6 @@
 cd src/Regi
 
-dotnet pack --output ./ --source https://artifactory.platform.manulife.io/artifactory/api/nuget/nuget
+dotnet pack --output ./
 
 dotnet tool uninstall -g regi
 
