@@ -78,13 +78,6 @@ namespace Regi.Services
 
             test.WaitForExit();
 
-            // Todo: Determine why test doesn't call exit
-            test.EndTime = DateTimeOffset.UtcNow;
-            if (test.Status == AppStatus.Running)
-            {
-                test.Status = AppStatus.Success;
-            }
-
             return test;
         }
 

@@ -37,6 +37,7 @@ namespace Regi
                 .AddSingleton<INetworkingService, NetworkingService>()
                 .AddSingleton<IPlatformService, PlatformService>()
                 .AddSingleton<IRuntimeInfo, RuntimeInfo>()
+                .AddSingleton<ISummaryService, SummaryService>()
                 .AddSingleton(console)
                 .AddSingleton<CommandLineContext, DefaultCommandLineContext>()
                 .BuildServiceProvider();

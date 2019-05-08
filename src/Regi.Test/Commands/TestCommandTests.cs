@@ -15,6 +15,7 @@ namespace Regi.Test.Commands
         private readonly ITestOutputHelper _testOutput;
         private readonly TestConsole _console;
         private readonly Mock<IRunnerService> _runnerServiceMock;
+        private readonly ISummaryService _summaryService;
 
         public TestCommandTests(ITestOutputHelper testOutput)
         {
@@ -22,6 +23,7 @@ namespace Regi.Test.Commands
             _console = new TestConsole(testOutput);
 
             _runnerServiceMock = new Mock<IRunnerService>();
+            _summaryService = new SummaryService(_console);
         }
 
         [Fact]
@@ -41,7 +43,7 @@ namespace Regi.Test.Commands
                 })
                 .Verifiable();
 
-            TestCommand command = new TestCommand(_runnerServiceMock.Object, _console)
+            TestCommand command = new TestCommand(_runnerServiceMock.Object, _summaryService, _console)
             {
                 Name = null
             };
@@ -69,7 +71,7 @@ namespace Regi.Test.Commands
                 })
                 .Verifiable();
 
-            TestCommand command = new TestCommand(_runnerServiceMock.Object, _console)
+            TestCommand command = new TestCommand(_runnerServiceMock.Object, _summaryService, _console)
             {
                 Name = null,
                 Type = type

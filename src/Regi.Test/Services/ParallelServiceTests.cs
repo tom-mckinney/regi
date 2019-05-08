@@ -14,6 +14,7 @@ namespace Regi.Test.Services
         private readonly IParallelService _service;
         private readonly Mock<INetworkingService> _networkingServiceMock = new Mock<INetworkingService>(MockBehavior.Strict);
         private readonly TestConsole _console;
+        private readonly object _lock = new object();
 
         public ParallelServiceTests(ITestOutputHelper output)
         {
@@ -24,50 +25,56 @@ namespace Regi.Test.Services
         [Fact]
         public void Queue_adds_to_parallel_by_default_and_serial_if_specified()
         {
-            int taskCount = 5;
-            int parallelExecutions = 0;
-            int serialExecutions = 0;
-
-            for (int i = 0; i < taskCount; i++)
+            lock (_lock)
             {
-                _service.Queue(false, () =>
-                {
-                    parallelExecutions++;
-                });
+                int taskCount = 5;
+                int parallelExecutions = 0;
+                int serialExecutions = 0;
 
-                _service.Queue(true, () =>
+                for (int i = 0; i < taskCount; i++)
                 {
-                    serialExecutions++;
-                });
+                    _service.Queue(false, () =>
+                    {
+                        parallelExecutions++;
+                    });
+
+                    _service.Queue(true, () =>
+                    {
+                        serialExecutions++;
+                    });
+                }
+
+                _service.RunAll();
+
+                Assert.Equal(taskCount, parallelExecutions);
+                Assert.Equal(taskCount, ((ParallelService)_service).ParallelActions.Count);
+
+                Assert.Equal(taskCount, serialExecutions);
+                Assert.Equal(taskCount, ((ParallelService)_service).SerialActions.Count);
             }
-
-            _service.RunAll();
-
-            Assert.Equal(taskCount, parallelExecutions);
-            Assert.Equal(taskCount, ((ParallelService)_service).ParallelActions.Count);
-
-            Assert.Equal(taskCount, serialExecutions);
-            Assert.Equal(taskCount, ((ParallelService)_service).SerialActions.Count);
         }
 
         [Fact]
         public void QueueParallel_can_add_and_run_all_tasks()
         {
-            int taskCount = 5;
-            int executions = 0;
-
-            for (int i = 0; i < taskCount; i++)
+            lock (_lock)
             {
-                _service.QueueParallel(() =>
+                int taskCount = 5;
+                int executions = 0;
+
+                for (int i = 0; i < taskCount; i++)
                 {
-                    executions++;
-                });
+                    _service.QueueParallel(() =>
+                    {
+                        executions++;
+                    });
+                }
+
+                _service.RunAll();
+
+                Assert.Equal(taskCount, executions);
+                Assert.Equal(taskCount, ((ParallelService)_service).ParallelActions.Count);
             }
-
-            _service.RunAll();
-
-            Assert.Equal(taskCount, executions);
-            Assert.Equal(taskCount, ((ParallelService)_service).ParallelActions.Count);
         }
 
         [Fact]

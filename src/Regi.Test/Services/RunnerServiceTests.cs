@@ -190,10 +190,21 @@ namespace Regi.Test.Services
 
             var processes = _runnerService.Test(TestOptions.Create());
 
-            Assert.Equal(totalTestCount + 1, processes.Count);
-            Assert.Equal(2, processes.Where(p => p.Process.Task == AppTask.Test).Count());
-            var requiredApp = Assert.Single(processes, p => p.Process.Task == AppTask.Start);
-            Assert.Contains(requiredApp.Port.Value, _parallelService.ActivePorts);
+            Assert.Equal(totalTestCount, processes.Count);
+            foreach (var project in processes)
+            {
+                Assert.Equal(AppTask.Test, project.Process.Task);
+                if (project.Requires?.Count > 0)
+                {
+                    Assert.Equal(project.Requires.Count, project.RequiredProjects.Count);
+                    foreach (var requirement in project.Requires)
+                    {
+                        var requiredApp = Assert.Single(project.RequiredProjects, p => p.Name == requirement);
+                        Assert.Equal(AppTask.Start, requiredApp.Process.Task);
+                        Assert.Contains(requiredApp.Port.Value, _parallelService.ActivePorts);
+                    }
+                }
+            }
 
             _dotnetServiceMock.VerifyAll();
         }

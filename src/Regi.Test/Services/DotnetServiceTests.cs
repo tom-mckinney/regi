@@ -17,6 +17,7 @@ namespace Regi.Test.Services
         private readonly TestConsole _console;
         private readonly IDotnetService _service;
         private readonly Mock<IRuntimeInfo> _runtimeInfoMock = new Mock<IRuntimeInfo>();
+        private readonly object _lock = new object();
 
         private readonly Project _successfulTests;
         private readonly Project _failedTests;
@@ -93,13 +94,16 @@ namespace Regi.Test.Services
         [Fact]
         public void RunProject_changes_status_from_running_to_success_on_exit()
         {
-            AppProcess process = _service.StartProject(_application, TestOptions.Create());
+            lock (_lock)
+            {
+                AppProcess process = _service.StartProject(_application, TestOptions.Create());
 
-            Assert.Equal(AppStatus.Running, process.Status);
+                Assert.Equal(AppStatus.Running, process.Status);
 
-            process.Process.WaitForExit();
+                process.Process.WaitForExit();
 
-            Assert.Equal(AppStatus.Success, process.Status);
+                Assert.Equal(AppStatus.Success, process.Status);
+            }
         }
 
         [Fact]

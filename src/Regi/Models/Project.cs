@@ -40,6 +40,12 @@ namespace Regi.Models
 
         public bool RawOutput { get; set; }
 
+        [JsonIgnore]
+        public AppProcess Process { get; set; }
+
+        [JsonIgnore]
+        public IList<Project> RequiredProjects { get; set; } = new List<Project>();
+
         public void TryAddSource(CommandOptions options, StartupConfig config)
         {
             if (string.IsNullOrWhiteSpace(Source))
@@ -74,8 +80,5 @@ namespace Regi.Models
                 return _file;
             }
         }
-
-        [JsonIgnore]
-        public AppProcess Process { get; set; }
     }
 }

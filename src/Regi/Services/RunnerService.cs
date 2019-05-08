@@ -103,7 +103,7 @@ namespace Regi.Services
             {
                 _parallelService.Queue(project.Serial || options.NoParallel, () =>
                 {
-                    StartProject(project, null, options);
+                    StartProject(project, options);
                 });
             }
 
@@ -114,7 +114,7 @@ namespace Regi.Services
             return projects;
         }
 
-        private AppProcess StartProject(Project project, IList<Project> projects, CommandOptions options)
+        private AppProcess StartProject(Project project, CommandOptions options)
         {
             _console.WriteEmphasizedLine($"Starting project {project.Name} ({project.File.DirectoryName})");
 
@@ -131,10 +131,6 @@ namespace Regi.Services
             if (process != null)
             {
                 project.Process = process;
-                if (projects != null)
-                {
-                    projects.Add(project);
-                }
             }
 
             return process;
@@ -165,8 +161,6 @@ namespace Regi.Services
             {
                 _parallelService.Queue(project.Serial || options.NoParallel, () =>
                 {
-                    IList<AppProcess> associatedProcesses = new List<AppProcess>();
-
                     CommandOptions requiredOptions = options.CloneForRequiredProjects();
 
                     if (project.Requires.Any())
@@ -192,8 +186,9 @@ namespace Regi.Services
                                     requiredProjectsWithPorts.Add(requiredProject.Port.Value, requiredProject);
                                 }
 
-                                var requiredProccess = StartProject(requiredProject, projects, requiredOptions);
-                                associatedProcesses.Add(requiredProccess);
+                                requiredProject.Process = StartProject(requiredProject, requiredOptions);
+
+                                project.RequiredProjects.Add(requiredProject);
                             }
                         }
 
@@ -221,7 +216,10 @@ namespace Regi.Services
 
                         processes.Add(project.Process);
 
-                        associatedProcesses.DisposeAll();
+                        foreach (var p in project.RequiredProjects)
+                        {
+                            p.Process.Dispose();
+                        }
                     }
                 });
             }
@@ -340,7 +338,7 @@ namespace Regi.Services
             int errorCount = 0;
             foreach (var framework in frameworks)
             {
-                _console.WriteEmphasizedLine($"Killing processes for framework: {framework}");
+                _console.WriteEmphasizedLine($"Killing processes for framework: {framework}", ConsoleLineStyle.LineBefore);
 
                 AppStatus status;
                 switch (framework)

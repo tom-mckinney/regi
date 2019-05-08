@@ -77,9 +77,6 @@ namespace Regi.Services
 
             test.WaitForExit();
 
-            test.Status = test.Process.ExitCode > 0 ? AppStatus.Failure : AppStatus.Success;
-            test.EndTime = DateTimeOffset.UtcNow;
-
             return test;
         }
 
@@ -87,7 +84,6 @@ namespace Regi.Services
         {
             if (!string.IsNullOrWhiteSpace(e.Data) && !e.Data.StartsWith("npm warn", StringComparison.InvariantCultureIgnoreCase))
             {
-                output.Status = AppStatus.Failure;
                 _console.WriteErrorLine(name + ": " + e.Data);
             }
         });

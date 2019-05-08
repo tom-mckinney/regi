@@ -55,8 +55,20 @@ namespace Regi.Services
                 EnableRaisingEvents = true,
             };
 
-            process.OutputDataReceived += (o, e) => _console.WriteLine(e.Data);
-            process.ErrorDataReceived += (o, e) => _console.WriteErrorLine(e.Data);
+            process.OutputDataReceived += (o, e) =>
+            {
+                if (!string.IsNullOrWhiteSpace(e.Data))
+                {
+                    _console.WriteLine(e.Data);
+                }
+            };
+            process.ErrorDataReceived += (o, e) =>
+            {
+                if (!string.IsNullOrWhiteSpace(e.Data))
+                {
+                    _console.WriteErrorLine(e.Data);
+                }
+            };
 
             return process;
         }

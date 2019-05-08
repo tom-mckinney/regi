@@ -176,7 +176,6 @@ namespace Regi.Services
             {
                 if (!string.IsNullOrWhiteSpace(e.Data))
                 {
-                    output.Status = AppStatus.Failure;
                     _console.WriteErrorLine(name + ": " + e.Data);
                 }
             }
@@ -192,9 +191,20 @@ namespace Regi.Services
             {
                 output.EndTime = DateTimeOffset.UtcNow;
 
-                if (output.Status == AppStatus.Running)
+                if (o is Process process)
                 {
-                    output.Status = AppStatus.Success;
+                    if (process.HasExited && process.ExitCode == 0)
+                    {
+                        output.Status = AppStatus.Success;
+                    }
+                    else
+                    {
+                        output.Status = AppStatus.Failure;
+                    }
+                }
+                else
+                {
+                    throw new InvalidOperationException("HandleExited event handler must be assigned to a Process object.");
                 }
             }
         });
