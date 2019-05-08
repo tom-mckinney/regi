@@ -63,11 +63,7 @@ namespace Regi.Models
                 if (!RawOutput)
                 {
                     Process.BeginErrorReadLine();
-
-                    if (Verbose)
-                    {
-                        Process.BeginOutputReadLine();
-                    }
+                    Process.BeginOutputReadLine();
                 }
 
                 ProcessId = Process.Id;

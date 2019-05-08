@@ -19,6 +19,8 @@ namespace Regi.Services
         void QueueSerial(Action action);
 
         void RunAll();
+        void RunParallel();
+        void RunSerial();
 
         void WaitOnPorts(IList<Project> projects);
 
@@ -59,8 +61,18 @@ namespace Regi.Services
 
         public void RunAll()
         {
-            Parallel.Invoke(ParallelActions.ToArray());
+            RunParallel();
 
+            RunSerial();
+        }
+
+        public void RunParallel()
+        {
+            Parallel.Invoke(ParallelActions.ToArray());
+        }
+
+        public void RunSerial()
+        {
             foreach (var action in SerialActions)
             {
                 action();

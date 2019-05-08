@@ -87,7 +87,7 @@ namespace Regi.Services
                     FileName = fileName ?? _frameworkExePath,
                     Arguments = args,
                     WorkingDirectory = project.File.DirectoryName,
-                    RedirectStandardOutput = !_platformService.RuntimeInfo.IsWindows || options.Verbose,
+                    RedirectStandardOutput = true,
                     RedirectStandardError = true,
                     CreateNoWindow = true
                 },
@@ -101,6 +101,11 @@ namespace Regi.Services
                 OnDispose = (processId) => HandleDispose(project, processId)
             };
 
+            process.StartInfo.CopyEnvironmentVariables(options.VariableList);
+            SetEnvironmentVariables(process, project);
+
+            process.Exited += HandleExited(output);
+
             if (project.RawOutput || options.RawOutput)
             {
                 output.RawOutput = true;
@@ -111,16 +116,14 @@ namespace Regi.Services
                 process.StartInfo.RedirectStandardError = false;
                 return output;
             }
-
-            process.StartInfo.CopyEnvironmentVariables(options.VariableList);
-            SetEnvironmentVariables(process, project);
-
-            process.ErrorDataReceived += HandleErrorDataReceived(project.Name, output);
-            process.Exited += HandleExited(output);
-
-            if (options.Verbose)
+            else
             {
-                process.OutputDataReceived += HandleOutputDataRecieved(project.Name);
+                process.ErrorDataReceived += HandleErrorDataReceived(project.Name, output);
+
+                if (options.Verbose)
+                    process.OutputDataReceived += HandleOutputDataRecieved(project.Name);
+                else
+                    process.OutputDataReceived += HandleDataEventSilently();
             }
 
             return output;
@@ -177,6 +180,10 @@ namespace Regi.Services
                     _console.WriteErrorLine(name + ": " + e.Data);
                 }
             }
+        });
+
+        public virtual DataReceivedEventHandler HandleDataEventSilently() => new DataReceivedEventHandler((o, e) =>
+        {
         });
 
         public virtual EventHandler HandleExited(AppProcess output) => new EventHandler((o, e) =>

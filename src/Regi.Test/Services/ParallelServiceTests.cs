@@ -138,5 +138,53 @@ namespace Regi.Test.Services
             _networkingServiceMock.Verify(m => m.IsPortListening(port), Times.Exactly(expectedCallCount));
             Assert.Equal(callCount, expectedCallCount);
         }
+
+        [Fact]
+        public void RunParallel_invokes_all_parallel_actions_in_parallel()
+        {
+            int callCount = 0;
+
+            ((ParallelService)_service).ParallelActions.Add(() => callCount++);
+            ((ParallelService)_service).ParallelActions.Add(() => callCount++);
+            ((ParallelService)_service).ParallelActions.Add(() => callCount++);
+
+            _service.RunParallel();
+
+            Assert.Equal(3, callCount);
+        }
+
+        [Fact]
+        public void RunSerial_invokes_all_serial_actions_in_order_added()
+        {
+            int callCount = 0;
+
+            ((ParallelService)_service).SerialActions.Add(() => callCount = 1);
+            ((ParallelService)_service).SerialActions.Add(() => callCount = 2);
+            ((ParallelService)_service).SerialActions.Add(() => callCount = 3);
+
+            _service.RunSerial();
+
+            Assert.Equal(3, callCount);
+        }
+
+        [Fact]
+        public void RunAll_runs_all_parallel_actions_and_then_all_serial_actions()
+        {
+            int parallelCount = 0;
+            int serialCount = 0;
+
+            ((ParallelService)_service).ParallelActions.Add(() => parallelCount++);
+            ((ParallelService)_service).ParallelActions.Add(() => parallelCount++);
+            ((ParallelService)_service).ParallelActions.Add(() => parallelCount++);
+
+            ((ParallelService)_service).SerialActions.Add(() => serialCount++);
+            ((ParallelService)_service).SerialActions.Add(() => serialCount++);
+            ((ParallelService)_service).SerialActions.Add(() => serialCount++);
+
+            _service.RunAll();
+
+            Assert.Equal(3, parallelCount);
+            Assert.Equal(3, serialCount);
+        }
     }
 }

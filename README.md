@@ -2,12 +2,18 @@
 
 ### Contribution Instructions
 
-``` bash
+```powershell
 dotnet pack --output ./
 ```
-``` bash
+
+```powershell
 dotnet tool uninstall -g regi
 ```
-``` bash
+
+```powershell
 dotnet tool install -g regi --add-source ./
+```
+
+```powershell
+dotnet nuget push
 ```

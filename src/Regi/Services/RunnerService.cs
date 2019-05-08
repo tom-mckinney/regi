@@ -28,18 +28,21 @@ namespace Regi.Services
         private readonly IDotnetService _dotnetService;
         private readonly INodeService _nodeService;
         private readonly IParallelService _parallelService;
+        private readonly INetworkingService _networkingService;
         private readonly IFileService _fileService;
         private readonly IConsole _console;
 
         public RunnerService(IDotnetService dotnetService,
             INodeService nodeService,
             IParallelService parallelService,
+            INetworkingService networkingService,
             IFileService fileService,
             IConsole console)
         {
             _dotnetService = dotnetService;
             _nodeService = nodeService;
             _parallelService = parallelService;
+            _networkingService = networkingService;
             _fileService = fileService;
             _console = console;
         }
@@ -179,7 +182,15 @@ namespace Regi.Services
                             if (requiredProject != null)
                             {
                                 if (requiredProject.Port.HasValue)
+                                {
+                                    if (_networkingService.IsPortListening(requiredProject.Port.Value))
+                                    {
+                                        _console.WriteLine($"Project {requiredProject.Name} is already listening on port {requiredProject.Port}");
+                                        continue;
+                                    }
+
                                     requiredProjectsWithPorts.Add(requiredProject.Port.Value, requiredProject);
+                                }
 
                                 var requiredProccess = StartProject(requiredProject, projects, requiredOptions);
                                 associatedProcesses.Add(requiredProccess);

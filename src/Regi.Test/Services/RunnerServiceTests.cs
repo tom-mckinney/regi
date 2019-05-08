@@ -19,10 +19,11 @@ namespace Regi.Test.Services
     {
         private readonly ITestOutputHelper _output;
         private readonly TestConsole _console;
-        private readonly Mock<IDotnetService> _dotnetServiceMock;
-        private readonly Mock<INodeService> _nodeServiceMock;
+        private readonly Mock<IDotnetService> _dotnetServiceMock = new Mock<IDotnetService>();
+        private readonly Mock<INodeService> _nodeServiceMock = new Mock<INodeService>();
         private readonly TestParallelService _parallelService;
-        private readonly Mock<IFileService> _fileServiceMock;
+        private readonly Mock<INetworkingService> _networkingServiceMock = new Mock<INetworkingService>();
+        private readonly Mock<IFileService> _fileServiceMock = new Mock<IFileService>();
         private readonly IRunnerService _runnerService;
 
         private readonly string _startupConfigGood;
@@ -41,14 +42,12 @@ namespace Regi.Test.Services
         {
             _output = output;
             _console = new TestConsole(output);
-            _dotnetServiceMock = new Mock<IDotnetService>();
-            _nodeServiceMock = new Mock<INodeService>();
             _parallelService = new TestParallelService(_console);
-            _fileServiceMock = new Mock<IFileService>();
             _runnerService = new RunnerService(
                 _dotnetServiceMock.Object,
                 _nodeServiceMock.Object,
                 _parallelService,
+                _networkingServiceMock.Object,
                 _fileServiceMock.Object,
                 _console);
 

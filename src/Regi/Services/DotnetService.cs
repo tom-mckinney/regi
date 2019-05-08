@@ -41,6 +41,9 @@ namespace Regi.Services
         {
             base.SetEnvironmentVariables(process, project);
 
+            string environmentName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development";
+            process.StartInfo.EnvironmentVariables.Add("ASPNETCORE_ENVIRONMENT", environmentName);
+
             if (project.Port.HasValue)
             {
                 process.StartInfo.EnvironmentVariables.Add("ASPNETCORE_URLS", $"http://*:{project.Port}"); // Default .NET Core URL variable

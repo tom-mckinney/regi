@@ -17,6 +17,7 @@ namespace Regi
     [Subcommand(typeof(InitalizeCommand))]
     [Subcommand(typeof(ListCommand))]
     [Subcommand(typeof(KillCommand))]
+    [Subcommand(typeof(VersionCommand))]
     public class Program
     {
         public static int Main(string[] args) => MainWithConsole(PhysicalConsole.Singleton, args);
