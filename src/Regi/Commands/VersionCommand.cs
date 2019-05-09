@@ -21,9 +21,9 @@ namespace Regi.Commands
 
         public override int OnExecute()
         {
-            string version = typeof(Program).Assembly.GetName().Version.ToString();
+            var version = typeof(Program).Assembly.GetName().Version;
 
-            _console.WriteEmphasizedLine($"Regi version: {version}");
+            _console.WriteEmphasizedLine($"Regi version: {version.Major}.{version.Minor}.{version.Build}");
 
             return 0;
         }

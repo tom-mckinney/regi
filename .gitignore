@@ -37,3 +37,5 @@ msbuild.wrn
 
 node_modules/
 .next/
+
+publish.cmd
