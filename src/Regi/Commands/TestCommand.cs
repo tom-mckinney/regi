@@ -1,6 +1,7 @@
 ﻿using McMaster.Extensions.CommandLineUtils;
 using Regi.Models;
 using Regi.Services;
+using System.Diagnostics;
 
 namespace Regi.Commands
 {
@@ -21,9 +22,15 @@ namespace Regi.Commands
 
         public override int OnExecute()
         {
+            Stopwatch stopwatch = new Stopwatch();
+
+            stopwatch.Start();
+
             Projects = _runnerService.Test(Options);
 
-            _summaryService.PrintTestSummary(Projects);
+            stopwatch.Stop();
+
+            _summaryService.PrintTestSummary(Projects, stopwatch.Elapsed);
 
             int projectCount = Projects.Count;
 

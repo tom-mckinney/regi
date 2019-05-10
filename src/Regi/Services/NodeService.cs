@@ -22,7 +22,14 @@ namespace Regi.Services
 
         protected override ProjectOptions FrameworkOptions { get; } = new ProjectOptions();
 
-        protected override void ApplyFrameworkOptions(StringBuilder builder, string command, Project project, CommandOptions options)
+        protected override IList<string> FrameworkWarningIndicators => new List<string>
+        {
+            "npm warn",
+            "Warning:",
+            "clean-webpack-plugin:"
+        };
+
+        protected override void ApplyFrameworkOptions(StringBuilder builder, string command, Project project, RegiOptions options)
         {
             lock (_lock)
             {
@@ -49,7 +56,7 @@ namespace Regi.Services
 
         protected override string FormatAdditionalArguments(string[] args) => $"-- {string.Join(' ', args)}";
 
-        public override AppProcess InstallProject(Project project, CommandOptions options)
+        public override AppProcess InstallProject(Project project, RegiOptions options)
         {
             AppProcess install = CreateProcess(FrameworkCommands.Node.Install, project, options);
 
@@ -60,7 +67,7 @@ namespace Regi.Services
             return install;
         }
 
-        public override AppProcess StartProject(Project project, CommandOptions options)
+        public override AppProcess StartProject(Project project, RegiOptions options)
         {
             AppProcess start = CreateProcess(FrameworkCommands.Node.Start, project, options);
 
@@ -69,7 +76,7 @@ namespace Regi.Services
             return start;
         }
 
-        public override AppProcess TestProject(Project project, CommandOptions options)
+        public override AppProcess TestProject(Project project, RegiOptions options)
         {
             AppProcess test = CreateProcess(FrameworkCommands.Node.Test, project, options);
 
@@ -80,15 +87,14 @@ namespace Regi.Services
             return test;
         }
 
-        public override DataReceivedEventHandler HandleErrorDataReceived(string name, AppProcess output) => new DataReceivedEventHandler((o, e) =>
+        public override AppProcess BuildProject(Project project, RegiOptions options)
         {
-            if (!string.IsNullOrWhiteSpace(e.Data) && !e.Data.StartsWith("npm warn", StringComparison.InvariantCultureIgnoreCase))
-            {
-                _console.WriteErrorLine(name + ": " + e.Data);
-            }
-        });
+            _console.WriteWarningLine($"Did not build {project.Name}. No implementation for {nameof(BuildProject)} in {nameof(NodeService)}.");
 
-        public override AppProcess KillProcesses(CommandOptions options)
+            return new AppProcess(null, AppTask.Build, AppStatus.Unknown);
+        }
+
+        public override AppProcess KillProcesses(RegiOptions options)
         {
             AppProcess process = new AppProcess(_platformService.GetKillProcess("node"),
                 AppTask.Kill,

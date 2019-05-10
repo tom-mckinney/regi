@@ -65,6 +65,18 @@ namespace Regi.Extensions
             }
         }
 
+        public static void WriteWarningLine(this IConsole console, string input, ConsoleLineStyle style = ConsoleLineStyle.Normal)
+        {
+            lock (_consoleLock)
+            {
+                console.ForegroundColor = ConsoleColor.Yellow;
+
+                WriteLineWithStyle(console, input, style);
+
+                console.ResetColor();
+            }
+        }
+
         public static void WriteIndentedLine(this IConsole console, string input, int indentCount, ConsoleColor? color = null)
         {
             lock (_consoleLock)

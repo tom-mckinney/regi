@@ -15,12 +15,13 @@ namespace Regi.Services
     public interface IRunnerService
     {
         StartupConfig GetStartupConfig();
-        IList<Project> Start(CommandOptions options);
-        IList<Project> Test(CommandOptions options);
-        IList<Project> Install(CommandOptions options);
-        OutputSummary List(CommandOptions options);
-        void Kill(CommandOptions options);
-        void Initialize(CommandOptions options);
+        IList<Project> Start(RegiOptions options);
+        IList<Project> Test(RegiOptions options);
+        IList<Project> Build(RegiOptions options);
+        IList<Project> Install(RegiOptions options);
+        OutputSummary List(RegiOptions options);
+        void Kill(RegiOptions options);
+        void Initialize(RegiOptions options);
     }
 
     public class RunnerService : IRunnerService
@@ -80,7 +81,7 @@ namespace Regi.Services
             }
         }
 
-        public IList<Project> Start(CommandOptions options)
+        public IList<Project> Start(RegiOptions options)
         {
             StartupConfig config = GetStartupConfig();
 
@@ -103,7 +104,7 @@ namespace Regi.Services
             {
                 _parallelService.Queue(project.Serial || options.NoParallel, () =>
                 {
-                    StartProject(project, options);
+                    InternalStartProject(project, options);
                 });
             }
 
@@ -114,7 +115,7 @@ namespace Regi.Services
             return projects;
         }
 
-        private AppProcess StartProject(Project project, CommandOptions options)
+        private AppProcess InternalStartProject(Project project, RegiOptions options)
         {
             _console.WriteEmphasizedLine($"Starting project {project.Name} ({project.File.DirectoryName})");
 
@@ -136,7 +137,7 @@ namespace Regi.Services
             return process;
         }
 
-        public IList<Project> Test(CommandOptions options)
+        public IList<Project> Test(RegiOptions options)
         {
             StartupConfig config = GetStartupConfig();
 
@@ -161,7 +162,7 @@ namespace Regi.Services
             {
                 _parallelService.Queue(project.Serial || options.NoParallel, () =>
                 {
-                    CommandOptions requiredOptions = options.CloneForRequiredProjects();
+                    RegiOptions requiredOptions = options.CloneForRequiredProjects();
 
                     if (project.Requires.Any())
                     {
@@ -186,7 +187,7 @@ namespace Regi.Services
                                     requiredProjectsWithPorts.Add(requiredProject.Port.Value, requiredProject);
                                 }
 
-                                requiredProject.Process = StartProject(requiredProject, requiredOptions);
+                                requiredProject.Process = InternalStartProject(requiredProject, requiredOptions);
 
                                 project.RequiredProjects.Add(requiredProject);
                             }
@@ -231,7 +232,53 @@ namespace Regi.Services
             return projects;
         }
 
-        public IList<Project> Install(CommandOptions options)
+        public IList<Project> Build(RegiOptions options)
+        {
+            StartupConfig config = GetStartupConfig();
+
+            options.VariableList = new VariableList(config);
+
+            IList<Project> projects = config.Apps.FilterByOptions(options);
+
+            Console.CancelKeyPress += (o, e) =>
+            {
+                foreach (var project in projects)
+                {
+                    project.Process?.Dispose();
+                }
+            };
+
+            if (projects.Count <= 0)
+                _console.WriteEmphasizedLine("No projects found");
+
+            foreach (var project in projects)
+            {
+                _parallelService.QueueSerial(() =>
+                {
+                    _console.WriteEmphasizedLine($"Starting build for project {project.Name}");
+
+                    if (project.Framework == ProjectFramework.Dotnet)
+                    {
+                        project.Process = _dotnetService.BuildProject(project, options);
+                    }
+                    else if (project.Framework == ProjectFramework.Node)
+                    {
+                        project.Process = _nodeService.BuildProject(project, options);
+                    }
+
+                    if (project.Process?.Status == AppStatus.Success)
+                    {
+                        _console.WriteSuccessLine($"Finished build for project {project.Name}", ConsoleLineStyle.LineAfter);
+                    }
+                });
+            }
+
+            _parallelService.RunAll();
+
+            return projects;
+        }
+
+        public IList<Project> Install(RegiOptions options)
         {
             StartupConfig config = GetStartupConfig();
 
@@ -280,12 +327,12 @@ namespace Regi.Services
             return projects;
         }
 
-        public void Initialize(CommandOptions options)
+        public void Initialize(RegiOptions options)
         {
             _fileService.CreateConfigFile();
         }
 
-        public OutputSummary List(CommandOptions options)
+        public OutputSummary List(RegiOptions options)
         {
             StartupConfig config = GetStartupConfig();
 
@@ -325,7 +372,7 @@ namespace Regi.Services
             return output;
         }
 
-        public void Kill(CommandOptions options)
+        public void Kill(RegiOptions options)
         {
             StartupConfig config = GetStartupConfig();
 

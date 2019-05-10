@@ -46,7 +46,7 @@ namespace Regi.Models
         [JsonIgnore]
         public IList<Project> RequiredProjects { get; set; } = new List<Project>();
 
-        public void TryAddSource(CommandOptions options, StartupConfig config)
+        public void TryAddSource(RegiOptions options, StartupConfig config)
         {
             if (string.IsNullOrWhiteSpace(Source))
             {

@@ -13,10 +13,11 @@ namespace Regi.Services
 {
     public interface IFrameworkService
     {
-        AppProcess InstallProject(Project project, CommandOptions options);
-        AppProcess StartProject(Project project, CommandOptions options);
-        AppProcess TestProject(Project project, CommandOptions options);
-        AppProcess KillProcesses(CommandOptions options);
+        AppProcess InstallProject(Project project, RegiOptions options);
+        AppProcess StartProject(Project project, RegiOptions options);
+        AppProcess TestProject(Project project, RegiOptions options);
+        AppProcess BuildProject(Project project, RegiOptions options);
+        AppProcess KillProcesses(RegiOptions options);
     }
 
     public abstract class FrameworkService : IFrameworkService
@@ -39,9 +40,10 @@ namespace Regi.Services
             _frameworkExePath = frameworkExePath;
         }
 
-        public abstract AppProcess InstallProject(Project project, CommandOptions options);
-        public abstract AppProcess StartProject(Project project, CommandOptions options);
-        public abstract AppProcess TestProject(Project project, CommandOptions options);
+        public abstract AppProcess InstallProject(Project project, RegiOptions options);
+        public abstract AppProcess StartProject(Project project, RegiOptions options);
+        public abstract AppProcess TestProject(Project project, RegiOptions options);
+        public abstract AppProcess BuildProject(Project project, RegiOptions options);
 
         protected virtual void SetEnvironmentVariables(Process process, Project project)
         {
@@ -52,7 +54,9 @@ namespace Regi.Services
 
         protected abstract ProjectOptions FrameworkOptions { get; }
 
-        protected virtual void ApplyFrameworkOptions(StringBuilder builder, string command, Project project, CommandOptions options)
+        protected virtual IList<string> FrameworkWarningIndicators { get; } = new List<string>();
+
+        protected virtual void ApplyFrameworkOptions(StringBuilder builder, string command, Project project, RegiOptions options)
         {
             lock (_lock)
             {
@@ -73,7 +77,7 @@ namespace Regi.Services
 
         protected virtual string FormatAdditionalArguments(string[] args) => string.Join(' ', args);
 
-        public virtual AppProcess CreateProcess(string command, Project project, CommandOptions options, string fileName = null)
+        public virtual AppProcess CreateProcess(string command, Project project, RegiOptions options, string fileName = null)
         {
             string args = BuildCommand(command, project, options);
 
@@ -129,7 +133,7 @@ namespace Regi.Services
             return output;
         }
 
-        public virtual string BuildCommand(string command, Project project, CommandOptions options)
+        public virtual string BuildCommand(string command, Project project, RegiOptions options)
         {
             lock (_lock)
             {
@@ -176,7 +180,14 @@ namespace Regi.Services
             {
                 if (!string.IsNullOrWhiteSpace(e.Data))
                 {
-                    _console.WriteErrorLine(name + ": " + e.Data);
+                    if (FrameworkWarningIndicators.Any(i => e.Data.StartsWith(i)))
+                    {
+                        _console.WriteWarningLine(name + ": " + e.Data);
+                    }
+                    else
+                    {
+                        _console.WriteErrorLine(name + ": " + e.Data);
+                    }
                 }
             }
         });
@@ -214,6 +225,6 @@ namespace Regi.Services
             _console.WriteEmphasizedLine($"Disposing process for project {project.Name} ({processId})");
         }
 
-        public abstract AppProcess KillProcesses(CommandOptions options);
+        public abstract AppProcess KillProcesses(RegiOptions options);
     }
 }

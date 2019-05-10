@@ -1,4 +1,5 @@
 ﻿using McMaster.Extensions.CommandLineUtils;
+using Regi.Extensions;
 using Regi.Models;
 using System;
 using System.Collections.Generic;
@@ -9,7 +10,7 @@ namespace Regi.Services
 {
     public interface ISummaryService
     {
-        void PrintTestSummary(IList<Project> projects);
+        void PrintTestSummary(IList<Project> projects, TimeSpan timespan);
     }
 
     public class SummaryService : ISummaryService
@@ -21,7 +22,7 @@ namespace Regi.Services
             _console = console;
         }
 
-        public void PrintTestSummary(IList<Project> projects)
+        public void PrintTestSummary(IList<Project> projects, TimeSpan timespan)
         {
             int failCount = 0;
             int successCount = 0;
@@ -98,7 +99,12 @@ namespace Regi.Services
             }
 
             _console.WriteLine();
-            _console.WriteLine(); // Padding
+            PrintElapsedTime(timespan);
+        }
+
+        private void PrintElapsedTime(TimeSpan elapsed)
+        {
+            _console.WriteLine($"Elapsed time: {elapsed.ToString()}", ConsoleLineStyle.LineAfter);
         }
 
         private void PrintBadge(string status, ConsoleColor backgroundColor)

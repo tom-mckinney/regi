@@ -13,6 +13,7 @@ namespace Regi
 {
     [Subcommand(typeof(StartCommand))]
     [Subcommand(typeof(TestCommand))]
+    [Subcommand(typeof(BuildCommand))]
     [Subcommand(typeof(InstallCommand))]
     [Subcommand(typeof(InitalizeCommand))]
     [Subcommand(typeof(ListCommand))]

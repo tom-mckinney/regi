@@ -29,7 +29,7 @@ namespace Regi.Test.Commands
         [Fact]
         public void Will_start_all_projects_by_default()
         {
-            _runnerServiceMock.Setup(m => m.Start(It.IsAny<CommandOptions>()))
+            _runnerServiceMock.Setup(m => m.Start(It.IsAny<RegiOptions>()))
                 .Returns(new List<Project>
                 {
                     new Project

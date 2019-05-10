@@ -24,7 +24,7 @@ namespace Regi.Services
             { FrameworkCommands.Dotnet.Run, new List<string> { "--no-launch-profile" } }
         };
 
-        protected override void ApplyFrameworkOptions(StringBuilder builder, string command, Project project, CommandOptions options)
+        protected override void ApplyFrameworkOptions(StringBuilder builder, string command, Project project, RegiOptions options)
         {
             lock (_lock)
             {
@@ -50,7 +50,7 @@ namespace Regi.Services
             }
         }
 
-        public override AppProcess InstallProject(Project project, CommandOptions options)
+        public override AppProcess InstallProject(Project project, RegiOptions options)
         {
             AppProcess install = CreateProcess(FrameworkCommands.Dotnet.Restore, project, options);
 
@@ -61,7 +61,7 @@ namespace Regi.Services
             return install;
         }
 
-        public override AppProcess StartProject(Project project, CommandOptions options)
+        public override AppProcess StartProject(Project project, RegiOptions options)
         {
             AppProcess start = CreateProcess(FrameworkCommands.Dotnet.Run, project, options);
 
@@ -70,7 +70,7 @@ namespace Regi.Services
             return start;
         }
 
-        public override AppProcess TestProject(Project project, CommandOptions options)
+        public override AppProcess TestProject(Project project, RegiOptions options)
         {
             AppProcess test = CreateProcess(FrameworkCommands.Dotnet.Test, project, options);
 
@@ -81,7 +81,18 @@ namespace Regi.Services
             return test;
         }
 
-        public override AppProcess KillProcesses(CommandOptions options)
+        public override AppProcess BuildProject(Project project, RegiOptions options)
+        {
+            AppProcess build = CreateProcess(FrameworkCommands.Dotnet.Build, project, options);
+
+            build.Start();
+
+            build.WaitForExit();
+
+            return build;
+        }
+
+        public override AppProcess KillProcesses(RegiOptions options)
         {
             AppProcess process = new AppProcess(_platformService.GetKillProcess("dotnet"), 
                 AppTask.Kill, 

@@ -8,7 +8,7 @@ namespace Regi.Extensions
 {
     public static class ListExtensions
     {
-        public static IList<Project> FilterByOptions(this IEnumerable<Project> projects, CommandOptions options)
+        public static IList<Project> FilterByOptions(this IEnumerable<Project> projects, RegiOptions options)
         {
             if (!string.IsNullOrWhiteSpace(options.Name))
             {

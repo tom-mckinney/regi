@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace Regi.Models
 {
-    public class CommandOptions
+    public class RegiOptions
     {
         [Argument(0, Description = "Name of the project")]
         public string Name { get; set; }
@@ -38,9 +38,9 @@ namespace Regi.Models
         /// Clones options and sets Arguments to null. This is used when omitting arguments for required project.
         /// </summary>
         /// <returns></returns>
-        public CommandOptions CloneForRequiredProjects()
+        public RegiOptions CloneForRequiredProjects()
         {
-            CommandOptions clone = (CommandOptions)MemberwiseClone();
+            RegiOptions clone = (RegiOptions)MemberwiseClone();
 
             clone.RemainingArguments = null;
 

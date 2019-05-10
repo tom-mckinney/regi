@@ -26,17 +26,22 @@ namespace Regi.Test.Services
             return $"***{string.Join(' ', args)}***";
         }
 
-        public override AppProcess InstallProject(Project project, CommandOptions options)
+        public override AppProcess InstallProject(Project project, RegiOptions options)
         {
             throw new NotImplementedException();
         }
 
-        public override AppProcess StartProject(Project project, CommandOptions options)
+        public override AppProcess StartProject(Project project, RegiOptions options)
         {
             throw new NotImplementedException();
         }
 
-        public override AppProcess TestProject(Project project, CommandOptions options)
+        public override AppProcess TestProject(Project project, RegiOptions options)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override AppProcess BuildProject(Project project, RegiOptions options)
         {
             throw new NotImplementedException();
         }
@@ -46,7 +51,7 @@ namespace Regi.Test.Services
             throw new NotImplementedException();
         }
 
-        public override AppProcess KillProcesses(CommandOptions options)
+        public override AppProcess KillProcesses(RegiOptions options)
         {
             throw new NotImplementedException();
         }
@@ -129,7 +134,7 @@ namespace Regi.Test.Services
         {
             var service = new WumboService(_console);
 
-            var options = new CommandOptions
+            var options = new RegiOptions
             {
                 RemainingArguments = new [] {"--wumbo good", "--verbose"}
             };

@@ -7,9 +7,9 @@ namespace Regi.Test.Helpers
 {
     public static class TestOptions
     {
-        public static CommandOptions Create(VariableList varList = null, params string[] otherArguments)
+        public static RegiOptions Create(VariableList varList = null, params string[] otherArguments)
         {
-            return new CommandOptions
+            return new RegiOptions
             {
                 VariableList = varList,
                 RemainingArguments = otherArguments,

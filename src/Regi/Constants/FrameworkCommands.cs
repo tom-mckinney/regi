@@ -14,6 +14,7 @@ namespace Regi.Constants
         {
             public const string Run = "run";
             public const string Test = FrameworkCommands.Test;
+            public const string Build = "build";
             public const string Restore = "restore";
         }
 
@@ -21,6 +22,7 @@ namespace Regi.Constants
         {
             public const string Start = "start";
             public const string Test = FrameworkCommands.Test;
+            public const string Build = "run build";
             public const string Install = "install";
         }
 
@@ -33,6 +35,9 @@ namespace Regi.Constants
                     return AppTask.Start;
                 case Test:
                     return AppTask.Test;
+                case Dotnet.Build:
+                case Node.Build:
+                    return AppTask.Build;
                 case Dotnet.Restore:
                 case Node.Install:
                     return AppTask.Install;

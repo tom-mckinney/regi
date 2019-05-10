@@ -10,5 +10,6 @@ namespace Regi.Models
         Start,
         Install,
         Kill,
+        Build,
     }
 }

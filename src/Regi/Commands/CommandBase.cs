@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace Regi.Commands
 {
-    public abstract class CommandBase : CommandOptions
+    public abstract class CommandBase : RegiOptions
     {
         public IList<Project> Projects { get; set; }
 
@@ -34,7 +34,7 @@ namespace Regi.Commands
             }
         }
 
-        public CommandOptions Options
+        public RegiOptions Options
         {
             get => this;
             //get => new CommandOptions

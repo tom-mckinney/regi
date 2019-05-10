@@ -119,7 +119,7 @@ namespace Regi.Test.Services
         [Fact]
         public void RunProject_without_verbose_starts_and_prints_nothing()
         {
-            CommandOptions optionsWithoutVerbose = new CommandOptions { Verbose = false, KillProcessesOnExit = false };
+            RegiOptions optionsWithoutVerbose = new RegiOptions { Verbose = false, KillProcessesOnExit = false };
 
             AppProcess process = _service.StartProject(_application, optionsWithoutVerbose);
 
