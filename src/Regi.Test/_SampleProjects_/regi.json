@@ -36,7 +36,8 @@
       "path": "./IntegrationTests/package.json",
       "framework": "node",
       "requires": ["Frontend", "Backend"],
-      "rawOutput": false,
+      "rawOutput": true,
+      "serial": true,
       "environment": {
         "HEADLESS": false
       }

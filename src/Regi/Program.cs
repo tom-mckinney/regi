@@ -25,23 +25,7 @@ namespace Regi
 
         public static int MainWithConsole(IConsole console, string[] args)
         {
-            var services = new ServiceCollection()
-                .Configure<Settings>(o =>
-                {
-                    o.RunIndefinitely = true;
-                })
-                .AddSingleton<IDotnetService, DotnetService>()
-                .AddSingleton<INodeService, NodeService>()
-                .AddSingleton<IRunnerService, RunnerService>()
-                .AddSingleton<IFileService, FileService>()
-                .AddSingleton<IQueueService, QueueService>()
-                .AddSingleton<INetworkingService, NetworkingService>()
-                .AddSingleton<IPlatformService, PlatformService>()
-                .AddSingleton<IRuntimeInfo, RuntimeInfo>()
-                .AddSingleton<ISummaryService, SummaryService>()
-                .AddSingleton(console)
-                .AddSingleton<CommandLineContext, DefaultCommandLineContext>()
-                .BuildServiceProvider();
+            var services = ConfigureServices(console);
 
             var app = new CommandLineApplication<Program>();
 
@@ -67,6 +51,28 @@ namespace Regi
             {
                 return e.LogAndReturnStatus(console);
             }
+        }
+
+        public static IServiceProvider ConfigureServices(IConsole console)
+        {
+            return new ServiceCollection()
+                .Configure<Settings>(o =>
+                {
+                    o.RunIndefinitely = true;
+                })
+                .AddSingleton<IFrameworkServiceProvider, FrameworkServiceProvider>()
+                .AddSingleton<IDotnetService, DotnetService>()
+                .AddSingleton<INodeService, NodeService>()
+                .AddSingleton<IRunnerService, RunnerService>()
+                .AddSingleton<IFileService, FileService>()
+                .AddSingleton<IQueueService, QueueService>()
+                .AddSingleton<INetworkingService, NetworkingService>()
+                .AddSingleton<IPlatformService, PlatformService>()
+                .AddSingleton<IRuntimeInfo, RuntimeInfo>()
+                .AddSingleton<ISummaryService, SummaryService>()
+                .AddSingleton(console)
+                .AddSingleton<CommandLineContext, DefaultCommandLineContext>()
+                .BuildServiceProvider();
         }
     }
 }

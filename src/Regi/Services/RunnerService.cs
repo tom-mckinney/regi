@@ -26,22 +26,19 @@ namespace Regi.Services
 
     public class RunnerService : IRunnerService
     {
-        private readonly IDotnetService _dotnetService;
-        private readonly INodeService _nodeService;
+        private readonly IFrameworkServiceProvider _frameworkServiceProvider;
         private readonly IQueueService _queueService;
         private readonly INetworkingService _networkingService;
         private readonly IFileService _fileService;
         private readonly IConsole _console;
 
-        public RunnerService(IDotnetService dotnetService,
-            INodeService nodeService,
+        public RunnerService(IFrameworkServiceProvider frameworkServiceProvider,
             IQueueService queueService,
             INetworkingService networkingService,
             IFileService fileService,
             IConsole console)
         {
-            _dotnetService = dotnetService;
-            _nodeService = nodeService;
+            _frameworkServiceProvider = frameworkServiceProvider;
             _queueService = queueService;
             _networkingService = networkingService;
             _fileService = fileService;
@@ -119,15 +116,9 @@ namespace Regi.Services
         {
             _console.WriteEmphasizedLine($"Starting project {project.Name} ({project.File.DirectoryName})");
 
-            AppProcess process = null;
-            if (project.Framework == ProjectFramework.Dotnet)
-            {
-                process = _dotnetService.StartProject(project, options);
-            }
-            else if (project.Framework == ProjectFramework.Node)
-            {
-                process = _nodeService.StartProject(project, options);
-            }
+            AppProcess process = _frameworkServiceProvider
+                .GetFrameworkService(project.Framework)
+                .StartProject(project, options);
 
             if (process != null)
             {
@@ -198,14 +189,9 @@ namespace Regi.Services
 
                     _console.WriteEmphasizedLine($"Starting tests for project {project.Name}");
 
-                    if (project.Framework == ProjectFramework.Dotnet)
-                    {
-                        project.Process = _dotnetService.TestProject(project, options);
-                    }
-                    else if (project.Framework == ProjectFramework.Node)
-                    {
-                        project.Process = _nodeService.TestProject(project, options);
-                    }
+                    project.Process = _frameworkServiceProvider
+                        .GetFrameworkService(project.Framework)
+                        .TestProject(project, options);
 
                     if (project.Process != null)
                     {
@@ -257,14 +243,9 @@ namespace Regi.Services
                 {
                     _console.WriteEmphasizedLine($"Starting build for project {project.Name}");
 
-                    if (project.Framework == ProjectFramework.Dotnet)
-                    {
-                        project.Process = _dotnetService.BuildProject(project, options);
-                    }
-                    else if (project.Framework == ProjectFramework.Node)
-                    {
-                        project.Process = _nodeService.BuildProject(project, options);
-                    }
+                    project.Process = _frameworkServiceProvider
+                        .GetFrameworkService(project.Framework)
+                        .BuildProject(project, options);
 
                     if (project.Process?.Status == AppStatus.Success)
                     {
@@ -301,24 +282,11 @@ namespace Regi.Services
                 {
                     _console.WriteEmphasizedLine($"Starting install for project {project.Name}");
 
-                    AppProcess process = null;
-
                     project.TryAddSource(options, config);
 
-                    if (project.Framework == ProjectFramework.Dotnet)
-                    {
-                        process = _dotnetService.InstallProject(project, options);
-                    }
-                    else if (project.Framework == ProjectFramework.Node)
-                    {
-                        process = _nodeService.InstallProject(project, options);
-                    }
-
-                    if (process != null)
-                    {
-                        project.Process = process;
-                    }
-
+                    project.Process = _frameworkServiceProvider
+                        .GetFrameworkService(project.Framework)
+                        .InstallProject(project, options);
                 });
             }
 
@@ -387,18 +355,10 @@ namespace Regi.Services
             {
                 _console.WriteEmphasizedLine($"Killing processes for framework: {framework}", ConsoleLineStyle.LineBefore);
 
-                AppStatus status;
-                switch (framework)
-                {
-                    case ProjectFramework.Dotnet:
-                        status = _dotnetService.KillProcesses(options).Status;
-                        break;
-                    case ProjectFramework.Node:
-                        status = _nodeService.KillProcesses(options).Status;
-                        break;
-                    default:
-                        continue;
-                }
+                AppStatus status = _frameworkServiceProvider
+                    .GetFrameworkService(framework)
+                    .KillProcesses(options)
+                    .Status;
 
                 if (status == AppStatus.Failure)
                     errorCount++;

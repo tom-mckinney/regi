@@ -21,6 +21,7 @@ namespace Regi.Test.Services
         private readonly TestConsole _console;
         private readonly Mock<IDotnetService> _dotnetServiceMock = new Mock<IDotnetService>();
         private readonly Mock<INodeService> _nodeServiceMock = new Mock<INodeService>();
+        private readonly Mock<IFrameworkServiceProvider> _frameworkServiceProviderMock = new Mock<IFrameworkServiceProvider>(MockBehavior.Loose);
         private readonly TestParallelService _queueService;
         private readonly Mock<INetworkingService> _networkingServiceMock = new Mock<INetworkingService>();
         private readonly Mock<IFileService> _fileServiceMock = new Mock<IFileService>();
@@ -40,12 +41,16 @@ namespace Regi.Test.Services
 
         public RunnerServiceTests(ITestOutputHelper output)
         {
+            _frameworkServiceProviderMock.Setup(m => m.GetFrameworkService(ProjectFramework.Dotnet))
+                .Returns(_dotnetServiceMock.Object);
+            _frameworkServiceProviderMock.Setup(m => m.GetFrameworkService(ProjectFramework.Node))
+                .Returns(_nodeServiceMock.Object);
+
             _output = output;
             _console = new TestConsole(output);
             _queueService = new TestParallelService(_console);
             _runnerService = new RunnerService(
-                _dotnetServiceMock.Object,
-                _nodeServiceMock.Object,
+                _frameworkServiceProviderMock.Object,
                 _queueService,
                 _networkingServiceMock.Object,
                 _fileServiceMock.Object,
