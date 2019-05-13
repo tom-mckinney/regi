@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Regi.Test.Helpers
 {
-    internal class TestParallelService : ParallelService
+    internal class TestParallelService : QueueService
     {
         public TestParallelService(IConsole console) : base(console, null) // No networking in Test stub
         {

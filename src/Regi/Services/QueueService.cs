@@ -4,16 +4,15 @@ using Regi.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
-using System.Net.NetworkInformation;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Regi.Services
 {
-    public interface IParallelService
+    public interface IQueueService
     {
+        ParallelOptions ParallelOptions { get; }
+
         void Queue(bool isSerial, Action action);
         void QueueParallel(Action action);
         void QueueSerial(Action action);
@@ -23,16 +22,15 @@ namespace Regi.Services
         void RunSerial();
 
         void WaitOnPorts(IList<Project> projects);
-
         void WaitOnPorts(IDictionary<int, Project> projects);
     }
 
-    public class ParallelService : IParallelService
+    public class QueueService : IQueueService
     {
         private readonly IConsole _console;
         private readonly INetworkingService _networkingService;
 
-        public ParallelService(IConsole console, INetworkingService networkingService)
+        public QueueService(IConsole console, INetworkingService networkingService)
         {
             _console = console;
             _networkingService = networkingService;
@@ -40,6 +38,11 @@ namespace Regi.Services
 
         public IList<Action> ParallelActions { get; } = new List<Action>();
         public IList<Action> SerialActions { get; } = new List<Action>();
+
+        public ParallelOptions ParallelOptions => new ParallelOptions
+        {
+            MaxDegreeOfParallelism = 3
+        };
 
         public void Queue(bool isSerial, Action action)
         {
@@ -68,7 +71,7 @@ namespace Regi.Services
 
         public void RunParallel()
         {
-            Parallel.Invoke(ParallelActions.ToArray());
+            Parallel.Invoke(ParallelOptions, ParallelActions.ToArray());
         }
 
         public void RunSerial()

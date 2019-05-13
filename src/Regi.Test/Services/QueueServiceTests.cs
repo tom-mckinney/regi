@@ -9,17 +9,17 @@ using Xunit.Abstractions;
 
 namespace Regi.Test.Services
 {
-    public class ParallelServiceTests
+    public class QueueServiceTests
     {
-        private readonly IParallelService _service;
+        private readonly IQueueService _service;
         private readonly Mock<INetworkingService> _networkingServiceMock = new Mock<INetworkingService>(MockBehavior.Strict);
         private readonly TestConsole _console;
         private readonly object _lock = new object();
 
-        public ParallelServiceTests(ITestOutputHelper output)
+        public QueueServiceTests(ITestOutputHelper output)
         {
             _console = new TestConsole(output);
-            _service = new ParallelService(new TestConsole(output), _networkingServiceMock.Object);
+            _service = new QueueService(new TestConsole(output), _networkingServiceMock.Object);
         }
 
         [Fact]
@@ -47,10 +47,10 @@ namespace Regi.Test.Services
                 _service.RunAll();
 
                 Assert.Equal(taskCount, parallelExecutions);
-                Assert.Equal(taskCount, ((ParallelService)_service).ParallelActions.Count);
+                Assert.Equal(taskCount, ((QueueService)_service).ParallelActions.Count);
 
                 Assert.Equal(taskCount, serialExecutions);
-                Assert.Equal(taskCount, ((ParallelService)_service).SerialActions.Count);
+                Assert.Equal(taskCount, ((QueueService)_service).SerialActions.Count);
             }
         }
 
@@ -73,7 +73,7 @@ namespace Regi.Test.Services
                 _service.RunAll();
 
                 Assert.Equal(taskCount, executions);
-                Assert.Equal(taskCount, ((ParallelService)_service).ParallelActions.Count);
+                Assert.Equal(taskCount, ((QueueService)_service).ParallelActions.Count);
             }
         }
 
@@ -94,7 +94,7 @@ namespace Regi.Test.Services
             _service.RunAll();
 
             Assert.Equal(taskCount, executions);
-            Assert.Equal(taskCount, ((ParallelService)_service).SerialActions.Count);
+            Assert.Equal(taskCount, ((QueueService)_service).SerialActions.Count);
         }
 
         [Theory]
@@ -151,9 +151,9 @@ namespace Regi.Test.Services
         {
             int callCount = 0;
 
-            ((ParallelService)_service).ParallelActions.Add(() => callCount++);
-            ((ParallelService)_service).ParallelActions.Add(() => callCount++);
-            ((ParallelService)_service).ParallelActions.Add(() => callCount++);
+            ((QueueService)_service).ParallelActions.Add(() => callCount++);
+            ((QueueService)_service).ParallelActions.Add(() => callCount++);
+            ((QueueService)_service).ParallelActions.Add(() => callCount++);
 
             _service.RunParallel();
 
@@ -165,9 +165,9 @@ namespace Regi.Test.Services
         {
             int callCount = 0;
 
-            ((ParallelService)_service).SerialActions.Add(() => callCount = 1);
-            ((ParallelService)_service).SerialActions.Add(() => callCount = 2);
-            ((ParallelService)_service).SerialActions.Add(() => callCount = 3);
+            ((QueueService)_service).SerialActions.Add(() => callCount = 1);
+            ((QueueService)_service).SerialActions.Add(() => callCount = 2);
+            ((QueueService)_service).SerialActions.Add(() => callCount = 3);
 
             _service.RunSerial();
 
@@ -180,13 +180,13 @@ namespace Regi.Test.Services
             int parallelCount = 0;
             int serialCount = 0;
 
-            ((ParallelService)_service).ParallelActions.Add(() => parallelCount++);
-            ((ParallelService)_service).ParallelActions.Add(() => parallelCount++);
-            ((ParallelService)_service).ParallelActions.Add(() => parallelCount++);
+            ((QueueService)_service).ParallelActions.Add(() => parallelCount++);
+            ((QueueService)_service).ParallelActions.Add(() => parallelCount++);
+            ((QueueService)_service).ParallelActions.Add(() => parallelCount++);
 
-            ((ParallelService)_service).SerialActions.Add(() => serialCount++);
-            ((ParallelService)_service).SerialActions.Add(() => serialCount++);
-            ((ParallelService)_service).SerialActions.Add(() => serialCount++);
+            ((QueueService)_service).SerialActions.Add(() => serialCount++);
+            ((QueueService)_service).SerialActions.Add(() => serialCount++);
+            ((QueueService)_service).SerialActions.Add(() => serialCount++);
 
             _service.RunAll();
 

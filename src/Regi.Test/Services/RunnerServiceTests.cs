@@ -21,7 +21,7 @@ namespace Regi.Test.Services
         private readonly TestConsole _console;
         private readonly Mock<IDotnetService> _dotnetServiceMock = new Mock<IDotnetService>();
         private readonly Mock<INodeService> _nodeServiceMock = new Mock<INodeService>();
-        private readonly TestParallelService _parallelService;
+        private readonly TestParallelService _queueService;
         private readonly Mock<INetworkingService> _networkingServiceMock = new Mock<INetworkingService>();
         private readonly Mock<IFileService> _fileServiceMock = new Mock<IFileService>();
         private readonly IRunnerService _runnerService;
@@ -42,11 +42,11 @@ namespace Regi.Test.Services
         {
             _output = output;
             _console = new TestConsole(output);
-            _parallelService = new TestParallelService(_console);
+            _queueService = new TestParallelService(_console);
             _runnerService = new RunnerService(
                 _dotnetServiceMock.Object,
                 _nodeServiceMock.Object,
-                _parallelService,
+                _queueService,
                 _networkingServiceMock.Object,
                 _fileServiceMock.Object,
                 _console);
@@ -109,7 +109,7 @@ namespace Regi.Test.Services
 
             Assert.Equal(totalAppCount, processes.Count);
             Assert.Single(processes, p => p.Port == 9080);
-            Assert.Equal(processes.Count(p => p.Port.HasValue), _parallelService.ActivePorts.Count);
+            Assert.Equal(processes.Count(p => p.Port.HasValue), _queueService.ActivePorts.Count);
 
             _dotnetServiceMock.Verify(m => m.StartProject(It.IsAny<Project>(), It.IsAny<RegiOptions>()), Times.Exactly(dotnetAppCount));
             _nodeServiceMock.Verify(m => m.StartProject(It.IsAny<Project>(), It.IsAny<RegiOptions>()), Times.Exactly(nodeAppCount));
@@ -137,7 +137,7 @@ namespace Regi.Test.Services
                         It.Is<RegiOptions>(o => o.VariableList.ContainsKey($"{p.Name}_PORT".ToUnderscoreCase()) &&
                         o.VariableList.ContainsKey($"{p.Name}_URL".ToUnderscoreCase()))));
 
-                    Assert.Contains(p.Port.Value, _parallelService.ActivePorts);
+                    Assert.Contains(p.Port.Value, _queueService.ActivePorts);
                 }
             }
         }
@@ -156,8 +156,8 @@ namespace Regi.Test.Services
 
             var projects = _runnerService.Start(TestOptions.Create());
 
-            Assert.Equal(2, _parallelService.ParallelActions.Count);
-            Assert.Single(_parallelService.SerialActions);
+            Assert.Equal(2, _queueService.ParallelActions.Count);
+            Assert.Single(_queueService.SerialActions);
         }
 
         [Fact]
@@ -201,7 +201,7 @@ namespace Regi.Test.Services
                     {
                         var requiredApp = Assert.Single(project.RequiredProjects, p => p.Name == requirement);
                         Assert.Equal(AppTask.Start, requiredApp.Process.Task);
-                        Assert.Contains(requiredApp.Port.Value, _parallelService.ActivePorts);
+                        Assert.Contains(requiredApp.Port.Value, _queueService.ActivePorts);
                     }
                 }
             }
@@ -238,8 +238,8 @@ namespace Regi.Test.Services
 
             var processes = _runnerService.Test(TestOptions.Create());
 
-            Assert.Single(_parallelService.ParallelActions);
-            Assert.Single(_parallelService.SerialActions);
+            Assert.Single(_queueService.ParallelActions);
+            Assert.Single(_queueService.SerialActions);
         }
 
         [Fact]

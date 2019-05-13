@@ -28,21 +28,21 @@ namespace Regi.Services
     {
         private readonly IDotnetService _dotnetService;
         private readonly INodeService _nodeService;
-        private readonly IParallelService _parallelService;
+        private readonly IQueueService _queueService;
         private readonly INetworkingService _networkingService;
         private readonly IFileService _fileService;
         private readonly IConsole _console;
 
         public RunnerService(IDotnetService dotnetService,
             INodeService nodeService,
-            IParallelService parallelService,
+            IQueueService queueService,
             INetworkingService networkingService,
             IFileService fileService,
             IConsole console)
         {
             _dotnetService = dotnetService;
             _nodeService = nodeService;
-            _parallelService = parallelService;
+            _queueService = queueService;
             _networkingService = networkingService;
             _fileService = fileService;
             _console = console;
@@ -102,15 +102,15 @@ namespace Regi.Services
 
             foreach (var project in projects)
             {
-                _parallelService.Queue(project.Serial || options.NoParallel, () =>
+                _queueService.Queue(project.Serial || options.NoParallel, () =>
                 {
                     InternalStartProject(project, options);
                 });
             }
 
-            _parallelService.RunAll();
+            _queueService.RunAll();
 
-            _parallelService.WaitOnPorts(projects);
+            _queueService.WaitOnPorts(projects);
 
             return projects;
         }
@@ -160,7 +160,7 @@ namespace Regi.Services
 
             foreach (var project in projects)
             {
-                _parallelService.Queue(project.Serial || options.NoParallel, () =>
+                _queueService.Queue(project.Serial || options.NoParallel, () =>
                 {
                     RegiOptions requiredOptions = options.CloneForRequiredProjects();
 
@@ -193,7 +193,7 @@ namespace Regi.Services
                             }
                         }
 
-                        _parallelService.WaitOnPorts(requiredProjectsWithPorts);
+                        _queueService.WaitOnPorts(requiredProjectsWithPorts);
                     }
 
                     _console.WriteEmphasizedLine($"Starting tests for project {project.Name}");
@@ -225,7 +225,7 @@ namespace Regi.Services
                 });
             }
 
-            _parallelService.RunAll();
+            _queueService.RunAll();
 
             processes.DisposeAll();
 
@@ -253,7 +253,7 @@ namespace Regi.Services
 
             foreach (var project in projects)
             {
-                _parallelService.QueueSerial(() =>
+                _queueService.QueueSerial(() =>
                 {
                     _console.WriteEmphasizedLine($"Starting build for project {project.Name}");
 
@@ -273,7 +273,7 @@ namespace Regi.Services
                 });
             }
 
-            _parallelService.RunAll();
+            _queueService.RunAll();
 
             return projects;
         }
@@ -297,7 +297,7 @@ namespace Regi.Services
 
             foreach (var project in projects)
             {
-                _parallelService.QueueParallel(() =>
+                _queueService.QueueParallel(() =>
                 {
                     _console.WriteEmphasizedLine($"Starting install for project {project.Name}");
 
@@ -322,7 +322,7 @@ namespace Regi.Services
                 });
             }
 
-            _parallelService.RunAll();
+            _queueService.RunAll();
 
             return projects;
         }
