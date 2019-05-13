@@ -104,7 +104,7 @@ namespace Regi.Services
 
         private void PrintElapsedTime(TimeSpan elapsed)
         {
-            _console.WriteLine($"Elapsed time: {elapsed.ToString()}", ConsoleLineStyle.LineAfter);
+            _console.WriteDefaultLine($"Elapsed time: {elapsed.ToHumanFriendlyString()}", ConsoleLineStyle.LineAfter);
         }
 
         private void PrintBadge(string status, ConsoleColor backgroundColor)
