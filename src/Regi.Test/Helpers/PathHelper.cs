@@ -9,11 +9,37 @@ namespace Regi.Test.Helpers
     {
         private static readonly char Slash = Path.DirectorySeparatorChar;
 
-        static internal string SampleDirectoryPath(string name)
+        internal static string SampleDirectoryPath(string name)
         {
-            string path = $"{Directory.GetCurrentDirectory()}{Slash}_SampleProjects_{Slash}{name}";
+            string path = $"{ProjectRootPath}{Slash}_SampleProjects_{Slash}{name}";
 
             return path;
+        }
+
+        private static string _projectRootPath;
+        internal static string ProjectRootPath
+        {
+            get
+            {
+                if (string.IsNullOrWhiteSpace(_projectRootPath))
+                {
+                    DirectoryInfo currentDirectory = new DirectoryInfo(Directory.GetCurrentDirectory());
+                    while (string.IsNullOrWhiteSpace(_projectRootPath) && currentDirectory != null && currentDirectory.Exists)
+                    {
+                        var projectFiles = currentDirectory.GetFiles("*.csproj", SearchOption.TopDirectoryOnly);
+                        if (projectFiles.Length > 0)
+                        {
+                            _projectRootPath = currentDirectory.FullName;
+                        }
+                        else
+                        {
+                            currentDirectory = currentDirectory.Parent;
+                        }
+                    }
+                }
+
+                return _projectRootPath;
+            }
         }
     }
 }

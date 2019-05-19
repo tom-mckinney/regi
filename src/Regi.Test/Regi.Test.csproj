@@ -1,39 +1,15 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
-
+    <TargetFramework>netcoreapp2.2</TargetFramework>
     <IsPackable>false</IsPackable>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="_SampleProjects_\Backend\bin\**" />
-    <Compile Remove="_SampleProjects_\Backend\obj\**" />
-    <Compile Remove="_SampleProjects_\Frontend\node_modules\**" />
-    <Compile Remove="_SampleProjects_\IntegrationTests\node_modules\**" />
-    <Compile Remove="_SampleProjects_\SampleAppLong\bin\**" />
-    <Compile Remove="_SampleProjects_\SampleAppLong\obj\**" />
-    <Compile Remove="_SampleProjects_\SampleApp\obj\**" />
-    <Compile Remove="_SampleProjects_\SampleNodeApp\node_modules\**" />
-    <Compile Remove="_SampleProjects_\SampleTests\**" />
-    <EmbeddedResource Remove="_SampleProjects_\Backend\bin\**" />
-    <EmbeddedResource Remove="_SampleProjects_\Backend\obj\**" />
-    <EmbeddedResource Remove="_SampleProjects_\Frontend\node_modules\**" />
-    <EmbeddedResource Remove="_SampleProjects_\IntegrationTests\node_modules\**" />
-    <EmbeddedResource Remove="_SampleProjects_\SampleAppLong\bin\**" />
-    <EmbeddedResource Remove="_SampleProjects_\SampleAppLong\obj\**" />
-    <EmbeddedResource Remove="_SampleProjects_\SampleApp\obj\**" />
-    <EmbeddedResource Remove="_SampleProjects_\SampleNodeApp\node_modules\**" />
-    <EmbeddedResource Remove="_SampleProjects_\SampleTests\**" />
-    <None Remove="_SampleProjects_\Backend\bin\**" />
-    <None Remove="_SampleProjects_\Backend\obj\**" />
-    <None Remove="_SampleProjects_\Frontend\node_modules\**" />
-    <None Remove="_SampleProjects_\IntegrationTests\node_modules\**" />
-    <None Remove="_SampleProjects_\SampleAppLong\bin\**" />
-    <None Remove="_SampleProjects_\SampleAppLong\obj\**" />
-    <None Remove="_SampleProjects_\SampleApp\obj\**" />
-    <None Remove="_SampleProjects_\SampleNodeApp\node_modules\**" />
-    <None Remove="_SampleProjects_\SampleTests\**" />
+    <Compile Remove="_SampleProjects_\**" />
+    <EmbeddedResource Remove="_SampleProjects_\**" />
+    <None Remove="_SampleProjects_\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -49,12 +25,19 @@
 
   <ItemGroup>
     <PackageReference Include="McMaster.Extensions.CommandLineUtils" Version="2.3.4" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.1.1" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.7.2" />
-    <PackageReference Include="Moq" Version="4.8.3" />
-    <PackageReference Include="xunit" Version="2.3.1" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.3.1" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.2.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.1.0" />
+    <PackageReference Include="Moq" Version="4.10.1" />
+    <PackageReference Include="xunit" Version="2.4.1" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.1">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <DotNetCliToolReference Include="dotnet-xunit" Version="2.3.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Regi\Regi.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -100,10 +83,6 @@
     <None Include="_SampleProjects_\SampleSuccessfulTests\UnitTest1.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\Regi\Regi.csproj" />
   </ItemGroup>
 
   <ItemGroup>
