@@ -4,6 +4,7 @@ using Regi.Services;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 
 namespace Regi.Commands
@@ -25,7 +26,9 @@ namespace Regi.Commands
         {
             Projects = _runnerService.Install(Options);
 
-            return Projects.Count;
+            return Projects
+                .Where(p => p.Process?.Status == AppStatus.Failure)
+                .Count();
         }
     }
 }

@@ -10,7 +10,7 @@ namespace Regi.Services
 {
     public interface ISummaryService
     {
-        void PrintTestSummary(IList<Project> projects, TimeSpan timespan);
+        OutputSummary PrintTestSummary(IList<Project> projects, TimeSpan timespan);
     }
 
     public class SummaryService : ISummaryService
@@ -22,7 +22,7 @@ namespace Regi.Services
             _console = console;
         }
 
-        public void PrintTestSummary(IList<Project> projects, TimeSpan timespan)
+        public OutputSummary PrintTestSummary(IList<Project> projects, TimeSpan timespan)
         {
             int failCount = 0;
             int successCount = 0;
@@ -100,6 +100,13 @@ namespace Regi.Services
 
             _console.WriteLine();
             PrintElapsedTime(timespan);
+
+            return new OutputSummary
+            {
+                SuccessCount = successCount,
+                FailCount = failCount,
+                UnknownCount = unknownCount
+            };
         }
 
         private void PrintElapsedTime(TimeSpan elapsed)

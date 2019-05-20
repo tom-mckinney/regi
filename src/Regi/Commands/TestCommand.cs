@@ -30,16 +30,14 @@ namespace Regi.Commands
 
             stopwatch.Stop();
 
-            _summaryService.PrintTestSummary(Projects, stopwatch.Elapsed);
-
-            int projectCount = Projects.Count;
+            var output = _summaryService.PrintTestSummary(Projects, stopwatch.Elapsed);
 
             foreach (var p in Projects)
             {
                 p.Process.Dispose();
             }
 
-            return Projects.Count;
+            return output.FailCount;
         }
     }
 }
