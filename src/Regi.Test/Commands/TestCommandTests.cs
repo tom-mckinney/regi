@@ -50,7 +50,36 @@ namespace Regi.Test.Commands
 
             int testProjectCount = command.OnExecute();
 
-            Assert.Equal(2, testProjectCount);
+            Assert.Equal(0, testProjectCount);
+
+            _runnerServiceMock.VerifyAll();
+        }
+
+        [Fact]
+        public void Returns_fail_count_as_exit_code()
+        {
+            _runnerServiceMock.Setup(m => m.Test(It.IsAny<RegiOptions>()))
+                .Returns(new List<Project>
+                {
+                    new Project
+                    {
+                        Process = new AppProcess(new Process(), AppTask.Test, AppStatus.Failure)
+                    },
+                    new Project
+                    {
+                        Process = new AppProcess(new Process(), AppTask.Test, AppStatus.Success)
+                    }
+                })
+                .Verifiable();
+
+            TestCommand command = new TestCommand(_runnerServiceMock.Object, _summaryService, _console)
+            {
+                Name = null
+            };
+
+            int testProjectCount = command.OnExecute();
+
+            Assert.Equal(1, testProjectCount);
 
             _runnerServiceMock.VerifyAll();
         }
@@ -79,7 +108,7 @@ namespace Regi.Test.Commands
 
             int testProjectCount = command.OnExecute();
 
-            Assert.Equal(1, testProjectCount);
+            Assert.Equal(0, testProjectCount);
 
             _runnerServiceMock.VerifyAll();
         }

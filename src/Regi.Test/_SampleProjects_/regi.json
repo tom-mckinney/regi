@@ -1,5 +1,47 @@
 {
-  "apps": [],
-  "tests": [],
+  "apps": [
+    {
+      "name": "Frontend",
+      "path": "./Frontend/package.json",
+      "framework": "node",
+      "port": 3000,
+      "commands": {
+        "start": "run dev"
+      }
+    },
+    {
+      "name": "Backend",
+      "path": "./Backend/Backend.csproj",
+      "framework": "dotnet",
+      "port": 5000,
+      "options": {
+        "*": [ "--foo bar" ]
+      }
+    }
+  ],
+  "tests": [
+    {
+      "name": "SampleSuccessfulTests",
+      "path": "./SampleSuccessfulTests/SampleSuccessfulTests.csproj",
+      "framework": "dotnet",
+      "type": "unit"
+    },
+    {
+      "name": "NodeApp",
+      "path": "./SampleNodeApp/package.json",
+      "framework": "node"
+    },
+    {
+      "name": "IntegrationTests",
+      "path": "./IntegrationTests/package.json",
+      "framework": "node",
+      "requires": [ "Frontend", "Backend" ],
+      "rawOutput": true,
+      "serial": true,
+      "environment": {
+        "HEADLESS": true
+      }
+    }
+  ],
   "services": []
 }

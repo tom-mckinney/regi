@@ -48,7 +48,36 @@ namespace Regi.Test.Commands
 
             int testProjectCount = command.OnExecute();
 
-            Assert.Equal(2, testProjectCount);
+            Assert.Equal(0, testProjectCount);
+
+            _runnerServiceMock.VerifyAll();
+        }
+
+        [Fact]
+        public void Returns_fail_count_as_exit_code()
+        {
+            _runnerServiceMock.Setup(m => m.Install(It.IsAny<RegiOptions>()))
+                .Returns(new List<Project>
+                {
+                    new Project
+                    {
+                        Process = new AppProcess(new Process(), AppTask.Install, AppStatus.Failure)
+                    },
+                    new Project
+                    {
+                        Process = new AppProcess(new Process(), AppTask.Install, AppStatus.Success)
+                    }
+                })
+                .Verifiable();
+
+            InstallCommand command = new InstallCommand(_runnerServiceMock.Object, _console)
+            {
+                Name = null
+            };
+
+            int testProjectCount = command.OnExecute();
+
+            Assert.Equal(1, testProjectCount);
 
             _runnerServiceMock.VerifyAll();
         }

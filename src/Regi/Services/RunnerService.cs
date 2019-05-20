@@ -14,7 +14,6 @@ namespace Regi.Services
 {
     public interface IRunnerService
     {
-        StartupConfig GetStartupConfig();
         IList<Project> Start(RegiOptions options);
         IList<Project> Test(RegiOptions options);
         IList<Project> Build(RegiOptions options);
@@ -26,18 +25,21 @@ namespace Regi.Services
 
     public class RunnerService : IRunnerService
     {
+        private readonly IConfigurationService _configurationService;
         private readonly IFrameworkServiceProvider _frameworkServiceProvider;
         private readonly IQueueService _queueService;
         private readonly INetworkingService _networkingService;
         private readonly IFileService _fileService;
         private readonly IConsole _console;
 
-        public RunnerService(IFrameworkServiceProvider frameworkServiceProvider,
+        public RunnerService(IConfigurationService configurationService,
+            IFrameworkServiceProvider frameworkServiceProvider,
             IQueueService queueService,
             INetworkingService networkingService,
             IFileService fileService,
             IConsole console)
         {
+            _configurationService = configurationService;
             _frameworkServiceProvider = frameworkServiceProvider;
             _queueService = queueService;
             _networkingService = networkingService;
@@ -45,42 +47,9 @@ namespace Regi.Services
             _console = console;
         }
 
-        public StartupConfig GetStartupConfig()
-        {
-            DirectoryInfo directory = new DirectoryInfo(DirectoryUtility.TargetDirectoryPath);
-
-            if (!directory.Exists)
-            {
-                throw new DirectoryNotFoundException($"Could not find directory: {directory.FullName}");
-            }
-
-            FileInfo startupFile = directory.GetOneOfFiles("regi.json", "startup.json");
-
-            if (startupFile == null || !startupFile.Exists)
-            {
-                throw new FileNotFoundException($"Could not find regi.json or startup.json in directory: {directory.FullName}");
-            }
-
-            using (StreamReader sr = new StreamReader(startupFile.OpenRead()))
-            using (JsonReader reader = new JsonTextReader(sr))
-            {
-                var serializer = JsonSerializer.CreateDefault();
-                serializer.MissingMemberHandling = MissingMemberHandling.Error;
-
-                try
-                {
-                    return serializer.Deserialize<StartupConfig>(reader);
-                }
-                catch (Exception e)
-                {
-                    throw new JsonSerializationException($"Configuration file was not properly formatted: {startupFile.FullName}{Environment.NewLine}{e.Message}", e);
-                }
-            }
-        }
-
         public IList<Project> Start(RegiOptions options)
         {
-            StartupConfig config = GetStartupConfig();
+            StartupConfig config = _configurationService.GetConfiguration();
 
             options.VariableList = new VariableList(config);
 
@@ -130,7 +99,7 @@ namespace Regi.Services
 
         public IList<Project> Test(RegiOptions options)
         {
-            StartupConfig config = GetStartupConfig();
+            StartupConfig config = _configurationService.GetConfiguration();
 
             IList<AppProcess> processes = new List<AppProcess>();
 
@@ -220,7 +189,7 @@ namespace Regi.Services
 
         public IList<Project> Build(RegiOptions options)
         {
-            StartupConfig config = GetStartupConfig();
+            StartupConfig config = _configurationService.GetConfiguration();
 
             options.VariableList = new VariableList(config);
 
@@ -261,7 +230,7 @@ namespace Regi.Services
 
         public IList<Project> Install(RegiOptions options)
         {
-            StartupConfig config = GetStartupConfig();
+            StartupConfig config = _configurationService.GetConfiguration();
 
             IList<Project> projects = config.Apps.Concat(config.Tests).FilterByOptions(options);
 
@@ -302,7 +271,7 @@ namespace Regi.Services
 
         public OutputSummary List(RegiOptions options)
         {
-            StartupConfig config = GetStartupConfig();
+            StartupConfig config = _configurationService.GetConfiguration();
 
             OutputSummary output = new OutputSummary();
 
@@ -342,7 +311,7 @@ namespace Regi.Services
 
         public void Kill(RegiOptions options)
         {
-            StartupConfig config = GetStartupConfig();
+            StartupConfig config = _configurationService.GetConfiguration();
 
             IList<Project> projects = config.Apps
                 .Concat(config.Tests)
@@ -350,24 +319,16 @@ namespace Regi.Services
 
             IEnumerable<ProjectFramework> frameworks = projects.Select(p => p.Framework).Distinct();
 
-            int errorCount = 0;
             foreach (var framework in frameworks)
             {
                 _console.WriteEmphasizedLine($"Killing processes for framework: {framework}", ConsoleLineStyle.LineBefore);
 
-                AppStatus status = _frameworkServiceProvider
+                _frameworkServiceProvider
                     .GetFrameworkService(framework)
-                    .KillProcesses(options)
-                    .Status;
-
-                if (status == AppStatus.Failure)
-                    errorCount++;
+                    .KillProcesses(options);
             }
 
-            if (errorCount > 0)
-                _console.WriteErrorLine($"Finished killing processes with {errorCount} failures", ConsoleLineStyle.LineBeforeAndAfter);
-            else
-                _console.WriteSuccessLine("Finished killing processess successfuly", ConsoleLineStyle.LineBeforeAndAfter);
+            _console.WriteSuccessLine("Finished killing processess successfuly", ConsoleLineStyle.LineBeforeAndAfter);
         }
     }
 }

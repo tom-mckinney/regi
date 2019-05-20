@@ -21,21 +21,21 @@ namespace Regi.Test.Services
         private readonly Mock<IRuntimeInfo> _runtimeInfoMock = new Mock<IRuntimeInfo>();
         private readonly INodeService _service;
 
-        private readonly Project _application;
+        private readonly Project _application = SampleProjects.SimpleNodeApp;
 
         public NodeServiceTests(ITestOutputHelper testOutput)
         {
             _console = new TestConsole(testOutput);
             _service = new NodeService(_console, new PlatformService(_console, _runtimeInfoMock.Object));
 
-            DirectoryInfo projectDir = new DirectoryInfo(Directory.GetCurrentDirectory())
-                .GetDirectories("SampleNodeApp", SearchOption.AllDirectories)
-                .First();
+            //DirectoryInfo projectDir = new DirectoryInfo(Directory.GetCurrentDirectory())
+            //    .GetDirectories("SampleNodeApp", SearchOption.AllDirectories)
+            //    .First();
 
-            _application = new Project("SampleNodeApp", projectDir
-                .GetFiles("package.json", SearchOption.AllDirectories)
-                .First()
-                .FullName);
+            //_application = new Project("SampleNodeApp", projectDir
+            //    .GetFiles("package.json", SearchOption.AllDirectories)
+            //    .First()
+            //    .FullName);
         }
 
         //[Fact]
@@ -140,7 +140,7 @@ namespace Regi.Test.Services
             {
                 Assert.Equal(AppTask.Install, process.Task);
                 Assert.Equal(AppStatus.Success, process.Status);
-                Assert.Null(process.Port);
+                Assert.Equal(_application.Port, process.Port);
             }
         }
 

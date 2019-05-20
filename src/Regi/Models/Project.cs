@@ -54,7 +54,9 @@ namespace Regi.Models
                 {
                     Source = options.Source;
                 }
-                else if ((config.Sources.TryGetValue(Framework, out string source) || config.Sources.TryGetValue(ProjectFramework.Any, out source)) && (!string.IsNullOrWhiteSpace(source)))
+                else if (config.Sources?.Count > 0
+                    && (config.Sources.TryGetValue(Framework, out string source) || config.Sources.TryGetValue(ProjectFramework.Any, out source))
+                    && !string.IsNullOrWhiteSpace(source))
                 {
                     Source = source;
                 }

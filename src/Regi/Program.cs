@@ -60,6 +60,7 @@ namespace Regi
                 {
                     o.RunIndefinitely = true;
                 })
+                .AddSingleton<IConfigurationService, ConfigurationService>()
                 .AddSingleton<IFrameworkServiceProvider, FrameworkServiceProvider>()
                 .AddSingleton<IDotnetService, DotnetService>()
                 .AddSingleton<INodeService, NodeService>()

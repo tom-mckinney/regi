@@ -13,6 +13,7 @@ namespace Regi.Extensions
             string failureMessage = e.InnerException?.Message ?? e.Message;
 
             console.WriteErrorLine(failureMessage);
+            console.WriteErrorLine($"Stack Trace: {e.StackTrace}");
 
             return 1;
         }
@@ -20,6 +21,7 @@ namespace Regi.Extensions
         public static int LogAndReturnStatus(this JsonSerializationException e, IConsole console)
         {
             console.WriteErrorLine(e.Message);
+            console.WriteErrorLine($"Stack Trace: {e.StackTrace}");
 
             return 1;
         }
