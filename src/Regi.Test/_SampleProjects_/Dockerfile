@@ -1,9 +1,5 @@
 FROM mcr.microsoft.com/dotnet/core/sdk:2.2
 
-# RUN apt-get update \
-#   && curl -sL https://deb.nodesource.com/setup_12.x | bash - \
-#   && apt-get install -y nodejs telnet build-essential
-
 RUN curl -sL https://deb.nodesource.com/setup_12.x | bash - \
   && apt-get update \
   && DEBIAN_FRONTEND=noninteractive apt-get install -y \
@@ -13,10 +9,9 @@ RUN curl -sL https://deb.nodesource.com/setup_12.x | bash - \
 
 ENV PUPPETEER_EXECUTABLE_PATH /usr/bin/chromium
 
-COPY src/ regi/
-COPY test.sh test.sh
+COPY . / src/
 
-RUN cd regi/Regi \
+RUN cd src \
   && dotnet tool install -g regi --add-source ./
 
 ENV PATH="${PATH}:/root/.dotnet/tools"
