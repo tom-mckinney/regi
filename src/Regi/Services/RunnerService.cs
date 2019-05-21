@@ -126,6 +126,8 @@ namespace Regi.Services
 
                     if (project.Requires.Any())
                     {
+                        IQueueService dependencyQueue = _frameworkServiceProvider.CreateScopedQueueService();
+
                         IDictionary<int, Project> requiredProjectsWithPorts = new Dictionary<int, Project>();
 
                         foreach (var r in project.Requires)
@@ -147,13 +149,17 @@ namespace Regi.Services
                                     requiredProjectsWithPorts.Add(requiredProject.Port.Value, requiredProject);
                                 }
 
-                                requiredProject.Process = InternalStartProject(requiredProject, requiredOptions);
+                                dependencyQueue.Queue(requiredProject.Serial || options.NoParallel, () =>
+                                {
+                                    requiredProject.Process = InternalStartProject(requiredProject, requiredOptions);
 
-                                project.RequiredProjects.Add(requiredProject);
+                                    project.RequiredProjects.Add(requiredProject);
+                                });;
                             }
                         }
 
-                        _queueService.WaitOnPorts(requiredProjectsWithPorts);
+                        dependencyQueue.RunAll();
+                        dependencyQueue.WaitOnPorts(requiredProjectsWithPorts);
                     }
 
                     _console.WriteEmphasizedLine($"Starting tests for project {project.Name}");

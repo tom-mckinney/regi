@@ -54,6 +54,7 @@
     <None Include="_SampleProjects_\Backend\Startup.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="_SampleProjects_\Dockerfile" />
     <None Include="_SampleProjects_\SampleAppError\Program.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

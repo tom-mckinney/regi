@@ -1,5 +1,7 @@
 cd src\Regi
 
+del Regi.*.nupkg
+
 dotnet pack --output ./
 
 dotnet tool uninstall -g regi

@@ -1,5 +1,7 @@
+del src\Regi\Regi.*.nupkg
+del src\Regi.Test\_SampleProjects_\Regi.*.nupkg
+
 cd src\Regi
-del Regi.*.nupkg
 dotnet pack --output ./
 copy Regi.*.nupkg ..\Regi.Test\_SampleProjects_\
 

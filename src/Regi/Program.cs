@@ -60,13 +60,13 @@ namespace Regi
                 {
                     o.RunIndefinitely = true;
                 })
+                .AddScoped<IQueueService, QueueService>()
                 .AddSingleton<IConfigurationService, ConfigurationService>()
                 .AddSingleton<IFrameworkServiceProvider, FrameworkServiceProvider>()
                 .AddSingleton<IDotnetService, DotnetService>()
                 .AddSingleton<INodeService, NodeService>()
                 .AddSingleton<IRunnerService, RunnerService>()
                 .AddSingleton<IFileService, FileService>()
-                .AddSingleton<IQueueService, QueueService>()
                 .AddSingleton<INetworkingService, NetworkingService>()
                 .AddSingleton<IPlatformService, PlatformService>()
                 .AddSingleton<IRuntimeInfo, RuntimeInfo>()

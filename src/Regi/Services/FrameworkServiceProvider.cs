@@ -9,6 +9,7 @@ namespace Regi.Services
     public interface IFrameworkServiceProvider
     {
         IFrameworkService GetFrameworkService(ProjectFramework framework);
+        IQueueService CreateScopedQueueService();
     }
 
     public class FrameworkServiceProvider : IFrameworkServiceProvider
@@ -32,6 +33,14 @@ namespace Regi.Services
                     throw new ArgumentException($"Cannot get framework service for project framework type of {framework}", nameof(framework));
                 default:
                     throw new NotImplementedException($"There is no implementation for framework of type {framework}");
+            }
+        }
+
+        public IQueueService CreateScopedQueueService()
+        {
+            using (var scope = _serviceProvider.CreateScope())
+            {
+                return scope.ServiceProvider.GetRequiredService<IQueueService>();
             }
         }
     }

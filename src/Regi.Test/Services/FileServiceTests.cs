@@ -31,7 +31,14 @@ namespace Regi.Test.Services
         [Fact]
         public void CreateConfigFile_creates_a_new_file()
         {
-            DirectoryUtility.SetTargetDirectory(PathHelper.SampleDirectoryPath(string.Empty));
+            string newConfigurationPath = PathHelper.SampleDirectoryPath("temp");
+
+            if (!Directory.Exists(newConfigurationPath))
+            {
+                Directory.CreateDirectory(newConfigurationPath);
+            }
+
+            DirectoryUtility.SetTargetDirectory(newConfigurationPath);
 
             FileInfo configFile = _service.CreateConfigFile();
 
