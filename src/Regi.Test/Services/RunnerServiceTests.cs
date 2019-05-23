@@ -23,7 +23,7 @@ namespace Regi.Test.Services
         private readonly Mock<IDotnetService> _dotnetServiceMock = new Mock<IDotnetService>();
         private readonly Mock<INodeService> _nodeServiceMock = new Mock<INodeService>();
         private readonly Mock<IFrameworkServiceProvider> _frameworkServiceProviderMock = new Mock<IFrameworkServiceProvider>(MockBehavior.Loose);
-        private readonly TestParallelService _queueService;
+        private readonly TestQueueService _queueService;
         private readonly Mock<INetworkingService> _networkingServiceMock = new Mock<INetworkingService>();
         private readonly Mock<IFileService> _fileServiceMock = new Mock<IFileService>();
         private readonly IRunnerService _runnerService;
@@ -37,7 +37,7 @@ namespace Regi.Test.Services
 
             _output = output;
             _console = new TestConsole(output);
-            _queueService = new TestParallelService(_console);
+            _queueService = new TestQueueService(_console);
             _runnerService = new RunnerService(
                 _configurationServiceMock.Object,
                 _frameworkServiceProviderMock.Object,
@@ -140,8 +140,13 @@ namespace Regi.Test.Services
         [Fact]
         public void Test_also_starts_every_requirement_for_each_test()
         {
+            TestQueueService dependencyQueueService = new TestQueueService(_console);
+
             _configurationServiceMock.Setup(m => m.GetConfiguration())
                 .Returns(SampleProjects.ConfigurationDefault)
+                .Verifiable();
+            _frameworkServiceProviderMock.Setup(m => m.CreateScopedQueueService())
+                .Returns(dependencyQueueService)
                 .Verifiable();
             _nodeServiceMock.Setup(m => m.TestProject(It.IsAny<Project>(), It.IsAny<RegiOptions>()))
                 .Returns(new AppProcess(new Process(), AppTask.Test, AppStatus.Success))
@@ -159,6 +164,7 @@ namespace Regi.Test.Services
             var processes = _runnerService.Test(TestOptions.Create());
 
             Assert.Equal(SampleProjects.ConfigurationDefault.Tests.Count, processes.Count);
+            Assert.Empty(_queueService.ActivePorts);
             foreach (var project in processes)
             {
                 Assert.Equal(AppTask.Test, project.Process.Task);
@@ -169,11 +175,12 @@ namespace Regi.Test.Services
                     {
                         var requiredApp = Assert.Single(project.RequiredProjects, p => p.Name == requirement);
                         Assert.Equal(AppTask.Start, requiredApp.Process.Task);
-                        Assert.Contains(requiredApp.Port.Value, _queueService.ActivePorts);
+                        Assert.Contains(requiredApp.Port.Value, dependencyQueueService.ActivePorts);
                     }
                 }
             }
 
+            _frameworkServiceProviderMock.Verify();
             _dotnetServiceMock.VerifyAll();
             _nodeServiceMock.VerifyAll();
         }

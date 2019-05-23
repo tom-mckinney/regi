@@ -51,6 +51,10 @@ namespace Regi.Models
 
         public bool RawOutput { get; internal set; }
 
+        public bool ErrorDataHandled { get; internal set; } = false;
+        public bool OutputDataHandled { get; internal set; } = false;
+
+
         public void Start()
         {
             if (Process == null)

@@ -12,6 +12,7 @@ using Xunit.Abstractions;
 
 namespace Regi.Test.Services
 {
+    [Collection("Integration")]
     public class DotnetServiceTests
     {
         private readonly TestConsole _console;

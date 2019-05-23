@@ -9,9 +9,9 @@ using System.Threading.Tasks;
 
 namespace Regi.Test.Helpers
 {
-    internal class TestParallelService : QueueService
+    internal class TestQueueService : QueueService
     {
-        public TestParallelService(IConsole console) : base(console, null) // No networking in Test stub
+        public TestQueueService(IConsole console) : base(console, null) // No networking in Test stub
         {
         }
 

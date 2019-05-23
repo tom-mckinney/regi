@@ -21,6 +21,9 @@ namespace Regi.Models
         [Option(CommandOptionType.NoValue, Description = "Print all output")]
         public bool Verbose { get; set; } = false;
 
+        [Option(CommandOptionType.MultipleValue, Template = "-o --show-output", Description = "Show all output for given project or projects (verbose for individual project)")]
+        public string[] ShowOutput { get; set; }
+
         [Option(CommandOptionType.SingleValue, Description = "Source to install dependencies from")]
         public string Source { get; set; }
 
@@ -35,7 +38,7 @@ namespace Regi.Models
         public bool KillProcessesOnExit { get; set; } = true;
 
         /// <summary>
-        /// Clones options and sets Arguments to null. This is used when omitting arguments for required project.
+        /// Clones options and sets Arguments to null. This is used when omitting arguments or properties for required projects.
         /// </summary>
         /// <returns></returns>
         public RegiOptions CloneForRequiredProjects()

@@ -102,7 +102,7 @@ namespace Regi.Services
             {
                 KillOnExit = options.KillProcessesOnExit,
                 Verbose = options.Verbose,
-                OnDispose = (processId) => HandleDispose(project, processId)
+                OnDispose = (processId) => HandleDispose(project, processId, options)
             };
 
             process.StartInfo.CopyEnvironmentVariables(options.VariableList);
@@ -123,11 +123,17 @@ namespace Regi.Services
             else
             {
                 process.ErrorDataReceived += HandleErrorDataReceived(project.Name, output);
+                output.ErrorDataHandled = true;
 
-                if (options.Verbose)
+                if (options.Verbose || options.ShowOutput?.Any(x => x.Equals(project.Name, StringComparison.InvariantCultureIgnoreCase)) == true)
+                {
                     process.OutputDataReceived += HandleOutputDataRecieved(project.Name);
+                    output.OutputDataHandled = true;
+                }
                 else
+                {
                     process.OutputDataReceived += HandleDataEventSilently();
+                }
             }
 
             return output;
@@ -220,9 +226,12 @@ namespace Regi.Services
             }
         });
 
-        protected virtual void HandleDispose(Project project, int processId)
+        protected virtual void HandleDispose(Project project, int processId, RegiOptions options)
         {
-            _console.WriteEmphasizedLine($"Disposing process for project {project.Name} ({processId})");
+            if (options.Verbose)
+            {
+                _console.WriteEmphasizedLine($"Disposing process for project {project.Name} ({processId})");
+            }
         }
 
         public abstract AppProcess KillProcesses(RegiOptions options);
