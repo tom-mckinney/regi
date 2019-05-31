@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace Regi.Extensions
 {
@@ -12,8 +13,7 @@ namespace Regi.Extensions
         {
             if (!string.IsNullOrWhiteSpace(options.Name))
             {
-                projects = projects
-                    .Where(p => p.Name.Contains(options.Name, StringComparison.InvariantCultureIgnoreCase));
+                projects = projects.Where(p => new Regex(options.Name, RegexOptions.IgnoreCase).IsMatch(p.Name));
                 
             }
 
@@ -24,7 +24,7 @@ namespace Regi.Extensions
                     {
                         foreach (var exclusion in options.Exclude)
                         {
-                            if (p.Name.Contains(exclusion, StringComparison.InvariantCultureIgnoreCase))
+                            if (new Regex(exclusion, RegexOptions.IgnoreCase).IsMatch(p.Name))
                                 return false;
                         }
 
