@@ -15,6 +15,7 @@ using Xunit.Abstractions;
 
 namespace Regi.Test.Services
 {
+    [Collection("FileSystem")]
     public class RunnerServiceTests
     {
         private readonly ITestOutputHelper _output;
@@ -262,6 +263,85 @@ namespace Regi.Test.Services
 
             Assert.Equal("http://nuget.org/api", dotnetApp.Source);
             Assert.Equal("http://npmjs.org", nodeApp.Source);
+        }
+
+        [Fact]
+        public void Install_will_also_install_for_any_required_dependencies()
+        {
+            TestQueueService dependencyQueueService = new TestQueueService(_console);
+
+            _configurationServiceMock.Setup(m => m.GetConfiguration())
+                .Returns(SampleProjects.ConfigurationDefault)
+                .Verifiable();
+            _frameworkServiceProviderMock.Setup(m => m.CreateScopedQueueService())
+                .Returns(dependencyQueueService)
+                .Verifiable();
+            _dotnetServiceMock.Setup(m => m.InstallProject(It.IsAny<Project>(), It.IsAny<RegiOptions>()))
+                .Returns(new AppProcess(new Process(), AppTask.Install, AppStatus.Success))
+                .Verifiable();
+            _nodeServiceMock.Setup(m => m.InstallProject(It.IsAny<Project>(), It.IsAny<RegiOptions>()))
+                .Returns(new AppProcess(new Process(), AppTask.Install, AppStatus.Success))
+                .Verifiable();
+
+            var options = TestOptions.Create();
+
+            options.Name = "IntegrationTests";
+
+            var outputProjects = _runnerService.Install(options);
+
+            var integrationTestProject = Assert.Single(outputProjects);
+
+            Assert.Equal(2, integrationTestProject.RequiredProjects.Count);
+
+            var dotnetApp = Assert.Single(integrationTestProject.RequiredProjects, p => p.Framework == ProjectFramework.Dotnet);
+            Assert.Equal(AppTask.Install, dotnetApp.Process.Task);
+            Assert.Equal(AppStatus.Success, dotnetApp.Process.Status);
+
+            var nodeApp = Assert.Single(integrationTestProject.RequiredProjects, p => p.Framework == ProjectFramework.Node);
+            Assert.Equal(AppTask.Install, nodeApp.Process.Task);
+            Assert.Equal(AppStatus.Success, nodeApp.Process.Status);
+
+            _configurationServiceMock.Verify();
+            _frameworkServiceProviderMock.Verify();
+            _dotnetServiceMock.Verify();
+            _nodeServiceMock.Verify();
+        }
+
+        [Fact]
+        public void Install_will_not_install_a_dependency_if_it_is_also_a_top_level_filtered_project()
+        {
+            TestQueueService dependencyQueueService = new TestQueueService(_console);
+
+            _configurationServiceMock.Setup(m => m.GetConfiguration())
+                .Returns(SampleProjects.ConfigurationDefault)
+                .Verifiable();
+            _frameworkServiceProviderMock.Setup(m => m.CreateScopedQueueService())
+                .Returns(dependencyQueueService)
+                .Verifiable();
+            _dotnetServiceMock.Setup(m => m.InstallProject(It.IsAny<Project>(), It.IsAny<RegiOptions>()))
+                .Returns(new AppProcess(new Process(), AppTask.Install, AppStatus.Success))
+                .Verifiable();
+            _nodeServiceMock.Setup(m => m.InstallProject(It.IsAny<Project>(), It.IsAny<RegiOptions>()))
+                .Returns(new AppProcess(new Process(), AppTask.Install, AppStatus.Success))
+                .Verifiable();
+
+            var outputProjects = _runnerService.Install(TestOptions.Create());
+
+            var allAppsAndTests = SampleProjects.ConfigurationDefault.Apps
+                .Concat(SampleProjects.ConfigurationDefault.Tests)
+                .ToList();
+
+            Assert.Equal(allAppsAndTests.Count, outputProjects.Count);
+
+            foreach (var project in outputProjects)
+            {
+                Assert.Empty(project.RequiredProjects);
+            }
+
+            _configurationServiceMock.Verify();
+            _frameworkServiceProviderMock.Verify();
+            _dotnetServiceMock.Verify();
+            _nodeServiceMock.Verify();
         }
 
         [Fact]

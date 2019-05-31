@@ -8,7 +8,7 @@ namespace Regi.Test
 {
     public static class SampleProjects
     {
-        public static Project Frontend = new Project
+        public static Project Frontend => new Project
         {
             Name = "Frontend",
             Path = PathHelper.SampleDirectoryPath("Frontend/package.json"),
@@ -20,7 +20,7 @@ namespace Regi.Test
             }
         };
 
-        public static Project Backend = new Project
+        public static Project Backend => new Project
         {
             Name = "Backend",
             Path = PathHelper.SampleDirectoryPath("Backend/Backend.csproj"),
@@ -32,7 +32,7 @@ namespace Regi.Test
             }
         };
 
-        public static Project XunitTests = new Project
+        public static Project XunitTests => new Project
         {
             Name = "SampleSuccessfulTests",
             Path = PathHelper.SampleDirectoryPath("SampleSuccessfulTests/SampleSuccessfulTests.csproj"),
@@ -40,19 +40,19 @@ namespace Regi.Test
             Type = ProjectType.Unit
         };
 
-        public static Project JestTests = new Project
+        public static Project JestTests => new Project
         {
             Name = "NodeApp",
             Path = PathHelper.SampleDirectoryPath("SampleNodeApp/package.json"),
             Framework = ProjectFramework.Node
         };
 
-        public static Project IntegrationTests = new Project
+        public static Project IntegrationTests => new Project
         {
             Name = "IntegrationTests",
             Path = PathHelper.SampleDirectoryPath("IntegrationTests/package.json"),
             Framework = ProjectFramework.Node,
-            Requires = new List<string> { "Frontend", "Backend" },
+            Requires = new List<string> { Frontend.Name, Backend.Name },
             RawOutput = true,
             Serial = true,
             Port = 5000,
@@ -62,7 +62,7 @@ namespace Regi.Test
             }
         };
 
-        public static Project SimpleNodeApp = new Project
+        public static Project SimpleNodeApp => new Project
         {
             Name = "SampleNodeApp",
             Path = PathHelper.SampleDirectoryPath("SampleNodeApp/package.json"),
@@ -71,7 +71,7 @@ namespace Regi.Test
             Port = 9081
         };
 
-        public static StartupConfig ConfigurationDefault = new StartupConfig
+        public static StartupConfig ConfigurationDefault => new StartupConfig
         {
             Apps = new List<Project>
             {
@@ -84,7 +84,7 @@ namespace Regi.Test
             Services = new List<Project>()
         };
 
-        public static StartupConfig ConfigurationGood = new StartupConfig
+        public static StartupConfig ConfigurationGood => new StartupConfig
         {
             Apps = new List<Project>
             {

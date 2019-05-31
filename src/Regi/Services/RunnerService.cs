@@ -122,10 +122,15 @@ namespace Regi.Services
             {
                 _queueService.Queue(project.Serial || options.NoParallel, () =>
                 {
-                    RegiOptions requiredOptions = options.CloneForRequiredProjects();
+                    _console.WriteEmphasizedLine($"Starting tests for project {project.Name}");
 
                     if (project.Requires.Any())
                     {
+                        string dependencyPluralization = project.Requires.Count > 1 ? "dependencies" : "dependency";
+                        _console.WriteDefaultLine($"Starting {project.Requires.Count} {dependencyPluralization} for project {project.Name}");
+
+                        RegiOptions requiredOptions = options.CloneForRequiredProjects();
+
                         IQueueService dependencyQueue = _frameworkServiceProvider.CreateScopedQueueService();
 
                         IDictionary<int, Project> requiredProjectsWithPorts = new Dictionary<int, Project>();
@@ -161,8 +166,6 @@ namespace Regi.Services
                         dependencyQueue.RunAll();
                         dependencyQueue.WaitOnPorts(requiredProjectsWithPorts);
                     }
-
-                    _console.WriteEmphasizedLine($"Starting tests for project {project.Name}");
 
                     project.Process = _frameworkServiceProvider
                         .GetFrameworkService(project.Framework)
@@ -255,19 +258,58 @@ namespace Regi.Services
             {
                 _queueService.QueueParallel(() =>
                 {
-                    _console.WriteEmphasizedLine($"Starting install for project {project.Name}");
+                    project.Process = InternalInstallProject(project, options, config);
 
-                    project.TryAddSource(options, config);
+                    if (project.Requires.Any())
+                    {
+                        string dependencyPluralization = project.Requires.Count > 1 ? "dependencies" : "dependency";
+                        _console.WriteDefaultLine($"Starting install for {project.Requires.Count} {dependencyPluralization} for project {project.Name}");
 
-                    project.Process = _frameworkServiceProvider
-                        .GetFrameworkService(project.Framework)
-                        .InstallProject(project, options);
+                        RegiOptions requiredOptions = options.CloneForRequiredProjects();
+
+                        IQueueService dependencyQueue = _frameworkServiceProvider.CreateScopedQueueService();
+
+                        foreach (var r in project.Requires)
+                        {
+                            Project requiredProject = config.Apps
+                                .Concat(config.Services)
+                                .FirstOrDefault(p => p.Name.Contains(r, StringComparison.InvariantCultureIgnoreCase));
+
+                            if (requiredProject != null)
+                            {
+                                if (projects.Any(p => p.Name == requiredProject.Name))
+                                {
+                                    continue;
+                                }
+
+                                dependencyQueue.QueueSerial(() =>
+                                {
+                                    requiredProject.Process = InternalInstallProject(requiredProject, requiredOptions, config);
+
+                                    project.RequiredProjects.Add(requiredProject);
+                                });
+                            }
+                        }
+
+                        dependencyQueue.RunAll();
+                    }
                 });
             }
 
             _queueService.RunAll();
 
             return projects;
+        }
+
+        private AppProcess InternalInstallProject(Project project, RegiOptions options, StartupConfig config)
+        {
+            _console.WriteEmphasizedLine($"Starting install for project {project.Name}");
+
+            project.TryAddSource(options, config);
+
+            return _frameworkServiceProvider
+                .GetFrameworkService(project.Framework)
+                .InstallProject(project, options);
         }
 
         public void Initialize(RegiOptions options)

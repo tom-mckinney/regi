@@ -24,6 +24,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="_SampleProjects_\ConfigurationBad\regi.json" />
+    <Content Include="_SampleProjects_\ConfigurationComplete\regi.json" />
+    <Content Include="_SampleProjects_\ConfigurationGood\regi.json" />
+    <Content Include="_SampleProjects_\ConfigurationRequires\regi.json" />
+    <Content Include="_SampleProjects_\ConfigurationWrongEnum\regi.json" />
     <Content Include="_SampleProjects_\regi.json" />
   </ItemGroup>
 

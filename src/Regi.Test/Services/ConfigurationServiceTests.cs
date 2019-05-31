@@ -14,6 +14,7 @@ using Xunit.Abstractions;
 
 namespace Regi.Test.Services
 {
+    [Collection("FileSystem")]
     public class ConfigurationServiceTests
     {
         private readonly IConsole _console;
