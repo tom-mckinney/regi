@@ -55,14 +55,6 @@ namespace Regi.Services
 
             IList<Project> projects = config.Apps.FilterByOptions(options);
 
-            Console.CancelKeyPress += (o, e) =>
-            {
-                foreach (var project in projects)
-                {
-                    project.Process?.Dispose();
-                }
-            };
-
             if (projects.Count <= 0)
                 _console.WriteEmphasizedLine("No projects found");
 
@@ -102,14 +94,6 @@ namespace Regi.Services
             StartupConfig config = _configurationService.GetConfiguration();
 
             IList<AppProcess> processes = new List<AppProcess>();
-
-            Console.CancelKeyPress += (o, e) =>
-            {
-                foreach (var process in processes)
-                {
-                    process.Dispose();
-                }
-            };
 
             options.VariableList = new VariableList(config);
 
@@ -204,14 +188,6 @@ namespace Regi.Services
 
             IList<Project> projects = config.Apps.FilterByOptions(options);
 
-            Console.CancelKeyPress += (o, e) =>
-            {
-                foreach (var project in projects)
-                {
-                    project.Process?.Dispose();
-                }
-            };
-
             if (projects.Count <= 0)
                 _console.WriteEmphasizedLine("No projects found");
 
@@ -242,14 +218,6 @@ namespace Regi.Services
             StartupConfig config = _configurationService.GetConfiguration();
 
             IList<Project> projects = config.Apps.Concat(config.Tests).FilterByOptions(options);
-
-            Console.CancelKeyPress += (o, e) =>
-            {
-                foreach (var project in projects)
-                {
-                    project.Process?.Dispose();
-                }
-            };
 
             if (projects.Count <= 0)
                 _console.WriteEmphasizedLine("No projects found");

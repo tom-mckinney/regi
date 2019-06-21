@@ -14,14 +14,12 @@ namespace Regi.Commands
     public class StartCommand : CommandBase
     {
         private readonly IRunnerService _runnerService;
-        private readonly IConsole _console;
         private readonly Settings _options;
 
-        public StartCommand(IRunnerService runnerService, IConsole console, IOptions<Settings> options)
-            : base(console)
+        public StartCommand(IRunnerService runnerService, ICleanupService cleanupService, IConsole console, IOptions<Settings> options)
+            : base(cleanupService, console)
         {
             _runnerService = runnerService;
-            _console = console;
             _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
         }
 

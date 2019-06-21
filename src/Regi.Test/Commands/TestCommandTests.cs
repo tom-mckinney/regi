@@ -14,16 +14,23 @@ namespace Regi.Test.Commands
     {
         private readonly ITestOutputHelper _testOutput;
         private readonly TestConsole _console;
-        private readonly Mock<IRunnerService> _runnerServiceMock;
+        private readonly Mock<IRunnerService> _runnerServiceMock = new Mock<IRunnerService>();
+        private readonly Mock<ICleanupService> _cleanupServiceMock = new Mock<ICleanupService>();
         private readonly ISummaryService _summaryService;
 
         public TestCommandTests(ITestOutputHelper testOutput)
         {
             _testOutput = testOutput;
             _console = new TestConsole(testOutput);
-
-            _runnerServiceMock = new Mock<IRunnerService>();
             _summaryService = new SummaryService(_console);
+        }
+
+        TestCommand CreateCommand()
+        {
+            return new TestCommand(_runnerServiceMock.Object, _summaryService, _cleanupServiceMock.Object, _console)
+            {
+                Name = null
+            };
         }
 
         [Fact]
@@ -43,10 +50,7 @@ namespace Regi.Test.Commands
                 })
                 .Verifiable();
 
-            TestCommand command = new TestCommand(_runnerServiceMock.Object, _summaryService, _console)
-            {
-                Name = null
-            };
+            TestCommand command = CreateCommand();
 
             int testProjectCount = command.OnExecute();
 
@@ -72,10 +76,7 @@ namespace Regi.Test.Commands
                 })
                 .Verifiable();
 
-            TestCommand command = new TestCommand(_runnerServiceMock.Object, _summaryService, _console)
-            {
-                Name = null
-            };
+            TestCommand command = CreateCommand();
 
             int testProjectCount = command.OnExecute();
 
@@ -100,11 +101,7 @@ namespace Regi.Test.Commands
                 })
                 .Verifiable();
 
-            TestCommand command = new TestCommand(_runnerServiceMock.Object, _summaryService, _console)
-            {
-                Name = null,
-                Type = type
-            };
+            TestCommand command = CreateCommand();
 
             int testProjectCount = command.OnExecute();
 

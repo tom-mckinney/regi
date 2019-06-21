@@ -10,14 +10,12 @@ namespace Regi.Commands
     {
         private readonly IRunnerService _runnerService;
         private readonly ISummaryService _summaryService;
-        private readonly IConsole _console;
 
-        public TestCommand(IRunnerService runnerService, ISummaryService summaryService, IConsole console)
-            : base(console)
+        public TestCommand(IRunnerService runnerService, ISummaryService summaryService, ICleanupService cleanupService, IConsole console)
+            : base(cleanupService, console)
         {
             _runnerService = runnerService;
             _summaryService = summaryService;
-            _console = console;
         }
 
         public override int OnExecute()

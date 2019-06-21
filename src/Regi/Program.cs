@@ -71,6 +71,7 @@ namespace Regi
                 .AddSingleton<IPlatformService, PlatformService>()
                 .AddSingleton<IRuntimeInfo, RuntimeInfo>()
                 .AddSingleton<ISummaryService, SummaryService>()
+                .AddSingleton<ICleanupService, CleanupService>()
                 .AddSingleton(console)
                 .AddSingleton<CommandLineContext, DefaultCommandLineContext>()
                 .BuildServiceProvider();

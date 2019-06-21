@@ -1,7 +1,9 @@
 ﻿using Moq;
+using Regi.Constants;
 using Regi.Models;
 using Regi.Services;
 using Regi.Test.Helpers;
+using Regi.Utilities;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -235,6 +237,21 @@ namespace Regi.Test.Services
             Assert.Equal(expectedArguments, startInfo.Arguments);
 
             _runtimeInfoMock.Verify();
+        }
+
+        [Fact]
+        public void ShutdownBuildServer_shuts_down_all_build_servers()
+        {
+            DirectoryUtility.SetTargetDirectory(PathHelper.ProjectRootPath);
+
+            var process = _service.ShutdownBuildServer(TestOptions.Create());
+
+            Assert.Equal(AppStatus.Success, process.Status);
+            Assert.Equal(AppTask.Cleanup, process.Task);
+
+            var startInfo = process.Process.StartInfo;
+            Assert.Contains("dotnet", startInfo.FileName);
+            Assert.Equal(FrameworkCommands.Dotnet.ShutdownBuildServer, startInfo.Arguments);
         }
     }
 }

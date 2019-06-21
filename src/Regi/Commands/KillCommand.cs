@@ -10,13 +10,11 @@ namespace Regi.Commands
     public class KillCommand : CommandBase
     {
         private readonly IRunnerService _runnerService;
-        private readonly IConsole _console;
 
-        public KillCommand(IRunnerService runnerService, IConsole console)
-            : base(console)
+        public KillCommand(IRunnerService runnerService, ICleanupService cleanupService, IConsole console)
+            : base(cleanupService, console)
         {
             _runnerService = runnerService;
-            _console = console;
         }
 
         public override int OnExecute()

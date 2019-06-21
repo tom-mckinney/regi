@@ -13,13 +13,11 @@ namespace Regi.Commands
     public class InstallCommand : CommandBase
     {
         private readonly IRunnerService _runnerService;
-        private readonly IConsole _console;
 
-        public InstallCommand(IRunnerService runnerService, IConsole console)
-            : base(console)
+        public InstallCommand(IRunnerService runnerService, ICleanupService cleanupService, IConsole console)
+            : base(cleanupService, console)
         {
             _runnerService = runnerService;
-            _console = console;
         }
 
         public override int OnExecute()

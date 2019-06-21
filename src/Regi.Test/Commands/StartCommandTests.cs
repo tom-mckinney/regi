@@ -15,15 +15,19 @@ namespace Regi.Test.Commands
     {
         private readonly ITestOutputHelper _output;
         private readonly TestConsole _console;
-        private readonly Mock<IRunnerService> _runnerServiceMock;
+        private readonly Mock<IRunnerService> _runnerServiceMock = new Mock<IRunnerService>();
+        private readonly Mock<ICleanupService> _cleanupServiceMock = new Mock<ICleanupService>();
         private readonly IOptions<Settings> _options = Options.Create(new Settings { RunIndefinitely = false });
 
         public StartCommandTests(ITestOutputHelper output)
         {
             _output = output;
             _console = new TestConsole(output);
+        }
 
-            _runnerServiceMock = new Mock<IRunnerService>();
+        StartCommand CreateCommand()
+        {
+            return new StartCommand(_runnerServiceMock.Object, _cleanupServiceMock.Object, _console, _options);
         }
 
         [Fact]
@@ -43,7 +47,7 @@ namespace Regi.Test.Commands
                 })
                 .Verifiable();
 
-            StartCommand command = new StartCommand(_runnerServiceMock.Object, _console, _options);
+            StartCommand command = CreateCommand();
 
             int projectCount = command.OnExecute();
 

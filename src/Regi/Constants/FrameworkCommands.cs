@@ -16,6 +16,7 @@ namespace Regi.Constants
             public const string Test = FrameworkCommands.Test;
             public const string Build = "build";
             public const string Restore = "restore";
+            public const string ShutdownBuildServer = "build-server shutdown";
         }
 
         public static class Node

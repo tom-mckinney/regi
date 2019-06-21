@@ -14,14 +14,21 @@ namespace Regi.Test.Commands
     {
         private readonly ITestOutputHelper _testOutput;
         private readonly TestConsole _console;
-        private readonly Mock<IRunnerService> _runnerServiceMock;
+        private readonly Mock<IRunnerService> _runnerServiceMock = new Mock<IRunnerService>();
+        private readonly Mock<ICleanupService> _cleanupServiceMock = new Mock<ICleanupService>();
 
         public InstallCommandTests(ITestOutputHelper testOutput)
         {
             _testOutput = testOutput;
             _console = new TestConsole(testOutput);
+        }
 
-            _runnerServiceMock = new Mock<IRunnerService>();
+        InstallCommand CreateCommand()
+        {
+            return new InstallCommand(_runnerServiceMock.Object, _cleanupServiceMock.Object, _console)
+            {
+                Name = null
+            };
         }
 
         [Fact]
@@ -41,10 +48,7 @@ namespace Regi.Test.Commands
                 })
                 .Verifiable();
 
-            InstallCommand command = new InstallCommand(_runnerServiceMock.Object, _console)
-            {
-                Name = null
-            };
+            InstallCommand command = CreateCommand();
 
             int testProjectCount = command.OnExecute();
 
@@ -70,10 +74,7 @@ namespace Regi.Test.Commands
                 })
                 .Verifiable();
 
-            InstallCommand command = new InstallCommand(_runnerServiceMock.Object, _console)
-            {
-                Name = null
-            };
+            InstallCommand command = CreateCommand();
 
             int testProjectCount = command.OnExecute();
 

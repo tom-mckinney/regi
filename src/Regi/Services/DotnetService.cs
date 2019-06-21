@@ -11,6 +11,7 @@ namespace Regi.Services
 {
     public interface IDotnetService : IFrameworkService
     {
+        AppProcess ShutdownBuildServer(RegiOptions options);
     }
 
     public class DotnetService : FrameworkService, IDotnetService
@@ -21,7 +22,12 @@ namespace Regi.Services
 
         protected override ProjectOptions FrameworkOptions { get; } = new ProjectOptions
         {
-            { FrameworkCommands.Dotnet.Run, new List<string> { "--no-launch-profile" } }
+            {
+                FrameworkCommands.Dotnet.Run, new List<string>
+                {
+                    "--no-launch-profile"
+                }
+            }
         };
 
         protected override void ApplyFrameworkOptions(StringBuilder builder, string command, Project project, RegiOptions options)
@@ -47,7 +53,6 @@ namespace Regi.Services
             if (project.Port.HasValue)
             {
                 process.StartInfo.EnvironmentVariables["ASPNETCORE_URLS"] = $"http://*:{project.Port}"; // Default .NET Core URL variable
-                //process.StartInfo.EnvironmentVariables.Add("ASPNETCORE_URLS", $"http://*:{project.Port}"); // Default .NET Core URL variable
             }
         }
 
@@ -95,8 +100,8 @@ namespace Regi.Services
 
         public override AppProcess KillProcesses(RegiOptions options)
         {
-            AppProcess process = new AppProcess(_platformService.GetKillProcess("dotnet"), 
-                AppTask.Kill, 
+            AppProcess process = new AppProcess(_platformService.GetKillProcess("dotnet"),
+                AppTask.Kill,
                 AppStatus.Running);
 
             try
@@ -115,6 +120,16 @@ namespace Regi.Services
             }
 
             return process;
+        }
+
+        public AppProcess ShutdownBuildServer(RegiOptions options)
+        {
+            AppProcess shutdownBuildServer = CreateProcess(FrameworkCommands.Dotnet.ShutdownBuildServer, options);
+
+            shutdownBuildServer.Start();
+            shutdownBuildServer.WaitForExit();
+
+            return shutdownBuildServer;
         }
     }
 }

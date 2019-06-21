@@ -11,5 +11,6 @@ namespace Regi.Models
         Install,
         Kill,
         Build,
+        Cleanup
     }
 }

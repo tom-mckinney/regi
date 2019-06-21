@@ -2,9 +2,11 @@
 using Regi.Constants;
 using Regi.Extensions;
 using Regi.Models;
+using Regi.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -77,18 +79,61 @@ namespace Regi.Services
 
         protected virtual string FormatAdditionalArguments(string[] args) => string.Join(' ', args);
 
-        public virtual AppProcess CreateProcess(string command, Project project, RegiOptions options, string fileName = null)
+        public virtual AppProcess CreateProcess(string command, RegiOptions options, string fileName = null)
         {
-            string args = BuildCommand(command, project, options);
+            fileName = fileName ?? _frameworkExePath;
+            string args = command;
 
             if (options.Verbose)
-                _console.WriteEmphasizedLine($"Executing: {_frameworkExePath} {args}");
+                _console.WriteEmphasizedLine($"Executing: {fileName} {args}");
 
             Process process = new Process
             {
                 StartInfo = new ProcessStartInfo()
                 {
-                    FileName = fileName ?? _frameworkExePath,
+                    FileName = fileName,
+                    Arguments = args,
+                    WorkingDirectory = DirectoryUtility.TargetDirectoryPath,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    CreateNoWindow = true
+                },
+                EnableRaisingEvents = true
+            };
+
+            AppProcess output = new AppProcess(process, AppTask.Cleanup, AppStatus.Running)
+            {
+                Verbose = options.Verbose
+            };
+
+            process.Exited += HandleExited(output);
+
+            if (options.Verbose)
+            {
+                process.OutputDataReceived += HandleDataReceivedAnonymously();
+                output.OutputDataHandled = true;
+            }
+            else
+            {
+                process.OutputDataReceived += HandleDataReceivedSilently();
+            }
+
+            return output;
+        }
+
+        public virtual AppProcess CreateProcess(string command, Project project, RegiOptions options, string fileName = null)
+        {
+            fileName = fileName ?? _frameworkExePath;
+            string args = BuildCommand(command, project, options);
+
+            if (options.Verbose)
+                _console.WriteEmphasizedLine($"Executing: {fileName} {args}");
+
+            Process process = new Process
+            {
+                StartInfo = new ProcessStartInfo()
+                {
+                    FileName = fileName,
                     Arguments = args,
                     WorkingDirectory = project.File.DirectoryName,
                     RedirectStandardOutput = true,
@@ -132,7 +177,7 @@ namespace Regi.Services
                 }
                 else
                 {
-                    process.OutputDataReceived += HandleDataEventSilently();
+                    process.OutputDataReceived += HandleDataReceivedSilently();
                 }
             }
 
@@ -198,7 +243,12 @@ namespace Regi.Services
             }
         });
 
-        public virtual DataReceivedEventHandler HandleDataEventSilently() => new DataReceivedEventHandler((o, e) =>
+        public virtual DataReceivedEventHandler HandleDataReceivedAnonymously() => new DataReceivedEventHandler((o, e) =>
+        {
+            _console.WriteDefaultLine(e.Data, ConsoleLineStyle.Normal);
+        });
+
+        public virtual DataReceivedEventHandler HandleDataReceivedSilently() => new DataReceivedEventHandler((o, e) =>
         {
         });
 

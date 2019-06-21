@@ -1,5 +1,7 @@
 ﻿using McMaster.Extensions.CommandLineUtils;
+using Regi.Extensions;
 using Regi.Models;
+using Regi.Services;
 using System;
 using System.Collections.Generic;
 
@@ -7,10 +9,14 @@ namespace Regi.Commands
 {
     public abstract class CommandBase : RegiOptions
     {
-        public IList<Project> Projects { get; set; }
+        protected readonly IConsole _console;
+        protected readonly ICleanupService _cleanupService;
 
-        public CommandBase(IConsole console)
+        public CommandBase(ICleanupService cleanupService, IConsole console)
         {
+            _console = console;
+            _cleanupService = cleanupService;
+
             if (console != null)
             {
                 console.CancelKeyPress += (o, e) =>
@@ -20,8 +26,12 @@ namespace Regi.Commands
             }
         }
 
+        public IList<Project> Projects { get; set; }
+
         public void ShutdownProccesses()
         {
+            _console.WriteEmphasizedLine("Shutting down processes");
+
             if (Projects != null)
             {
                 foreach (var project in Projects)
@@ -32,17 +42,13 @@ namespace Regi.Commands
                     }
                 }
             }
+
+            _cleanupService.ShutdownBuildServers(Options);
         }
 
         public RegiOptions Options
         {
             get => this;
-            //get => new CommandOptions
-            //{
-            //    Name = this.Name,
-            //    SearchPattern = this.SearchPattern,
-            //    Verbose = this.Verbose
-            //};
         }
 
         public abstract int OnExecute();
