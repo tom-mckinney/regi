@@ -11,8 +11,8 @@ namespace Regi.Commands
     {
         private IRunnerService _runnerService;
 
-        public BuildCommand(IRunnerService runnerService, ICleanupService cleanupService, IConsole console)
-            : base(cleanupService, console)
+        public BuildCommand(IRunnerService runnerService, IConsole console)
+            : base(console)
         {
             _runnerService = runnerService;
         }

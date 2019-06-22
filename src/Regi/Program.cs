@@ -61,6 +61,7 @@ namespace Regi
                     o.RunIndefinitely = true;
                 })
                 .AddScoped<IQueueService, QueueService>()
+                .AddSingleton<IProjectManager, ProjectManager>()
                 .AddSingleton<IConfigurationService, ConfigurationService>()
                 .AddSingleton<IFrameworkServiceProvider, FrameworkServiceProvider>()
                 .AddSingleton<IDotnetService, DotnetService>()

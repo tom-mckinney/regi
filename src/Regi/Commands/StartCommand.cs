@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Regi.Commands
 {
@@ -16,8 +17,8 @@ namespace Regi.Commands
         private readonly IRunnerService _runnerService;
         private readonly Settings _options;
 
-        public StartCommand(IRunnerService runnerService, ICleanupService cleanupService, IConsole console, IOptions<Settings> options)
-            : base(cleanupService, console)
+        public StartCommand(IRunnerService runnerService, IConsole console, IOptions<Settings> options)
+            : base(console)
         {
             _runnerService = runnerService;
             _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
@@ -29,12 +30,7 @@ namespace Regi.Commands
 
             while (_options.RunIndefinitely)
             {
-                var key = Console.ReadKey(true);
-                if (key.Key == ConsoleKey.Enter)
-                {
-                    ShutdownProccesses();
-                    break;
-                }
+                Task.Delay(200);
             }
 
             return Projects.Count;

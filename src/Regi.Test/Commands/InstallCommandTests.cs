@@ -15,7 +15,6 @@ namespace Regi.Test.Commands
         private readonly ITestOutputHelper _testOutput;
         private readonly TestConsole _console;
         private readonly Mock<IRunnerService> _runnerServiceMock = new Mock<IRunnerService>();
-        private readonly Mock<ICleanupService> _cleanupServiceMock = new Mock<ICleanupService>();
 
         public InstallCommandTests(ITestOutputHelper testOutput)
         {
@@ -25,7 +24,7 @@ namespace Regi.Test.Commands
 
         InstallCommand CreateCommand()
         {
-            return new InstallCommand(_runnerServiceMock.Object, _cleanupServiceMock.Object, _console)
+            return new InstallCommand(_runnerServiceMock.Object, _console)
             {
                 Name = null
             };

@@ -15,7 +15,6 @@ namespace Regi.Test.Commands
         private readonly ITestOutputHelper _testOutput;
         private readonly TestConsole _console;
         private readonly Mock<IRunnerService> _runnerServiceMock = new Mock<IRunnerService>();
-        private readonly Mock<ICleanupService> _cleanupServiceMock = new Mock<ICleanupService>();
         private readonly ISummaryService _summaryService;
 
         public TestCommandTests(ITestOutputHelper testOutput)
@@ -27,7 +26,7 @@ namespace Regi.Test.Commands
 
         TestCommand CreateCommand()
         {
-            return new TestCommand(_runnerServiceMock.Object, _summaryService, _cleanupServiceMock.Object, _console)
+            return new TestCommand(_runnerServiceMock.Object, _summaryService, _console)
             {
                 Name = null
             };

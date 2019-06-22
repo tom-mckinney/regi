@@ -25,6 +25,7 @@ namespace Regi.Services
 
     public class RunnerService : IRunnerService
     {
+        private readonly IProjectManager _projectManager;
         private readonly IConfigurationService _configurationService;
         private readonly IFrameworkServiceProvider _frameworkServiceProvider;
         private readonly IQueueService _queueService;
@@ -32,13 +33,16 @@ namespace Regi.Services
         private readonly IFileService _fileService;
         private readonly IConsole _console;
 
-        public RunnerService(IConfigurationService configurationService,
+        public RunnerService(
+            IProjectManager projectManager,
+            IConfigurationService configurationService,
             IFrameworkServiceProvider frameworkServiceProvider,
             IQueueService queueService,
             INetworkingService networkingService,
             IFileService fileService,
             IConsole console)
         {
+            _projectManager = projectManager;
             _configurationService = configurationService;
             _frameworkServiceProvider = frameworkServiceProvider;
             _queueService = queueService;
@@ -53,7 +57,7 @@ namespace Regi.Services
 
             options.VariableList = new VariableList(config);
 
-            IList<Project> projects = config.Apps.FilterByOptions(options);
+            IList<Project> projects = _projectManager.FilterProjects(options, config.Apps);
 
             if (projects.Count <= 0)
                 _console.WriteEmphasizedLine("No projects found");
@@ -97,7 +101,7 @@ namespace Regi.Services
 
             options.VariableList = new VariableList(config);
 
-            IList<Project> projects = config.Tests.FilterByOptions(options);
+            IList<Project> projects = _projectManager.FilterProjects(options, config.Tests);
 
             if (projects.Count <= 0)
                 _console.WriteEmphasizedLine("No projects found");
@@ -186,7 +190,7 @@ namespace Regi.Services
 
             options.VariableList = new VariableList(config);
 
-            IList<Project> projects = config.Apps.FilterByOptions(options);
+            IList<Project> projects = _projectManager.FilterProjects(options, config.Apps);
 
             if (projects.Count <= 0)
                 _console.WriteEmphasizedLine("No projects found");
@@ -217,7 +221,7 @@ namespace Regi.Services
         {
             StartupConfig config = _configurationService.GetConfiguration();
 
-            IList<Project> projects = config.Apps.Concat(config.Tests).FilterByOptions(options);
+            IList<Project> projects = _projectManager.FilterProjects(options, config.Apps, config.Tests);
 
             if (projects.Count <= 0)
                 _console.WriteEmphasizedLine("No projects found");
@@ -329,9 +333,7 @@ namespace Regi.Services
         {
             StartupConfig config = _configurationService.GetConfiguration();
 
-            IList<Project> projects = config.Apps
-                .Concat(config.Tests)
-                .FilterByOptions(options);
+            IList<Project> projects = _projectManager.FilterProjects(options, config.Apps, config.Tests);
 
             IEnumerable<ProjectFramework> frameworks = projects.Select(p => p.Framework).Distinct();
 

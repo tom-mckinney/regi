@@ -11,8 +11,8 @@ namespace Regi.Commands
     [Command("version")]
     public class VersionCommand : CommandBase
     {
-        public VersionCommand(ICleanupService cleanupService, IConsole console)
-            : base(cleanupService, console)
+        public VersionCommand(IConsole console)
+            : base(console)
         {
         }
 
