@@ -29,7 +29,8 @@
     {
       "name": "NodeApp",
       "path": "./SampleNodeApp/package.json",
-      "framework": "node"
+      "framework": "node",
+      "type": "unit"
     },
     {
       "name": "IntegrationTests",

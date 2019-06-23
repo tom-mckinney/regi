@@ -57,7 +57,7 @@ namespace Regi.Services
 
             options.VariableList = new VariableList(config);
 
-            IList<Project> projects = _projectManager.FilterProjects(options, config.Apps);
+            IList<Project> projects = _projectManager.FilterAndTrackProjects(options, config.Apps);
 
             if (projects.Count <= 0)
                 _console.WriteEmphasizedLine("No projects found");
@@ -101,7 +101,7 @@ namespace Regi.Services
 
             options.VariableList = new VariableList(config);
 
-            IList<Project> projects = _projectManager.FilterProjects(options, config.Tests);
+            IList<Project> projects = _projectManager.FilterAndTrackProjects(options, config.Tests);
 
             if (projects.Count <= 0)
                 _console.WriteEmphasizedLine("No projects found");
@@ -190,7 +190,7 @@ namespace Regi.Services
 
             options.VariableList = new VariableList(config);
 
-            IList<Project> projects = _projectManager.FilterProjects(options, config.Apps);
+            IList<Project> projects = _projectManager.FilterAndTrackProjects(options, config.Apps);
 
             if (projects.Count <= 0)
                 _console.WriteEmphasizedLine("No projects found");
@@ -221,7 +221,7 @@ namespace Regi.Services
         {
             StartupConfig config = _configurationService.GetConfiguration();
 
-            IList<Project> projects = _projectManager.FilterProjects(options, config.Apps, config.Tests);
+            IList<Project> projects = _projectManager.FilterAndTrackProjects(options, config.Apps, config.Tests);
 
             if (projects.Count <= 0)
                 _console.WriteEmphasizedLine("No projects found");
@@ -295,8 +295,8 @@ namespace Regi.Services
 
             OutputSummary output = new OutputSummary();
 
-            var apps = config.Apps.FilterByOptions(options);
-            var tests = config.Tests.FilterByOptions(options);
+            var apps = _projectManager.FilterByOptions(config.Apps, options);
+            var tests = _projectManager.FilterByOptions(config.Tests, options);
 
             PrintAppGroupDetails(apps, output.Apps, "Apps");
             PrintAppGroupDetails(tests, output.Tests, "Tests");
@@ -315,12 +315,15 @@ namespace Regi.Services
                         if (options.Verbose)
                         {
                             _console.WritePropertyIfSpecified("Framework", app.Framework);
+                            _console.WritePropertyIfSpecified("Type", app.Type);
                             _console.WritePropertyIfSpecified("Path", app.Path);
                             _console.WritePropertyIfSpecified("Port", app.Port);
                             _console.WritePropertyIfSpecified("Commands", app.Commands);
                             _console.WritePropertyIfSpecified("Requires", app.Requires);
                             _console.WritePropertyIfSpecified("Options", app.Options);
                             _console.WritePropertyIfSpecified("Environment", app.Environment);
+                            _console.WritePropertyIfSpecified("Serial", app.Serial);
+                            _console.WritePropertyIfSpecified("Raw Output", app.RawOutput);
                         }
                     }
                 }
@@ -331,11 +334,21 @@ namespace Regi.Services
 
         public void Kill(RegiOptions options)
         {
-            StartupConfig config = _configurationService.GetConfiguration();
+            _console.WriteEmphasizedLine("Committing regicide...");
 
-            IList<Project> projects = _projectManager.FilterProjects(options, config.Apps, config.Tests);
+            IEnumerable<ProjectFramework> frameworks;
+            try
+            {
+                StartupConfig config = _configurationService.GetConfiguration();
 
-            IEnumerable<ProjectFramework> frameworks = projects.Select(p => p.Framework).Distinct();
+                IList<Project> projects = _projectManager.FilterAndTrackProjects(options, config.Apps, config.Tests);
+
+                frameworks = projects.Select(p => p.Framework).Distinct();
+            }
+            catch (IOException)
+            {
+                frameworks = _frameworkServiceProvider.GetAllProjectFrameworkTypes();
+            }
 
             foreach (var framework in frameworks)
             {

@@ -29,14 +29,20 @@
     <Content Include="_SampleProjects_\ConfigurationGood\regi.json" />
     <Content Include="_SampleProjects_\ConfigurationRequires\regi.json" />
     <Content Include="_SampleProjects_\ConfigurationWrongEnum\regi.json" />
+    <Content Include="_SampleProjects_\Frontend\package-lock.json" />
+    <Content Include="_SampleProjects_\Frontend\package.json" />
+    <Content Include="_SampleProjects_\IntegrationTests\package-lock.json" />
+    <Content Include="_SampleProjects_\IntegrationTests\package.json" />
     <Content Include="_SampleProjects_\regi.json" />
+    <Content Include="_SampleProjects_\SampleNodeApp\package-lock.json" />
+    <Content Include="_SampleProjects_\SampleNodeApp\package.json" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="McMaster.Extensions.CommandLineUtils" Version="2.3.4" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.2.0" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.1.0" />
-    <PackageReference Include="Moq" Version="4.10.1" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.1.1" />
+    <PackageReference Include="Moq" Version="4.12.0" />
     <PackageReference Include="xunit" Version="2.4.1" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.1">
       <PrivateAssets>all</PrivateAssets>
@@ -60,6 +66,11 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="_SampleProjects_\Dockerfile" />
+    <None Include="_SampleProjects_\Frontend\pages\index.js" />
+    <None Include="_SampleProjects_\Frontend\pages\index.styles.js" />
+    <None Include="_SampleProjects_\IntegrationTests\.babelrc" />
+    <None Include="_SampleProjects_\IntegrationTests\jest-puppeteer.config.js" />
+    <None Include="_SampleProjects_\IntegrationTests\journeys\homepage.test.js" />
     <None Include="_SampleProjects_\SampleAppError\Program.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -87,6 +98,9 @@
     <None Include="_SampleProjects_\SampleFailedTests\UnitTest1.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="_SampleProjects_\SampleNodeApp\failing.test.js" />
+    <None Include="_SampleProjects_\SampleNodeApp\index.js" />
+    <None Include="_SampleProjects_\SampleNodeApp\passing.test.js" />
     <None Include="_SampleProjects_\SampleSuccessfulTests\SampleSuccessfulTests.csproj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

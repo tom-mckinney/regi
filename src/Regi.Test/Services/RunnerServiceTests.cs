@@ -381,6 +381,32 @@ namespace Regi.Test.Services
         }
 
         [Fact]
+        public void Kill_will_call_kill_for_every_type_of_ProjectFramework_if_there_is_no_startup_config()
+        {
+            _configurationServiceMock.Setup(m => m.GetConfiguration())
+               .Throws(new FileNotFoundException())
+               .Verifiable();
+            _frameworkServiceProviderMock.Setup(m => m.GetAllProjectFrameworkTypes())
+                .Returns(new List<ProjectFramework> { ProjectFramework.Dotnet, ProjectFramework.Node })
+                .Verifiable();
+            _dotnetServiceMock.Setup(m => m.KillProcesses(It.IsAny<RegiOptions>()))
+                .Returns(new AppProcess(null, AppTask.Kill, AppStatus.Success))
+                .Verifiable();
+            _nodeServiceMock.Setup(m => m.KillProcesses(It.IsAny<RegiOptions>()))
+                .Returns(new AppProcess(null, AppTask.Kill, AppStatus.Success))
+                .Verifiable();
+
+            var options = TestOptions.Create();
+
+            _runnerService.Kill(options);
+
+            _configurationServiceMock.Verify();
+            _frameworkServiceProviderMock.Verify();
+            _nodeServiceMock.Verify(m => m.KillProcesses(options), Times.Once);
+            _dotnetServiceMock.Verify(m => m.KillProcesses(options), Times.Once);
+        }
+
+        [Fact]
         public void List_prints_all_apps_and_tests()
         {
             _configurationServiceMock.Setup(m => m.GetConfiguration())

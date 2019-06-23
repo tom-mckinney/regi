@@ -82,5 +82,26 @@ namespace Regi.Test.Services
 
             Assert.Throws<InvalidOperationException>(() => service.GetFrameworkService(ProjectFramework.Dotnet));
         }
+
+        [Fact]
+        public void GetAllProjectFrameworkTypes_returns_every_type_of_project_framework_except_Any()
+        {
+            var service = CreateService(null);
+
+            var allProjectFrameworkTypes = service.GetAllProjectFrameworkTypes();
+
+            foreach (var enumValue in Enum.GetValues(typeof(ProjectFramework)))
+            {
+                ProjectFramework projectFramework = (ProjectFramework)enumValue;
+
+                if (projectFramework != ProjectFramework.Any)
+                {
+                    Assert.Contains(projectFramework, allProjectFrameworkTypes);
+                    allProjectFrameworkTypes.Remove(projectFramework);
+                }
+            }
+
+            Assert.Empty(allProjectFrameworkTypes);
+        }
     }
 }

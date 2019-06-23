@@ -133,12 +133,28 @@ namespace Regi.Extensions
             }
         }
 
+        public static void WritePropertyIfSpecified(this IConsole console, string propertyName, bool propertyValue, int indentCount = 2)
+        {
+            if (!propertyValue)
+                return;
+
+            console.WriteIndentedLine($"- {propertyName}: {propertyValue}", indentCount);
+        }
+
+        public static void WritePropertyIfSpecified(this IConsole console, string propertyName, ProjectType propertyValue, int indentCount = 2)
+        {
+            if (propertyValue == ProjectType.Unknown)
+                return;
+
+            console.WriteIndentedLine($"- {propertyName}: {propertyValue}", indentCount);
+        }
+
         public static void WritePropertyIfSpecified(this IConsole console, string propertyName, object propertyValue, int indentCount = 2)
         {
             if (propertyValue == null || propertyValue is string propertyValueString && string.IsNullOrWhiteSpace(propertyValueString))
                 return;
 
-            console.WriteIndentedLine($"{propertyName}: {propertyValue}", indentCount, ConsoleColor.DarkGreen);
+            console.WriteIndentedLine($"- {propertyName}: {propertyValue}", indentCount);
         }
 
         private static string Indent(int indentCount) => new string(' ', indentCount * 2);

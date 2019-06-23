@@ -2,7 +2,8 @@
 {
     public enum ProjectType
     {
-        Web = 1,
+        Unknown = 0,
+        Web,
         Unit,
         Integration
     }

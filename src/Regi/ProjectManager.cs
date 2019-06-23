@@ -14,7 +14,9 @@ namespace Regi
     {
         IList<Project> Projects { get; }
 
-        IList<Project> FilterProjects(RegiOptions options, params IEnumerable<Project>[] projectCollections);
+        IList<Project> FilterAndTrackProjects(RegiOptions options, params IEnumerable<Project>[] projectCollections);
+
+        IList<Project> FilterByOptions(IEnumerable<Project> projects, RegiOptions options);
     }
 
     public class ProjectManager : IProjectManager
@@ -30,7 +32,7 @@ namespace Regi
 
         public IList<Project> Projects { get; private set; } = new List<Project>();
 
-        public IList<Project> FilterProjects(RegiOptions options, params IEnumerable<Project>[] projectCollections)
+        public IList<Project> FilterAndTrackProjects(RegiOptions options, params IEnumerable<Project>[] projectCollections)
         {
             var targetProjects = projectCollections.Aggregate((acc, list) => acc.Concat(list));
 
@@ -41,7 +43,7 @@ namespace Regi
             return Projects;
         }
 
-        private IList<Project> FilterByOptions(IEnumerable<Project> projects, RegiOptions options)
+        public IList<Project> FilterByOptions(IEnumerable<Project> projects, RegiOptions options)
         {
             if (!string.IsNullOrWhiteSpace(options.Name))
             {

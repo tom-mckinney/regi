@@ -10,6 +10,7 @@ namespace Regi.Services
     {
         IFrameworkService GetFrameworkService(ProjectFramework framework);
         IQueueService CreateScopedQueueService();
+        IList<ProjectFramework> GetAllProjectFrameworkTypes();
     }
 
     public class FrameworkServiceProvider : IFrameworkServiceProvider
@@ -42,6 +43,15 @@ namespace Regi.Services
             {
                 return scope.ServiceProvider.GetRequiredService<IQueueService>();
             }
+        }
+
+        public IList<ProjectFramework> GetAllProjectFrameworkTypes()
+        {
+            return new List<ProjectFramework>
+            {
+                ProjectFramework.Dotnet,
+                ProjectFramework.Node
+            };
         }
     }
 }
