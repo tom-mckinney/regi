@@ -1,17 +1,17 @@
 {
   "name": "integration-tests",
   "scripts": {
-    "test": "jest"
+    "test": "jest --ci"
   },
   "dependencies": {
-    "jest": "^24.5.0",
-    "jest-puppeteer": "^4.1.0",
-    "puppeteer": "^1.13.0"
+    "jest": "^24.8.0",
+    "jest-puppeteer": "^4.2.0",
+    "puppeteer": "^1.18.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.4.0",
-    "@babel/preset-env": "^7.4.2",
-    "babel-jest": "^24.5.0"
+    "@babel/core": "^7.4.5",
+    "@babel/preset-env": "^7.4.5",
+    "babel-jest": "^24.8.0"
   },
   "jest": {
     "preset": "jest-puppeteer",

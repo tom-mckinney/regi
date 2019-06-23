@@ -36,6 +36,7 @@
       "name": "IntegrationTests",
       "path": "./IntegrationTests/package.json",
       "framework": "node",
+      "type": "integration",
       "requires": [ "Frontend", "Backend" ],
       "rawOutput": true,
       "serial": true,

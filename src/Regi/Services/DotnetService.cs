@@ -47,8 +47,7 @@ namespace Regi.Services
         {
             base.SetEnvironmentVariables(process, project);
 
-            string environmentName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development";
-            process.StartInfo.EnvironmentVariables.Add("ASPNETCORE_ENVIRONMENT", environmentName);
+            process.StartInfo.EnvironmentVariables.TryAdd("ASPNETCORE_ENVIRONMENT", "Development");
 
             if (project.Port.HasValue)
             {

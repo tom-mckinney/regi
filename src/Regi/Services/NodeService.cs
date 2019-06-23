@@ -46,11 +46,11 @@ namespace Regi.Services
         {
             base.SetEnvironmentVariables(process, project);
 
-            process.StartInfo.EnvironmentVariables.Add("CI", bool.TrueString);
+            process.StartInfo.EnvironmentVariables.TryAdd("CI", bool.TrueString);
 
             if (project.Port.HasValue)
             {
-                process.StartInfo.EnvironmentVariables.Add("PORT", project.Port.Value.ToString()); // Default NodeJS port variable
+                process.StartInfo.EnvironmentVariables["PORT"] = project.Port.Value.ToString(); // Default NodeJS port variable
             }
         }
 

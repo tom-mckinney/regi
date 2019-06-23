@@ -49,9 +49,9 @@ namespace Regi.Services
 
         protected virtual void SetEnvironmentVariables(Process process, Project project)
         {
-            process.StartInfo.EnvironmentVariables.Add("END_TO_END_TESTING", bool.TrueString);
-            process.StartInfo.EnvironmentVariables.Add("IN_MEMORY_DATABASE", bool.TrueString);
-            process.StartInfo.EnvironmentVariables.Add("DONT_STUB_PLAID", bool.FalseString);
+            process.StartInfo.EnvironmentVariables.TryAdd("END_TO_END_TESTING", bool.TrueString);
+            process.StartInfo.EnvironmentVariables.TryAdd("IN_MEMORY_DATABASE", bool.TrueString);
+            process.StartInfo.EnvironmentVariables.TryAdd("DONT_STUB_PLAID", bool.FalseString);
         }
 
         protected abstract ProjectOptions FrameworkOptions { get; }

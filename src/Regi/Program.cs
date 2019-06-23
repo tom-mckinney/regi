@@ -55,6 +55,8 @@ namespace Regi
 
         public static IServiceProvider ConfigureServices(IConsole console)
         {
+            Console.OutputEncoding = System.Text.Encoding.UTF8;
+
             return new ServiceCollection()
                 .Configure<Settings>(o =>
                 {
