@@ -95,7 +95,6 @@ namespace Regi.Services
 
         public IList<Project> Test(RegiOptions options)
         {
-            System.Diagnostics.Debugger.Launch();
             StartupConfig config = _configurationService.GetConfiguration();
 
             IList<AppProcess> processes = new List<AppProcess>();
