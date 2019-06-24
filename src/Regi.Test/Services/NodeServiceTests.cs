@@ -15,6 +15,7 @@ using Xunit.Abstractions;
 
 namespace Regi.Test.Services
 {
+    [Collection("Integration")]
     public class NodeServiceTests
     {
         private readonly IConsole _console;
@@ -27,27 +28,7 @@ namespace Regi.Test.Services
         {
             _console = new TestConsole(testOutput);
             _service = new NodeService(_console, new PlatformService(_console, _runtimeInfoMock.Object));
-
-            //DirectoryInfo projectDir = new DirectoryInfo(Directory.GetCurrentDirectory())
-            //    .GetDirectories("SampleNodeApp", SearchOption.AllDirectories)
-            //    .First();
-
-            //_application = new Project("SampleNodeApp", projectDir
-            //    .GetFiles("package.json", SearchOption.AllDirectories)
-            //    .First()
-            //    .FullName);
         }
-
-        //[Fact]
-        //public void RunProject_returns_failure_status_on_thrown_exception()
-        //{
-        //    throw new NotImplementedException();
-        //    //AppProcess app = _service.RunProject(_applicationError);
-
-        //    //app.Process.WaitForExit();
-
-        //    //Assert.Equal(AppStatus.Failure, app.Status);
-        //}
 
         [Fact]
         public void RunProject_starts_and_returns_process()

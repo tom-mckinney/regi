@@ -4,11 +4,10 @@ using Regi.Models;
 using Regi.Services;
 using Regi.Test.Helpers;
 using Regi.Utilities;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Threading;
+using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -103,7 +102,7 @@ namespace Regi.Test.Services
 
                 Assert.Equal(AppStatus.Running, process.Status);
 
-                process.Process.WaitForExit();
+                process.WaitForExit();
 
                 Assert.Equal(AppStatus.Success, process.Status);
             }
@@ -114,7 +113,7 @@ namespace Regi.Test.Services
         {
             AppProcess process = _service.StartProject(_applicationError, TestOptions.Create());
 
-            process.Process.WaitForExit();
+            process.WaitForExit();
 
             Assert.Equal(AppStatus.Failure, process.Status);
         }
@@ -126,7 +125,7 @@ namespace Regi.Test.Services
 
             AppProcess process = _service.StartProject(_application, optionsWithoutVerbose);
 
-            process.Process.WaitForExit();
+            process.WaitForExit();
 
             Assert.Equal(AppTask.Start, process.Task);
             Assert.Equal(AppStatus.Success, process.Status);
@@ -138,7 +137,7 @@ namespace Regi.Test.Services
         {
             AppProcess process = _service.StartProject(_application, TestOptions.Create());
 
-            process.Process.WaitForExit();
+            process.WaitForExit();
 
             Assert.Equal(AppTask.Start, process.Task);
             Assert.Equal(AppStatus.Success, process.Status);
