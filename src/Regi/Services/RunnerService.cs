@@ -279,9 +279,13 @@ namespace Regi.Services
 
             project.TryAddSource(options, config);
 
-            return _frameworkServiceProvider
+            var process = _frameworkServiceProvider
                 .GetFrameworkService(project.Framework)
                 .InstallProject(project, options);
+
+            _console.WriteEmphasizedLine($"Finished installing project {project.Name}");
+
+            return process;
         }
 
         public void Initialize(RegiOptions options)

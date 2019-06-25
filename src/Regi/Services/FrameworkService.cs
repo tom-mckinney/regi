@@ -231,7 +231,7 @@ namespace Regi.Services
             {
                 if (!string.IsNullOrWhiteSpace(e.Data))
                 {
-                    if (FrameworkWarningIndicators.Any(i => e.Data.StartsWith(i)))
+                    if (FrameworkWarningIndicators.Any(i => e.Data.StartsWith(i, StringComparison.InvariantCultureIgnoreCase)))
                     {
                         _console.WriteWarningLine(name + ": " + e.Data);
                     }
