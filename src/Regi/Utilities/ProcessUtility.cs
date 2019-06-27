@@ -1,4 +1,6 @@
-﻿using Regi.Models;
+﻿using McMaster.Extensions.CommandLineUtils;
+using Regi.Extensions;
+using Regi.Models;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -13,6 +15,16 @@ namespace Regi.Utilities
         private static readonly bool _isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
         private static readonly TimeSpan _defaultTimeout = TimeSpan.FromSeconds(10);
 
+        public static string AddExtension(string name, string extension = ".exe")
+        {
+            if (name.EndsWith(extension, StringComparison.InvariantCultureIgnoreCase))
+            {
+                return name;
+            }
+
+            return name + extension;
+        }
+
         public static void KillAllOfType(string processName)
         {
             KillAllOfType(processName, _defaultTimeout);
@@ -22,65 +34,142 @@ namespace Regi.Utilities
         {
             if (_isWindows)
             {
-                RunProcessAndWaitForExit("taskkill", $"/F /IM {AddExtension(processName)}", timeout);
+                RunProcessAndWaitForExit("taskkill", $"/F /IM {AddExtension(processName)}", out string _, out string _);
             }
             else
             {
-                RunProcessAndWaitForExit("killall", $"{processName}", timeout);
+                RunProcessAndWaitForExit("killall", $"{processName}", out string _, out string _);
             }
         }
 
-        public static void KillTree(int processId)
+        public static void KillTree(this Process process, int processId)
         {
-            KillTree(processId, _defaultTimeout);
+            KillTree(process, processId, _defaultTimeout, null);
         }
 
-        public static void KillTree(int processId, TimeSpan timeout)
+        public static void KillTree(this Process process, int processId, IConsole console)
         {
+            KillTree(process, processId, _defaultTimeout, console);
+        }
+
+        public static void KillTree(this Process process, int processId, TimeSpan timeout, IConsole console)
+        {
+            string stdout;
+            string stderr;
+
             if (_isWindows)
             {
-                RunProcessAndWaitForExit("taskkill", $"/T /F /PID {processId}", timeout);
+                RunProcessAndWaitForExit("taskkill", $"/T /F /PID {processId}", out stdout, out stderr);
+                LogOutputs(console, stdout, stderr);
             }
             else
             {
-                RunProcessAndWaitForExit("kill", $"-TERM {processId}", timeout);
+                var children = new HashSet<int>();
+                GetAllChildIdsUnix(processId, children);
+                foreach (var childId in children)
+                {
+                    KillProcessUnix(childId, out stdout, out stderr);
+                    LogOutputs(console, stdout, stderr);
+                }
+
+                KillProcessUnix(processId, out stdout, out stderr);
+                LogOutputs(console, stdout, stderr);
+            }
+
+            try
+            {
+                // wait until the process finishes exiting/getting killed. 
+                // We don't want to wait forever here because the task is already supposed to be dieing, we just want to give it long enough
+                // to try and flush what it can and stop. If it cannot do that in a reasonable time frame then we will just ignore it.
+                process?.WaitForExit(timeout.Milliseconds);
+            }
+            catch (Exception e)
+            {
+                // TODO: handle this
             }
         }
 
-        private static int RunProcessAndWaitForExit(string fileName, string arguments, TimeSpan timeout)
+        public static void GetAllChildIdsUnix(int parentId, ISet<int> children)
         {
-            var process = new Process
+            var exitCode = RunProcessAndWaitForExit(
+                "pgrep",
+                $"-P {parentId}",
+                out string stdout,
+                out string _);
+
+            if (exitCode == 0 && !string.IsNullOrEmpty(stdout))
             {
-                StartInfo = new ProcessStartInfo
+                using (var reader = new StringReader(stdout))
                 {
-                    FileName = fileName,
-                    Arguments = arguments,
-                    CreateNoWindow = false,
-                    WindowStyle = ProcessWindowStyle.Normal,
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true
-                },
-                EnableRaisingEvents = true
+                    while (true)
+                    {
+                        var text = reader.ReadLine();
+                        if (text == null)
+                        {
+                            return;
+                        }
+
+                        int id;
+                        if (int.TryParse(text, out id))
+                        {
+                            children.Add(id);
+                            // Recursively get the children
+                            GetAllChildIdsUnix(id, children);
+                        }
+                    }
+                }
+            }
+        }
+
+        public static void KillProcessUnix(int processId, out string stdout, out string stderr)
+        {
+            RunProcessAndWaitForExit(
+                "kill",
+                $"-TERM {processId}",
+                out stdout, out stderr);
+        }
+
+        public static int RunProcessAndWaitForExit(string fileName, string arguments, out string stdout, out string stderr)
+        {
+            var startInfo = new ProcessStartInfo
+            {
+                FileName = fileName,
+                Arguments = arguments,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false
             };
 
-            process.Start();
+            var process = Process.Start(startInfo);
 
-            if (!process.WaitForExit((int)timeout.TotalMilliseconds))
+            stdout = null;
+            stderr = null;
+            if (process.WaitForExit((int)TimeSpan.FromSeconds(30).TotalMilliseconds))
+            {
+                stdout = process.StandardOutput.ReadToEnd();
+                stderr = process.StandardError.ReadToEnd();
+            }
+            else
             {
                 process.Kill();
+
+                // Kill is asynchronous so we should still wait a little
+                //
+                process.WaitForExit((int)TimeSpan.FromSeconds(1).TotalMilliseconds);
             }
 
-            return process.ExitCode;
+            return process.HasExited ? process.ExitCode : -1;
         }
 
-        public static string AddExtension(string name, string extension = ".exe")
+        private static void LogOutputs(IConsole console, string stdout, string stderr)
         {
-            if (name.EndsWith(extension, StringComparison.InvariantCultureIgnoreCase))
+            if (console != null)
             {
-                return name;
+                if (!string.IsNullOrWhiteSpace(stdout))
+                    console.WriteDefaultLine(stdout);
+                if (!string.IsNullOrWhiteSpace(stderr))
+                    console.WriteErrorLine(stderr);
             }
-
-            return name + extension;
         }
     }
 }

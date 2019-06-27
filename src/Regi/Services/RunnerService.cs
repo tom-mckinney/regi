@@ -178,7 +178,7 @@ namespace Regi.Services
 
                         foreach (var p in project.RequiredProjects)
                         {
-                            p.Process.Dispose();
+                            p.Process.Kill(_console);
                         }
                     }
                 });
@@ -186,7 +186,7 @@ namespace Regi.Services
 
             _queueService.RunAll();
 
-            processes.DisposeAll();
+            processes.KillAll(_console);
 
             return projects;
         }

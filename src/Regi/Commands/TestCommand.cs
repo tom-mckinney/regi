@@ -32,7 +32,7 @@ namespace Regi.Commands
 
             foreach (var p in Projects)
             {
-                p.Process.Dispose();
+                p.Process.Kill();
             }
 
             return output.FailCount;

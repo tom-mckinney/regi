@@ -1,11 +1,12 @@
-﻿using Regi.Extensions;
+﻿using McMaster.Extensions.CommandLineUtils;
+using Regi.Extensions;
 using Regi.Utilities;
 using System;
 using System.Diagnostics;
 
 namespace Regi.Models
 {
-    public class AppProcess : IDisposable
+    public class AppProcess //: IDisposable
     {
         private object _lock = new object();
 
@@ -80,15 +81,20 @@ namespace Regi.Models
             Process?.WaitForExit();
         }
 
-        public Action<int> OnDispose { get; set; }
+        public Action<int> OnKill { get; set; }
 
-        public void Dispose()
+        public void Kill()
         {
-            OnDispose?.Invoke(ProcessId);
+            Kill(null);
+        }
+
+        public void Kill(IConsole console)
+        {
+            OnKill?.Invoke(ProcessId);
 
             if (KillOnExit)
             {
-                ProcessUtility.KillTree(ProcessId);
+                ProcessUtility.KillTree(Process, ProcessId, console);
             }
         }
     }

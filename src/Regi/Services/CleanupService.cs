@@ -1,6 +1,9 @@
-﻿using Regi.Models;
+﻿using McMaster.Extensions.CommandLineUtils;
+using Regi.Models;
+using Regi.Utilities;
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace Regi.Services
@@ -12,7 +15,9 @@ namespace Regi.Services
 
     public class CleanupService : ICleanupService
     {
-        private IDotnetService dotnetService;
+        private readonly IDotnetService dotnetService;
+        private readonly bool _isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+        private readonly TimeSpan _defaultTimeout = TimeSpan.FromSeconds(10);
 
         public CleanupService(IDotnetService dotnetService)
         {

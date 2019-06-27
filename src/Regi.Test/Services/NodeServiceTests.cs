@@ -33,13 +33,14 @@ namespace Regi.Test.Services
         [Fact]
         public void RunProject_starts_and_returns_process()
         {
-            using (AppProcess app = _service.StartProject(_application, TestOptions.Create()))
-            {
-                Thread.Sleep(1000);
+            AppProcess app = _service.StartProject(_application, TestOptions.Create());
 
-                Assert.Equal(AppTask.Start, app.Task);
-                Assert.Equal(AppStatus.Running, app.Status);
-            }
+            Thread.Sleep(1000);
+
+            Assert.Equal(AppTask.Start, app.Task);
+            Assert.Equal(AppStatus.Running, app.Status);
+
+            app.Kill();
         }
 
         [Fact]
@@ -49,14 +50,15 @@ namespace Regi.Test.Services
 
             _application.Port = expectedPort;
 
-            using (AppProcess app = _service.StartProject(_application, TestOptions.Create()))
-            {
-                Thread.Sleep(1000);
+            AppProcess app = _service.StartProject(_application, TestOptions.Create());
 
-                Assert.Equal(AppTask.Start, app.Task);
-                Assert.Equal(AppStatus.Running, app.Status);
-                Assert.Equal(expectedPort, app.Port);
-            }
+            Thread.Sleep(1000);
+
+            Assert.Equal(AppTask.Start, app.Task);
+            Assert.Equal(AppStatus.Running, app.Status);
+            Assert.Equal(expectedPort, app.Port);
+
+            app.Kill();
         }
 
         [Fact]
@@ -69,16 +71,17 @@ namespace Regi.Test.Services
                 { "foo", "bar" }
             };
 
-            using (AppProcess appProcess = _service.StartProject(_application, TestOptions.Create(varList)))
-            {
-                Thread.Sleep(500);
+            AppProcess appProcess = _service.StartProject(_application, TestOptions.Create(varList));
 
-                Assert.Equal(AppTask.Start, appProcess.Task);
-                Assert.Equal(AppStatus.Running, appProcess.Status);
-                Assert.Equal(8080, appProcess.Port);
-                Assert.True(appProcess.Process.StartInfo.EnvironmentVariables.ContainsKey("foo"), "Environment variable \"foo\" has not been set.");
-                Assert.Equal("bar", appProcess.Process.StartInfo.EnvironmentVariables["foo"]);
-            }
+            Thread.Sleep(500);
+
+            Assert.Equal(AppTask.Start, appProcess.Task);
+            Assert.Equal(AppStatus.Running, appProcess.Status);
+            Assert.Equal(8080, appProcess.Port);
+            Assert.True(appProcess.Process.StartInfo.EnvironmentVariables.ContainsKey("foo"), "Environment variable \"foo\" has not been set.");
+            Assert.Equal("bar", appProcess.Process.StartInfo.EnvironmentVariables["foo"]);
+
+            appProcess.Kill();
         }
 
         [Theory]
@@ -87,11 +90,12 @@ namespace Regi.Test.Services
         [InlineData("failing", AppStatus.Failure)]
         public void TestProject_will_return_test_for_path_pattern_and_expected_status(string pathPattern, AppStatus expectedStatus)
         {
-            using (AppProcess test = _service.TestProject(_application, TestOptions.Create(null, pathPattern)))
-            {
-                Assert.Equal(AppTask.Test, test.Task);
-                Assert.Equal(expectedStatus, test.Status);
-            }
+            AppProcess test = _service.TestProject(_application, TestOptions.Create(null, pathPattern));
+
+            Assert.Equal(AppTask.Test, test.Task);
+            Assert.Equal(expectedStatus, test.Status);
+
+            test.Kill();
         }
 
         [Fact]
@@ -104,25 +108,27 @@ namespace Regi.Test.Services
                 { "foo", "bar" }
             };
 
-            using (AppProcess testProcess = _service.TestProject(_application, TestOptions.Create(varList)))
-            {
-                Assert.Equal(AppTask.Test, testProcess.Task);
-                Assert.Equal(AppStatus.Failure, testProcess.Status);
-                Assert.Equal(8080, testProcess.Port);
-                Assert.True(testProcess.Process.StartInfo.EnvironmentVariables.ContainsKey("foo"), "Environment variable \"foo\" has not been set.");
-                Assert.Equal("bar", testProcess.Process.StartInfo.EnvironmentVariables["foo"]);
-            }
+            AppProcess testProcess = _service.TestProject(_application, TestOptions.Create(varList));
+
+            Assert.Equal(AppTask.Test, testProcess.Task);
+            Assert.Equal(AppStatus.Failure, testProcess.Status);
+            Assert.Equal(8080, testProcess.Port);
+            Assert.True(testProcess.Process.StartInfo.EnvironmentVariables.ContainsKey("foo"), "Environment variable \"foo\" has not been set.");
+            Assert.Equal("bar", testProcess.Process.StartInfo.EnvironmentVariables["foo"]);
+
+            testProcess.Kill();
         }
 
         [Fact]
         public void InstallProject_returns_process()
         {
-            using (AppProcess process = _service.InstallProject(_application, TestOptions.Create()))
-            {
-                Assert.Equal(AppTask.Install, process.Task);
-                Assert.Equal(AppStatus.Success, process.Status);
-                Assert.Equal(_application.Port, process.Port);
-            }
+            AppProcess process = _service.InstallProject(_application, TestOptions.Create());
+
+            Assert.Equal(AppTask.Install, process.Task);
+            Assert.Equal(AppStatus.Success, process.Status);
+            Assert.Equal(_application.Port, process.Port);
+
+            process.Kill();
         }
 
         [Fact]
@@ -131,10 +137,11 @@ namespace Regi.Test.Services
             string source = "https://artifactory.org/npm";
             _application.Source = source;
 
-            using (AppProcess process = _service.InstallProject(_application, TestOptions.Create()))
-            {
-                Assert.Contains($"--registry {source}", process.Process.StartInfo.Arguments);
-            }
+            AppProcess process = _service.InstallProject(_application, TestOptions.Create());
+
+            Assert.Contains($"--registry {source}", process.Process.StartInfo.Arguments);
+
+            process.Kill();
         }
 
         [Theory]

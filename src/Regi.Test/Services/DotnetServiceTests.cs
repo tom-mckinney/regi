@@ -147,14 +147,15 @@ namespace Regi.Test.Services
         [Fact]
         public void RunProject_long_starts_and_prints_nothing()
         {
-            using (AppProcess appProcess = _service.StartProject(_applicationLong, TestOptions.Create()))
-            {
-                Thread.Sleep(1000);
+            AppProcess appProcess = _service.StartProject(_applicationLong, TestOptions.Create());
 
-                Assert.Equal(AppTask.Start, appProcess.Task);
-                Assert.Equal(AppStatus.Running, appProcess.Status);
-                Assert.Null(appProcess.Port);
-            }
+            Thread.Sleep(1000);
+
+            Assert.Equal(AppTask.Start, appProcess.Task);
+            Assert.Equal(AppStatus.Running, appProcess.Status);
+            Assert.Null(appProcess.Port);
+
+            appProcess.Kill();
         }
 
         [Fact]
@@ -162,14 +163,15 @@ namespace Regi.Test.Services
         {
             _applicationLong.Port = 8080;
 
-            using (AppProcess appProcess = _service.StartProject(_applicationLong, TestOptions.Create()))
-            {
-                Thread.Sleep(1000);
+            AppProcess appProcess = _service.StartProject(_applicationLong, TestOptions.Create());
 
-                Assert.Equal(AppTask.Start, appProcess.Task);
-                Assert.Equal(AppStatus.Running, appProcess.Status);
-                Assert.Equal(8080, appProcess.Port);
-            }
+            Thread.Sleep(1000);
+
+            Assert.Equal(AppTask.Start, appProcess.Task);
+            Assert.Equal(AppStatus.Running, appProcess.Status);
+            Assert.Equal(8080, appProcess.Port);
+
+            appProcess.Kill();
         }
 
         [Fact]
@@ -182,16 +184,17 @@ namespace Regi.Test.Services
                 { "foo", "bar" }
             };
 
-            using (AppProcess appProcess = _service.StartProject(_applicationLong, TestOptions.Create(varList)))
-            {
-                Thread.Sleep(500);
+            AppProcess appProcess = _service.StartProject(_applicationLong, TestOptions.Create(varList));
 
-                Assert.Equal(AppTask.Start, appProcess.Task);
-                Assert.Equal(AppStatus.Running, appProcess.Status);
-                Assert.Equal(8080, appProcess.Port);
-                Assert.True(appProcess.Process.StartInfo.EnvironmentVariables.ContainsKey("foo"), "Environment variable \"foo\" has not been set.");
-                Assert.Equal("bar", appProcess.Process.StartInfo.EnvironmentVariables["foo"]);
-            }
+            Thread.Sleep(500);
+
+            Assert.Equal(AppTask.Start, appProcess.Task);
+            Assert.Equal(AppStatus.Running, appProcess.Status);
+            Assert.Equal(8080, appProcess.Port);
+            Assert.True(appProcess.Process.StartInfo.EnvironmentVariables.ContainsKey("foo"), "Environment variable \"foo\" has not been set.");
+            Assert.Equal("bar", appProcess.Process.StartInfo.EnvironmentVariables["foo"]);
+
+            appProcess.Kill();
         }
 
         [Fact]
@@ -199,12 +202,13 @@ namespace Regi.Test.Services
         {
             _application.Source = "http://artifactory.org/nuget";
 
-            using (AppProcess process = _service.InstallProject(_application, TestOptions.Create()))
-            {
-                Assert.Equal(AppTask.Install, process.Task);
-                Assert.Equal(AppStatus.Success, process.Status);
-                Assert.Null(process.Port);
-            }
+            AppProcess process = _service.InstallProject(_application, TestOptions.Create());
+
+            Assert.Equal(AppTask.Install, process.Task);
+            Assert.Equal(AppStatus.Success, process.Status);
+            Assert.Null(process.Port);
+
+            process.Kill();
         }
 
         [Fact]
@@ -213,10 +217,11 @@ namespace Regi.Test.Services
             string source = "http://artifactory.org/nuget";
             _application.Source = source;
 
-            using (AppProcess process = _service.InstallProject(_application, TestOptions.Create()))
-            {
-                Assert.Contains($"--source {source}", process.Process.StartInfo.Arguments);
-            }
+            AppProcess process = _service.InstallProject(_application, TestOptions.Create());
+
+            Assert.Contains($"--source {source}", process.Process.StartInfo.Arguments);
+
+            process.Kill();
         }
 
         [Theory]

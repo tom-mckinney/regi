@@ -1,4 +1,5 @@
-﻿using Regi.Models;
+﻿using McMaster.Extensions.CommandLineUtils;
+using Regi.Models;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -9,13 +10,18 @@ namespace Regi.Extensions
 {
     public static class ListExtensions
     {
-        public static void DisposeAll(this IEnumerable<AppProcess> processes)
+        public static void KillAll(this IEnumerable<AppProcess> processes)
+        {
+            KillAll(processes, null);
+        }
+
+        public static void KillAll(this IEnumerable<AppProcess> processes, IConsole console)
         {
             if (processes?.Count() > 0)
             {
                 foreach (var p in processes)
                 {
-                    p.Dispose();
+                    p.Kill(console);
                 }
             }
         }

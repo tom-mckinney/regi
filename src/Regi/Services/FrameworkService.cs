@@ -149,7 +149,7 @@ namespace Regi.Services
             {
                 KillOnExit = options.KillProcessesOnExit,
                 Verbose = options.Verbose,
-                OnDispose = (processId) => HandleDispose(project, processId, options)
+                OnKill = (processId) => HandleDispose(project, processId, options)
             };
 
             process.StartInfo.CopyEnvironmentVariables(options.VariableList);

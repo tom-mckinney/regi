@@ -85,7 +85,7 @@ namespace Regi
                 {
                     if (project.Process != null)
                     {
-                        project.Process.Dispose();
+                        project.Process.Kill(_console);
                     }
                 }
             }

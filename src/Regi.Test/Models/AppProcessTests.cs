@@ -16,10 +16,10 @@ namespace Regi.Test.Models
 
             AppProcess model = new AppProcess(new System.Diagnostics.Process(), AppTask.Test, AppStatus.Running)
             {
-                OnDispose = (processId) => callCount++
+                OnKill = (processId) => callCount++
             };
 
-            model.Dispose();
+            model.Kill();
 
             Assert.Equal(1, callCount);
         }
@@ -31,10 +31,10 @@ namespace Regi.Test.Models
 
             AppProcess model = new AppProcess(new System.Diagnostics.Process(), AppTask.Test, AppStatus.Running)
             {
-                OnDispose = null
+                OnKill = null
             };
 
-            model.Dispose();
+            model.Kill();
 
             Assert.Equal(0, callCount);
         }
