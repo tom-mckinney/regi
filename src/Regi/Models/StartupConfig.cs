@@ -8,16 +8,16 @@ namespace Regi.Models
     public class StartupConfig
     {
         [JsonProperty("apps")]
-        public List<Project> Apps { get; set; }
+        public List<Project> Apps { get; set; } = new List<Project>();
 
         [JsonProperty("tests")]
-        public List<Project> Tests { get; set; }
+        public List<Project> Tests { get; set; } = new List<Project>();
 
         [JsonProperty("services")]
-        public List<Project> Services { get; set; }
+        public List<Project> Services { get; set; } = new List<Project>();
 
         [JsonProperty("sources")]
-        public IDictionary<ProjectFramework, string> Sources { get; set; }
+        public IDictionary<ProjectFramework, string> Sources { get; set; } = new Dictionary<ProjectFramework, string>();
 
         public IList<Project> GetRequirements(Project project)
         {

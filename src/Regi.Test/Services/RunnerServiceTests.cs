@@ -187,6 +187,45 @@ namespace Regi.Test.Services
             _nodeServiceMock.VerifyAll();
         }
 
+        [Fact]
+        public void Test_also_waits_on_required_dependency_sequentially_when_no_parallel_is_specified()
+        {
+            TestQueueService dependencyQueueService = new TestQueueService(_console);
+
+            _configurationServiceMock.Setup(m => m.GetConfiguration())
+                .Returns(SampleProjects.ConfigurationDefault)
+                .Verifiable();
+            _frameworkServiceProviderMock.Setup(m => m.CreateScopedQueueService())
+                .Returns(dependencyQueueService)
+                .Verifiable();
+            _nodeServiceMock.Setup(m => m.TestProject(It.IsAny<Project>(), It.IsAny<RegiOptions>()))
+                .Returns(new AppProcess(new Process(), AppTask.Test, AppStatus.Success))
+                .Verifiable();
+            _nodeServiceMock.Setup(m => m.StartProject(It.IsAny<Project>(), It.IsAny<RegiOptions>()))
+                .Returns(new AppProcess(new Process(), AppTask.Start, AppStatus.Success))
+                .Verifiable();
+            _dotnetServiceMock.Setup(m => m.StartProject(It.IsAny<Project>(), It.IsAny<RegiOptions>()))
+                .Returns(new AppProcess(new Process(), AppTask.Start, AppStatus.Success))
+                .Verifiable();
+
+            var options = TestOptions.Create();
+
+            options.Name = SampleProjects.IntegrationTests.Name;
+            options.NoParallel = true;
+
+            var processes = _runnerService.Test(options);
+
+            int requiredCount = SampleProjects.IntegrationTests.Requires.Count;
+            Assert.Equal(requiredCount, dependencyQueueService.WaitOnPortCallCount);
+            Assert.Equal(1, dependencyQueueService.WaitOnPortListCallCount);
+            Assert.Equal(requiredCount * 2, dependencyQueueService.ActivePorts.Count);
+
+            _configurationServiceMock.Verify();
+            _frameworkServiceProviderMock.Verify();
+            _nodeServiceMock.Verify();
+            _dotnetServiceMock.Verify();
+        }
+
         [Theory]
         [InlineData(ProjectType.Unit, 1)]
         [InlineData(ProjectType.Integration, 1)]
@@ -343,6 +382,47 @@ namespace Regi.Test.Services
             _frameworkServiceProviderMock.Verify();
             _dotnetServiceMock.Verify();
             _nodeServiceMock.Verify();
+        }
+
+        [Fact]
+        public void Install_will_not_install_a_dependency_if_it_has_already_been_installed_as_another_project_dependency()
+        {
+            var app = SampleProjects.Backend;
+
+            var test1 = SampleProjects.XunitTests;
+            test1.Name = "Test1";
+            test1.Requires = new List<string> { app.Name };
+
+            var test2 = SampleProjects.XunitTests;
+            test2.Name = "Test2";
+            test2.Requires = new List<string> { app.Name };
+
+            var options = TestOptions.Create();
+            options.NoParallel = true;
+            options.Type = test1.Type;
+
+            _configurationServiceMock.Setup(m => m.GetConfiguration())
+                .Returns(new StartupConfig
+                {
+                    Apps = new List<Project> { app },
+                    Tests = new List<Project> { test1, test2 }
+                })
+                .Verifiable();
+            _frameworkServiceProviderMock.Setup(m => m.CreateScopedQueueService())
+                .Returns(() => new TestQueueService(_console))
+                .Verifiable();
+            _dotnetServiceMock.Setup(m => m.InstallProject(It.IsAny<Project>(), It.IsAny<RegiOptions>()))
+                .Returns(() => new AppProcess(new Process(), AppTask.Install, AppStatus.Success))
+                .Verifiable();
+
+            var outputProjects = _runnerService.Install(options);
+
+            Assert.Equal(2, outputProjects.Count);
+            Assert.Single(outputProjects, p => p.RequiredProjects.Count > 0);
+
+            _configurationServiceMock.Verify();
+            _frameworkServiceProviderMock.Verify();
+            _dotnetServiceMock.Verify(m => m.InstallProject(It.IsAny<Project>(), It.IsAny<RegiOptions>()), Times.Exactly(3));
         }
 
         [Fact]

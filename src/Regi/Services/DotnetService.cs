@@ -30,13 +30,15 @@ namespace Regi.Services
             }
         };
 
+        protected override IList<string> FrameworkCommandWildcardExclusions => new List<string> { FrameworkCommands.Dotnet.Restore };
+
         protected override void ApplyFrameworkOptions(StringBuilder builder, string command, Project project, RegiOptions options)
         {
             lock (_lock)
             {
                 if (!string.IsNullOrWhiteSpace(project.Source))
                 {
-                    FrameworkOptions.AddOptions(FrameworkCommands.Any, $"--source {project.Source}");
+                    builder.AppendCliOption($"--source {project.Source}");
                 }
 
                 base.ApplyFrameworkOptions(builder, command, project, options);

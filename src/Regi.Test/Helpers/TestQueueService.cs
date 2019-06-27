@@ -17,12 +17,24 @@ namespace Regi.Test.Helpers
 
         public IList<int> ActivePorts { get; } = new List<int>();
 
+        public int WaitOnPortListCallCount = 0;
+        public int WaitOnPortCallCount = 0;
+
         public override void WaitOnPorts(IDictionary<int, Project> projects)
         {
+            WaitOnPortListCallCount++;
+
             foreach (var p in projects)
             {
                 ActivePorts.Add(p.Key);
             }
+        }
+
+        public override void WaitOnPort(int port, Project project)
+        {
+            WaitOnPortCallCount++;
+
+            ActivePorts.Add(port);
         }
     }
 }

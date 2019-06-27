@@ -23,6 +23,8 @@ namespace Regi.Services
 
         void WaitOnPorts(IList<Project> projects);
         void WaitOnPorts(IDictionary<int, Project> projects);
+
+        void WaitOnPort(int port, Project project);
     }
 
     public class QueueService : IQueueService
@@ -82,6 +84,20 @@ namespace Regi.Services
             }
         }
 
+        public virtual void WaitOnPort(int port, Project project)
+        {
+            bool isListening = false;
+
+            while (!isListening)
+            {
+                isListening = _networkingService.IsPortListening(port);
+
+                Thread.Sleep(100);
+            }
+
+            _console.WriteSuccessLine($"{project.Name} is now listening on port {port}");
+        }
+
         public void WaitOnPorts(IList<Project> projects)
         {
             IDictionary<int, Project> projectsWithPorts = projects
@@ -106,7 +122,7 @@ namespace Regi.Services
                     {
                         activePorts.Add(port);
 
-                        _console.WriteEmphasizedLine($"{projects[port].Name} is now listening on port {port}");
+                        _console.WriteSuccessLine($"{projects[port].Name} is now listening on port {port}");
                     }
                 }
 

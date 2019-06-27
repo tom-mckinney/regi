@@ -252,5 +252,17 @@ namespace Regi.Test.Services
             Assert.Contains("dotnet", startInfo.FileName);
             Assert.Equal(FrameworkCommands.Dotnet.ShutdownBuildServer, startInfo.Arguments);
         }
+
+        [Fact]
+        public void BuildCommand_does_not_add_command_options_if_restoring()
+        {
+            var project = SampleProjects.Backend;
+            project.Options.AddOptions("*", "--dont-do-this-on-restore");
+            project.Options.AddOptions("restore", "--foo bar");
+
+            var command = ((DotnetService)_service).BuildCommand(FrameworkCommands.Dotnet.Restore, project, TestOptions.Create());
+
+            Assert.Equal("restore --foo bar", command);
+        }
     }
 }

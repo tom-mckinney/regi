@@ -25,8 +25,10 @@ namespace Regi.Services
         protected override IList<string> FrameworkWarningIndicators => new List<string>
         {
             "npm warn",
+            "npm notice",
             "Warning:",
-            "clean-webpack-plugin:"
+            "clean-webpack-plugin:",
+            "[BABEL] Note:",
         };
 
         protected override void ApplyFrameworkOptions(StringBuilder builder, string command, Project project, RegiOptions options)
@@ -35,7 +37,7 @@ namespace Regi.Services
             {
                 if (!string.IsNullOrWhiteSpace(project.Source))
                 {
-                    FrameworkOptions.AddOptions(FrameworkCommands.Any, $"--registry {project.Source}");
+                    builder.AppendCliOption($"--registry {project.Source}");
                 }
 
                 base.ApplyFrameworkOptions(builder, command, project, options);

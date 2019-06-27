@@ -17,7 +17,7 @@ namespace Regi.Extensions
             {
                 foreach (var env in varList)
                 {
-                    startInfo.EnvironmentVariables.Add(env.Key, env.Value);
+                    startInfo.EnvironmentVariables.TryAdd(env.Key, env.Value);
                 }
             }
         }

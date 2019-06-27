@@ -58,6 +58,8 @@ namespace Regi.Services
 
         protected virtual IList<string> FrameworkWarningIndicators { get; } = new List<string>();
 
+        protected virtual IList<string> FrameworkCommandWildcardExclusions { get; } = new List<string>();
+
         protected virtual void ApplyFrameworkOptions(StringBuilder builder, string command, Project project, RegiOptions options)
         {
             lock (_lock)
@@ -66,12 +68,12 @@ namespace Regi.Services
                 {
                     if (FrameworkOptions.TryGetValue(command, out IList<string> defaultOptions))
                     {
-                        builder.Append(' ').AppendJoin(' ', defaultOptions);
+                        builder.AppendJoinCliOptions(defaultOptions);
                     }
 
                     if (FrameworkOptions.TryGetValue(FrameworkCommands.Any, out IList<string> anyCommandOptions))
                     {
-                        builder.Append(' ').AppendJoin(' ', anyCommandOptions);
+                        builder.AppendJoinCliOptions(anyCommandOptions);
                     }
                 }
             }
@@ -197,26 +199,30 @@ namespace Regi.Services
 
                 builder.Append(command);
 
-                if (project?.Options?.Count > 0)
-                {
-                    foreach (var commandOption in project.Options)
-                    {
-                        if (commandOption.Key == "*" || commandOption.Key == command)
-                        {
-
-                            builder.Append(' ').AppendJoin(' ', commandOption.Value);
-                        }
-                    }
-                }
+                AddCommandOptions(builder, command, project, options);
 
                 ApplyFrameworkOptions(builder, command, project, options);
 
                 if (options?.RemainingArguments?.Count() > 0)
                 {
-                    builder.Append(' ').Append(FormatAdditionalArguments(options.RemainingArguments));
+                    builder.AppendCliOption(FormatAdditionalArguments(options.RemainingArguments));
                 }
 
                 return builder.ToString();
+            }
+        }
+
+        public virtual void AddCommandOptions(StringBuilder builder, string command, Project project, RegiOptions options)
+        {
+            if (project?.Options?.Count > 0)
+            {
+                foreach (var commandOption in project.Options)
+                {
+                    if (commandOption.Key == command || (commandOption.Key == "*" && !FrameworkCommandWildcardExclusions.Contains(command)))
+                    {
+                        builder.AppendJoinCliOptions(commandOption.Value);
+                    }
+                }
             }
         }
 

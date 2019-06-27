@@ -4,6 +4,7 @@ using Regi.Extensions;
 using Regi.Models;
 using Regi.Utilities;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -142,11 +143,17 @@ namespace Regi.Services
                                     requiredProjectsWithPorts.Add(requiredProject.Port.Value, requiredProject);
                                 }
 
-                                dependencyQueue.Queue(requiredProject.Serial || options.NoParallel, () =>
+                                bool noParallel = requiredProject.Serial || options.NoParallel;
+                                dependencyQueue.Queue(noParallel, () =>
                                 {
                                     requiredProject.Process = InternalStartProject(requiredProject, requiredOptions);
 
                                     project.RequiredProjects.Add(requiredProject);
+
+                                    if (noParallel && requiredProject.Port.HasValue)
+                                    {
+                                        dependencyQueue.WaitOnPort(requiredProject.Port.Value, requiredProject);
+                                    }
                                 });;
                             }
                         }
@@ -226,11 +233,17 @@ namespace Regi.Services
             if (projects.Count <= 0)
                 _console.WriteEmphasizedLine("No projects found");
 
+            var installedProjects = new ConcurrentBag<string>();
+
             foreach (var project in projects)
             {
-                _queueService.QueueParallel(() =>
+                _queueService.Queue(project.Serial || options.NoParallel, () =>
                 {
-                    project.Process = InternalInstallProject(project, options, config);
+                    if (!installedProjects.Contains(project.Name))
+                    {
+                        installedProjects.Add(project.Name);
+                        project.Process = InternalInstallProject(project, options, config);
+                    }
 
                     if (project.Requires.Any())
                     {
@@ -249,12 +262,14 @@ namespace Regi.Services
 
                             if (requiredProject != null)
                             {
-                                if (projects.Any(p => p.Name == requiredProject.Name))
+                                if (installedProjects.Contains(requiredProject.Name) || projects.Any(p => p.Name == requiredProject.Name))
                                 {
                                     continue;
                                 }
 
-                                dependencyQueue.QueueSerial(() =>
+                                installedProjects.Add(requiredProject.Name);
+
+                                dependencyQueue.Queue(requiredProject.Serial || options.NoParallel, () =>
                                 {
                                     requiredProject.Process = InternalInstallProject(requiredProject, requiredOptions, config);
 
@@ -283,7 +298,7 @@ namespace Regi.Services
                 .GetFrameworkService(project.Framework)
                 .InstallProject(project, options);
 
-            _console.WriteEmphasizedLine($"Finished installing project {project.Name}");
+            _console.WriteSuccessLine($"Finished installing project {project.Name}");
 
             return process;
         }

@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Regi.Commands
@@ -30,7 +31,7 @@ namespace Regi.Commands
 
             while (_options.RunIndefinitely)
             {
-                Task.Delay(200);
+                Thread.Sleep(200);
             }
 
             return Projects.Count;

@@ -43,31 +43,8 @@ namespace Regi.Utilities
             }
             else
             {
-                RunProcessAndWaitForExit("pkill", $"-P {processId}", timeout); // TODO: find better method of doing this on unix
-                //var children = new HashSet<int>();
-                //GetAllChildIdsUnix(processId, children, timeout);
-                //foreach (var childId in children)
-                //{
-                //    KillProcessUnix(childId, timeout);
-                //}
-                //KillProcessUnix(processId, timeout);
+                RunProcessAndWaitForExit("kill", $"-TERM {processId}", timeout);
             }
-        }
-
-        private static void GetAllChildIdsUnix(int parentId, ISet<int> children, TimeSpan timeout)
-        {
-            var exitCode = RunProcessAndWaitForExit(
-                "pgrep",
-                $"-P {parentId}",
-                timeout);
-        }
-
-        private static void KillProcessUnix(int processId, TimeSpan timeout)
-        {
-            RunProcessAndWaitForExit(
-                "kill",
-                $"-TERM {processId}",
-                timeout);
         }
 
         private static int RunProcessAndWaitForExit(string fileName, string arguments, TimeSpan timeout)
