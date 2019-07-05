@@ -57,22 +57,22 @@ namespace Regi.Test.Services
             _configurationServiceMock.Setup(m => m.GetConfiguration())
                 .Returns(configuration)
                 .Verifiable();
-            _dotnetServiceMock.Setup(m => m.StartProject(It.IsAny<Project>(), It.IsAny<RegiOptions>()))
-                .Returns<Project, RegiOptions>((p, o) => new AppProcess(new Process(), AppTask.Start, AppStatus.Success, p?.Port))
+            _dotnetServiceMock.Setup(m => m.StartProject(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<RegiOptions>()))
+                .Returns<Project, string, RegiOptions>((p, s, o) => new AppProcess(new Process(), AppTask.Start, AppStatus.Success, p?.Port))
                 .Verifiable();
-            _nodeServiceMock.Setup(m => m.StartProject(It.IsAny<Project>(), It.IsAny<RegiOptions>()))
-                .Returns<Project, RegiOptions>((p, o) => new AppProcess(new Process(), AppTask.Start, AppStatus.Success, p?.Port))
+            _nodeServiceMock.Setup(m => m.StartProject(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<RegiOptions>()))
+                .Returns<Project, string, RegiOptions>((p, s, o) => new AppProcess(new Process(), AppTask.Start, AppStatus.Success, p?.Port))
                 .Verifiable();
 
             var processes = _runnerService.Start(TestOptions.Create());
 
             Assert.Equal(configuration.Apps.Count, processes.Count);
             Assert.Single(processes, p => p.Port == 9080);
-            Assert.Equal(processes.Count(p => p.Port.HasValue), _queueService.ActivePorts.Count);
+            Assert.Equal(processes.Count(p => p.Port.HasValue), _queueService.ActivePorts.Distinct().Count());
 
             _configurationServiceMock.Verify();
-            _dotnetServiceMock.Verify(m => m.StartProject(It.IsAny<Project>(), It.IsAny<RegiOptions>()), Times.Exactly(configuration.Apps.Count(a => a.Framework == ProjectFramework.Dotnet)));
-            _nodeServiceMock.Verify(m => m.StartProject(It.IsAny<Project>(), It.IsAny<RegiOptions>()), Times.Exactly(configuration.Apps.Count(a => a.Framework == ProjectFramework.Node)));
+            _dotnetServiceMock.Verify(m => m.StartProject(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<RegiOptions>()), Times.Exactly(configuration.Apps.Count(a => a.Framework == ProjectFramework.Dotnet)));
+            _nodeServiceMock.Verify(m => m.StartProject(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<RegiOptions>()), Times.Exactly(configuration.Apps.Count(a => a.Framework == ProjectFramework.Node)));
         }
 
         [Fact]
@@ -81,11 +81,11 @@ namespace Regi.Test.Services
             _configurationServiceMock.Setup(m => m.GetConfiguration())
                 .Returns(SampleProjects.ConfigurationGood)
                 .Verifiable();
-            _dotnetServiceMock.Setup(m => m.StartProject(It.IsAny<Project>(), It.IsAny<RegiOptions>()))
-                .Returns<Project, RegiOptions>((p, o) => new AppProcess(new Process(), AppTask.Start, AppStatus.Success, p?.Port))
+            _dotnetServiceMock.Setup(m => m.StartProject(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<RegiOptions>()))
+                .Returns<Project, string, RegiOptions>((p, s, o) => new AppProcess(new Process(), AppTask.Start, AppStatus.Success, p?.Port))
                 .Verifiable();
-            _nodeServiceMock.Setup(m => m.StartProject(It.IsAny<Project>(), It.IsAny<RegiOptions>()))
-                .Returns<Project, RegiOptions>((p, b) => new AppProcess(new Process(), AppTask.Start, AppStatus.Success, p?.Port))
+            _nodeServiceMock.Setup(m => m.StartProject(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<RegiOptions>()))
+                .Returns<Project, string, RegiOptions>((p, s, b) => new AppProcess(new Process(), AppTask.Start, AppStatus.Success, p?.Port))
                 .Verifiable();
 
             var projects = _runnerService.Start(TestOptions.Create());
@@ -95,6 +95,7 @@ namespace Regi.Test.Services
                 if (p.Port.HasValue)
                 {
                     _dotnetServiceMock.Verify(m => m.StartProject(It.IsAny<Project>(),
+                         It.IsAny<string>(),
                         It.Is<RegiOptions>(o => o.VariableList.ContainsKey($"{p.Name}_PORT".ToUnderscoreCase()) &&
                         o.VariableList.ContainsKey($"{p.Name}_URL".ToUnderscoreCase()))));
 
@@ -109,11 +110,11 @@ namespace Regi.Test.Services
             _configurationServiceMock.Setup(m => m.GetConfiguration())
                 .Returns(SampleProjects.ConfigurationGood)
                 .Verifiable();
-            _dotnetServiceMock.Setup(m => m.StartProject(It.IsAny<Project>(), It.IsAny<RegiOptions>()))
-                .Returns<Project, RegiOptions>((p, o) => new AppProcess(new Process(), AppTask.Start, AppStatus.Success, p?.Port))
+            _dotnetServiceMock.Setup(m => m.StartProject(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<RegiOptions>()))
+                .Returns<Project, string, RegiOptions>((p, s, o) => new AppProcess(new Process(), AppTask.Start, AppStatus.Success, p?.Port))
                 .Verifiable();
-            _nodeServiceMock.Setup(m => m.StartProject(It.IsAny<Project>(), It.IsAny<RegiOptions>()))
-                .Returns<Project, RegiOptions>((p, b) => new AppProcess(new Process(), AppTask.Start, AppStatus.Success, p?.Port))
+            _nodeServiceMock.Setup(m => m.StartProject(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<RegiOptions>()))
+                .Returns<Project, string, RegiOptions>((p, s, b) => new AppProcess(new Process(), AppTask.Start, AppStatus.Success, p?.Port))
                 .Verifiable();
 
             var projects = _runnerService.Start(TestOptions.Create());
@@ -122,14 +123,45 @@ namespace Regi.Test.Services
             Assert.Single(_queueService.SerialActions);
         }
 
+        [Theory]
+        [InlineData(1)]
+        [InlineData(2)]
+        [InlineData(3)]
+        public void Start_creates_an_AppProcess_for_every_path_in_Project(int pathCount)
+        {
+            var appCollection = SampleProjects.AppCollection;
+            appCollection.Paths = appCollection.Paths.Take(pathCount).ToList();
+            var config = new StartupConfig
+            {
+                Apps = new List<Project> { appCollection }
+            };
+
+            _configurationServiceMock.Setup(m => m.GetConfiguration())
+                .Returns(config)
+                .Verifiable();
+            _dotnetServiceMock.Setup(m => m.StartProject(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<RegiOptions>()))
+                .Returns<Project, string, RegiOptions>((p, path, o) => new AppProcess(new Process(), AppTask.Start, AppStatus.Success, p?.Port))
+                .Verifiable();
+            _nodeServiceMock.Setup(m => m.StartProject(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<RegiOptions>()))
+                .Throws(new System.Exception("Should not be called"));
+
+            var projects = _runnerService.Start(TestOptions.Create());
+
+            Assert.Equal(pathCount, _queueService.ParallelActions.Count);
+            _dotnetServiceMock.Verify(m => m.StartProject(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<RegiOptions>()), Times.Exactly(pathCount));
+
+            var project = Assert.Single(projects);
+            Assert.Equal(pathCount, project.Processes.Count);
+        }
+
         [Fact]
         public void Test_returns_a_project_for_every_test_in_startup_config()
         {
             _configurationServiceMock.Setup(m => m.GetConfiguration())
                 .Returns(SampleProjects.ConfigurationGood)
                 .Verifiable();
-            _dotnetServiceMock.Setup(m => m.TestProject(It.IsAny<Project>(), It.IsAny<RegiOptions>()))
-                .Returns<Project, RegiOptions>((p, o) => new AppProcess(new Process(), AppTask.Start, AppStatus.Success, p?.Port))
+            _dotnetServiceMock.Setup(m => m.TestProject(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<RegiOptions>()))
+                .Returns<Project, string, RegiOptions>((p, d, o) => new AppProcess(new Process(), AppTask.Start, AppStatus.Success, p?.Port))
                 .Verifiable();
 
             var processes = _runnerService.Test(TestOptions.Create());
@@ -150,34 +182,38 @@ namespace Regi.Test.Services
             _frameworkServiceProviderMock.Setup(m => m.CreateScopedQueueService())
                 .Returns(dependencyQueueService)
                 .Verifiable();
-            _nodeServiceMock.Setup(m => m.TestProject(It.IsAny<Project>(), It.IsAny<RegiOptions>()))
+            _nodeServiceMock.Setup(m => m.TestProject(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<RegiOptions>()))
                 .Returns(new AppProcess(new Process(), AppTask.Test, AppStatus.Success))
                 .Verifiable();
-            _nodeServiceMock.Setup(m => m.StartProject(It.IsAny<Project>(), It.IsAny<RegiOptions>()))
+            _nodeServiceMock.Setup(m => m.StartProject(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<RegiOptions>()))
                 .Returns(new AppProcess(new Process(), AppTask.Start, AppStatus.Success))
                 .Verifiable();
-            _dotnetServiceMock.Setup(m => m.TestProject(It.IsAny<Project>(), It.IsAny<RegiOptions>()))
+            _dotnetServiceMock.Setup(m => m.TestProject(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<RegiOptions>()))
                 .Returns(new AppProcess(new Process(), AppTask.Test, AppStatus.Success))
                 .Verifiable();
-            _dotnetServiceMock.Setup(m => m.StartProject(It.IsAny<Project>(), It.IsAny<RegiOptions>()))
+            _dotnetServiceMock.Setup(m => m.StartProject(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<RegiOptions>()))
                 .Returns(new AppProcess(new Process(), AppTask.Start, AppStatus.Success))
                 .Verifiable();
 
-            var processes = _runnerService.Test(TestOptions.Create());
+            var projects = _runnerService.Test(TestOptions.Create());
 
-            Assert.Equal(SampleProjects.ConfigurationDefault.Tests.Count, processes.Count);
-            Assert.Empty(_queueService.ActivePorts);
-            foreach (var project in processes)
+            Assert.Equal(SampleProjects.ConfigurationDefault.Tests.Count, projects.Count);
+
+            foreach (var project in projects)
             {
-                Assert.Equal(AppTask.Test, project.Process.Task);
+                var process = Assert.Single(project.Processes);
+                Assert.Equal(AppTask.Test, process.Task);
                 if (project.Requires?.Count > 0)
                 {
                     Assert.Equal(project.Requires.Count, project.RequiredProjects.Count);
                     foreach (var requirement in project.Requires)
                     {
                         var requiredApp = Assert.Single(project.RequiredProjects, p => p.Name == requirement);
-                        Assert.Equal(AppTask.Start, requiredApp.Process.Task);
-                        Assert.Contains(requiredApp.Port.Value, dependencyQueueService.ActivePorts);
+                        var requiredAppProcess = Assert.Single(requiredApp.Processes);
+                        Assert.Equal(AppTask.Start, requiredAppProcess.Task);
+
+                        Assert.Contains(requiredApp.Port.Value, _queueService.ActivePorts); // Waited on during InternalStart
+                        Assert.Contains(requiredApp.Port.Value, dependencyQueueService.ActivePorts); // Waited on after starting Test dependencies
                     }
                 }
             }
@@ -188,42 +224,47 @@ namespace Regi.Test.Services
         }
 
         [Fact]
-        public void Test_also_waits_on_required_dependency_sequentially_when_no_parallel_is_specified()
+        public void Test_requirements_with_multiple_paths_will_start_every_path()
         {
-            TestQueueService dependencyQueueService = new TestQueueService(_console);
+            var dependencyQueue = new TestQueueService(_console);
+            var appCollection = SampleProjects.AppCollection;
+            var testProject = SampleProjects.XunitTests;
+            testProject.Requires = new List<string> { SampleProjects.AppCollection.Name };
 
             _configurationServiceMock.Setup(m => m.GetConfiguration())
-                .Returns(SampleProjects.ConfigurationDefault)
+                .Returns(new StartupConfig
+                {
+                    Apps = new List<Project> { appCollection },
+                    Tests = new List<Project> { testProject }
+                })
                 .Verifiable();
-            _frameworkServiceProviderMock.Setup(m => m.CreateScopedQueueService())
-                .Returns(dependencyQueueService)
-                .Verifiable();
-            _nodeServiceMock.Setup(m => m.TestProject(It.IsAny<Project>(), It.IsAny<RegiOptions>()))
+            _dotnetServiceMock.Setup(m => m.TestProject(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<RegiOptions>()))
                 .Returns(new AppProcess(new Process(), AppTask.Test, AppStatus.Success))
                 .Verifiable();
-            _nodeServiceMock.Setup(m => m.StartProject(It.IsAny<Project>(), It.IsAny<RegiOptions>()))
-                .Returns(new AppProcess(new Process(), AppTask.Start, AppStatus.Success))
-                .Verifiable();
-            _dotnetServiceMock.Setup(m => m.StartProject(It.IsAny<Project>(), It.IsAny<RegiOptions>()))
-                .Returns(new AppProcess(new Process(), AppTask.Start, AppStatus.Success))
+            _frameworkServiceProviderMock.Setup(m => m.CreateScopedQueueService())
+                .Returns(dependencyQueue)
                 .Verifiable();
 
-            var options = TestOptions.Create();
+            foreach (var path in SampleProjects.AppCollection.Paths)
+            {
+                _dotnetServiceMock.Setup(m => m.StartProject(appCollection, It.IsAny<string>(), It.IsAny<RegiOptions>()))
+                    .Returns(new AppProcess(new Process(), AppTask.Start, AppStatus.Running))
+                    .Verifiable();
+            }
 
-            options.Name = SampleProjects.IntegrationTests.Name;
-            options.NoParallel = true;
+            var projects = _runnerService.Test(TestOptions.Create());
 
-            var processes = _runnerService.Test(options);
-
-            int requiredCount = SampleProjects.IntegrationTests.Requires.Count;
-            Assert.Equal(requiredCount, dependencyQueueService.WaitOnPortCallCount);
-            Assert.Equal(1, dependencyQueueService.WaitOnPortListCallCount);
-            Assert.Equal(requiredCount * 2, dependencyQueueService.ActivePorts.Count);
+            var actualTestProject = Assert.Single(projects);
+            Assert.Same(testProject, actualTestProject);
+            Assert.Single(testProject.Processes);
+            var requiredProject = Assert.Single(testProject.RequiredProjects);
+            Assert.Same(appCollection, requiredProject);
+            Assert.Equal(3, requiredProject.Processes.Count);
+            Assert.Equal(3, dependencyQueue.ParallelActions.Count);
 
             _configurationServiceMock.Verify();
-            _frameworkServiceProviderMock.Verify();
-            _nodeServiceMock.Verify();
             _dotnetServiceMock.Verify();
+            _frameworkServiceProviderMock.Verify();
         }
 
         [Theory]
@@ -234,7 +275,7 @@ namespace Regi.Test.Services
             _configurationServiceMock.Setup(m => m.GetConfiguration())
                 .Returns(SampleProjects.ConfigurationGood)
                 .Verifiable();
-            _dotnetServiceMock.Setup(m => m.TestProject(It.IsAny<Project>(), It.IsAny<RegiOptions>()))
+            _dotnetServiceMock.Setup(m => m.TestProject(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<RegiOptions>()))
                 .Returns(new AppProcess(new Process(), AppTask.Test, AppStatus.Success))
                 .Verifiable();
 
@@ -251,8 +292,8 @@ namespace Regi.Test.Services
             _configurationServiceMock.Setup(m => m.GetConfiguration())
                 .Returns(SampleProjects.ConfigurationGood)
                 .Verifiable();
-            _dotnetServiceMock.Setup(m => m.TestProject(It.IsAny<Project>(), It.IsAny<RegiOptions>()))
-                .Returns<Project, RegiOptions>((p, o) => new AppProcess(new Process(), AppTask.Start, AppStatus.Success, p?.Port))
+            _dotnetServiceMock.Setup(m => m.TestProject(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<RegiOptions>()))
+                .Returns<Project, string, RegiOptions>((p, d, o) => new AppProcess(new Process(), AppTask.Start, AppStatus.Success, p?.Port))
                 .Verifiable();
 
             var processes = _runnerService.Test(TestOptions.Create());
@@ -267,10 +308,10 @@ namespace Regi.Test.Services
             _configurationServiceMock.Setup(m => m.GetConfiguration())
                 .Returns(SampleProjects.ConfigurationGood)
                 .Verifiable();
-            _dotnetServiceMock.Setup(m => m.InstallProject(It.IsAny<Project>(), It.IsAny<RegiOptions>()))
+            _dotnetServiceMock.Setup(m => m.InstallProject(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<RegiOptions>()))
                 .Returns(new AppProcess(new Process(), AppTask.Install, AppStatus.Success))
                 .Verifiable();
-            _nodeServiceMock.Setup(m => m.InstallProject(It.IsAny<Project>(), It.IsAny<RegiOptions>()))
+            _nodeServiceMock.Setup(m => m.InstallProject(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<RegiOptions>()))
                 .Returns(new AppProcess(new Process(), AppTask.Install, AppStatus.Success))
                 .Verifiable();
 
@@ -289,10 +330,10 @@ namespace Regi.Test.Services
             _configurationServiceMock.Setup(m => m.GetConfiguration())
                 .Returns(SampleProjects.ConfigurationGood)
                 .Verifiable();
-            _dotnetServiceMock.Setup(m => m.InstallProject(It.IsAny<Project>(), It.IsAny<RegiOptions>()))
+            _dotnetServiceMock.Setup(m => m.InstallProject(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<RegiOptions>()))
                 .Returns(new AppProcess(new Process(), AppTask.Install, AppStatus.Success))
                 .Verifiable();
-            _nodeServiceMock.Setup(m => m.InstallProject(It.IsAny<Project>(), It.IsAny<RegiOptions>()))
+            _nodeServiceMock.Setup(m => m.InstallProject(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<RegiOptions>()))
                 .Returns(new AppProcess(new Process(), AppTask.Install, AppStatus.Success))
                 .Verifiable();
 
@@ -316,10 +357,10 @@ namespace Regi.Test.Services
             _frameworkServiceProviderMock.Setup(m => m.CreateScopedQueueService())
                 .Returns(dependencyQueueService)
                 .Verifiable();
-            _dotnetServiceMock.Setup(m => m.InstallProject(It.IsAny<Project>(), It.IsAny<RegiOptions>()))
+            _dotnetServiceMock.Setup(m => m.InstallProject(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<RegiOptions>()))
                 .Returns(new AppProcess(new Process(), AppTask.Install, AppStatus.Success))
                 .Verifiable();
-            _nodeServiceMock.Setup(m => m.InstallProject(It.IsAny<Project>(), It.IsAny<RegiOptions>()))
+            _nodeServiceMock.Setup(m => m.InstallProject(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<RegiOptions>()))
                 .Returns(new AppProcess(new Process(), AppTask.Install, AppStatus.Success))
                 .Verifiable();
 
@@ -334,12 +375,13 @@ namespace Regi.Test.Services
             Assert.Equal(2, integrationTestProject.RequiredProjects.Count);
 
             var dotnetApp = Assert.Single(integrationTestProject.RequiredProjects, p => p.Framework == ProjectFramework.Dotnet);
-            Assert.Equal(AppTask.Install, dotnetApp.Process.Task);
-            Assert.Equal(AppStatus.Success, dotnetApp.Process.Status);
+            //Assert.Equal(AppTask.Install, dotnetApp.Process.Task);
+            //Assert.Equal(AppStatus.Success, dotnetApp.Process.Status);
+            Assert.Equal(AppStatus.Success, dotnetApp.OutputStatus);
 
             var nodeApp = Assert.Single(integrationTestProject.RequiredProjects, p => p.Framework == ProjectFramework.Node);
-            Assert.Equal(AppTask.Install, nodeApp.Process.Task);
-            Assert.Equal(AppStatus.Success, nodeApp.Process.Status);
+            //Assert.Equal(AppTask.Install, nodeApp.Process.Task);
+            Assert.Equal(AppStatus.Success, nodeApp.OutputStatus);
 
             _configurationServiceMock.Verify();
             _frameworkServiceProviderMock.Verify();
@@ -358,10 +400,10 @@ namespace Regi.Test.Services
             _frameworkServiceProviderMock.Setup(m => m.CreateScopedQueueService())
                 .Returns(dependencyQueueService)
                 .Verifiable();
-            _dotnetServiceMock.Setup(m => m.InstallProject(It.IsAny<Project>(), It.IsAny<RegiOptions>()))
+            _dotnetServiceMock.Setup(m => m.InstallProject(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<RegiOptions>()))
                 .Returns(new AppProcess(new Process(), AppTask.Install, AppStatus.Success))
                 .Verifiable();
-            _nodeServiceMock.Setup(m => m.InstallProject(It.IsAny<Project>(), It.IsAny<RegiOptions>()))
+            _nodeServiceMock.Setup(m => m.InstallProject(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<RegiOptions>()))
                 .Returns(new AppProcess(new Process(), AppTask.Install, AppStatus.Success))
                 .Verifiable();
 
@@ -411,7 +453,7 @@ namespace Regi.Test.Services
             _frameworkServiceProviderMock.Setup(m => m.CreateScopedQueueService())
                 .Returns(() => new TestQueueService(_console))
                 .Verifiable();
-            _dotnetServiceMock.Setup(m => m.InstallProject(It.IsAny<Project>(), It.IsAny<RegiOptions>()))
+            _dotnetServiceMock.Setup(m => m.InstallProject(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<RegiOptions>()))
                 .Returns(() => new AppProcess(new Process(), AppTask.Install, AppStatus.Success))
                 .Verifiable();
 
@@ -422,7 +464,7 @@ namespace Regi.Test.Services
 
             _configurationServiceMock.Verify();
             _frameworkServiceProviderMock.Verify();
-            _dotnetServiceMock.Verify(m => m.InstallProject(It.IsAny<Project>(), It.IsAny<RegiOptions>()), Times.Exactly(3));
+            _dotnetServiceMock.Verify(m => m.InstallProject(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<RegiOptions>()), Times.Exactly(3));
         }
 
         [Fact]

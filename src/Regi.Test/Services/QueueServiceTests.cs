@@ -140,7 +140,7 @@ namespace Regi.Test.Services
                 })
                 .Verifiable();
 
-            _service.WaitOnPorts(new List<Project> { new Project { Name = "TestProject", Port = port } });
+            _service.ConfirmProjectsStarted(new List<Project> { new Project { Name = "TestProject", Port = port } });
 
             _networkingServiceMock.Verify(m => m.IsPortListening(port), Times.Exactly(expectedCallCount));
             Assert.Equal(callCount, expectedCallCount);

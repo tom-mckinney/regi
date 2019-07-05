@@ -11,7 +11,7 @@ namespace Regi.Test
         public static Project Frontend => new Project
         {
             Name = "Frontend",
-            Path = PathHelper.SampleDirectoryPath("Frontend/package.json"),
+            Path = PathHelper.SampleDirectoryPath("Frontend"),
             Framework = ProjectFramework.Node,
             Port = 3000,
             Commands = new Dictionary<string, string>
@@ -35,7 +35,7 @@ namespace Regi.Test
         public static Project XunitTests => new Project
         {
             Name = "SampleSuccessfulTests",
-            Path = PathHelper.SampleDirectoryPath("SampleSuccessfulTests/SampleSuccessfulTests.csproj"),
+            Path = PathHelper.SampleDirectoryPath("SampleSuccessfulTests"),
             Framework = ProjectFramework.Dotnet,
             Type = ProjectType.Unit
         };
@@ -60,6 +60,32 @@ namespace Regi.Test
             {
                 { "HEADLESS", bool.FalseString }
             }
+        };
+
+        public static Project AppCollection => new Project
+        {
+            Name = "AppCollection",
+            Paths = new List<string>
+            {
+                PathHelper.SampleDirectoryPath("AppCollection/App1/App1.csproj"),
+                PathHelper.SampleDirectoryPath("AppCollection/App2/App2.csproj"),
+                PathHelper.SampleDirectoryPath("AppCollection/App3/App3.csproj"),
+            },
+            Framework = ProjectFramework.Dotnet,
+            Type = ProjectType.Web
+        };
+
+        public static Project TestCollection => new Project
+        {
+            Name = "TestCollection",
+            Paths = new List<string>
+            {
+                PathHelper.SampleDirectoryPath("TestCollection/Test1/Test1.csproj"),
+                PathHelper.SampleDirectoryPath("TestCollection/Test2/Test2.csproj"),
+                PathHelper.SampleDirectoryPath("TestCollection/Test3/Test3.csproj"),
+            },
+            Framework = ProjectFramework.Dotnet,
+            Type = ProjectType.Unit
         };
 
         public static Project SimpleNodeApp => new Project

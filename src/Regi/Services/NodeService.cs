@@ -58,9 +58,9 @@ namespace Regi.Services
 
         protected override string FormatAdditionalArguments(string[] args) => $"-- {string.Join(' ', args)}";
 
-        public override AppProcess InstallProject(Project project, RegiOptions options)
+        public override AppProcess InstallProject(Project project, string appDirectoryPath, RegiOptions options)
         {
-            AppProcess install = CreateProcess(FrameworkCommands.Node.Install, project, options);
+            AppProcess install = CreateProcess(FrameworkCommands.Node.Install, project, appDirectoryPath, options);
 
             install.Start();
 
@@ -69,18 +69,18 @@ namespace Regi.Services
             return install;
         }
 
-        public override AppProcess StartProject(Project project, RegiOptions options)
+        public override AppProcess StartProject(Project project, string appDirectoryPath, RegiOptions options)
         {
-            AppProcess start = CreateProcess(FrameworkCommands.Node.Start, project, options);
+            AppProcess start = CreateProcess(FrameworkCommands.Node.Start, project, appDirectoryPath, options);
 
             start.Start();
 
             return start;
         }
 
-        public override AppProcess TestProject(Project project, RegiOptions options)
+        public override AppProcess TestProject(Project project, string appDirectoryPath, RegiOptions options)
         {
-            AppProcess test = CreateProcess(FrameworkCommands.Node.Test, project, options);
+            AppProcess test = CreateProcess(FrameworkCommands.Node.Test, project, appDirectoryPath, options);
 
             test.Start();
 
@@ -89,7 +89,7 @@ namespace Regi.Services
             return test;
         }
 
-        public override AppProcess BuildProject(Project project, RegiOptions options)
+        public override AppProcess BuildProject(Project project, string appDirectoryPath, RegiOptions options)
         {
             _console.WriteWarningLine($"Did not build {project.Name}. No implementation for {nameof(BuildProject)} in {nameof(NodeService)}.");
 

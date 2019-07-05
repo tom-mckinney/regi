@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Regi.Utilities;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 
@@ -19,6 +20,8 @@ namespace Regi.Models
         public string Name { get; set; } = "Unnamed Project";
 
         public string Path { get; set; }
+
+        public IList<string> Paths { get; set; }
 
         public ProjectType Type { get; set; }
 
@@ -41,10 +44,48 @@ namespace Regi.Models
         public bool RawOutput { get; set; }
 
         [JsonIgnore]
-        public AppProcess Process { get; set; }
+        public ConcurrentBag<AppProcess> Processes { get; set; } = new ConcurrentBag<AppProcess>();
 
         [JsonIgnore]
-        public IList<Project> RequiredProjects { get; set; } = new List<Project>();
+        public ConcurrentBag<Project> RequiredProjects { get; set; } = new ConcurrentBag<Project>();
+
+        [JsonIgnore]
+        public AppStatus OutputStatus
+        {
+            get
+            {
+                int successCount = 0;
+                int failCount = 0;
+                int runningCount = 0;
+
+                foreach (var process in Processes)
+                {
+                    switch (process.Status)
+                    {
+                        case AppStatus.Success:
+                            successCount++;
+                            break;
+                        case AppStatus.Failure:
+                            failCount++;
+                            break;
+                        case AppStatus.Running:
+                            runningCount++;
+                            break;
+                        default:
+                            break;
+                    }
+                }
+
+                if (successCount == Processes.Count)
+                    return AppStatus.Success;
+                else if (failCount > 0)
+                    return AppStatus.Failure;
+                else if (runningCount > 0)
+                    return AppStatus.Running;
+                else
+                    return AppStatus.Unknown;
+            }
+        }
 
         public void TryAddSource(RegiOptions options, StartupConfig config)
         {
@@ -63,23 +104,29 @@ namespace Regi.Models
             }
         }
 
-        private FileInfo _file;
-        public FileInfo File
+        private IList<string> _appDirectoryPaths;
+        public IList<string> AppDirectoryPaths
         {
             get
             {
-                if (_file == null)
+                if (_appDirectoryPaths == null)
                 {
-                    string absolutePath = System.IO.Path.GetFullPath(Path, DirectoryUtility.TargetDirectoryPath);
-                    _file = new FileInfo(absolutePath);
+                    _appDirectoryPaths = new List<string>();
 
-                    if (!_file.Exists)
+                    if (Paths?.Count > 0)
                     {
-                        throw new FileNotFoundException($"Could not find project, {_file.FullName}");
+                        foreach (var path in Paths)
+                        {
+                            _appDirectoryPaths.Add(DirectoryUtility.GetDirectoryPath(path));
+                        }
+                    }
+                    else if (!string.IsNullOrWhiteSpace(Path))
+                    {
+                        _appDirectoryPaths.Add(DirectoryUtility.GetDirectoryPath(Path));
                     }
                 }
 
-                return _file;
+                return _appDirectoryPaths;
             }
         }
     }

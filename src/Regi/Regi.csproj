@@ -4,7 +4,7 @@
     <ToolCommandName>regi</ToolCommandName>
     <TargetFramework>netcoreapp2.2</TargetFramework>
     <OutputType>Exe</OutputType>
-    <VersionPrefix>0.0.17</VersionPrefix>
+    <VersionPrefix>0.0.18</VersionPrefix>
     <IsPackable>true</IsPackable>
     <PackAsTool>true</PackAsTool>
     <!-- Optional performance setting - enables tiered JIT compilation-->

@@ -24,6 +24,48 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="_SampleProjects_\AppCollection\App1\Program.cs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="_SampleProjects_\AppCollection\App1\Startup.cs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="_SampleProjects_\AppCollection\App2\Program.cs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="_SampleProjects_\AppCollection\App2\Startup.cs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="_SampleProjects_\AppCollection\App3\Program.cs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="_SampleProjects_\AppCollection\App3\Startup.cs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="_SampleProjects_\AppCollection\App1\App1.csproj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="_SampleProjects_\AppCollection\App2\App2.csproj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="_SampleProjects_\AppCollection\App3\App3.csproj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="_SampleProjects_\TestCollection\Test1\UnitTest1.cs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="_SampleProjects_\TestCollection\Test2\UnitTest2.cs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="_SampleProjects_\TestCollection\Test3\UnitTest3.cs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Include="_SampleProjects_\ConfigurationBad\regi.json" />
     <Content Include="_SampleProjects_\ConfigurationComplete\regi.json" />
     <Content Include="_SampleProjects_\ConfigurationGood\regi.json" />
@@ -105,6 +147,15 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="_SampleProjects_\SampleSuccessfulTests\UnitTest1.cs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="_SampleProjects_\TestCollection\Test1\Test1.csproj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="_SampleProjects_\TestCollection\Test2\Test2.csproj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="_SampleProjects_\TestCollection\Test3\Test3.csproj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

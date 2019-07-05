@@ -1,15 +1,8 @@
 ﻿using McMaster.Extensions.CommandLineUtils;
-using Regi.Extensions;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Net;
 using System.Net.NetworkInformation;
-using System.Runtime.InteropServices;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace Regi.Services
 {
@@ -23,8 +16,6 @@ namespace Regi.Services
         private readonly IConsole _console;
         private readonly IRuntimeInfo _runtime;
         private readonly IPGlobalProperties _ipGlobalProperties;
-
-        private object _lock = new object();
 
         public NetworkingService(IConsole console, IRuntimeInfo runtime)
         {

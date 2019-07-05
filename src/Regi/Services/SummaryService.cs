@@ -33,15 +33,15 @@ namespace Regi.Services
 
             foreach (var project in projects)
             {
-                switch (project.Process.Status)
+                switch (project.OutputStatus)
                 {
-                    case AppStatus.Failure:
-                        PrintBadge("FAIL", ConsoleColor.Red);
-                        failCount++;
-                        break;
                     case AppStatus.Success:
                         PrintBadge("PASS", ConsoleColor.Green);
                         successCount++;
+                        break;
+                    case AppStatus.Failure:
+                        PrintBadge("FAIL", ConsoleColor.Red);
+                        failCount++;
                         break;
                     case AppStatus.Running:
                         PrintBadge("RUNNING", ConsoleColor.DarkYellow);
@@ -56,6 +56,32 @@ namespace Regi.Services
                 }
 
                 _console.WriteLine($" {project.Name}");
+
+                if (project.Processes?.Count > 1)
+                {
+                    foreach (var process in project.Processes)
+                    {
+                        switch (process.Status)
+                        {
+                            case AppStatus.Failure:
+                                PrintBadge("FAIL", ConsoleColor.Red, 1);
+                                break;
+                            case AppStatus.Success:
+                                PrintBadge("PASS", ConsoleColor.Green, 1);
+                                break;
+                            case AppStatus.Running:
+                                PrintBadge("RUNNING", ConsoleColor.DarkYellow, 1);
+                                break;
+                            case AppStatus.Unknown:
+                                PrintBadge("UNKNOWN", ConsoleColor.Gray, 1);
+                                break;
+                            default:
+                                throw new InvalidOperationException("Recieved project with invalid status.");
+                        }
+
+                        _console.WriteLine($" {process.Path}");
+                    }                    
+                }
             }
 
             List<(string Message, ConsoleColor Color)> outputDescriptors = new List<(string Message, ConsoleColor Color)>();
@@ -114,8 +140,13 @@ namespace Regi.Services
             _console.WriteDefaultLine($"Elapsed time: {elapsed.ToHumanFriendlyString()}", ConsoleLineStyle.LineAfter);
         }
 
-        private void PrintBadge(string status, ConsoleColor backgroundColor)
+        private void PrintBadge(string status, ConsoleColor backgroundColor, int? indentCount = null)
         {
+            if (indentCount.HasValue)
+            {
+                _console.Write(new string(' ', indentCount.Value * 2));
+            }
+
             _console.BackgroundColor = backgroundColor;
             _console.ForegroundColor = ConsoleColor.Black;
 

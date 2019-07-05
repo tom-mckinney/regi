@@ -30,6 +30,8 @@ namespace Regi.Models
 
         public int? Port { get; set; }
 
+        public string Path { get; set; }
+
         public DateTimeOffset? StartTime
         {
             get

@@ -22,10 +22,10 @@ namespace Regi.Services
         void RunParallel();
         void RunSerial();
 
-        void WaitOnPorts(IList<Project> projects);
-        void WaitOnPorts(IDictionary<int, Project> projects);
+        void ConfirmProjectsStarted(IList<Project> projects);
+        void ConfirmProjectsStarted(IDictionary<int, Project> projects);
 
-        void WaitOnPort(int port, Project project);
+        void WaitOnPort(Project project);
     }
 
     public class QueueService : IQueueService
@@ -85,49 +85,51 @@ namespace Regi.Services
             }
         }
 
-        public virtual void WaitOnPort(int port, Project project)
+        public virtual void WaitOnPort(Project project)
         {
-            bool isListening = false;
-
-            while (!isListening)
+            if (project.Port.HasValue)
             {
-                isListening = _networkingService.IsPortListening(port);
+                bool isListening = false;
 
-                Thread.Sleep(100);
+                while (!isListening)
+                {
+                    Thread.Sleep(200);
+
+                    isListening = _networkingService.IsPortListening(project.Port.Value);
+                }
+
+                _console.WriteSuccessLine($"{project.Name} is now listening on port {project.Port}");
             }
-
-            _console.WriteSuccessLine($"{project.Name} is now listening on port {port}");
         }
 
-        public void WaitOnPorts(IList<Project> projects)
+        public void ConfirmProjectsStarted(IList<Project> projects)
         {
             IDictionary<int, Project> projectsWithPorts = projects
                 .Where(p => p.Port.HasValue)
                 .ToDictionary(p => p.Port.Value);
 
-            WaitOnPorts(projectsWithPorts);
+            ConfirmProjectsStarted(projectsWithPorts);
         }
 
-        public virtual void WaitOnPorts(IDictionary<int, Project> projects)
+        public virtual void ConfirmProjectsStarted(IDictionary<int, Project> projects)
         {
-            string projectPluralization = projects.Count > 1 ? "projects" : "project";
-            _console.WriteEmphasizedLine($"Waiting for {projectPluralization} to start: {string.Join(", ", projects.Select(p => $"{p.Value.Name} ({p.Key})"))}");
+            string projectPluralization = projects.Count == 1 ? "project" : "projects";
+            string hasPluralization = projects.Count == 1 ? "has" : "have";
+            _console.WriteDefaultLine($"Confirming {projectPluralization} {hasPluralization} started: {string.Join(", ", projects.Select(p => $"{p.Value.Name} ({p.Key})"))}");
 
             IList<int> activePorts = new List<int>();
 
             while (projects.Count > activePorts.Count)
             {
+                Thread.Sleep(200);
+
                 foreach (var port in projects.Keys.Where(k => !activePorts.Contains(k)))
                 {
                     if (_networkingService.IsPortListening(port))
                     {
                         activePorts.Add(port);
-
-                        _console.WriteSuccessLine($"{projects[port].Name} is now listening on port {port}");
                     }
                 }
-
-                Thread.Sleep(100);
             }
 
             _console.WriteSuccessLine("All projects started", ConsoleLineStyle.LineBeforeAndAfter);

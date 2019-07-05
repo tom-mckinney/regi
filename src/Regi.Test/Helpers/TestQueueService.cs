@@ -20,7 +20,7 @@ namespace Regi.Test.Helpers
         public int WaitOnPortListCallCount = 0;
         public int WaitOnPortCallCount = 0;
 
-        public override void WaitOnPorts(IDictionary<int, Project> projects)
+        public override void ConfirmProjectsStarted(IDictionary<int, Project> projects)
         {
             WaitOnPortListCallCount++;
 
@@ -30,11 +30,14 @@ namespace Regi.Test.Helpers
             }
         }
 
-        public override void WaitOnPort(int port, Project project)
+        public override void WaitOnPort(Project project)
         {
-            WaitOnPortCallCount++;
+            if (project.Port.HasValue)
+            {
+                WaitOnPortCallCount++;
 
-            ActivePorts.Add(port);
+                ActivePorts.Add(project.Port.Value);
+            }
         }
     }
 }

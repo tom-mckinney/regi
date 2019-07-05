@@ -57,9 +57,9 @@ namespace Regi.Services
             }
         }
 
-        public override AppProcess InstallProject(Project project, RegiOptions options)
+        public override AppProcess InstallProject(Project project, string appDirectoryPath, RegiOptions options)
         {
-            AppProcess install = CreateProcess(FrameworkCommands.Dotnet.Restore, project, options);
+            AppProcess install = CreateProcess(FrameworkCommands.Dotnet.Restore, project, appDirectoryPath, options);
 
             install.Start();
 
@@ -68,18 +68,18 @@ namespace Regi.Services
             return install;
         }
 
-        public override AppProcess StartProject(Project project, RegiOptions options)
+        public override AppProcess StartProject(Project project, string appDirectoryPath, RegiOptions options)
         {
-            AppProcess start = CreateProcess(FrameworkCommands.Dotnet.Run, project, options);
+            AppProcess start = CreateProcess(FrameworkCommands.Dotnet.Run, project, appDirectoryPath, options);
 
             start.Start();
 
             return start;
         }
 
-        public override AppProcess TestProject(Project project, RegiOptions options)
+        public override AppProcess TestProject(Project project, string appDirectoryPath, RegiOptions options)
         {
-            AppProcess test = CreateProcess(FrameworkCommands.Dotnet.Test, project, options);
+            AppProcess test = CreateProcess(FrameworkCommands.Dotnet.Test, project, appDirectoryPath, options);
 
             test.Start();
 
@@ -88,9 +88,9 @@ namespace Regi.Services
             return test;
         }
 
-        public override AppProcess BuildProject(Project project, RegiOptions options)
+        public override AppProcess BuildProject(Project project, string appDirectoryPath, RegiOptions options)
         {
-            AppProcess build = CreateProcess(FrameworkCommands.Dotnet.Build, project, options);
+            AppProcess build = CreateProcess(FrameworkCommands.Dotnet.Build, project, appDirectoryPath, options);
 
             build.Start();
 

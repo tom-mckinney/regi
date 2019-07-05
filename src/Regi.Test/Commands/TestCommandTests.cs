@@ -3,6 +3,7 @@ using Regi.Commands;
 using Regi.Models;
 using Regi.Services;
 using Regi.Test.Helpers;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Xunit;
@@ -40,11 +41,11 @@ namespace Regi.Test.Commands
                 {
                     new Project
                     {
-                        Process = new AppProcess(new Process(), AppTask.Test, AppStatus.Success)
+                        Processes = new ConcurrentBag<AppProcess> { new AppProcess(new Process(), AppTask.Test, AppStatus.Success) }
                     },
                     new Project
                     {
-                        Process = new AppProcess(new Process(), AppTask.Test, AppStatus.Success)
+                        Processes = new ConcurrentBag<AppProcess> { new AppProcess(new Process(), AppTask.Test, AppStatus.Success) }
                     }
                 })
                 .Verifiable();
@@ -66,11 +67,11 @@ namespace Regi.Test.Commands
                 {
                     new Project
                     {
-                        Process = new AppProcess(new Process(), AppTask.Test, AppStatus.Failure)
+                        Processes = new ConcurrentBag<AppProcess> { new AppProcess(new Process(), AppTask.Test, AppStatus.Failure) }
                     },
                     new Project
                     {
-                        Process = new AppProcess(new Process(), AppTask.Test, AppStatus.Success)
+                        Processes = new ConcurrentBag<AppProcess> { new AppProcess(new Process(), AppTask.Test, AppStatus.Success) }
                     }
                 })
                 .Verifiable();
@@ -90,23 +91,25 @@ namespace Regi.Test.Commands
         [InlineData(null)]
         public void Will_only_run_tests_with_matching_type_if_specified(ProjectType? type)
         {
-            _runnerServiceMock.Setup(m => m.Test(It.IsAny<RegiOptions>()))
+            _runnerServiceMock.Setup(m => m.Test(It.Is<RegiOptions>(o => o.Type == type)))
                 .Returns(new List<Project>
                 {
                     new Project
                     {
-                        Process = new AppProcess(new Process(), AppTask.Test, AppStatus.Success)
+                        Processes = new ConcurrentBag<AppProcess> { new AppProcess(new Process(), AppTask.Test, AppStatus.Success) }
                     }
                 })
                 .Verifiable();
 
             TestCommand command = CreateCommand();
 
+            command.Type = type;
+
             int testProjectCount = command.OnExecute();
 
             Assert.Equal(0, testProjectCount);
 
-            _runnerServiceMock.VerifyAll();
+            _runnerServiceMock.Verify();
         }
     }
 }

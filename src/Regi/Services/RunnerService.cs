@@ -65,31 +65,36 @@ namespace Regi.Services
 
             foreach (var project in projects)
             {
-                _queueService.Queue(project.Serial || options.NoParallel, () =>
+                foreach (var path in project.AppDirectoryPaths)
                 {
-                    InternalStartProject(project, options);
-                });
+                    _queueService.Queue(project.Serial || options.NoParallel, () =>
+                    {
+                        InternalStartProject(project, path, options);
+                    });
+                }
             }
 
             _queueService.RunAll();
 
-            _queueService.WaitOnPorts(projects);
+            _queueService.ConfirmProjectsStarted(projects);
 
             return projects;
         }
 
-        private AppProcess InternalStartProject(Project project, RegiOptions options)
+        private AppProcess InternalStartProject(Project project, string applicationDirectoryPath, RegiOptions options)
         {
-            _console.WriteEmphasizedLine($"Starting project {project.Name} ({project.File.DirectoryName})");
+            _console.WriteEmphasizedLine($"Starting project {project.Name} ({applicationDirectoryPath})");
 
             AppProcess process = _frameworkServiceProvider
                 .GetFrameworkService(project.Framework)
-                .StartProject(project, options);
+                .StartProject(project, applicationDirectoryPath, options);
 
             if (process != null)
             {
-                project.Process = process;
+                project.Processes.Add(process);
             }
+
+            _queueService.WaitOnPort(project);
 
             return process;
         }
@@ -97,8 +102,6 @@ namespace Regi.Services
         public IList<Project> Test(RegiOptions options)
         {
             StartupConfig config = _configurationService.GetConfiguration();
-
-            IList<AppProcess> processes = new List<AppProcess>();
 
             options.VariableList = new VariableList(config);
 
@@ -109,76 +112,80 @@ namespace Regi.Services
 
             foreach (var project in projects)
             {
-                _queueService.Queue(project.Serial || options.NoParallel, () =>
+                foreach (var path in project.AppDirectoryPaths)
                 {
-                    _console.WriteEmphasizedLine($"Starting tests for project {project.Name}");
-
-                    if (project.Requires.Any())
+                    _queueService.Queue(project.Serial || options.NoParallel, () =>
                     {
-                        string dependencyPluralization = project.Requires.Count > 1 ? "dependencies" : "dependency";
-                        _console.WriteDefaultLine($"Starting {project.Requires.Count} {dependencyPluralization} for project {project.Name}");
+                        _console.WriteEmphasizedLine($"Starting tests for project {project.Name}");
 
-                        RegiOptions requiredOptions = options.CloneForRequiredProjects();
-
-                        IQueueService dependencyQueue = _frameworkServiceProvider.CreateScopedQueueService();
-
-                        IDictionary<int, Project> requiredProjectsWithPorts = new Dictionary<int, Project>();
-
-                        foreach (var r in project.Requires)
+                        if (project.Requires.Any())
                         {
-                            Project requiredProject = config.Apps
-                                .Concat(config.Services)
-                                .FirstOrDefault(p => p.Name.Contains(r, StringComparison.InvariantCultureIgnoreCase));
+                            string dependencyPluralization = project.Requires.Count > 1 ? "dependencies" : "dependency";
+                            _console.WriteDefaultLine($"Starting {project.Requires.Count} {dependencyPluralization} for project {project.Name}");
 
-                            if (requiredProject != null)
+                            RegiOptions requiredOptions = options.CloneForRequiredProjects();
+
+                            IQueueService dependencyQueue = _frameworkServiceProvider.CreateScopedQueueService();
+
+                            IDictionary<int, Project> requiredProjectsWithPorts = new Dictionary<int, Project>();
+
+                            foreach (var r in project.Requires)
                             {
-                                if (requiredProject.Port.HasValue)
+                                Project requiredProject = config.Apps
+                                    .Concat(config.Services)
+                                    .FirstOrDefault(p => p.Name.Contains(r, StringComparison.InvariantCultureIgnoreCase));
+
+                                if (requiredProject != null)
                                 {
-                                    if (_networkingService.IsPortListening(requiredProject.Port.Value))
+                                    if (requiredProject.Port.HasValue)
                                     {
-                                        _console.WriteLine($"Project {requiredProject.Name} is already listening on port {requiredProject.Port}");
-                                        continue;
+                                        if (_networkingService.IsPortListening(requiredProject.Port.Value))
+                                        {
+                                            _console.WriteLine($"Project {requiredProject.Name} is already listening on port {requiredProject.Port}");
+                                            continue;
+                                        }
+
+                                        requiredProjectsWithPorts.Add(requiredProject.Port.Value, requiredProject);
                                     }
 
-                                    requiredProjectsWithPorts.Add(requiredProject.Port.Value, requiredProject);
-                                }
-
-                                bool noParallel = requiredProject.Serial || options.NoParallel;
-                                dependencyQueue.Queue(noParallel, () =>
-                                {
-                                    requiredProject.Process = InternalStartProject(requiredProject, requiredOptions);
+                                    bool noParallel = requiredProject.Serial || options.NoParallel;
 
                                     project.RequiredProjects.Add(requiredProject);
 
-                                    if (noParallel && requiredProject.Port.HasValue)
+                                    foreach (var requiredPath in requiredProject.AppDirectoryPaths)
                                     {
-                                        dependencyQueue.WaitOnPort(requiredProject.Port.Value, requiredProject);
+                                        dependencyQueue.Queue(noParallel, () =>
+                                        {
+                                            InternalStartProject(requiredProject, requiredPath, requiredOptions);
+                                        });
                                     }
-                                });;
+                                }
                             }
+
+                            dependencyQueue.RunAll();
+                            dependencyQueue.ConfirmProjectsStarted(requiredProjectsWithPorts);
                         }
 
-                        dependencyQueue.RunAll();
-                        dependencyQueue.WaitOnPorts(requiredProjectsWithPorts);
-                    }
+                        var testProcess = _frameworkServiceProvider
+                            .GetFrameworkService(project.Framework)
+                            .TestProject(project, path, options);
 
-                    project.Process = _frameworkServiceProvider
-                        .GetFrameworkService(project.Framework)
-                        .TestProject(project, options);
+                        project.Processes.Add(testProcess);
 
-                    if (project.Process != null)
-                    {
-                        string outputMessage = $"Finished tests for project {project.Name} with status {project.Process?.Status}";
-                        if (project.Process?.Status == AppStatus.Success)
-                            _console.WriteSuccessLine(outputMessage, ConsoleLineStyle.LineBeforeAndAfter);
-                        else
-                            _console.WriteErrorLine(outputMessage, ConsoleLineStyle.LineBeforeAndAfter);
+                        if (project.Processes?.Count > 0)
+                        {
+                            var outputStatus = project.OutputStatus;
+                            string outputMessage = $"Finished tests for project {project.Name} with status {outputStatus}";
 
-                        processes.Add(project.Process);
+                            if (outputStatus == AppStatus.Success)
+                                _console.WriteSuccessLine(outputMessage, ConsoleLineStyle.LineBeforeAndAfter);
+                            else
+                                _console.WriteErrorLine(outputMessage, ConsoleLineStyle.LineBeforeAndAfter);
 
-                        _projectManager.KillAllProcesses(project.RequiredProjects, options);
-                    }
-                });
+                            _projectManager.KillAllProcesses(project.RequiredProjects, options);
+                        }
+                    });
+                }
             }
 
             _queueService.RunAll();
@@ -201,19 +208,26 @@ namespace Regi.Services
 
             foreach (var project in projects)
             {
-                _queueService.QueueSerial(() =>
+                foreach (var path in project.AppDirectoryPaths)
                 {
-                    _console.WriteEmphasizedLine($"Starting build for project {project.Name}");
-
-                    project.Process = _frameworkServiceProvider
-                        .GetFrameworkService(project.Framework)
-                        .BuildProject(project, options);
-
-                    if (project.Process?.Status == AppStatus.Success)
+                    _queueService.QueueSerial(() =>
                     {
-                        _console.WriteSuccessLine($"Finished build for project {project.Name}", ConsoleLineStyle.LineAfter);
-                    }
-                });
+                        _console.WriteEmphasizedLine($"Starting build for project {project.Name}");
+
+                        project.Processes.Add(_frameworkServiceProvider
+                            .GetFrameworkService(project.Framework)
+                            .BuildProject(project, path, options));
+
+                        if (project.OutputStatus == AppStatus.Success)
+                        {
+                            _console.WriteSuccessLine($"Finished build for project {project.Name}", ConsoleLineStyle.LineAfter);
+                        }
+                        else
+                        {
+                            _console.WriteErrorLine($"Build for project {project.Name} exited with status {project.OutputStatus}", ConsoleLineStyle.LineAfter);
+                        }
+                    });
+                }
             }
 
             _queueService.RunAll();
@@ -234,50 +248,56 @@ namespace Regi.Services
 
             foreach (var project in projects)
             {
-                _queueService.Queue(project.Serial || options.NoParallel, () =>
+                foreach (var path in project.AppDirectoryPaths)
                 {
-                    if (!installedProjects.Contains(project.Name))
+                    _queueService.Queue(project.Serial || options.NoParallel, () =>
                     {
-                        installedProjects.Add(project.Name);
-                        project.Process = InternalInstallProject(project, options, config);
-                    }
-
-                    if (project.Requires.Any())
-                    {
-                        string dependencyPluralization = project.Requires.Count > 1 ? "dependencies" : "dependency";
-                        _console.WriteDefaultLine($"Starting install for {project.Requires.Count} {dependencyPluralization} for project {project.Name}");
-
-                        RegiOptions requiredOptions = options.CloneForRequiredProjects();
-
-                        IQueueService dependencyQueue = _frameworkServiceProvider.CreateScopedQueueService();
-
-                        foreach (var r in project.Requires)
+                        if (!installedProjects.Contains(project.Name))
                         {
-                            Project requiredProject = config.Apps
-                                .Concat(config.Services)
-                                .FirstOrDefault(p => p.Name.Contains(r, StringComparison.InvariantCultureIgnoreCase));
-
-                            if (requiredProject != null)
-                            {
-                                if (installedProjects.Contains(requiredProject.Name) || projects.Any(p => p.Name == requiredProject.Name))
-                                {
-                                    continue;
-                                }
-
-                                installedProjects.Add(requiredProject.Name);
-
-                                dependencyQueue.Queue(requiredProject.Serial || options.NoParallel, () =>
-                                {
-                                    requiredProject.Process = InternalInstallProject(requiredProject, requiredOptions, config);
-
-                                    project.RequiredProjects.Add(requiredProject);
-                                });
-                            }
+                            installedProjects.Add(project.Name);
+                            InternalInstallProject(project, path, options, config); // TODO: Loop through all paths
                         }
 
-                        dependencyQueue.RunAll();
-                    }
-                });
+                        if (project.Requires.Any())
+                        {
+                            string dependencyPluralization = project.Requires.Count > 1 ? "dependencies" : "dependency";
+                            _console.WriteDefaultLine($"Starting install for {project.Requires.Count} {dependencyPluralization} for project {project.Name}");
+
+                            RegiOptions requiredOptions = options.CloneForRequiredProjects();
+
+                            IQueueService dependencyQueue = _frameworkServiceProvider.CreateScopedQueueService();
+
+                            foreach (var r in project.Requires)
+                            {
+                                Project requiredProject = config.Apps
+                                    .Concat(config.Services)
+                                    .FirstOrDefault(p => p.Name.Contains(r, StringComparison.InvariantCultureIgnoreCase));
+
+                                if (requiredProject != null)
+                                {
+                                    if (installedProjects.Contains(requiredProject.Name) || projects.Any(p => p.Name == requiredProject.Name))
+                                    {
+                                        continue;
+                                    }
+
+                                    installedProjects.Add(requiredProject.Name);
+
+                                    foreach (var requiredPath in requiredProject.AppDirectoryPaths)
+                                    {
+                                        dependencyQueue.Queue(requiredProject.Serial || options.NoParallel, () =>
+                                        {
+                                            InternalInstallProject(requiredProject, requiredPath, requiredOptions, config);
+
+                                            project.RequiredProjects.Add(requiredProject);
+                                        });
+                                    }
+                                }
+                            }
+
+                            dependencyQueue.RunAll();
+                        }
+                    });
+                }
             }
 
             _queueService.RunAll();
@@ -285,7 +305,7 @@ namespace Regi.Services
             return projects;
         }
 
-        private AppProcess InternalInstallProject(Project project, RegiOptions options, StartupConfig config)
+        private AppProcess InternalInstallProject(Project project, string appDirectoryPath, RegiOptions options, StartupConfig config)
         {
             _console.WriteEmphasizedLine($"Starting install for project {project.Name}");
 
@@ -293,9 +313,11 @@ namespace Regi.Services
 
             var process = _frameworkServiceProvider
                 .GetFrameworkService(project.Framework)
-                .InstallProject(project, options);
+                .InstallProject(project, appDirectoryPath, options);
 
             _console.WriteSuccessLine($"Finished installing project {project.Name}");
+
+            project.Processes.Add(process);
 
             return process;
         }

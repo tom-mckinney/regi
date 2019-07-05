@@ -6,6 +6,7 @@ using Regi.Test.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Text;
 using Xunit;
 using Xunit.Abstractions;
@@ -108,7 +109,7 @@ namespace Regi.Test.Services
 
             options.Verbose = isVerbose;
 
-            var process = service.CreateProcess(FrameworkCommands.Dotnet.Run, SampleProjects.Backend, options, "dotnet");
+            var process = service.CreateProcess(FrameworkCommands.Dotnet.Run, SampleProjects.Backend, SampleProjects.Backend.AppDirectoryPaths[0], options, "dotnet");
 
             Assert.True(process.ErrorDataHandled);
         }
@@ -124,7 +125,7 @@ namespace Regi.Test.Services
 
             options.Verbose = isVerbose;
 
-            var process = service.CreateProcess(FrameworkCommands.Dotnet.Run, SampleProjects.Backend, options, "dotnet");
+            var process = service.CreateProcess(FrameworkCommands.Dotnet.Run, SampleProjects.Backend, SampleProjects.Backend.AppDirectoryPaths[0], options, "dotnet");
 
             if (isVerbose)
                 Assert.True(process.OutputDataHandled);
@@ -143,7 +144,7 @@ namespace Regi.Test.Services
 
             options.ShowOutput = new string[] { SampleProjects.Backend.Name };            
 
-            var process = service.CreateProcess(FrameworkCommands.Dotnet.Run, SampleProjects.Backend, options, "dotnet");
+            var process = service.CreateProcess(FrameworkCommands.Dotnet.Run, SampleProjects.Backend, SampleProjects.Backend.AppDirectoryPaths[0], options, "dotnet");
 
             Assert.True(process.OutputDataHandled);
         }
@@ -159,7 +160,7 @@ namespace Regi.Test.Services
 
             options.ShowOutput = new string[] { "Wumbo" };
 
-            var process = service.CreateProcess(FrameworkCommands.Dotnet.Run, SampleProjects.Backend, options, "dotnet");
+            var process = service.CreateProcess(FrameworkCommands.Dotnet.Run, SampleProjects.Backend, SampleProjects.Backend.AppDirectoryPaths[0], options, "dotnet");
 
             Assert.False(process.OutputDataHandled);
         }
@@ -180,22 +181,22 @@ namespace Regi.Test.Services
             return $"***{string.Join(' ', args)}***";
         }
 
-        public override AppProcess InstallProject(Project project, RegiOptions options)
+        public override AppProcess InstallProject(Project project, string appDirectoryPath, RegiOptions options)
         {
             throw new NotImplementedException();
         }
 
-        public override AppProcess StartProject(Project project, RegiOptions options)
+        public override AppProcess StartProject(Project project, string appDirectoryPath, RegiOptions options)
         {
             throw new NotImplementedException();
         }
 
-        public override AppProcess TestProject(Project project, RegiOptions options)
+        public override AppProcess TestProject(Project project, string appDirectoryPath, RegiOptions options)
         {
             throw new NotImplementedException();
         }
 
-        public override AppProcess BuildProject(Project project, RegiOptions options)
+        public override AppProcess BuildProject(Project project, string appDirectoryPath, RegiOptions options)
         {
             throw new NotImplementedException();
         }

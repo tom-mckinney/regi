@@ -1,14 +1,9 @@
 ﻿using McMaster.Extensions.CommandLineUtils;
 using Moq;
-using Regi.Extensions;
 using Regi.Models;
 using Regi.Services;
 using Regi.Test.Helpers;
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using Xunit;
 using Xunit.Abstractions;
@@ -33,7 +28,7 @@ namespace Regi.Test.Services
         [Fact]
         public void RunProject_starts_and_returns_process()
         {
-            AppProcess app = _service.StartProject(_application, TestOptions.Create());
+            AppProcess app = _service.StartProject(_application, _application.AppDirectoryPaths[0], TestOptions.Create());
 
             Thread.Sleep(1000);
 
@@ -48,7 +43,7 @@ namespace Regi.Test.Services
 
             _application.Port = expectedPort;
 
-            AppProcess app = _service.StartProject(_application, TestOptions.Create());
+            AppProcess app = _service.StartProject(_application, _application.AppDirectoryPaths[0], TestOptions.Create());
 
             Thread.Sleep(1000);
 
@@ -67,7 +62,7 @@ namespace Regi.Test.Services
                 { "foo", "bar" }
             };
 
-            AppProcess appProcess = _service.StartProject(_application, TestOptions.Create(varList));
+            AppProcess appProcess = _service.StartProject(_application, _application.AppDirectoryPaths[0], TestOptions.Create(varList));
 
             Thread.Sleep(500);
 
@@ -84,7 +79,7 @@ namespace Regi.Test.Services
         [InlineData("failing", AppStatus.Failure)]
         public void TestProject_will_return_test_for_path_pattern_and_expected_status(string pathPattern, AppStatus expectedStatus)
         {
-            AppProcess test = _service.TestProject(_application, TestOptions.Create(null, pathPattern));
+            AppProcess test = _service.TestProject(_application, _application.AppDirectoryPaths[0], TestOptions.Create(null, pathPattern));
 
             Assert.Equal(AppTask.Test, test.Task);
             Assert.Equal(expectedStatus, test.Status);
@@ -100,7 +95,7 @@ namespace Regi.Test.Services
                 { "foo", "bar" }
             };
 
-            AppProcess testProcess = _service.TestProject(_application, TestOptions.Create(varList));
+            AppProcess testProcess = _service.TestProject(_application, _application.AppDirectoryPaths[0], TestOptions.Create(varList));
 
             Assert.Equal(AppTask.Test, testProcess.Task);
             Assert.Equal(AppStatus.Failure, testProcess.Status);
@@ -112,7 +107,7 @@ namespace Regi.Test.Services
         [Fact]
         public void InstallProject_returns_process()
         {
-            AppProcess process = _service.InstallProject(_application, TestOptions.Create());
+            AppProcess process = _service.InstallProject(_application, _application.AppDirectoryPaths[0], TestOptions.Create());
 
             Assert.Equal(AppTask.Install, process.Task);
             Assert.Equal(AppStatus.Success, process.Status);
@@ -125,7 +120,7 @@ namespace Regi.Test.Services
             string source = "https://artifactory.org/npm";
             _application.Source = source;
 
-            AppProcess process = _service.InstallProject(_application, TestOptions.Create());
+            AppProcess process = _service.InstallProject(_application, _application.AppDirectoryPaths[0], TestOptions.Create());
 
             Assert.Contains($"--registry {source}", process.Process.StartInfo.Arguments);
         }

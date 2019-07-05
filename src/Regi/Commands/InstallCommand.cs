@@ -25,7 +25,7 @@ namespace Regi.Commands
             Projects = _runnerService.Install(Options);
 
             return Projects
-                .Where(p => p.Process?.Status == AppStatus.Failure)
+                .Where(p => p.Processes?.Any(x => x.Status == AppStatus.Failure) == true)
                 .Count();
         }
     }

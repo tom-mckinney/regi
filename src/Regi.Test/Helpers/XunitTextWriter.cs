@@ -31,10 +31,20 @@ namespace Regi.Test.Helpers
                 {
                     string output = _sb?.ToString();
 
-                    _testOutput.WriteLine(output);
-                    _callback?.Invoke(output);
+                    try
+                    {
+                        _testOutput.WriteLine(output);
+                    }
+                    catch
+                    {
+                        // Do not handle
+                    }
+                    finally
+                    {
+                        _callback?.Invoke(output);
 
-                    _sb.Clear();
+                        _sb.Clear();
+                    }
                 }
                 else
                 {

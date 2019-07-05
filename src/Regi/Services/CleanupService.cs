@@ -72,9 +72,9 @@ namespace Regi.Services
 
         private void LogOutputs(string stdout, string stderr, RegiOptions options)
         {
-            if (console != null)
+            if (console != null && options.Verbose)
             {
-                if (!string.IsNullOrWhiteSpace(stdout) && options.Verbose)
+                if (!string.IsNullOrWhiteSpace(stdout))
                 {
                     console.WriteDefaultLine(stdout);
                 }

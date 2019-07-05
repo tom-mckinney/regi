@@ -4,6 +4,7 @@ using Regi.Commands;
 using Regi.Models;
 using Regi.Services;
 using Regi.Test.Helpers;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Xunit;
@@ -37,11 +38,11 @@ namespace Regi.Test.Commands
                 {
                     new Project
                     {
-                        Process = new AppProcess(new Process(), AppTask.Start, AppStatus.Success)
+                        Processes = new ConcurrentBag<AppProcess> { new AppProcess(new Process(), AppTask.Start, AppStatus.Success) }
                     },
                     new Project
                     {
-                        Process = new AppProcess(new Process(), AppTask.Start, AppStatus.Success)
+                        Processes = new ConcurrentBag<AppProcess> { new AppProcess(new Process(), AppTask.Start, AppStatus.Success) }
                     }
                 })
                 .Verifiable();

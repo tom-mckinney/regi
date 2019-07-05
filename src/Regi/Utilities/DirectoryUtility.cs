@@ -22,5 +22,23 @@ namespace Regi.Utilities
         {
             _targetDirectoryPath = path;
         }
+
+        public static string GetDirectoryPath(string path)
+        {
+            string absolutePath = Path.GetFullPath(path, TargetDirectoryPath);
+
+            if (Directory.Exists(absolutePath))
+            {
+                return absolutePath;
+            }
+            else if (File.Exists(absolutePath))
+            {
+                return Path.GetDirectoryName(absolutePath);
+            }
+            else
+            {
+                throw new DirectoryNotFoundException($"Could not find project, {absolutePath}");
+            }
+        }
     }
 }

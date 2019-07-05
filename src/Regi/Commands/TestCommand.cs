@@ -1,4 +1,5 @@
 ﻿using McMaster.Extensions.CommandLineUtils;
+using Regi.Extensions;
 using Regi.Models;
 using Regi.Services;
 using System.Diagnostics;
@@ -32,8 +33,10 @@ namespace Regi.Commands
 
             foreach (var p in Projects)
             {
-
-                p.Process.Kill(); // TODO: handle this globally in project manager
+                foreach (var process in p.Processes)
+                {
+                    process.Kill(); // TODO: handle this globally in project manager
+                }
             }
 
             return output.FailCount;

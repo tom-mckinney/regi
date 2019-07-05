@@ -17,7 +17,7 @@ namespace Regi
         IList<Project> FilterAndTrackProjects(RegiOptions options, params IEnumerable<Project>[] projectCollections);
         IList<Project> FilterByOptions(IEnumerable<Project> projects, RegiOptions options);
         void KillAllProcesses(RegiOptions options);
-        void KillAllProcesses(IList<Project> projects, RegiOptions options);
+        void KillAllProcesses(IEnumerable<Project> projects, RegiOptions options);
     }
 
     public class ProjectManager : IProjectManager
@@ -81,18 +81,22 @@ namespace Regi
             KillAllProcesses(Projects, options);
         }
 
-        public void KillAllProcesses(IList<Project> projects, RegiOptions options)
+        public void KillAllProcesses(IEnumerable<Project> projects, RegiOptions options)
         {
-            string processPluralization = projects.Count > 1 ? "processes" : "process";
-            _console.WriteDefaultLine($"Killing {projects.Count} {processPluralization}");
-
-            if (projects?.Count > 0)
+            int projectCount = projects.Count();
+            if (projectCount > 0)
             {
+                string projectPluralization = projectCount == 1 ? "project" : "projects";
+                _console.WriteDefaultLine($"Killing processes for {projects.Count()} {projectPluralization}");
+
                 foreach (var project in projects)
                 {
-                    if (project.Process != null)
+                    if (project.Processes?.Count > 0)
                     {
-                        _cleanupService.KillProcessTree(project.Process, options);
+                        foreach (var process in project.Processes)
+                        {
+                            _cleanupService.KillProcessTree(process, options);
+                        }
                     }
                 }
             }

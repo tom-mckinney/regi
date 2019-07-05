@@ -57,7 +57,7 @@ namespace Regi.Test.Services
         [Fact]
         public void TestProject_on_success_returns_status()
         {
-            AppProcess unitTest = _service.TestProject(_successfulTests, TestOptions.Create());
+            AppProcess unitTest = _service.TestProject(_successfulTests, _successfulTests.AppDirectoryPaths[0], TestOptions.Create());
 
             Assert.Equal(AppTask.Test, unitTest.Task);
             Assert.Equal(AppStatus.Success, unitTest.Status);
@@ -66,7 +66,7 @@ namespace Regi.Test.Services
         [Fact]
         public void TestProject_verbose_on_success_prints_all_output()
         {
-            AppProcess unitTest = _service.TestProject(_successfulTests, TestOptions.Create());
+            AppProcess unitTest = _service.TestProject(_successfulTests, _successfulTests.AppDirectoryPaths[0], TestOptions.Create());
 
             Assert.Equal(AppTask.Test, unitTest.Task);
             Assert.Equal(AppStatus.Success, unitTest.Status);
@@ -76,7 +76,7 @@ namespace Regi.Test.Services
         [Fact]
         public void TestProject_on_failure_prints_only_exception_info()
         {
-            AppProcess unitTest = _service.TestProject(_failedTests, TestOptions.Create());
+            AppProcess unitTest = _service.TestProject(_failedTests, _failedTests.AppDirectoryPaths[0], TestOptions.Create());
 
             Assert.Equal(AppTask.Test, unitTest.Task);
             Assert.Equal(AppStatus.Failure, unitTest.Status);
@@ -86,7 +86,7 @@ namespace Regi.Test.Services
         [Fact]
         public void TestProject_verbose_on_failure_prints_all_output()
         {
-            AppProcess unitTest = _service.TestProject(_failedTests, TestOptions.Create());
+            AppProcess unitTest = _service.TestProject(_failedTests, _failedTests.AppDirectoryPaths[0], TestOptions.Create());
 
             Assert.Equal(AppTask.Test, unitTest.Task);
             Assert.Equal(AppStatus.Failure, unitTest.Status);
@@ -98,7 +98,7 @@ namespace Regi.Test.Services
         {
             lock (_lock)
             {
-                AppProcess process = _service.StartProject(_application, TestOptions.Create());
+                AppProcess process = _service.StartProject(_application, _application.AppDirectoryPaths[0], TestOptions.Create());
 
                 Assert.Equal(AppStatus.Running, process.Status);
 
@@ -111,7 +111,7 @@ namespace Regi.Test.Services
         [Fact]
         public void RunProject_returns_failure_status_on_thrown_exception()
         {
-            AppProcess process = _service.StartProject(_applicationError, TestOptions.Create());
+            AppProcess process = _service.StartProject(_applicationError, _applicationError.AppDirectoryPaths[0], TestOptions.Create());
 
             process.WaitForExit();
 
@@ -123,7 +123,7 @@ namespace Regi.Test.Services
         {
             RegiOptions optionsWithoutVerbose = new RegiOptions { Verbose = false, KillProcessesOnExit = false };
 
-            AppProcess process = _service.StartProject(_application, optionsWithoutVerbose);
+            AppProcess process = _service.StartProject(_application, _application.AppDirectoryPaths[0], optionsWithoutVerbose);
 
             process.WaitForExit();
 
@@ -135,7 +135,7 @@ namespace Regi.Test.Services
         [Fact]
         public void RunProject_verbose_starts_and_prints_all_output()
         {
-            AppProcess process = _service.StartProject(_application, TestOptions.Create());
+            AppProcess process = _service.StartProject(_application, _application.AppDirectoryPaths[0], TestOptions.Create());
 
             process.WaitForExit();
 
@@ -147,7 +147,7 @@ namespace Regi.Test.Services
         [Fact]
         public void RunProject_long_starts_and_prints_nothing()
         {
-            AppProcess appProcess = _service.StartProject(_applicationLong, TestOptions.Create());
+            AppProcess appProcess = _service.StartProject(_applicationLong, _applicationLong.AppDirectoryPaths[0], TestOptions.Create());
 
             Thread.Sleep(1000);
 
@@ -161,7 +161,7 @@ namespace Regi.Test.Services
         {
             _applicationLong.Port = 8080;
 
-            AppProcess appProcess = _service.StartProject(_applicationLong, TestOptions.Create());
+            AppProcess appProcess = _service.StartProject(_applicationLong, _applicationLong.AppDirectoryPaths[0], TestOptions.Create());
 
             Thread.Sleep(1000);
 
@@ -180,7 +180,7 @@ namespace Regi.Test.Services
                 { "foo", "bar" }
             };
 
-            AppProcess appProcess = _service.StartProject(_applicationLong, TestOptions.Create(varList));
+            AppProcess appProcess = _service.StartProject(_applicationLong, _applicationLong.AppDirectoryPaths[0], TestOptions.Create(varList));
 
             Thread.Sleep(500);
 
@@ -196,7 +196,7 @@ namespace Regi.Test.Services
         {
             _application.Source = "http://artifactory.org/nuget";
 
-            AppProcess process = _service.InstallProject(_application, TestOptions.Create());
+            AppProcess process = _service.InstallProject(_application, _application.AppDirectoryPaths[0], TestOptions.Create());
 
             Assert.Equal(AppTask.Install, process.Task);
             Assert.Equal(AppStatus.Success, process.Status);
@@ -209,7 +209,7 @@ namespace Regi.Test.Services
             string source = "http://artifactory.org/nuget";
             _application.Source = source;
 
-            AppProcess process = _service.InstallProject(_application, TestOptions.Create());
+            AppProcess process = _service.InstallProject(_application, _application.AppDirectoryPaths[0], TestOptions.Create());
 
             Assert.Contains($"--source {source}", process.Process.StartInfo.Arguments);
         }
