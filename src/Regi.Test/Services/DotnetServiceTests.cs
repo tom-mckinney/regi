@@ -154,8 +154,6 @@ namespace Regi.Test.Services
             Assert.Equal(AppTask.Start, appProcess.Task);
             Assert.Equal(AppStatus.Running, appProcess.Status);
             Assert.Null(appProcess.Port);
-
-            appProcess.Kill();
         }
 
         [Fact]
@@ -170,8 +168,6 @@ namespace Regi.Test.Services
             Assert.Equal(AppTask.Start, appProcess.Task);
             Assert.Equal(AppStatus.Running, appProcess.Status);
             Assert.Equal(8080, appProcess.Port);
-
-            appProcess.Kill();
         }
 
         [Fact]
@@ -193,8 +189,6 @@ namespace Regi.Test.Services
             Assert.Equal(8080, appProcess.Port);
             Assert.True(appProcess.Process.StartInfo.EnvironmentVariables.ContainsKey("foo"), "Environment variable \"foo\" has not been set.");
             Assert.Equal("bar", appProcess.Process.StartInfo.EnvironmentVariables["foo"]);
-
-            appProcess.Kill();
         }
 
         [Fact]
@@ -207,8 +201,6 @@ namespace Regi.Test.Services
             Assert.Equal(AppTask.Install, process.Task);
             Assert.Equal(AppStatus.Success, process.Status);
             Assert.Null(process.Port);
-
-            process.Kill();
         }
 
         [Fact]
@@ -220,8 +212,6 @@ namespace Regi.Test.Services
             AppProcess process = _service.InstallProject(_application, TestOptions.Create());
 
             Assert.Contains($"--source {source}", process.Process.StartInfo.Arguments);
-
-            process.Kill();
         }
 
         [Theory]

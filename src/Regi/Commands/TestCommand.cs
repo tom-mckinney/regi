@@ -32,7 +32,8 @@ namespace Regi.Commands
 
             foreach (var p in Projects)
             {
-                p.Process.Kill();
+
+                p.Process.Kill(); // TODO: handle this globally in project manager
             }
 
             return output.FailCount;

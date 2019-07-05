@@ -15,8 +15,9 @@ namespace Regi
         IList<Project> Projects { get; }
 
         IList<Project> FilterAndTrackProjects(RegiOptions options, params IEnumerable<Project>[] projectCollections);
-
         IList<Project> FilterByOptions(IEnumerable<Project> projects, RegiOptions options);
+        void KillAllProcesses(RegiOptions options);
+        void KillAllProcesses(IList<Project> projects, RegiOptions options);
     }
 
     public class ProjectManager : IProjectManager
@@ -75,22 +76,33 @@ namespace Regi
             return projects.ToList();
         }
 
-        public ConsoleCancelEventHandler HandleCancelEvent(RegiOptions options) => (o, e) =>
+        public void KillAllProcesses(RegiOptions options)
         {
-            _console.WriteEmphasizedLine("Shutting down processes");
+            KillAllProcesses(Projects, options);
+        }
 
-            if (Projects?.Count > 0)
+        public void KillAllProcesses(IList<Project> projects, RegiOptions options)
+        {
+            string processPluralization = projects.Count > 1 ? "processes" : "process";
+            _console.WriteDefaultLine($"Killing {projects.Count} {processPluralization}");
+
+            if (projects?.Count > 0)
             {
-                foreach (var project in Projects)
+                foreach (var project in projects)
                 {
                     if (project.Process != null)
                     {
-                        project.Process.Kill(_console);
+                        _cleanupService.KillProcessTree(project.Process, options);
                     }
                 }
             }
 
             _cleanupService.ShutdownBuildServers(options);
+        }
+
+        public ConsoleCancelEventHandler HandleCancelEvent(RegiOptions options) => (o, e) =>
+        {
+            KillAllProcesses(options);
         };
     }
 }

@@ -34,8 +34,6 @@ namespace Regi.Test.Models
                 OnKill = null
             };
 
-            model.Kill();
-
             Assert.Equal(0, callCount);
         }
     }

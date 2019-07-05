@@ -39,8 +39,6 @@ namespace Regi.Test.Services
 
             Assert.Equal(AppTask.Start, app.Task);
             Assert.Equal(AppStatus.Running, app.Status);
-
-            app.Kill();
         }
 
         [Fact]
@@ -57,8 +55,6 @@ namespace Regi.Test.Services
             Assert.Equal(AppTask.Start, app.Task);
             Assert.Equal(AppStatus.Running, app.Status);
             Assert.Equal(expectedPort, app.Port);
-
-            app.Kill();
         }
 
         [Fact]
@@ -80,8 +76,6 @@ namespace Regi.Test.Services
             Assert.Equal(8080, appProcess.Port);
             Assert.True(appProcess.Process.StartInfo.EnvironmentVariables.ContainsKey("foo"), "Environment variable \"foo\" has not been set.");
             Assert.Equal("bar", appProcess.Process.StartInfo.EnvironmentVariables["foo"]);
-
-            appProcess.Kill();
         }
 
         [Theory]
@@ -94,8 +88,6 @@ namespace Regi.Test.Services
 
             Assert.Equal(AppTask.Test, test.Task);
             Assert.Equal(expectedStatus, test.Status);
-
-            test.Kill();
         }
 
         [Fact]
@@ -115,8 +107,6 @@ namespace Regi.Test.Services
             Assert.Equal(8080, testProcess.Port);
             Assert.True(testProcess.Process.StartInfo.EnvironmentVariables.ContainsKey("foo"), "Environment variable \"foo\" has not been set.");
             Assert.Equal("bar", testProcess.Process.StartInfo.EnvironmentVariables["foo"]);
-
-            testProcess.Kill();
         }
 
         [Fact]
@@ -127,8 +117,6 @@ namespace Regi.Test.Services
             Assert.Equal(AppTask.Install, process.Task);
             Assert.Equal(AppStatus.Success, process.Status);
             Assert.Equal(_application.Port, process.Port);
-
-            process.Kill();
         }
 
         [Fact]
@@ -140,8 +128,6 @@ namespace Regi.Test.Services
             AppProcess process = _service.InstallProject(_application, TestOptions.Create());
 
             Assert.Contains($"--registry {source}", process.Process.StartInfo.Arguments);
-
-            process.Kill();
         }
 
         [Theory]

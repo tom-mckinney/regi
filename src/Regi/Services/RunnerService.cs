@@ -176,17 +176,14 @@ namespace Regi.Services
 
                         processes.Add(project.Process);
 
-                        foreach (var p in project.RequiredProjects)
-                        {
-                            p.Process.Kill(_console);
-                        }
+                        _projectManager.KillAllProcesses(project.RequiredProjects, options);
                     }
                 });
             }
 
             _queueService.RunAll();
 
-            processes.KillAll(_console);
+            _projectManager.KillAllProcesses(options); // TODO: should this be done as part of global command lifecycle?
 
             return projects;
         }

@@ -1,5 +1,6 @@
 ﻿using McMaster.Extensions.CommandLineUtils;
 using Regi.Extensions;
+using Regi.Models;
 using Regi.Utilities;
 using System;
 using System.Collections.Generic;
@@ -11,7 +12,7 @@ namespace Regi.Services
 {
     public interface IPlatformService
     {
-        Process GetKillProcess(string processName);
+        Process GetKillProcess(string processName, RegiOptions options);
         IRuntimeInfo RuntimeInfo { get; }
     }
 
@@ -27,7 +28,7 @@ namespace Regi.Services
 
         public IRuntimeInfo RuntimeInfo { get; private set; }
 
-        public Process GetKillProcess(string processName)
+        public Process GetKillProcess(string processName, RegiOptions options)
         {
             var startInfo = new ProcessStartInfo
             {
@@ -57,7 +58,7 @@ namespace Regi.Services
 
             process.OutputDataReceived += (o, e) =>
             {
-                if (!string.IsNullOrWhiteSpace(e.Data))
+                if (options.Verbose && !string.IsNullOrWhiteSpace(e.Data))
                 {
                     _console.WriteLine(e.Data);
                 }
@@ -66,7 +67,7 @@ namespace Regi.Services
             {
                 if (!string.IsNullOrWhiteSpace(e.Data))
                 {
-                    _console.WriteErrorLine(e.Data);
+                    _console.WriteWarningLine(e.Data);
                 }
             };
 

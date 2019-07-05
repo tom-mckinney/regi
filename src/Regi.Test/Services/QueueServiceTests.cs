@@ -151,9 +151,9 @@ namespace Regi.Test.Services
         {
             int callCount = 0;
 
-            ((QueueService)_service).ParallelActions.Add(() => callCount++);
-            ((QueueService)_service).ParallelActions.Add(() => callCount++);
-            ((QueueService)_service).ParallelActions.Add(() => callCount++);
+            _service.QueueParallel(() => callCount++);
+            _service.QueueParallel(() => callCount++);
+            _service.QueueParallel(() => callCount++);
 
             _service.RunParallel();
 
@@ -165,9 +165,9 @@ namespace Regi.Test.Services
         {
             int callCount = 0;
 
-            ((QueueService)_service).SerialActions.Add(() => callCount = 1);
-            ((QueueService)_service).SerialActions.Add(() => callCount = 2);
-            ((QueueService)_service).SerialActions.Add(() => callCount = 3);
+            _service.QueueSerial(() => callCount = 1);
+            _service.QueueSerial(() => callCount = 2);
+            _service.QueueSerial(() => callCount = 3);
 
             _service.RunSerial();
 
@@ -180,13 +180,13 @@ namespace Regi.Test.Services
             int parallelCount = 0;
             int serialCount = 0;
 
-            ((QueueService)_service).ParallelActions.Add(() => parallelCount++);
-            ((QueueService)_service).ParallelActions.Add(() => parallelCount++);
-            ((QueueService)_service).ParallelActions.Add(() => parallelCount++);
+            _service.QueueParallel(() => parallelCount++);
+            _service.QueueParallel(() => parallelCount++);
+            _service.QueueParallel(() => parallelCount++);
 
-            ((QueueService)_service).SerialActions.Add(() => serialCount++);
-            ((QueueService)_service).SerialActions.Add(() => serialCount++);
-            ((QueueService)_service).SerialActions.Add(() => serialCount++);
+            _service.QueueSerial(() => serialCount++);
+            _service.QueueSerial(() => serialCount++);
+            _service.QueueSerial(() => serialCount++);
 
             _service.RunAll();
 

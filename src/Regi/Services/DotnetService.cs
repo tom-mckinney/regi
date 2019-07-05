@@ -101,7 +101,7 @@ namespace Regi.Services
 
         public override AppProcess KillProcesses(RegiOptions options)
         {
-            AppProcess process = new AppProcess(_platformService.GetKillProcess("dotnet"),
+            AppProcess process = new AppProcess(_platformService.GetKillProcess("dotnet", options),
                 AppTask.Kill,
                 AppStatus.Running);
 

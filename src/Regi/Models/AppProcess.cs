@@ -1,4 +1,5 @@
 ﻿using McMaster.Extensions.CommandLineUtils;
+using Regi.Constants;
 using Regi.Extensions;
 using Regi.Utilities;
 using System;
@@ -6,7 +7,7 @@ using System.Diagnostics;
 
 namespace Regi.Models
 {
-    public class AppProcess //: IDisposable
+    public class AppProcess
     {
         private object _lock = new object();
 
@@ -83,19 +84,33 @@ namespace Regi.Models
 
         public Action<int> OnKill { get; set; }
 
-        public void Kill()
+        public void Kill(IConsole console = null)
         {
-            Kill(null);
+            Kill(ProcessConstants.DefaultTimeout, console);
         }
 
-        public void Kill(IConsole console)
+        public void Kill(TimeSpan timeout, IConsole console = null)
         {
             OnKill?.Invoke(ProcessId);
 
-            if (KillOnExit)
+            try
             {
-                ProcessUtility.KillTree(Process, ProcessId, console);
+                Process?.WaitForExit(timeout.Milliseconds);
+            }
+            catch (Exception e)
+            {
+                console?.WriteErrorLine($"Exception was thrown while exiting process with PID {ProcessId}. Details: {e.Message}");
             }
         }
+
+        //public void Kill(IConsole console)
+        //{
+        //    OnKill?.Invoke(ProcessId);
+
+        //    if (KillOnExit)
+        //    {
+        //        ProcessUtility.KillTree(Process, ProcessId, console);
+        //    }
+        //}
     }
 }

@@ -2,6 +2,7 @@
 using Regi.Extensions;
 using Regi.Models;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -38,8 +39,8 @@ namespace Regi.Services
             _networkingService = networkingService;
         }
 
-        public IList<Action> ParallelActions { get; } = new List<Action>();
-        public IList<Action> SerialActions { get; } = new List<Action>();
+        public ConcurrentQueue<Action> ParallelActions { get; } = new ConcurrentQueue<Action>();
+        public ConcurrentQueue<Action> SerialActions { get; } = new ConcurrentQueue<Action>();
 
         public ParallelOptions ParallelOptions => new ParallelOptions
         {
@@ -56,12 +57,12 @@ namespace Regi.Services
 
         public void QueueParallel(Action action)
         {
-            ParallelActions.Add(action);
+            ParallelActions.Enqueue(action);
         }
 
         public void QueueSerial(Action action)
         {
-            SerialActions.Add(action);
+            SerialActions.Enqueue(action);
         }
 
         public void RunAll()
