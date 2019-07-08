@@ -1,8 +1,6 @@
 ﻿using McMaster.Extensions.CommandLineUtils;
-using Regi.Constants;
 using Regi.Extensions;
 using Regi.Models;
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
@@ -38,7 +36,10 @@ namespace Regi.Services
             {
                 if (!string.IsNullOrWhiteSpace(project.Source))
                 {
-                    builder.AppendCliOption($"--source {project.Source}");
+                    if (command == FrameworkCommands.Dotnet.Restore || command == FrameworkCommands.Dotnet.Run || command == FrameworkCommands.Dotnet.Build || command == FrameworkCommands.Dotnet.Publish)
+                    {
+                        builder.AppendCliOption($"--source {project.Source}");
+                    }
                 }
 
                 base.ApplyFrameworkOptions(builder, command, project, options);

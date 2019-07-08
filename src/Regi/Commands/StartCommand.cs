@@ -1,14 +1,10 @@
 ﻿using McMaster.Extensions.CommandLineUtils;
 using Microsoft.Extensions.Options;
-using Regi.Extensions;
 using Regi.Models;
 using Regi.Services;
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace Regi.Commands
 {
@@ -18,23 +14,25 @@ namespace Regi.Commands
         private readonly IRunnerService _runnerService;
         private readonly Settings _options;
 
-        public StartCommand(IRunnerService runnerService, IConsole console, IOptions<Settings> options)
-            : base(console)
+        public StartCommand(IRunnerService runnerService, IProjectManager projectManager, IConfigurationService configurationService, IConsole console, IOptions<Settings> options)
+            : base(projectManager, configurationService, console)
         {
             _runnerService = runnerService;
             _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
         }
 
-        public override int OnExecute()
+        protected override Func<StartupConfig, IEnumerable<Project>> GetTargetProjects => (c) => c.Apps;
+
+        protected override int Execute(IList<Project> projects)
         {
-            Projects = _runnerService.Start(Options);
+            _runnerService.Start(projects, Options);
 
             while (_options.RunIndefinitely)
             {
                 Thread.Sleep(200);
             }
 
-            return Projects.Count;
+            return 0;
         }
     }
 }

@@ -1,7 +1,5 @@
 ﻿using McMaster.Extensions.CommandLineUtils;
-using Regi.Constants;
 using Regi.Extensions;
-using Regi.Utilities;
 using System;
 using System.Diagnostics;
 
@@ -88,31 +86,24 @@ namespace Regi.Models
 
         public void Kill(IConsole console = null)
         {
-            Kill(ProcessConstants.DefaultTimeout, console);
+            Kill(Constants.DefaultTimeout, console);
         }
 
         public void Kill(TimeSpan timeout, IConsole console = null)
         {
             OnKill?.Invoke(ProcessId);
 
-            try
+            if (KillOnExit)
             {
-                Process?.WaitForExit(timeout.Milliseconds);
-            }
-            catch (Exception e)
-            {
-                console?.WriteErrorLine($"Exception was thrown while exiting process with PID {ProcessId}. Details: {e.Message}");
+                try
+                {
+                    Process?.WaitForExit(timeout.Milliseconds);
+                }
+                catch (Exception e)
+                {
+                    console?.WriteErrorLine($"Exception was thrown while exiting process with PID {ProcessId}. Details: {e.Message}");
+                }
             }
         }
-
-        //public void Kill(IConsole console)
-        //{
-        //    OnKill?.Invoke(ProcessId);
-
-        //    if (KillOnExit)
-        //    {
-        //        ProcessUtility.KillTree(Process, ProcessId, console);
-        //    }
-        //}
     }
 }

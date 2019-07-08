@@ -33,6 +33,11 @@ namespace Regi.Services
         {
             string configFilePath = Path.Combine(DirectoryUtility.TargetDirectoryPath, "regi.json");
 
+            if (File.Exists(configFilePath))
+            {
+                throw new InvalidOperationException($"There is already a {nameof(Regi)} configuration file at path: {configFilePath}");
+            }
+
             _console.WriteEmphasizedLine($"Creating config file: {configFilePath}");
 
             FileInfo configFile = new FileInfo(configFilePath);

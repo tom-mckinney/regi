@@ -3,9 +3,7 @@ using Regi.Models;
 using Regi.Services;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text;
 
 namespace Regi.Commands
 {
@@ -14,17 +12,19 @@ namespace Regi.Commands
     {
         private readonly IRunnerService _runnerService;
 
-        public InstallCommand(IRunnerService runnerService, IConsole console)
-            : base(console)
+        public InstallCommand(IRunnerService runnerService, IProjectManager projectManager, IConfigurationService configurationService, IConsole console)
+            : base(projectManager, configurationService, console)
         {
             _runnerService = runnerService;
         }
 
-        public override int OnExecute()
-        {
-            Projects = _runnerService.Install(Options);
+        protected override Func<StartupConfig, IEnumerable<Project>> GetTargetProjects => (c) => c.Apps.Concat(c.Tests);
 
-            return Projects
+        protected override int Execute(IList<Project> projects)
+        {
+            _runnerService.Install(projects, Options);
+
+            return projects
                 .Where(p => p.Processes?.Any(x => x.Status == AppStatus.Failure) == true)
                 .Count();
         }

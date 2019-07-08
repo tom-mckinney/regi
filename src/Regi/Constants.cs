@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Regi.Constants
+namespace Regi
 {
-    public static class ProcessConstants
+    public static class Constants
     {
         public static TimeSpan DefaultTimeout = TimeSpan.FromSeconds(10);
     }

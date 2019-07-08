@@ -1,4 +1,5 @@
-﻿using Regi.Models;
+﻿using Moq;
+using Regi.Models;
 using Regi.Services;
 using Regi.Test.Helpers;
 using Regi.Utilities;
@@ -21,7 +22,40 @@ namespace Regi.Test.Services
 
         ISummaryService CreateService()
         {
-            return new SummaryService(_console);
+            return new SummaryService(new ProjectManager(_console, new Mock<ICleanupService>().Object), _console);
+        }
+
+        [Fact]
+        public void PrintDomainSummary_prints_all_apps_and_tests()
+        {
+            var service = CreateService();
+
+            var output = service.PrintDomainSummary(SampleProjects.ConfigurationGood, TestOptions.Create());
+
+            Assert.Equal(SampleProjects.ConfigurationGood.Apps.Count, output.Apps.Count);
+            Assert.Equal(SampleProjects.ConfigurationGood.Tests.Count, output.Tests.Count);
+
+            Assert.Contains("Apps:", _console.LogOutput);
+            Assert.Contains("Tests:", _console.LogOutput);
+        }
+
+        [Theory]
+        [InlineData("node", 1, 0)]
+        [InlineData("test", 0, 2)]
+        [InlineData("SampleApp1", 1, 0)]
+        public void PrintDomainSummary_prints_only_apps_or_tests_that_match_name_if_specified(string name, int appCount, int testCount)
+        {
+            var service = CreateService();
+
+            var output = service.PrintDomainSummary(SampleProjects.ConfigurationGood, new RegiOptions { Name = name });
+
+            Assert.Equal(appCount, output.Apps.Count);
+            Assert.Equal(testCount, output.Tests.Count);
+
+            if (appCount <= 0)
+                Assert.DoesNotContain("Apps:", _console.LogOutput);
+            if (testCount <= 0)
+                Assert.DoesNotContain("Tests:", _console.LogOutput);
         }
 
         [Fact]

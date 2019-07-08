@@ -1,14 +1,11 @@
 ﻿using McMaster.Extensions.CommandLineUtils;
-using Regi.Constants;
 using Regi.Extensions;
 using Regi.Models;
 using Regi.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Text;
 
 namespace Regi.Services
@@ -16,7 +13,6 @@ namespace Regi.Services
     public interface IFrameworkService
     {
         AppProcess InstallProject(Project project, string appDirectoryPath, RegiOptions options);
-        //AppProcess StartProject(Project project, RegiOptions options);
         AppProcess StartProject(Project project, string appDirectoryPath, RegiOptions options);
         AppProcess TestProject(Project project, string appDirectoryPath, RegiOptions options);
         AppProcess BuildProject(Project project, string appDirectoryPath, RegiOptions options);
@@ -44,7 +40,6 @@ namespace Regi.Services
         }
 
         public abstract AppProcess InstallProject(Project project, string appDirectoryPath, RegiOptions options);
-        //public abstract AppProcess StartProject(Project project, RegiOptions options);
         public abstract AppProcess StartProject(Project project, string appDirectoryPath, RegiOptions options);
         public abstract AppProcess TestProject(Project project, string appDirectoryPath, RegiOptions options);
         public abstract AppProcess BuildProject(Project project, string appDirectoryPath, RegiOptions options);
@@ -188,69 +183,6 @@ namespace Regi.Services
 
             return output;
         }
-
-        //public virtual AppProcess CreateProcess(string command, Project project, RegiOptions options, string fileName = null)
-        //{
-        //    fileName = fileName ?? _frameworkExePath;
-        //    string args = BuildCommand(command, project, options);
-
-        //    if (options.Verbose)
-        //        _console.WriteEmphasizedLine($"Executing: {fileName} {args}");
-
-        //    Process process = new Process
-        //    {
-        //        StartInfo = new ProcessStartInfo()
-        //        {
-        //            FileName = fileName,
-        //            Arguments = args,
-        //            WorkingDirectory = project.File.DirectoryName,
-        //            RedirectStandardOutput = true,
-        //            RedirectStandardError = true,
-        //            CreateNoWindow = true
-        //        },
-        //        EnableRaisingEvents = true
-        //    };
-
-        //    AppProcess output = new AppProcess(process, FrameworkCommands.GetAppTask(command), AppStatus.Running, project.Port)
-        //    {
-        //        KillOnExit = options.KillProcessesOnExit,
-        //        Verbose = options.Verbose,
-        //        OnKill = (processId) => HandleDispose(project, processId, options)
-        //    };
-
-        //    process.StartInfo.CopyEnvironmentVariables(options.VariableList);
-        //    SetEnvironmentVariables(process, project);
-
-        //    process.Exited += HandleExited(output);
-
-        //    if (project.RawOutput || options.RawOutput)
-        //    {
-        //        output.RawOutput = true;
-        //        process.StartInfo.CreateNoWindow = false;
-        //        process.StartInfo.WindowStyle = ProcessWindowStyle.Normal;
-        //        process.StartInfo.RedirectStandardInput = true;
-        //        process.StartInfo.RedirectStandardOutput = false;
-        //        process.StartInfo.RedirectStandardError = false;
-        //        return output;
-        //    }
-        //    else
-        //    {
-        //        process.ErrorDataReceived += HandleErrorDataReceived(project.Name, output);
-        //        output.ErrorDataHandled = true;
-
-        //        if (options.Verbose || options.ShowOutput?.Any(x => x.Equals(project.Name, StringComparison.InvariantCultureIgnoreCase)) == true)
-        //        {
-        //            process.OutputDataReceived += HandleOutputDataRecieved(project.Name);
-        //            output.OutputDataHandled = true;
-        //        }
-        //        else
-        //        {
-        //            process.OutputDataReceived += HandleDataReceivedSilently();
-        //        }
-        //    }
-
-        //    return output;
-        //}
 
         public virtual string BuildCommand(string command, Project project, RegiOptions options)
         {

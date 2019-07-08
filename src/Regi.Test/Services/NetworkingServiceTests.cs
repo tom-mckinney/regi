@@ -35,7 +35,7 @@ namespace Regi.Test.Services
             _runtimeInfoMock.Setup(m => m.IsMac).Returns(RuntimeInformation.IsOSPlatform(OSPlatform.OSX));
             _runtimeInfoMock.Setup(m => m.NewLine).Returns(Environment.NewLine);
 
-            int port = new Random().Next(9000, 10000);
+            int port = new Random().Next(10000, 30000);
 
             var listener = TcpListener.Create(port);
 

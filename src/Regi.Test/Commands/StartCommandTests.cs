@@ -4,7 +4,6 @@ using Regi.Commands;
 using Regi.Models;
 using Regi.Services;
 using Regi.Test.Helpers;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Xunit;
@@ -16,42 +15,49 @@ namespace Regi.Test.Commands
     {
         private readonly ITestOutputHelper _output;
         private readonly TestConsole _console;
+        private readonly IProjectManager _projectManager;
+        private readonly Mock<ICleanupService> _cleanupServiceMock = new Mock<ICleanupService>();
         private readonly Mock<IRunnerService> _runnerServiceMock = new Mock<IRunnerService>();
+        private readonly Mock<IConfigurationService> _configServiceMock = new Mock<IConfigurationService>();
         private readonly IOptions<Settings> _options = Options.Create(new Settings { RunIndefinitely = false });
 
         public StartCommandTests(ITestOutputHelper output)
         {
             _output = output;
             _console = new TestConsole(output);
+            _projectManager = new ProjectManager(_console, _cleanupServiceMock.Object);
         }
 
         StartCommand CreateCommand()
         {
-            return new StartCommand(_runnerServiceMock.Object, _console, _options);
+            return new StartCommand(_runnerServiceMock.Object, _projectManager, _configServiceMock.Object, _console, _options);
         }
 
         [Fact]
         public void Will_start_all_projects_by_default()
         {
-            _runnerServiceMock.Setup(m => m.Start(It.IsAny<RegiOptions>()))
-                .Returns(new List<Project>
+            _configServiceMock.Setup(m => m.GetConfiguration())
+                .Returns(SampleProjects.ConfigurationDefault)
+                .Verifiable();
+            _runnerServiceMock.Setup(m => m.Start(It.IsAny<IList<Project>>(), It.IsAny<RegiOptions>()))
+                .Callback<IList<Project>, RegiOptions>((projects, options) =>
                 {
-                    new Project
+                    foreach (var p in projects)
                     {
-                        Processes = new ConcurrentBag<AppProcess> { new AppProcess(new Process(), AppTask.Start, AppStatus.Success) }
-                    },
-                    new Project
-                    {
-                        Processes = new ConcurrentBag<AppProcess> { new AppProcess(new Process(), AppTask.Start, AppStatus.Success) }
+                        p.Processes.Add(new AppProcess(new Process(), AppTask.Start, AppStatus.Success));
                     }
                 })
+                .Returns<IList<Project>, RegiOptions>((projects, options) => projects)
                 .Verifiable();
 
             StartCommand command = CreateCommand();
 
-            int projectCount = command.OnExecute();
+            int statusCode = command.OnExecute();
 
-            Assert.Equal(2, projectCount);
+            Assert.Equal(0, statusCode);
+
+            _configServiceMock.Verify();
+            _runnerServiceMock.Verify();
         }
     }
 }

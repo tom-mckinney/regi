@@ -9,6 +9,7 @@ using Xunit.Abstractions;
 
 namespace Regi.Test.Services
 {
+    [Collection("Parallel")]
     public class QueueServiceTests
     {
         private readonly IQueueService _service;

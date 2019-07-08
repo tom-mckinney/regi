@@ -22,19 +22,31 @@
   "tests": [
     {
       "name": "SampleSuccessfulTests",
-      "path": "./SampleSuccessfulTests/SampleSuccessfulTests.csproj",
+      "path": "./SampleSuccessfulTests",
       "framework": "dotnet",
       "type": "unit"
     },
     {
       "name": "NodeApp",
-      "path": "./SampleNodeApp/package.json",
+      "path": "./SampleNodeApp",
       "framework": "node",
       "type": "unit"
     },
     {
       "name": "IntegrationTests",
-      "path": "./IntegrationTests/package.json",
+      "path": "./IntegrationTests",
+      "framework": "node",
+      "type": "integration",
+      "requires": [ "Frontend", "Backend" ],
+      "rawOutput": true,
+      "serial": true,
+      "environment": {
+        "HEADLESS": true
+      }
+    },
+    {
+      "name": "IntegrationTests-Cypress",
+      "path": "./IntegrationTests-Cypress",
       "framework": "node",
       "type": "integration",
       "requires": [ "Frontend", "Backend" ],

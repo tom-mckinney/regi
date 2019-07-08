@@ -1,26 +1,29 @@
-﻿using McMaster.Extensions.CommandLineUtils;
-using Regi.Extensions;
-using Regi.Services;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Reflection;
-using System.Text;
+using McMaster.Extensions.CommandLineUtils;
+using Regi.Extensions;
+using Regi.Models;
+using Regi.Services;
 
 namespace Regi.Commands
 {
     [Command("version")]
     public class VersionCommand : CommandBase
     {
-        public VersionCommand(IConsole console)
-            : base(console)
+        public VersionCommand(IProjectManager projectManager, IConfigurationService configurationService, IConsole console)
+            : base(projectManager, configurationService, console)
         {
         }
 
-        public override int OnExecute()
+        public override bool FilterProjects => false;
+
+        protected override Func<StartupConfig, IEnumerable<Project>> GetTargetProjects => throw new NotImplementedException();
+
+        protected override int Execute(IList<Project> projects)
         {
             var version = typeof(Program).Assembly.GetName().Version;
 
-            _console.WriteEmphasizedLine($"Regi version: {version.Major}.{version.Minor}.{version.Build}");
+            console.WriteEmphasizedLine($"Regi version: {version.Major}.{version.Minor}.{version.Build}");
 
             return 0;
         }

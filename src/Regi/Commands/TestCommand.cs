@@ -1,7 +1,8 @@
 ﻿using McMaster.Extensions.CommandLineUtils;
-using Regi.Extensions;
 using Regi.Models;
 using Regi.Services;
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace Regi.Commands
@@ -12,32 +13,26 @@ namespace Regi.Commands
         private readonly IRunnerService _runnerService;
         private readonly ISummaryService _summaryService;
 
-        public TestCommand(IRunnerService runnerService, ISummaryService summaryService, IConsole console)
-            : base(console)
+        public TestCommand(IRunnerService runnerService, ISummaryService summaryService, IProjectManager projectManager, IConfigurationService configurationService, IConsole console)
+            : base(projectManager, configurationService, console)
         {
             _runnerService = runnerService;
             _summaryService = summaryService;
         }
 
-        public override int OnExecute()
+        protected override Func<StartupConfig, IEnumerable<Project>> GetTargetProjects => (c) => c.Tests;
+
+        protected override int Execute(IList<Project> projects)
         {
             Stopwatch stopwatch = new Stopwatch();
 
             stopwatch.Start();
 
-            Projects = _runnerService.Test(Options);
+            _runnerService.Test(projects, Options);
 
             stopwatch.Stop();
 
-            var output = _summaryService.PrintTestSummary(Projects, stopwatch.Elapsed);
-
-            foreach (var p in Projects)
-            {
-                foreach (var process in p.Processes)
-                {
-                    process.Kill(); // TODO: handle this globally in project manager
-                }
-            }
+            var output = _summaryService.PrintTestSummary(projects, stopwatch.Elapsed);
 
             return output.FailCount;
         }

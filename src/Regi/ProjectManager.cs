@@ -14,6 +14,7 @@ namespace Regi
     {
         IList<Project> Projects { get; }
 
+        IList<Project> FilterAndTrackProjects(RegiOptions options, StartupConfig config, Func<StartupConfig, IEnumerable<Project>> getTargetProjects);
         IList<Project> FilterAndTrackProjects(RegiOptions options, params IEnumerable<Project>[] projectCollections);
         IList<Project> FilterByOptions(IEnumerable<Project> projects, RegiOptions options);
         void KillAllProcesses(RegiOptions options);
@@ -32,6 +33,19 @@ namespace Regi
         }
 
         public IList<Project> Projects { get; private set; } = new List<Project>();
+
+        public IList<Project> FilterAndTrackProjects(RegiOptions options, StartupConfig config, Func<StartupConfig, IEnumerable<Project>> getTargetProjects)
+        {
+            var targetProjects = getTargetProjects(config);
+
+            Projects = FilterByOptions(targetProjects, options);
+
+            LinkProjectRequirements(Projects, options, config);
+
+            _console.CancelKeyPress += HandleCancelEvent(options);
+
+            return Projects;
+        }
 
         public IList<Project> FilterAndTrackProjects(RegiOptions options, params IEnumerable<Project>[] projectCollections)
         {
@@ -74,6 +88,29 @@ namespace Regi
             }
 
             return projects.ToList();
+        }
+
+        public static void LinkProjectRequirements(IEnumerable<Project> projects, RegiOptions options, StartupConfig config)
+        {
+            foreach (var project in projects)
+            {
+                project.TryAddSource(options, config);
+
+                foreach (var r in project.Requires)
+                {
+                    var requiredProject = config.Apps.FirstOrDefault(p => p.Name.Contains(r, StringComparison.InvariantCultureIgnoreCase));
+
+                    if (requiredProject == null)
+                        requiredProject = config.Services.FirstOrDefault(p => p.Name.Contains(r, StringComparison.InvariantCultureIgnoreCase));
+
+                    if (requiredProject == null)
+                        throw new Exception($"Could not find requirement \"{r}\" defined in project {project.Name}");
+
+                    requiredProject.TryAddSource(options, config);
+
+                    project.RequiredProjects.Add(requiredProject);
+                }
+            }
         }
 
         public void KillAllProcesses(RegiOptions options)

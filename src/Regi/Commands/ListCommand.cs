@@ -1,25 +1,27 @@
 ﻿using McMaster.Extensions.CommandLineUtils;
+using Regi.Models;
 using Regi.Services;
 using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace Regi.Commands
 {
     [Command("list")]
     public class ListCommand : CommandBase
     {
-        private IRunnerService _runnerService;
+        private ISummaryService summaryService;
 
-        public ListCommand(IRunnerService runnerService, IConsole console)
-            : base(console)
+        public ListCommand(ISummaryService summaryService, IProjectManager projectManager, IConfigurationService configurationService, IConsole console)
+            : base(projectManager, configurationService, console)
         {
-            _runnerService = runnerService;
+            this.summaryService = summaryService;
         }
 
-        public override int OnExecute()
+        protected override Func<StartupConfig, IEnumerable<Project>> GetTargetProjects => (c) => new List<Project>();
+
+        protected override int Execute(IList<Project> projects)
         {
-            _runnerService.List(Options);
+            summaryService.PrintDomainSummary(Config, Options);
 
             return 0;
         }

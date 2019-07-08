@@ -11,16 +11,60 @@ namespace Regi.Services
 {
     public interface ISummaryService
     {
+        OutputSummary PrintDomainSummary(StartupConfig config, RegiOptions options);
         OutputSummary PrintTestSummary(IList<Project> projects, TimeSpan timespan);
     }
 
     public class SummaryService : ISummaryService
     {
-        private readonly IConsole _console;
+        private readonly IProjectManager projectManager;
+        private readonly IConsole console;
 
-        public SummaryService(IConsole console)
+        public SummaryService(IProjectManager projectManager, IConsole console)
         {
-            _console = console;
+            this.projectManager = projectManager;
+            this.console = console;
+        }
+
+        public OutputSummary PrintDomainSummary(StartupConfig config, RegiOptions options)
+        {
+            OutputSummary output = new OutputSummary();
+
+            var apps = projectManager.FilterByOptions(config.Apps, options);
+            var tests = projectManager.FilterByOptions(config.Tests, options);
+
+            PrintAppGroupDetails(apps, output.Apps, "Apps");
+            PrintAppGroupDetails(tests, output.Tests, "Tests");
+
+            void PrintAppGroupDetails(IList<Project> inputApps, IList<Project> outputApps, string groupName)
+            {
+                if (inputApps != null && inputApps.Any())
+                {
+                    console.WriteEmphasizedLine($"{groupName}:");
+                    foreach (var app in inputApps)
+                    {
+                        outputApps.Add(app);
+
+                        console.WriteLine("  " + app.Name);
+
+                        if (options.Verbose)
+                        {
+                            console.WritePropertyIfSpecified("Framework", app.Framework);
+                            console.WritePropertyIfSpecified("Type", app.Type);
+                            console.WritePropertyIfSpecified("Paths", app.AppDirectoryPaths, true, 2);
+                            console.WritePropertyIfSpecified("Port", app.Port);
+                            console.WritePropertyIfSpecified("Commands", app.Commands);
+                            console.WritePropertyIfSpecified("Requires", app.Requires);
+                            console.WritePropertyIfSpecified("Options", app.Options);
+                            console.WritePropertyIfSpecified("Environment", app.Environment);
+                            console.WritePropertyIfSpecified("Serial", app.Serial);
+                            console.WritePropertyIfSpecified("Raw Output", app.RawOutput);
+                        }
+                    }
+                }
+            }
+
+            return output;
         }
 
         public OutputSummary PrintTestSummary(IList<Project> projects, TimeSpan timespan)
@@ -30,7 +74,7 @@ namespace Regi.Services
             int runningCount = 0;
             int unknownCount = 0;
 
-            _console.WriteLine(); // Padding
+            console.WriteLine(); // Padding
 
             foreach (var project in projects)
             {
@@ -56,13 +100,13 @@ namespace Regi.Services
                         throw new InvalidOperationException("Recieved project with invalid status.");
                 }
 
-                _console.WriteLine($" {project.Name}");
+                console.WriteLine($" {project.Name}");
 
                 if (project.Processes?.Count > 1)
                 {
                     foreach (var process in project.Processes)
                     {
-                        _console.Write(' ');
+                        console.Write(' ');
 
                         switch (process.Status)
                         {
@@ -82,7 +126,7 @@ namespace Regi.Services
                                 throw new InvalidOperationException("Recieved project with invalid status.");
                         }
 
-                        _console.WriteLine($" {DirectoryUtility.GetDirectoryShortName(process.Path)}");
+                        console.WriteLine($" {DirectoryUtility.GetDirectoryShortName(process.Path)}");
                     }                    
                 }
             }
@@ -109,25 +153,25 @@ namespace Regi.Services
             outputDescriptors.Add(($"{projects.Count} total", ConsoleColor.White));
 
 
-            _console.WriteLine(); // Padding
-            _console.Write("Test projects: ");
+            console.WriteLine(); // Padding
+            console.Write("Test projects: ");
 
             for (int i = 0; i < outputDescriptors.Count; i++)
             {
                 if (i != 0)
                 {
-                    _console.ResetColor();
-                    _console.Write(", ");
+                    console.ResetColor();
+                    console.Write(", ");
                 }
 
                 var (Message, Color) = outputDescriptors[i];
 
-                _console.ForegroundColor = Color;
-                _console.Write(Message);
-                _console.ResetColor();
+                console.ForegroundColor = Color;
+                console.Write(Message);
+                console.ResetColor();
             }
 
-            _console.WriteLine();
+            console.WriteLine();
             PrintElapsedTime(timespan);
 
             return new OutputSummary
@@ -140,22 +184,22 @@ namespace Regi.Services
 
         private void PrintElapsedTime(TimeSpan elapsed)
         {
-            _console.WriteDefaultLine($"Elapsed time: {elapsed.ToHumanFriendlyString()}", ConsoleLineStyle.LineAfter);
+            console.WriteDefaultLine($"Elapsed time: {elapsed.ToHumanFriendlyString()}", ConsoleLineStyle.LineAfter);
         }
 
         private void PrintBadge(string status, ConsoleColor backgroundColor, int? indentCount = null)
         {
             if (indentCount.HasValue)
             {
-                _console.Write(new string(' ', indentCount.Value * 2));
+                console.Write(new string(' ', indentCount.Value * 2));
             }
 
-            _console.BackgroundColor = backgroundColor;
-            _console.ForegroundColor = ConsoleColor.Black;
+            console.BackgroundColor = backgroundColor;
+            console.ForegroundColor = ConsoleColor.Black;
 
-            _console.Write($" {status} ");
+            console.Write($" {status} ");
 
-            _console.ResetColor();
+            console.ResetColor();
         }
     }
 }

@@ -15,51 +15,37 @@ namespace Regi.Services
 {
     public interface IRunnerService
     {
-        IList<Project> Start(RegiOptions options);
-        IList<Project> Test(RegiOptions options);
-        IList<Project> Build(RegiOptions options);
-        IList<Project> Install(RegiOptions options);
-        OutputSummary List(RegiOptions options);
-        void Kill(RegiOptions options);
-        void Initialize(RegiOptions options);
+        IList<Project> Start(IList<Project> projects, RegiOptions options);
+        IList<Project> Test(IList<Project> projects, RegiOptions options);
+        IList<Project> Build(IList<Project> projects, RegiOptions options);
+        IList<Project> Install(IList<Project> projects, RegiOptions options);
+        void Kill(IList<Project> projects, RegiOptions options);
     }
 
     public class RunnerService : IRunnerService
     {
         private readonly IProjectManager _projectManager;
-        private readonly IConfigurationService _configurationService;
         private readonly IFrameworkServiceProvider _frameworkServiceProvider;
         private readonly IQueueService _queueService;
         private readonly INetworkingService _networkingService;
-        private readonly IFileService _fileService;
         private readonly IConsole _console;
 
         public RunnerService(
             IProjectManager projectManager,
-            IConfigurationService configurationService,
             IFrameworkServiceProvider frameworkServiceProvider,
             IQueueService queueService,
             INetworkingService networkingService,
-            IFileService fileService,
             IConsole console)
         {
             _projectManager = projectManager;
-            _configurationService = configurationService;
             _frameworkServiceProvider = frameworkServiceProvider;
             _queueService = queueService;
             _networkingService = networkingService;
-            _fileService = fileService;
             _console = console;
         }
 
-        public IList<Project> Start(RegiOptions options)
+        public IList<Project> Start(IList<Project> projects, RegiOptions options)
         {
-            StartupConfig config = _configurationService.GetConfiguration();
-
-            options.VariableList = new VariableList(config);
-
-            IList<Project> projects = _projectManager.FilterAndTrackProjects(options, config.Apps);
-
             if (projects.Count <= 0)
                 _console.WriteEmphasizedLine("No projects found");
 
@@ -99,14 +85,8 @@ namespace Regi.Services
             return process;
         }
 
-        public IList<Project> Test(RegiOptions options)
+        public IList<Project> Test(IList<Project> projects, RegiOptions options)
         {
-            StartupConfig config = _configurationService.GetConfiguration();
-
-            options.VariableList = new VariableList(config);
-
-            IList<Project> projects = _projectManager.FilterAndTrackProjects(options, config.Tests);
-
             if (projects.Count <= 0)
                 _console.WriteEmphasizedLine("No projects found");
 
@@ -119,10 +99,10 @@ namespace Regi.Services
                         string appName = project.AppDirectoryPaths.Count > 1 ? $"{DirectoryUtility.GetDirectoryShortName(path)} ({project.Name})" : project.Name;
                         _console.WriteEmphasizedLine($"Starting tests for {appName}");
 
-                        if (project.Requires.Any())
+                        if (project.RequiredProjects.Any())
                         {
-                            string dependencyPluralization = project.Requires.Count > 1 ? "dependencies" : "dependency";
-                            _console.WriteDefaultLine($"Starting {project.Requires.Count} {dependencyPluralization} for project {appName}");
+                            string dependencyPluralization = project.RequiredProjects.Count > 1 ? "dependencies" : "dependency";
+                            _console.WriteDefaultLine($"Starting {project.RequiredProjects.Count} {dependencyPluralization} for project {appName}");
 
                             RegiOptions requiredOptions = options.CloneForRequiredProjects();
 
@@ -130,19 +110,15 @@ namespace Regi.Services
 
                             IDictionary<int, Project> requiredProjectsWithPorts = new Dictionary<int, Project>();
 
-                            foreach (var r in project.Requires)
+                            foreach (var requiredProject in project.RequiredProjects)
                             {
-                                Project requiredProject = config.Apps
-                                    .Concat(config.Services)
-                                    .FirstOrDefault(p => p.Name.Contains(r, StringComparison.InvariantCultureIgnoreCase));
-
                                 if (requiredProject != null)
                                 {
                                     if (requiredProject.Port.HasValue)
                                     {
                                         if (_networkingService.IsPortListening(requiredProject.Port.Value))
                                         {
-                                            _console.WriteLine($"Project {requiredProject.Name} is already listening on port {requiredProject.Port}");
+                                            _console.WriteWarningLine($"Project {requiredProject.Name} is already listening on port {requiredProject.Port}");
                                             continue;
                                         }
 
@@ -150,8 +126,6 @@ namespace Regi.Services
                                     }
 
                                     bool noParallel = requiredProject.Serial || options.NoParallel;
-
-                                    project.RequiredProjects.Add(requiredProject);
 
                                     foreach (var requiredPath in requiredProject.AppDirectoryPaths)
                                     {
@@ -191,19 +165,11 @@ namespace Regi.Services
 
             _queueService.RunAll();
 
-            _projectManager.KillAllProcesses(options); // TODO: should this be done as part of global command lifecycle?
-
             return projects;
         }
 
-        public IList<Project> Build(RegiOptions options)
+        public IList<Project> Build(IList<Project> projects, RegiOptions options)
         {
-            StartupConfig config = _configurationService.GetConfiguration();
-
-            options.VariableList = new VariableList(config);
-
-            IList<Project> projects = _projectManager.FilterAndTrackProjects(options, config.Apps);
-
             if (projects.Count <= 0)
                 _console.WriteEmphasizedLine("No projects found");
 
@@ -236,12 +202,8 @@ namespace Regi.Services
             return projects;
         }
 
-        public IList<Project> Install(RegiOptions options)
+        public IList<Project> Install(IList<Project> projects, RegiOptions options)
         {
-            StartupConfig config = _configurationService.GetConfiguration();
-
-            IList<Project> projects = _projectManager.FilterAndTrackProjects(options, config.Apps, config.Tests);
-
             if (projects.Count <= 0)
                 _console.WriteEmphasizedLine("No projects found");
 
@@ -256,24 +218,20 @@ namespace Regi.Services
                         if (!installedProjects.Contains(project.Name))
                         {
                             installedProjects.Add(project.Name);
-                            InternalInstallProject(project, path, options, config); // TODO: Loop through all paths
+                            InternalInstallProject(project, path, options);
                         }
 
-                        if (project.Requires.Any())
+                        if (project.RequiredProjects.Any())
                         {
                             string dependencyPluralization = project.Requires.Count > 1 ? "dependencies" : "dependency";
-                            _console.WriteDefaultLine($"Starting install for {project.Requires.Count} {dependencyPluralization} for project {project.Name}");
+                            _console.WriteDefaultLine($"Starting install for {project.RequiredProjects.Count} {dependencyPluralization} for project {project.Name}");
 
                             RegiOptions requiredOptions = options.CloneForRequiredProjects();
 
                             IQueueService dependencyQueue = _frameworkServiceProvider.CreateScopedQueueService();
 
-                            foreach (var r in project.Requires)
+                            foreach (var requiredProject in project.RequiredProjects)
                             {
-                                Project requiredProject = config.Apps
-                                    .Concat(config.Services)
-                                    .FirstOrDefault(p => p.Name.Contains(r, StringComparison.InvariantCultureIgnoreCase));
-
                                 if (requiredProject != null)
                                 {
                                     if (installedProjects.Contains(requiredProject.Name) || projects.Any(p => p.Name == requiredProject.Name))
@@ -287,9 +245,7 @@ namespace Regi.Services
                                     {
                                         dependencyQueue.Queue(requiredProject.Serial || options.NoParallel, () =>
                                         {
-                                            InternalInstallProject(requiredProject, requiredPath, requiredOptions, config);
-
-                                            project.RequiredProjects.Add(requiredProject);
+                                            InternalInstallProject(requiredProject, requiredPath, requiredOptions);
                                         });
                                     }
                                 }
@@ -306,11 +262,9 @@ namespace Regi.Services
             return projects;
         }
 
-        private AppProcess InternalInstallProject(Project project, string appDirectoryPath, RegiOptions options, StartupConfig config)
+        private AppProcess InternalInstallProject(Project project, string appDirectoryPath, RegiOptions options)
         {
             _console.WriteEmphasizedLine($"Starting install for project {project.Name}");
-
-            project.TryAddSource(options, config);
 
             var process = _frameworkServiceProvider
                 .GetFrameworkService(project.Framework)
@@ -323,72 +277,20 @@ namespace Regi.Services
             return process;
         }
 
-        public void Initialize(RegiOptions options)
-        {
-            _fileService.CreateConfigFile();
-        }
-
-        public OutputSummary List(RegiOptions options)
-        {
-            StartupConfig config = _configurationService.GetConfiguration();
-
-            OutputSummary output = new OutputSummary();
-
-            var apps = _projectManager.FilterByOptions(config.Apps, options);
-            var tests = _projectManager.FilterByOptions(config.Tests, options);
-
-            PrintAppGroupDetails(apps, output.Apps, "Apps");
-            PrintAppGroupDetails(tests, output.Tests, "Tests");
-
-            void PrintAppGroupDetails(IList<Project> inputApps, IList<Project> outputApps, string groupName)
-            {
-                if (inputApps != null && inputApps.Any())
-                {
-                    _console.WriteEmphasizedLine($"{groupName}:");
-                    foreach (var app in inputApps)
-                    {
-                        outputApps.Add(app);
-
-                        _console.WriteLine("  " + app.Name);
-
-                        if (options.Verbose)
-                        {
-                            _console.WritePropertyIfSpecified("Framework", app.Framework);
-                            _console.WritePropertyIfSpecified("Type", app.Type);
-                            _console.WritePropertyIfSpecified("Paths", app.AppDirectoryPaths, true, 2);
-                            _console.WritePropertyIfSpecified("Port", app.Port);
-                            _console.WritePropertyIfSpecified("Commands", app.Commands);
-                            _console.WritePropertyIfSpecified("Requires", app.Requires);
-                            _console.WritePropertyIfSpecified("Options", app.Options);
-                            _console.WritePropertyIfSpecified("Environment", app.Environment);
-                            _console.WritePropertyIfSpecified("Serial", app.Serial);
-                            _console.WritePropertyIfSpecified("Raw Output", app.RawOutput);
-                        }
-                    }
-                }
-            }
-
-            return output;
-        }
-
-        public void Kill(RegiOptions options)
+        public void Kill(IList<Project> projects, RegiOptions options)
         {
             _console.WriteEmphasizedLine("Committing regicide...");
 
             IEnumerable<ProjectFramework> frameworks;
-            try
+            if (projects?.Count > 0)
             {
-                StartupConfig config = _configurationService.GetConfiguration();
-
-                IList<Project> projects = _projectManager.FilterAndTrackProjects(options, config.Apps, config.Tests);
-
                 frameworks = projects.Select(p => p.Framework).Distinct();
             }
-            catch (IOException)
+            else
             {
                 frameworks = _frameworkServiceProvider.GetAllProjectFrameworkTypes();
             }
-
+            
             foreach (var framework in frameworks)
             {
                 _console.WriteEmphasizedLine($"Killing processes for framework: {framework}", ConsoleLineStyle.LineBefore);

@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Regi.Constants
+namespace Regi
 {
     public static class FrameworkCommands
     {
@@ -16,6 +16,7 @@ namespace Regi.Constants
             public const string Test = FrameworkCommands.Test;
             public const string Build = "build";
             public const string Restore = "restore";
+            public const string Publish = "publish";
             public const string ShutdownBuildServer = "build-server shutdown";
         }
 

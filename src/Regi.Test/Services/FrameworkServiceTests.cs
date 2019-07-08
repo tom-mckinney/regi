@@ -1,13 +1,10 @@
 ﻿using McMaster.Extensions.CommandLineUtils;
-using Regi.Constants;
 using Regi.Models;
 using Regi.Services;
 using Regi.Test.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
 using Xunit;
 using Xunit.Abstractions;
 

@@ -1,8 +1,9 @@
 ﻿using McMaster.Extensions.CommandLineUtils;
+using Regi.Models;
 using Regi.Services;
 using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Linq;
 
 namespace Regi.Commands
 {
@@ -11,15 +12,17 @@ namespace Regi.Commands
     {
         private IRunnerService _runnerService;
 
-        public BuildCommand(IRunnerService runnerService, IConsole console)
-            : base(console)
+        public BuildCommand(IRunnerService runnerService, IProjectManager projectManager, IConfigurationService configurationService, IConsole console)
+            : base(projectManager, configurationService, console)
         {
             _runnerService = runnerService;
         }
 
-        public override int OnExecute()
+        protected override Func<StartupConfig, IEnumerable<Project>> GetTargetProjects => (c) => c.Apps.Concat(c.Tests);
+
+        protected override int Execute(IList<Project> projects)
         {
-            _runnerService.Build(Options);
+            _runnerService.Build(projects, Options);
 
             return 0;
         }

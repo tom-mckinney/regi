@@ -32,7 +32,7 @@ namespace Regi.Test.Services
         [Fact]
         public void CreateConfigFile_creates_a_new_file()
         {
-            string newConfigurationPath = PathHelper.SampleDirectoryPath("temp");
+            string newConfigurationPath = PathHelper.SampleDirectoryPath($"temp/{Guid.NewGuid()}");
 
             if (!Directory.Exists(newConfigurationPath))
             {
@@ -44,6 +44,30 @@ namespace Regi.Test.Services
             FileInfo configFile = _service.CreateConfigFile();
 
             Assert.True(configFile.Exists, $"Config File does not exist: {configFile.FullName}");
+
+            Directory.Delete(newConfigurationPath, true);
+        }
+
+        [Fact]
+        public void CreateConfigFile_throws_if_config_file_already_exists()
+        {
+            string newConfigurationPath = PathHelper.SampleDirectoryPath($"temp/{Guid.NewGuid()}");
+
+            if (!Directory.Exists(newConfigurationPath))
+            {
+                Directory.CreateDirectory(newConfigurationPath);
+            }
+
+            using (var stream = File.Create(Path.Combine(newConfigurationPath, "regi.json")))
+            {
+                stream.Close();
+            }
+
+            DirectoryUtility.SetTargetDirectory(newConfigurationPath);
+
+            Assert.Throws<InvalidOperationException>(() => _service.CreateConfigFile());
+
+            Directory.Delete(newConfigurationPath, true);
         }
     }
 }

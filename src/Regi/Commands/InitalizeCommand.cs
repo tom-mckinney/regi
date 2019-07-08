@@ -1,26 +1,29 @@
-﻿using McMaster.Extensions.CommandLineUtils;
+﻿using System;
+using System.Collections.Generic;
+using McMaster.Extensions.CommandLineUtils;
 using Regi.Models;
 using Regi.Services;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Regi.Commands
 {
     [Command("init")]
     public class InitalizeCommand : CommandBase
     {
-        private readonly IRunnerService _runnerService;
+        private readonly IFileService fileService;
 
-        public InitalizeCommand(IRunnerService runnerService, IConsole console)
-            : base(console)
+        public InitalizeCommand(IFileService fileService, IProjectManager projectManager, IConfigurationService configurationService, IConsole console)
+            : base(projectManager, configurationService, console)
         {
-            _runnerService = runnerService;
+            this.fileService = fileService;
         }
 
-        public override int OnExecute()
+        public override bool FilterProjects => false;
+
+        protected override Func<StartupConfig, IEnumerable<Project>> GetTargetProjects => throw new NotImplementedException();
+
+        protected override int Execute(IList<Project> projects)
         {
-            _runnerService.Initialize(Options);
+            fileService.CreateConfigFile();
 
             return 0;
         }

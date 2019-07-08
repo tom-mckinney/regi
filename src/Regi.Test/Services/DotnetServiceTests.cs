@@ -1,5 +1,4 @@
 ﻿using Moq;
-using Regi.Constants;
 using Regi.Models;
 using Regi.Services;
 using Regi.Test.Helpers;
@@ -7,7 +6,6 @@ using Regi.Utilities;
 using System.IO;
 using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 

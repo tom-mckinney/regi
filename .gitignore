@@ -41,3 +41,7 @@ node_modules/
 
 publish.cmd
 temp/
+
+# Cypress
+screenshots/
+videos/
