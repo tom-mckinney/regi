@@ -1,6 +1,7 @@
 ﻿using McMaster.Extensions.CommandLineUtils;
 using Regi.Extensions;
 using Regi.Models;
+using Regi.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -61,13 +62,15 @@ namespace Regi.Services
                 {
                     foreach (var process in project.Processes)
                     {
+                        _console.Write(' ');
+
                         switch (process.Status)
                         {
                             case AppStatus.Failure:
                                 PrintBadge("FAIL", ConsoleColor.Red, 1);
                                 break;
                             case AppStatus.Success:
-                                PrintBadge("PASS", ConsoleColor.Green, 1);
+                                PrintBadge("PASS", ConsoleColor.Green, 0);
                                 break;
                             case AppStatus.Running:
                                 PrintBadge("RUNNING", ConsoleColor.DarkYellow, 1);
@@ -79,7 +82,7 @@ namespace Regi.Services
                                 throw new InvalidOperationException("Recieved project with invalid status.");
                         }
 
-                        _console.WriteLine($" {process.Path}");
+                        _console.WriteLine($" {DirectoryUtility.GetDirectoryShortName(process.Path)}");
                     }                    
                 }
             }

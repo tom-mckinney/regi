@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 
 namespace Regi.Utilities
 {
@@ -39,6 +40,14 @@ namespace Regi.Utilities
             {
                 throw new DirectoryNotFoundException($"Could not find project, {absolutePath}");
             }
+        }
+
+        public static string GetDirectoryShortName(string path)
+        {
+            if (string.IsNullOrWhiteSpace(path))
+                throw new ArgumentException("Must specify a valid directory path", nameof(path));
+
+            return Path.GetFileName(path);
         }
     }
 }

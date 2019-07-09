@@ -116,12 +116,13 @@ namespace Regi.Services
                 {
                     _queueService.Queue(project.Serial || options.NoParallel, () =>
                     {
-                        _console.WriteEmphasizedLine($"Starting tests for project {project.Name}");
+                        string appName = project.AppDirectoryPaths.Count > 1 ? $"{DirectoryUtility.GetDirectoryShortName(path)} ({project.Name})" : project.Name;
+                        _console.WriteEmphasizedLine($"Starting tests for {appName}");
 
                         if (project.Requires.Any())
                         {
                             string dependencyPluralization = project.Requires.Count > 1 ? "dependencies" : "dependency";
-                            _console.WriteDefaultLine($"Starting {project.Requires.Count} {dependencyPluralization} for project {project.Name}");
+                            _console.WriteDefaultLine($"Starting {project.Requires.Count} {dependencyPluralization} for project {appName}");
 
                             RegiOptions requiredOptions = options.CloneForRequiredProjects();
 
@@ -175,12 +176,12 @@ namespace Regi.Services
                         if (project.Processes?.Count > 0)
                         {
                             var outputStatus = project.OutputStatus;
-                            string outputMessage = $"Finished tests for project {project.Name} with status {outputStatus}";
+                            string outputMessage = $"Finished tests for {appName} with status {outputStatus}";
 
                             if (outputStatus == AppStatus.Success)
-                                _console.WriteSuccessLine(outputMessage, ConsoleLineStyle.LineBeforeAndAfter);
+                                _console.WriteSuccessLine(outputMessage);
                             else
-                                _console.WriteErrorLine(outputMessage, ConsoleLineStyle.LineBeforeAndAfter);
+                                _console.WriteErrorLine(outputMessage);
 
                             _projectManager.KillAllProcesses(project.RequiredProjects, options);
                         }
