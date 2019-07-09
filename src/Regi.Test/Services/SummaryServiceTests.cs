@@ -1,6 +1,7 @@
 ﻿using Regi.Models;
 using Regi.Services;
 using Regi.Test.Helpers;
+using Regi.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -70,9 +71,9 @@ namespace Regi.Test.Services
 
             string expectedOutput = "\r";
             expectedOutput += $" PASS  {SampleProjects.TestCollection.Name}\r";
-            expectedOutput += $"   PASS  {SampleProjects.TestCollection.Paths[2]}\r";
-            expectedOutput += $"   PASS  {SampleProjects.TestCollection.Paths[1]}\r";
-            expectedOutput += $"   PASS  {SampleProjects.TestCollection.Paths[0]}\r";
+            expectedOutput += $"  PASS  {DirectoryUtility.GetDirectoryShortName(SampleProjects.TestCollection.Paths[2])}\r";
+            expectedOutput += $"  PASS  {DirectoryUtility.GetDirectoryShortName(SampleProjects.TestCollection.Paths[1])}\r";
+            expectedOutput += $"  PASS  {DirectoryUtility.GetDirectoryShortName(SampleProjects.TestCollection.Paths[0])}\r";
             expectedOutput += "\rTest projects: 1 succeeded, 1 total\rElapsed time: 100ms\r\r";
 
             Assert.Equal(expectedOutput, _console.LogOutput);
@@ -100,9 +101,9 @@ namespace Regi.Test.Services
 
             string expectedOutput = "\r";
             expectedOutput += $" FAIL  {SampleProjects.TestCollection.Name}\r";
-            expectedOutput += $"   PASS  {SampleProjects.TestCollection.Paths[2]}\r";
-            expectedOutput += $"   PASS  {SampleProjects.TestCollection.Paths[1]}\r";
-            expectedOutput += $"   FAIL  {SampleProjects.TestCollection.Paths[0]}\r";
+            expectedOutput += $"  PASS  {DirectoryUtility.GetDirectoryShortName(SampleProjects.TestCollection.Paths[2])}\r";
+            expectedOutput += $"  PASS  {DirectoryUtility.GetDirectoryShortName(SampleProjects.TestCollection.Paths[1])}\r";
+            expectedOutput += $"  FAIL  {DirectoryUtility.GetDirectoryShortName(SampleProjects.TestCollection.Paths[0])}\r";
             expectedOutput += "\rTest projects: 1 failed, 1 total\rElapsed time: 100ms\r\r";
 
             Assert.Equal(expectedOutput, _console.LogOutput);

@@ -67,16 +67,16 @@ namespace Regi.Services
                         switch (process.Status)
                         {
                             case AppStatus.Failure:
-                                PrintBadge("FAIL", ConsoleColor.Red, 1);
+                                PrintBadge("FAIL", ConsoleColor.Red, 0);
                                 break;
                             case AppStatus.Success:
                                 PrintBadge("PASS", ConsoleColor.Green, 0);
                                 break;
                             case AppStatus.Running:
-                                PrintBadge("RUNNING", ConsoleColor.DarkYellow, 1);
+                                PrintBadge("RUNNING", ConsoleColor.DarkYellow, 0);
                                 break;
                             case AppStatus.Unknown:
-                                PrintBadge("UNKNOWN", ConsoleColor.Gray, 1);
+                                PrintBadge("UNKNOWN", ConsoleColor.Gray, 0);
                                 break;
                             default:
                                 throw new InvalidOperationException("Recieved project with invalid status.");
