@@ -355,7 +355,7 @@ namespace Regi.Services
                         {
                             _console.WritePropertyIfSpecified("Framework", app.Framework);
                             _console.WritePropertyIfSpecified("Type", app.Type);
-                            _console.WritePropertyIfSpecified("Path", app.Path);
+                            _console.WritePropertyIfSpecified("Paths", app.AppDirectoryPaths, true, 2);
                             _console.WritePropertyIfSpecified("Port", app.Port);
                             _console.WritePropertyIfSpecified("Commands", app.Commands);
                             _console.WritePropertyIfSpecified("Requires", app.Requires);

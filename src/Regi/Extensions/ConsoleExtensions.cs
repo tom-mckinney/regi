@@ -125,11 +125,38 @@ namespace Regi.Extensions
             }
         }
 
-        public static void WritePropertyIfSpecified<T>(this IConsole console, string propertyName, ICollection<T> propertyValue, int indentCount = 2)
+        public static void WritePropertyIfSpecified<T>(this IConsole console, string propertyName, ICollection<T> propertyValue, bool linebreakItems = false, int indentCount = 2)
         {
             if (propertyValue?.Count > 0)
             {
-                WritePropertyIfSpecified(console, propertyName, $"[{string.Join(", ", propertyValue)}]", indentCount);
+                if (linebreakItems)
+                {
+                    StringBuilder builder = new StringBuilder();
+
+                    builder.AppendLine("[");
+
+                    for (int i = 0; i < propertyValue.Count; i++)
+                    {
+                        var value = propertyValue.ElementAt(0);
+
+                        builder.Append(Indent(indentCount + 1))
+                            .Append(value);
+
+                        if (i < propertyValue.Count - 1)
+                            builder.AppendLine(",");
+                        else
+                            builder.AppendLine();
+                    }
+
+                    builder.Append(Indent(indentCount))
+                        .Append("]");
+
+                    WritePropertyIfSpecified(console, propertyName, builder.ToString(), indentCount);
+                }
+                else
+                {
+                    WritePropertyIfSpecified(console, propertyName, $"[{string.Join(", ", propertyValue)}]", indentCount);
+                }
             }
         }
 
