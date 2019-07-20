@@ -29,7 +29,6 @@ steps:
 
 - task: DotNetCoreCLI@2
   displayName: Push
-  enabled: false
   inputs:
     command: 'push'
     packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
