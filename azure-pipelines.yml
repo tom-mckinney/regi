@@ -4,7 +4,7 @@
 # https://docs.microsoft.com/azure/devops/pipelines/languages/dotnet-core
 
 trigger:
-- master
+- pipelines
 
 pool:
   vmImage: 'ubuntu-latest'
@@ -15,12 +15,23 @@ variables:
 steps:
 - task: DotNetCoreCLI@2
   displayName: Test
+  enabled: false
   inputs:
     command: 'test'
-    projects: './src/Regi.Test'
+    projects: '**/Regi.Test.csproj'
+
 - task: DotNetCoreCLI@2
-  displayName: Publish
+  displayName: Pack
   inputs:
-    command: 'publish'
-    publishWebProjects: false
-    projects: './src/Regi'
+    command: 'pack'
+    packagesToPack: '**/Regi.csproj'
+    versioningScheme: 'off'
+
+- task: DotNetCoreCLI@2
+  displayName: Push
+  enabled: false
+  inputs:
+    command: 'push'
+    packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
+    nuGetFeedType: 'internal'
+    publishVstsFeed: '2b5d720d-249e-45c9-9f77-53b698bd64e3'
