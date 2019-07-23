@@ -15,6 +15,7 @@ namespace Regi.Commands
         {
         }
 
+        public override bool RequireStartupConfig => false;
         public override bool FilterProjects => false;
 
         protected override Func<StartupConfig, IEnumerable<Project>> GetTargetProjects => throw new NotImplementedException();

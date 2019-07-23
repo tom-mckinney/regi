@@ -22,6 +22,7 @@ namespace Regi.Test.Services
         private readonly Mock<IFrameworkServiceProvider> _frameworkServiceProviderMock = new Mock<IFrameworkServiceProvider>(MockBehavior.Loose);
         private readonly TestQueueService _queueService;
         private readonly Mock<INetworkingService> _networkingServiceMock = new Mock<INetworkingService>();
+        private readonly Mock<IPlatformService> _platformServiceMock = new Mock<IPlatformService>();
         private readonly IRunnerService _runnerService;
 
         public RunnerServiceTests(ITestOutputHelper output)
@@ -39,6 +40,7 @@ namespace Regi.Test.Services
                 _frameworkServiceProviderMock.Object,
                 _queueService,
                 _networkingServiceMock.Object,
+                _platformServiceMock.Object,
                 _console);
         }
 
@@ -129,6 +131,24 @@ namespace Regi.Test.Services
 
             var project = Assert.Single(projects);
             Assert.Equal(pathCount, project.Processes.Count);
+        }
+
+        [Fact]
+        public void Start_runs_before_scripts_if_they_are_specified()
+        {
+            var configuration = SampleProjects.ConfigurationGood;
+
+            configuration.Apps[0].Scripts = new ProjectOptions
+            {
+                { AppTask.Start.ToString(), new List<string> { "foo bar -v" } }
+            };
+
+            _platformServiceMock.Setup(m => m.RunAnonymousScript("foo bar -v", It.IsAny<RegiOptions>()))
+                .Verifiable();
+
+            var processes = _runnerService.Start(configuration.Apps, TestOptions.Create());
+
+            _platformServiceMock.Verify();
         }
 
         [Fact]

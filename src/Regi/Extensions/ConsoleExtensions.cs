@@ -7,6 +7,13 @@ using System.Text;
 
 namespace Regi.Extensions
 {
+    public enum ConsoleLogLevel
+    {
+        Default = 0,
+        Error,
+        Warning
+    }
+
     public enum ConsoleLineStyle
     {
         Normal = 0,

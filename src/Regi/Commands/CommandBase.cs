@@ -43,13 +43,16 @@ namespace Regi.Commands
         {
             try
             {
-                Config = configurationService.GetConfiguration();
-
-                Options.VariableList = new VariableList(Config);
-
-                if (FilterProjects)
+                if (RequireStartupConfig)
                 {
-                    projectManager.FilterAndTrackProjects(Options, Config, GetTargetProjects);
+                    Config = configurationService.GetConfiguration();
+
+                    Options.VariableList = new VariableList(Config);
+
+                    if (FilterProjects)
+                    {
+                        projectManager.FilterAndTrackProjects(Options, Config, GetTargetProjects);
+                    }
                 }
             }
             catch (Exception e)

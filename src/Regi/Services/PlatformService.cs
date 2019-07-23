@@ -12,8 +12,9 @@ namespace Regi.Services
 {
     public interface IPlatformService
     {
-        Process GetKillProcess(string processName, RegiOptions options);
         IRuntimeInfo RuntimeInfo { get; }
+        Process GetKillProcess(string processName, RegiOptions options);
+        void RunAnonymousScript(string script, RegiOptions options);
     }
 
     public class PlatformService : IPlatformService
@@ -72,6 +73,27 @@ namespace Regi.Services
             };
 
             return process;
+        }
+
+        public void RunAnonymousScript(string script, RegiOptions options)
+        {
+            string fileName = RuntimeInfo.IsWindows ? "powershell.exe" : "bash";
+
+            using (var process = ProcessUtility.CreateProcess(fileName, script))
+            {
+                process.ErrorDataReceived += ProcessUtility.WriteOutput(_console, ConsoleLogLevel.Error);
+                if (options.Verbose)
+                {
+                    process.OutputDataReceived += ProcessUtility.WriteOutput(_console);
+                }
+
+                process.Start();
+
+                process.BeginOutputReadLine();
+                process.BeginErrorReadLine();
+
+                process.WaitForExit(5000);
+            }
         }
     }
 }

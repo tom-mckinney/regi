@@ -1,4 +1,6 @@
-﻿using System;
+﻿using McMaster.Extensions.CommandLineUtils;
+using Regi.Extensions;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -58,36 +60,75 @@ namespace Regi.Utilities
                 out stdout, out stderr);
         }
 
-        public static int RunProcessAndWaitForExit(string fileName, string arguments, out string stdout, out string stderr)
+        public static Process CreateProcess(string fileName, string arguments)
         {
             var startInfo = new ProcessStartInfo
             {
+                WorkingDirectory = DirectoryUtility.TargetDirectoryPath,
                 FileName = fileName,
                 Arguments = arguments,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
+                RedirectStandardInput = true,
                 UseShellExecute = false
             };
 
-            var process = Process.Start(startInfo);
-
-            stdout = null;
-            stderr = null;
-            if (process.WaitForExit((int)TimeSpan.FromSeconds(30).TotalMilliseconds))
+            return new Process
             {
-                stdout = process.StandardOutput.ReadToEnd();
-                stderr = process.StandardError.ReadToEnd();
-            }
-            else
+                StartInfo = startInfo
+            };
+        }
+
+        public static int RunProcessAndWaitForExit(string fileName, string arguments, out string stdout, out string stderr)
+        {
+            using (var process = CreateProcess(fileName, arguments))
             {
-                process.Kill();
+                process.Start();
 
-                // Kill is asynchronous so we should still wait a little
-                //
-                process.WaitForExit((int)TimeSpan.FromSeconds(1).TotalMilliseconds);
+                stdout = null;
+                stderr = null;
+                if (process.WaitForExit((int)TimeSpan.FromSeconds(30).TotalMilliseconds))
+                {
+                    stdout = process.StandardOutput.ReadToEnd();
+                    stderr = process.StandardError.ReadToEnd();
+                }
+                else
+                {
+                    process.Kill();
+
+                    // Kill is asynchronous so we should still wait a little
+                    //
+                    process.WaitForExit((int)TimeSpan.FromSeconds(1).TotalMilliseconds);
+                }
+
+                return process.HasExited ? process.ExitCode : -1;
             }
+        }
 
-            return process.HasExited ? process.ExitCode : -1;
+        public static DataReceivedEventHandler WriteOutput(IConsole console, ConsoleLogLevel logLevel = ConsoleLogLevel.Default)
+        {
+            switch (logLevel)
+            {
+                case ConsoleLogLevel.Error:
+                    return (o, e) =>
+                    {
+                        if (!string.IsNullOrWhiteSpace(e?.Data))
+                            console.WriteErrorLine(e.Data);
+                    };
+                case ConsoleLogLevel.Warning:
+                    return (o, e) =>
+                    {
+                        if (!string.IsNullOrWhiteSpace(e?.Data))
+                            console.WriteWarningLine(e.Data);
+                    };
+                case ConsoleLogLevel.Default:
+                default:
+                    return (o, e) =>
+                    {
+                        if (!string.IsNullOrWhiteSpace(e?.Data))
+                            console.WriteDefaultLine(e.Data);
+                    };
+            }
         }
     }
 }

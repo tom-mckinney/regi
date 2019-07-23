@@ -28,6 +28,7 @@ namespace Regi.Services
         private readonly IFrameworkServiceProvider _frameworkServiceProvider;
         private readonly IQueueService _queueService;
         private readonly INetworkingService _networkingService;
+        private readonly IPlatformService _platformService;
         private readonly IConsole _console;
 
         public RunnerService(
@@ -35,12 +36,14 @@ namespace Regi.Services
             IFrameworkServiceProvider frameworkServiceProvider,
             IQueueService queueService,
             INetworkingService networkingService,
+            IPlatformService platformService,
             IConsole console)
         {
             _projectManager = projectManager;
             _frameworkServiceProvider = frameworkServiceProvider;
             _queueService = queueService;
             _networkingService = networkingService;
+            _platformService = platformService;
             _console = console;
         }
 
@@ -51,6 +54,8 @@ namespace Regi.Services
 
             foreach (var project in projects)
             {
+                RunScriptsForTask(project, AppTask.Start, options);
+
                 foreach (var path in project.AppDirectoryPaths)
                 {
                     _queueService.Queue(project.Serial || options.NoParallel, () =>
@@ -92,6 +97,8 @@ namespace Regi.Services
 
             foreach (var project in projects)
             {
+                RunScriptsForTask(project, AppTask.Test, options);
+
                 foreach (var path in project.AppDirectoryPaths)
                 {
                     _queueService.Queue(project.Serial || options.NoParallel, () =>
@@ -112,6 +119,8 @@ namespace Regi.Services
 
                             foreach (var requiredProject in project.RequiredProjects)
                             {
+                                RunScriptsForTask(requiredProject, AppTask.Test, options);
+
                                 if (requiredProject != null)
                                 {
                                     if (requiredProject.Port.HasValue)
@@ -301,6 +310,29 @@ namespace Regi.Services
             }
 
             _console.WriteSuccessLine("Finished killing processess successfuly", ConsoleLineStyle.LineBeforeAndAfter);
+        }
+
+        public void RunLifecycleScripts(ProjectOptions allScripts, AppTask task, RegiOptions options)
+        {
+            if (allScripts?.Count > 0 && allScripts.TryGetValue(task.ToString(), out IList<string> scripts))
+            {
+                foreach (var script in scripts)
+                {
+
+                }
+            }
+        }
+
+        private void RunScriptsForTask(Project project, AppTask task, RegiOptions options)
+        {
+            if (project.Scripts?.Count > 0
+                    && project.Scripts.TryGetValue(task, out IList<string> beforeScripts))
+            {
+                foreach (var script in beforeScripts)
+                {
+                    _platformService.RunAnonymousScript(script, options);
+                }
+            }
         }
     }
 }

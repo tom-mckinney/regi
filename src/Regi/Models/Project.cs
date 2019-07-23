@@ -43,6 +43,8 @@ namespace Regi.Models
 
         public bool RawOutput { get; set; }
 
+        public ProjectOptions Scripts { get; set; }
+
         [JsonIgnore]
         public ConcurrentBag<AppProcess> Processes { get; set; } = new ConcurrentBag<AppProcess>();
 

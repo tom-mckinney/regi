@@ -49,12 +49,13 @@ namespace Regi.Test.Services
         }
 
         [Theory]
-        [InlineData(8080, true)]
-        [InlineData(8888, false)]
-        [InlineData(53483, false)]
-        public void ContainsPort_Mac_returns_true_if_port_is_listening(int port, bool isListening)
+        [InlineData(8080, true, "MacNetstat.txt")]
+        [InlineData(8888, false, "MacNetstat.txt")]
+        [InlineData(53483, false, "MacNetstat.txt")]
+        [InlineData(9000, false, "MacNetstat-CLOSE_WAIT.txt")]
+        public void ContainsPort_Mac_returns_true_if_port_is_listening(int port, bool isListening, string fileName)
         {
-            FileInfo responseFile = new FileInfo(Path.Combine(Directory.GetCurrentDirectory(), "SystemResponses", "Mac", "MacNetstat.txt"));
+            FileInfo responseFile = new FileInfo(Path.Combine(Directory.GetCurrentDirectory(), "SystemResponses", "Mac", fileName));
 
             if (!responseFile.Exists)
                 throw new FileNotFoundException("Could not find test file");

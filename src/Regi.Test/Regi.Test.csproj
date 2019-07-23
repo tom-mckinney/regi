@@ -161,6 +161,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="SystemResponses\Mac\MacNetstat-CLOSE_WAIT.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="SystemResponses\Mac\MacNetstat.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
