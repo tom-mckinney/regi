@@ -132,7 +132,10 @@ namespace Regi
                     {
                         foreach (var process in project.Processes)
                         {
-                            _cleanupService.KillProcessTree(process, options);
+                            if (process?.Process != null)
+                            {
+                                _cleanupService.KillProcessTree(process, options);
+                            }
                         }
                     }
                 }

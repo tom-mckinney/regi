@@ -35,23 +35,9 @@ namespace Regi.Utilities
 
         private static string TryFindNpmExePath()
         {
-            var fileName = Environment.ExpandEnvironmentVariables(FileName);
-
-            if (File.Exists(fileName))
+            if (PathUtility.TryGetPathFile(FileName, out string fileName))
             {
-                return Path.GetFullPath(fileName);
-            }
-
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                fileName += ".cmd";
-            }
-
-            foreach (string pathVar in (Environment.GetEnvironmentVariable("PATH") ?? "").Split(';'))
-            {
-                string path = pathVar.Trim();
-                if (!string.IsNullOrEmpty(path) && File.Exists(path = Path.Combine(path, fileName)))
-                    return Path.GetFullPath(path);
+                return fileName;
             }
 
             return null;

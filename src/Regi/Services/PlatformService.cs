@@ -77,7 +77,11 @@ namespace Regi.Services
 
         public void RunAnonymousScript(string script, RegiOptions options)
         {
-            string fileName = RuntimeInfo.IsWindows ? "powershell.exe" : "bash";
+            string scriptExecutable = PathUtility.GetFileNameFromScript(script);
+            if (!PathUtility.TryGetPathFile(scriptExecutable, out string fileName, RuntimeInfo.IsWindows))
+            {
+                fileName = RuntimeInfo.IsWindows ? "powershell.exe" : "bash";
+            }
 
             using (var process = ProcessUtility.CreateProcess(fileName, script))
             {

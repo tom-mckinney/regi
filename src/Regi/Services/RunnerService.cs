@@ -198,7 +198,7 @@ namespace Regi.Services
                         {
                             _console.WriteSuccessLine($"Finished build for project {project.Name}", ConsoleLineStyle.LineAfter);
                         }
-                        else
+                        else if (project.OutputStatus != AppStatus.Unknown)
                         {
                             _console.WriteErrorLine($"Build for project {project.Name} exited with status {project.OutputStatus}", ConsoleLineStyle.LineAfter);
                         }

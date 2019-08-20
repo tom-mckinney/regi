@@ -140,7 +140,7 @@ namespace Regi.Test.Services
 
             configuration.Apps[0].Scripts = new ProjectOptions
             {
-                { AppTask.Start.ToString(), new List<string> { "foo bar -v" } }
+                { "start", new List<string> { "foo bar -v" } }
             };
 
             _platformServiceMock.Setup(m => m.RunAnonymousScript("foo bar -v", It.IsAny<RegiOptions>()))
