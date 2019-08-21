@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Regi.Services;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -8,12 +9,14 @@ namespace Regi.Utilities
 {
     public static class PathUtility
     {
+        private static readonly string[] WindowsExtensionsLookup = new string[] { ".exe", ".cmd" };
+
         public static bool TryGetPathFile(string fileName, out string pathToFile)
         {
-            return TryGetPathFile(fileName, out pathToFile, RuntimeInformation.IsOSPlatform(OSPlatform.Windows));
+            return TryGetPathFile(fileName, new RuntimeInfo(), out pathToFile);
         }
 
-        public static bool TryGetPathFile(string fileName, out string pathToFile, bool isWindows)
+        public static bool TryGetPathFile(string fileName, IRuntimeInfo runtimeInfo, out string pathToFile)
         {
             fileName = Environment.ExpandEnvironmentVariables(fileName);
 
@@ -23,18 +26,33 @@ namespace Regi.Utilities
                 return true;
             }
 
-            if (isWindows && !fileName.EndsWith(".cmd"))
-            {
-                fileName += ".cmd";
-            }
-
-            foreach (string pathVar in (Environment.GetEnvironmentVariable("PATH") ?? "").Split(';'))
+            char pathSeparator = runtimeInfo.IsWindows ? ';' : ':';
+            string[] pathVariables = (Environment.GetEnvironmentVariable("PATH") ?? "").Split(pathSeparator);
+            foreach (var pathVar in pathVariables)
             {
                 string path = pathVar.Trim();
-                if (!string.IsNullOrEmpty(path) && File.Exists(path = Path.Combine(path, fileName)))
+                if (!string.IsNullOrWhiteSpace(path))
                 {
-                    pathToFile = Path.GetFullPath(path);
-                    return true;
+                    if (runtimeInfo.IsWindows)
+                    {
+                        string pathWithExtension;
+                        foreach (var extension in WindowsExtensionsLookup)
+                        {
+                            if (File.Exists(pathWithExtension = Path.Combine(path, fileName + extension)))
+                            {
+                                pathToFile = Path.GetFullPath(pathWithExtension);
+                                return true;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (File.Exists(path = Path.Combine(path, fileName)))
+                        {
+                            pathToFile = Path.GetFullPath(path);
+                            return true;
+                        }
+                    }
                 }
             }
 
@@ -42,7 +60,7 @@ namespace Regi.Utilities
             return false;
         }
 
-        public static string GetFileNameFromScript(string script)
+        public static string GetFileNameFromCommand(string script)
         {
             if (string.IsNullOrWhiteSpace(script))
             {

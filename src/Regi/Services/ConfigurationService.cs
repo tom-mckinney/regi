@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Regi.Extensions;
 using Regi.Models;
+using Regi.Models.Exceptions;
 using Regi.Utilities;
 using System;
 using System.Collections.Generic;
@@ -29,7 +30,7 @@ namespace Regi.Services
 
             if (startupFile == null || !startupFile.Exists)
             {
-                throw new FileNotFoundException($"Could not find regi.json or startup.json in directory: {directory.FullName}");
+                throw new RegiException($"Could not find regi.json or startup.json in directory: {directory.FullName}");
             }
 
             using (StreamReader sr = new StreamReader(startupFile.OpenRead()))

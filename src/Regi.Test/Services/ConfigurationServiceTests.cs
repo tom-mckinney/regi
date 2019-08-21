@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using Regi.Extensions;
 using Regi.Models;
+using Regi.Models.Exceptions;
 using Regi.Services;
 using Regi.Test.Helpers;
 using Regi.Utilities;
@@ -54,7 +55,7 @@ namespace Regi.Test.Services
 
             var service = CreateService();
 
-            Assert.Throws<FileNotFoundException>(() => service.GetConfiguration());
+            Assert.Throws<RegiException>(() => service.GetConfiguration());
         }
 
         [Theory]

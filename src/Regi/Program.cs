@@ -6,6 +6,7 @@ using Regi.Abstractions;
 using Regi.Commands;
 using Regi.Extensions;
 using Regi.Models;
+using Regi.Models.Exceptions;
 using Regi.Services;
 using System;
 
@@ -38,6 +39,10 @@ namespace Regi
             try
             {
                 return app.Execute(args);
+            }
+            catch (RegiException e)
+            {
+                return e.LogAndReturnStatus(console);
             }
             catch (JsonSerializationException e)
             {

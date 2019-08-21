@@ -17,7 +17,7 @@ namespace Regi.Test.Utilities
         [InlineData("npm dotnet wumbo", "npm")]
         public void GetFileNameFromScript_returns_expected_file_name(string script, string expectedFileName)
         {
-            string actualFileName = PathUtility.GetFileNameFromScript(script);
+            string actualFileName = PathUtility.GetFileNameFromCommand(script);
 
             Assert.Equal(expectedFileName, actualFileName);
         }
@@ -28,7 +28,7 @@ namespace Regi.Test.Utilities
         [InlineData("  ")]
         public void GetfileNameFromScript_throws_if_script_is_null_or_empty(string script)
         {
-            Assert.Throws<ArgumentException>(() => PathUtility.GetFileNameFromScript(script));
+            Assert.Throws<ArgumentException>(() => PathUtility.GetFileNameFromCommand(script));
         }
     }
 }
