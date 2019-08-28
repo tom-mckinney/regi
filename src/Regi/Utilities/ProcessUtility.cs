@@ -60,11 +60,11 @@ namespace Regi.Utilities
                 out stdout, out stderr);
         }
 
-        public static Process CreateProcess(string fileName, string arguments)
+        public static Process CreateProcess(string fileName, string arguments, string workingDirectory = null)
         {
             var startInfo = new ProcessStartInfo
             {
-                WorkingDirectory = DirectoryUtility.TargetDirectoryPath,
+                WorkingDirectory = DirectoryUtility.GetDirectoryPath(workingDirectory, false) ?? DirectoryUtility.TargetDirectoryPath,
                 FileName = fileName,
                 Arguments = arguments,
                 RedirectStandardOutput = true,

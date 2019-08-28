@@ -44,5 +44,31 @@ namespace Regi.Test.Utilities
 
             Assert.Throws<DirectoryNotFoundException>(() => DirectoryUtility.GetDirectoryPath(path));
         }
+
+        [Fact]
+        public void GetDirectoryPath_with_file_that_does_not_exist_does_not_throw_if_throwIfNotFound_is_false()
+        {
+            string path = PathHelper.SampleDirectoryPath("FAKE_DIRECTORY/Fake.csproj");
+
+            Assert.Null(DirectoryUtility.GetDirectoryPath(path, false));
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData(" ")]
+        public void GetDirectoryPath_throws_if_path_is_null(string path)
+        {
+            Assert.Throws<ArgumentException>(() => DirectoryUtility.GetDirectoryPath(path));
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData(" ")]
+        public void GetDirectoryPath_does_not_throw_if_path_is_null_and_throwIfNotFound_is_false(string path)
+        {
+            Assert.Null(DirectoryUtility.GetDirectoryPath(path, false));
+        }
     }
 }

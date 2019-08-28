@@ -14,7 +14,7 @@ namespace Regi.Services
     {
         IRuntimeInfo RuntimeInfo { get; }
         Process GetKillProcess(string processName, RegiOptions options);
-        void RunAnonymousScript(string script, RegiOptions options);
+        void RunAnonymousScript(string script, RegiOptions options, string workingDirectory = null);
     }
 
     public class PlatformService : IPlatformService
@@ -75,7 +75,7 @@ namespace Regi.Services
             return process;
         }
 
-        public void RunAnonymousScript(string script, RegiOptions options)
+        public void RunAnonymousScript(string script, RegiOptions options, string workingDirectory = null)
         {
             string scriptExecutable = PathUtility.GetFileNameFromCommand(script);
             if (!PathUtility.TryGetPathFile(scriptExecutable, RuntimeInfo, out string fileName))
@@ -92,7 +92,7 @@ namespace Regi.Services
                 _console.WriteDefaultLine($"Executing '{fileName} {script}'");
             }
 
-            using (var process = ProcessUtility.CreateProcess(fileName, script))
+            using (var process = ProcessUtility.CreateProcess(fileName, script, workingDirectory))
             {
                 process.ErrorDataReceived += ProcessUtility.WriteOutput(_console, ConsoleLogLevel.Error);
                 if (options.Verbose)

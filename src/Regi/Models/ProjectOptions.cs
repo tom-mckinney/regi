@@ -3,35 +3,35 @@ using System.Linq;
 
 namespace Regi.Models
 {
-    public class ProjectOptions : Dictionary<string, IList<string>>
+    public class ProjectOptions<TValue> : Dictionary<string, IList<TValue>>
     {
-        public void AddOptions(string command, params string[] options)
+        public void AddOptions(string command, params TValue[] options)
         {
             if (ContainsKey(command) && this[command] != null)
             {
-                foreach(var option in options)
+                foreach (var option in options)
                 {
                     this[command].Add(option);
                 }
             }
             else
             {
-                this[command] = new List<string>(options);
+                this[command] = new List<TValue>(options);
             }
         }
 
-        public bool TryGetValue(AppTask task, out IList<string> options)
+        public bool TryGetValue(AppTask task, out IList<TValue> options)
         {
-            IEnumerable<string> values = new List<string>();
+            IEnumerable<TValue> values = new List<TValue>();
 
             string key = task.ToString().ToLowerInvariant();
 
-            if (TryGetValue(key, out IList<string> taskOptions))
+            if (TryGetValue(key, out IList<TValue> taskOptions))
             {
                 values = values.Concat(taskOptions);
             }
 
-            if (TryGetValue("*", out IList<string> anyOptions))
+            if (TryGetValue("*", out IList<TValue> anyOptions))
             {
                 values = values.Concat(anyOptions);
             }
@@ -40,5 +40,9 @@ namespace Regi.Models
 
             return options.Count > 0;
         }
+    }
+
+    public class ProjectOptions : ProjectOptions<string>
+    {
     }
 }

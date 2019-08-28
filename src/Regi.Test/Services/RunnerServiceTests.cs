@@ -3,6 +3,7 @@ using Regi.Models;
 using Regi.Services;
 using Regi.Test.Helpers;
 using Regi.Utilities;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -134,17 +135,55 @@ namespace Regi.Test.Services
         }
 
         [Fact]
-        public void Start_runs_before_scripts_if_they_are_specified()
+        public void Start_runs_simple_script_before_starting_if_they_are_specified()
         {
             var configuration = SampleProjects.ConfigurationGood;
 
-            configuration.Apps[0].Scripts = new ProjectOptions
+            configuration.Apps[0].Scripts = new ProjectOptions<object>
             {
-                { "start", new List<string> { "foo bar -v" } }
+                { "start", new List<object> { "foo bar -v" } }
             };
 
-            _platformServiceMock.Setup(m => m.RunAnonymousScript("foo bar -v", It.IsAny<RegiOptions>()))
+            _platformServiceMock.Setup(m => m.RunAnonymousScript("foo bar -v", It.IsAny<RegiOptions>(), null))
                 .Verifiable();
+
+            var processes = _runnerService.Start(configuration.Apps, TestOptions.Create());
+
+            _platformServiceMock.Verify();
+        }
+
+        [Fact]
+        public void Start_runs_app_script_in_working_directory_before_starting_if_they_are_specified()
+        {
+            string workingDirectory = PathHelper.SampleDirectoryPath("ConfigurationGood");
+
+            var configuration = SampleProjects.ConfigurationGood;
+
+            configuration.Apps[0].Scripts = new ProjectOptions<object>
+            {
+                { "start", new List<object> { new AppScript("foo bar -v", workingDirectory) } }
+            };
+
+            _platformServiceMock.Setup(m => m.RunAnonymousScript("foo bar -v", It.IsAny<RegiOptions>(), workingDirectory))
+                .Verifiable();
+
+            var processes = _runnerService.Start(configuration.Apps, TestOptions.Create());
+
+            _platformServiceMock.Verify();
+        }
+
+        [Fact]
+        public void Start_does_not_run_script_if_it_is_not_string_or_app_script()
+        {
+            var configuration = SampleProjects.ConfigurationGood;
+
+            configuration.Apps[0].Scripts = new ProjectOptions<object>
+            {
+                { "start", new List<object> { new { Foo = "Bar" } } }
+            };
+
+            _platformServiceMock.Setup(m => m.RunAnonymousScript(It.IsAny<string>(), It.IsAny<RegiOptions>(), It.IsAny<string>()))
+                .Throws(new Exception("This should not be called"));
 
             var processes = _runnerService.Start(configuration.Apps, TestOptions.Create());
 

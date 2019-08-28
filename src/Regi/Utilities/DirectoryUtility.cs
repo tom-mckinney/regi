@@ -24,8 +24,20 @@ namespace Regi.Utilities
             _targetDirectoryPath = path;
         }
 
-        public static string GetDirectoryPath(string path)
+        public static string GetDirectoryPath(string path, bool throwIfNotFound = true)
         {
+            if (string.IsNullOrWhiteSpace(path))
+            {
+                if (throwIfNotFound)
+                {
+                    throw new ArgumentException("Path cannot be null", nameof(path));
+                }
+                else
+                {
+                    return null;
+                }
+            }
+
             string absolutePath = Path.GetFullPath(path, TargetDirectoryPath);
 
             if (Directory.Exists(absolutePath))
@@ -36,10 +48,12 @@ namespace Regi.Utilities
             {
                 return Path.GetDirectoryName(absolutePath);
             }
-            else
+            else if (throwIfNotFound)
             {
                 throw new DirectoryNotFoundException($"Could not find project, {absolutePath}");
             }
+
+            return null;
         }
 
         public static string GetDirectoryShortName(string path)

@@ -312,25 +312,21 @@ namespace Regi.Services
             _console.WriteSuccessLine("Finished killing processess successfuly", ConsoleLineStyle.LineBeforeAndAfter);
         }
 
-        public void RunLifecycleScripts(ProjectOptions allScripts, AppTask task, RegiOptions options)
-        {
-            if (allScripts?.Count > 0 && allScripts.TryGetValue(task.ToString(), out IList<string> scripts))
-            {
-                foreach (var script in scripts)
-                {
-
-                }
-            }
-        }
-
         private void RunScriptsForTask(Project project, AppTask task, RegiOptions options)
         {
             if (project.Scripts?.Count > 0
-                    && project.Scripts.TryGetValue(task, out IList<string> beforeScripts))
+                    && project.Scripts.TryGetValue(task, out IList<object> beforeScripts))
             {
                 foreach (var script in beforeScripts)
                 {
-                    _platformService.RunAnonymousScript(script, options);
+                    if (script is string simpleScript)
+                    {
+                        _platformService.RunAnonymousScript(simpleScript, options);
+                    }
+                    else if (script is AppScript appScript)
+                    {
+                        _platformService.RunAnonymousScript(appScript.Run, options, appScript.Path);
+                    }
                 }
             }
         }
