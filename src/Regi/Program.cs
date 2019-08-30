@@ -20,6 +20,8 @@ namespace Regi
     [Subcommand(typeof(ListCommand))]
     [Subcommand(typeof(KillCommand))]
     [Subcommand(typeof(VersionCommand))]
+    [Subcommand(typeof(HijackCommand))]
+    [Subcommand(typeof(BroadcastCommand))] // TODO: delete this
     public class Program
     {
         public static int Main(string[] args) => MainWithConsole(PhysicalConsole.Singleton, args);
@@ -41,6 +43,10 @@ namespace Regi
                 return app.Execute(args);
             }
             catch (RegiException e)
+            {
+                return e.LogAndReturnStatus(console);
+            }
+            catch (CommandParsingException e)
             {
                 return e.LogAndReturnStatus(console);
             }

@@ -9,7 +9,7 @@ namespace Regi.Utilities
 {
     public static class PathUtility
     {
-        private static readonly string[] WindowsExtensionsLookup = new string[] { ".exe", ".cmd" };
+        private static readonly string[] WindowsExtensionsLookup = new string[] { ".exe", ".cmd", ".bat" };
 
         public static bool TryGetPathFile(string fileName, out string pathToFile)
         {

@@ -11,29 +11,47 @@ namespace Regi.Extensions
     {
         public static int LogAndReturnStatus(this RegiException e, IConsole console)
         {
-            console.WriteErrorLine(e.Message);
+            LogMessage(e, console);
+
+            return 1;
+        }
+
+        public static int LogAndReturnStatus(this CommandParsingException e, IConsole console)
+        {
+            LogMessage(e, console);
 
             return 1;
         }
 
         public static int LogAndReturnStatus(this Exception e, IConsole console)
         {
-            string failureMessage = e.InnerException?.Message ?? e.Message;
-
-            console.WriteErrorLine(failureMessage);
-            console.WriteLine();
-            console.WriteErrorLine($"Stack Trace: {e.StackTrace}");
+            LogMessageAndDetails(e, console);
 
             return 1;
         }
 
         public static int LogAndReturnStatus(this JsonSerializationException e, IConsole console)
         {
-            console.WriteErrorLine(e.Message);
-            console.WriteLine();
-            console.WriteErrorLine($"Stack Trace: {e.StackTrace}");
+            LogMessageAndDetails(e, console);
 
             return 1;
+        }
+
+        private static void LogMessage(Exception e, IConsole console)
+        {
+            string message = e.InnerException?.Message ?? e.Message;
+
+            console.WriteErrorLine(message);
+        }
+
+        private static void LogMessageAndDetails(Exception e, IConsole console)
+        {
+            string message = e.InnerException?.Message ?? e.Message;
+
+            console.WriteErrorLine(message);
+            console.WriteLine();
+            console.WriteErrorLine($"Type: {e.GetType().Name}");
+            console.WriteErrorLine($"Stack Trace: {e.StackTrace}");
         }
     }
 }
