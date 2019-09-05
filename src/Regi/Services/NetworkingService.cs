@@ -9,6 +9,8 @@ namespace Regi.Services
     public interface INetworkingService
     {
         bool IsPortListening(int port);
+
+        string GetTcpMessage(string address, int port);
     }
 
     public class NetworkingService : INetworkingService
@@ -39,7 +41,7 @@ namespace Regi.Services
 
             Process netstat = new Process
             {
-                StartInfo =
+                StartInfo = new ProcessStartInfo
                 {
                     FileName =  _runtime.IsWindows || _runtime.IsWindowsLinux ? "netstat.exe" : "netstat",
                     Arguments = "-tna",
@@ -83,6 +85,11 @@ namespace Regi.Services
 
                     return isListening;
                 });
+        }
+
+        public string GetTcpMessage(string address, int port)
+        {
+            throw new System.NotImplementedException();
         }
     }
 }

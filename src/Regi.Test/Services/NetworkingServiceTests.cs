@@ -72,5 +72,17 @@ namespace Regi.Test.Services
 
             _runtimeInfoMock.Verify();
         }
+
+        [Fact]
+        public void GetTcpMessage_returns_message_as_string_when_recieved()
+        {
+            throw new NotImplementedException();
+        }
+
+        [Fact]
+        public void GetTcpMessage_waits_indefintetly_if_no_connection_is_made()
+        {
+            throw new NotImplementedException();
+        }
     }
 }
