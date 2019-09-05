@@ -150,6 +150,8 @@ namespace Regi.Services
                 OnKill = (processId) => HandleDispose(project, processId, options)
             };
 
+            output.InitializeOutputStream(project);
+
             process.StartInfo.CopyEnvironmentVariables(options.VariableList);
             SetEnvironmentVariables(process, project);
 
@@ -177,7 +179,7 @@ namespace Regi.Services
                 }
                 else
                 {
-                    process.OutputDataReceived += HandleDataReceivedSilently();
+                    process.OutputDataReceived += BroadcastDataRecieved(output);
                 }
             }
 
@@ -254,6 +256,14 @@ namespace Regi.Services
 
         public virtual DataReceivedEventHandler HandleDataReceivedSilently() => new DataReceivedEventHandler((o, e) =>
         {
+        });
+
+        public virtual DataReceivedEventHandler BroadcastDataRecieved(AppProcess output) => new DataReceivedEventHandler((o, e) =>
+        {
+            if (!string.IsNullOrEmpty(e.Data))
+            {
+                output.WriteToOutputStream(e.Data);
+            }
         });
 
         public virtual EventHandler HandleExited(AppProcess output) => new EventHandler((o, e) =>

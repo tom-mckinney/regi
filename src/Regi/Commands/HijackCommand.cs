@@ -4,8 +4,10 @@ using Regi.Services;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.IO.Pipes;
 using System.Linq;
+using System.Net.Sockets;
 using System.Security.Principal;
 using System.Text;
 using System.Threading;
@@ -16,56 +18,60 @@ namespace Regi.Commands
     public class HijackCommand : CommandBase
     {
         private static int numClients = 4;
+        private readonly IBroadcastService _broadcastService;
 
-        public HijackCommand(IProjectManager projectManager, IConfigurationService configurationService, IConsole console) : base(projectManager, configurationService, console)
+        public HijackCommand(IBroadcastService broadcastService, IProjectManager projectManager, IConfigurationService configurationService, IConsole console) : base(projectManager, configurationService, console)
         {
+            _broadcastService = broadcastService;
         }
+
+        private static NamedPipeClientStream PipeClient { get; set; }
 
         protected override Func<StartupConfig, IEnumerable<Project>> GetTargetProjects => (c) => c.Apps.Concat(c.Tests);
 
         protected override int Execute(IList<Project> projects)
         {
-            if (true)
+            foreach (var project in projects)
             {
-                if (true)
+                _broadcastService.RequestBroadcast(project);
+            }
+
+            return 0;
+        }
+
+        protected int OldExecute(IList<Project> projects)
+        {
+            console.WriteLine($"Hijacking {projects.Count} projects");
+
+            //foreach (var project in projects)
+            {
+                using (PipeClient = new NamedPipeClientStream(".", $"regi_Backend", PipeDirection.In))
                 {
-                    NamedPipeClientStream pipeClient =
-                        new NamedPipeClientStream(".", "testpipe",
-                            PipeDirection.InOut, PipeOptions.None,
-                            TokenImpersonationLevel.Impersonation);
-
                     Console.WriteLine("Connecting to server...\n");
-                    pipeClient.Connect();
+                    PipeClient.Connect();
 
-                    StreamString ss = new StreamString(pipeClient);
-                    // Validate the server's signature string
-                    if (ss.ReadString() == "I am the one true server!")
-                    {
-                        // The client security token is sent with the first write.
-                        // Send the name of the file whose contents are returned
-                        // by the server.
-                        ss.WriteString("c:\\textfile.txt");
+                    Console.WriteLine("Connected to pipe.");
+                    Console.WriteLine("There are currently {0} pipe server instances open.",
+                       PipeClient.NumberOfServerInstances);
 
-                        // Print the file to the screen.
-                        Console.Write(ss.ReadString());
-                    }
-                    else
+                    using (StreamReader sr = new StreamReader(PipeClient))
                     {
-                        Console.WriteLine("Server could not be verified.");
+                        while (true)
+                        {
+                            string temp;
+                            while ((temp = sr.ReadLine()) != null)
+                            {
+                                Console.WriteLine("Received from server: {0}", temp);
+                            }
+                            Thread.Sleep(200);
+                        }
+                        // Display the read text to the console
                     }
-                    pipeClient.Close();
-                    // Give the client process some time to display results before exiting.
-                    Thread.Sleep(4000);
                 }
             }
-            else
-            {
-                Console.WriteLine("\n*** Named pipe client stream with impersonation example ***\n");
-                StartClients();
-            }
 
-            Console.WriteLine("\n*** Named pipe client stream with impersonation example ***\n");
-            StartClients();
+            Console.Write("Press Enter to continue...");
+            Console.ReadLine();
 
             return 0;
         }

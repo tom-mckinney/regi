@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Pipes;
 using System.Linq;
+using System.Net;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 
@@ -15,148 +17,134 @@ namespace Regi.Commands
     [Command("broadcast", AllowArgumentSeparator = true)]
     public class BroadcastCommand : CommandBase
     {
-        private static int numThreads = 4;
 
-        public BroadcastCommand(IProjectManager projectManager, IConfigurationService configurationService, IConsole console) : base(projectManager, configurationService, console)
+        public BroadcastCommand(IBroadcastService broadcastService, IProjectManager projectManager, IConfigurationService configurationService, IConsole console) : base(projectManager, configurationService, console)
         {
+            _broadcastService = broadcastService;
         }
+
+        private static NamedPipeServerStream PipeServer { get; set;  }
+
+        private static StreamWriter _streamWriter;
+        //private static StreamWriter StreamWriter
+        //{
+        //    get
+        //    {
+        //        if (_streamWriter == null)
+        //        {
+        //            _streamWriter = new StreamWriter(PipeServer);
+
+        //            _streamWriter.AutoFlush = true;
+        //        }
+
+        //        return _streamWriter;
+        //    }
+        //}
 
         protected override Func<StartupConfig, IEnumerable<Project>> GetTargetProjects => (c) => c.Apps.Concat(c.Tests);
 
+        private readonly IBroadcastService _broadcastService;
+
         protected override int Execute(IList<Project> projects)
         {
+            _broadcastService.ListenForBroadcastRequests();
+
+            while (true)
+            {
+                console.WriteDefaultLine("Just chilling");
+
+                Thread.Sleep(2000);
+            }
+        }
+
+        protected int OldExecute(IList<Project> projects)
+        {
+            //TcpClient tcpClient = new TcpClient();
+
+            //tcpClient.Connect("localhost", 11420);
+
+            //tcpClient.GetStream().
+
+            
+
             console.WriteWarningLine("THESE ARE NOT THE DROID YOU ARE LOOKING FOR!", ConsoleLineStyle.LineAfter);
             console.WriteWarningLine("This command is only to be used for inital testing of the hijack command.");
 
-            int i;
-            Thread[] servers = new Thread[numThreads];
+            Thread pipeServerThread = new Thread(TestThread);
+            pipeServerThread.Start();
 
-            console.WriteLine("\n*** Named pipe server stream with impersonation example ***\n");
-            console.WriteLine("Waiting for client connect...\n");
-            for (i = 0; i < numThreads; i++)
+            for (int i = 0; true; i++)
             {
-                servers[i] = new Thread(ServerThread);
-                servers[i].Start();
+                var data = $"Rount {i}!";
+                //if (PipeServer.IsConnected)
+                //{
+                //    StreamWriter.WriteLine();
+                //}
+
+                TryWriteToPipe(data);
+
+                Thread.Sleep(1000);
             }
-            Thread.Sleep(250);
-            while (i > 0)
-            {
-                for (int j = 0; j < numThreads; j++)
-                {
-                    if (servers[j] != null)
-                    {
-                        if (servers[j].Join(250))
-                        {
-                            console.WriteLine("Server thread[{0}] finished.", servers[j].ManagedThreadId);
-                            servers[j] = null;
-                            i--;    // decrement the thread watch count
-                        }
-                    }
-                }
-            }
-            console.WriteLine("\nServer threads exhausted, exiting.");
+            //using (var PipeServer = new NamedPipeServerStream("regi_Backend", PipeDirection.InOut))
+            //{
+            //    Console.Write("Waiting for client connection...");
+            //    //pipeServer.WaitForConnection();
+            //    Console.WriteLine("Client connected.");
+
+            //    //using (StreamWriter sw = new StreamWriter(pipeServer))
+            //    {
+            //        //sw.AutoFlush = true;
+
+
+            //        //Console.Write("Enter text: ");
+
+            //        //sw.WriteLine(Console.ReadLine());
+            //    }
+            //}
 
             return 0;
         }
 
-        private static void ServerThread(object data)
+        private static void TryWriteToPipe(string data)
         {
-            NamedPipeServerStream pipeServer = new NamedPipeServerStream("testpipe", PipeDirection.InOut, numThreads);
-
-            int threadId = Thread.CurrentThread.ManagedThreadId;
-
-            // Wait for a client to connect
-            pipeServer.WaitForConnection();
-
-            Console.WriteLine("Client connected on thread[{0}].", threadId);
-            try
+            if (_streamWriter != null)
             {
-                // Read the request from the client. Once the client has
-                // written to the pipe its security token will be available.
-
-                StreamString ss = new StreamString(pipeServer);
-
-                // Verify our identity to the connected client using a
-                // string that the client anticipates.
-
-                ss.WriteString("I am the one true server!");
-                string filename = ss.ReadString();
-
-                // Read in the contents of the file while impersonating the client.
-                ReadFileToStream fileReader = new ReadFileToStream(ss, filename);
-
-                // Display the name of the user we are impersonating.
-                Console.WriteLine("Reading file: {0} on thread[{1}] as user: {2}.",
-                    filename, threadId, pipeServer.GetImpersonationUserName());
-                pipeServer.RunAsClient(fileReader.Start);
+                _streamWriter.WriteLine(data);
             }
-            // Catch the IOException that is raised if the pipe is broken
-            // or disconnected.
-            catch (IOException e)
+        }
+
+        private static void TestThread(object data)
+        {
+            PipeServer = new NamedPipeServerStream("regi_Backend", PipeDirection.Out);
             {
-                Console.WriteLine("ERROR: {0}", e.Message);
+                Console.Write("Waiting for client connection...");
+                PipeServer.WaitForConnection();
+                Console.WriteLine("Client connected.");
+
+                _streamWriter = new StreamWriter(PipeServer)
+                {
+                    AutoFlush = true
+                };
+
+                //for (int i = 0; true; i++)
+                //{
+                //    if (PipeServer.IsConnected)
+                //    {
+                //        StreamWriter.WriteLine($"Rount {i}!");
+                //    }
+
+                //    Thread.Sleep(1000);
+                //}
+                //using (StreamWriter sw = new StreamWriter(pipeServer))
+                {
+                    //sw.AutoFlush = true;
+
+
+                    //Console.Write("Enter text: ");
+
+                    //sw.WriteLine(Console.ReadLine());
+                }
             }
-            pipeServer.Close();
-        }
-    }
-
-    // Defines the data protocol for reading and writing strings on our stream
-    public class StreamString
-    {
-        private Stream ioStream;
-        private UnicodeEncoding streamEncoding;
-
-        public StreamString(Stream ioStream)
-        {
-            this.ioStream = ioStream;
-            streamEncoding = new UnicodeEncoding();
-        }
-
-        public string ReadString()
-        {
-            int len = 0;
-
-            len = ioStream.ReadByte() * 256;
-            len += ioStream.ReadByte();
-            byte[] inBuffer = new byte[len];
-            ioStream.Read(inBuffer, 0, len);
-
-            return streamEncoding.GetString(inBuffer);
-        }
-
-        public int WriteString(string outString)
-        {
-            byte[] outBuffer = streamEncoding.GetBytes(outString);
-            int len = outBuffer.Length;
-            if (len > UInt16.MaxValue)
-            {
-                len = (int)UInt16.MaxValue;
-            }
-            ioStream.WriteByte((byte)(len / 256));
-            ioStream.WriteByte((byte)(len & 255));
-            ioStream.Write(outBuffer, 0, len);
-            ioStream.Flush();
-
-            return outBuffer.Length + 2;
-        }
-    }
-
-    // Contains the method executed in the context of the impersonated user
-    public class ReadFileToStream
-    {
-        private string fn;
-        private StreamString ss;
-
-        public ReadFileToStream(StreamString str, string filename)
-        {
-            fn = filename;
-            ss = str;
-        }
-
-        public void Start()
-        {
-            string contents = File.ReadAllText(fn);
-            ss.WriteString(contents);
         }
     }
 }

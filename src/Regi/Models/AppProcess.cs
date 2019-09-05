@@ -2,6 +2,8 @@
 using Regi.Extensions;
 using System;
 using System.Diagnostics;
+using System.IO;
+using System.IO.Pipes;
 
 namespace Regi.Models
 {
@@ -56,6 +58,26 @@ namespace Regi.Models
         public bool ErrorDataHandled { get; internal set; } = false;
         public bool OutputDataHandled { get; internal set; } = false;
 
+        public virtual NamedPipeServerStream OutputStream { get; private set; }
+
+        public void InitializeOutputStream(Project project)
+        {
+            Console.WriteLine($"initializing stream at regi_{project.Name}");
+
+            OutputStream = new NamedPipeServerStream($"regi_{project.Name}", PipeDirection.Out);
+        }
+
+        private StreamWriter _outputStreamWriter;
+        public void WriteToOutputStream(string data)
+        {
+            if (_outputStreamWriter == null)
+            {
+                _outputStreamWriter = new StreamWriter(OutputStream);
+            }
+
+            Console.WriteLine("Writing to stream");
+            _outputStreamWriter.WriteLine(data);
+        }
 
         public void Start()
         {
