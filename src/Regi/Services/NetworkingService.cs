@@ -1,7 +1,10 @@
 ﻿using McMaster.Extensions.CommandLineUtils;
 using System.Diagnostics;
 using System.Linq;
+using System.Net;
 using System.Net.NetworkInformation;
+using System.Net.Sockets;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace Regi.Services
@@ -89,7 +92,33 @@ namespace Regi.Services
 
         public string GetTcpMessage(string address, int port)
         {
-            throw new System.NotImplementedException();
+            string message = null;
+
+            IPAddress localAddr = IPAddress.Parse(Constants.LocalAddress);
+            TcpListener server = new TcpListener(localAddr, Constants.LocalPort);
+
+            server.Start();
+
+            byte[] bytes = new byte[256];
+
+            while (message == null)
+            {
+                using (var client = server.AcceptTcpClient())
+                {
+                    using (var stream = client.GetStream())
+                    {
+                        int i;
+                        while (stream.CanRead && (i = stream.Read(bytes, 0, bytes.Length)) != 0)
+                        {
+                            message = Encoding.UTF8.GetString(bytes, 0, i);
+                        }
+                    }
+
+                    client.Close();
+                }
+            }
+
+            return message;
         }
     }
 }

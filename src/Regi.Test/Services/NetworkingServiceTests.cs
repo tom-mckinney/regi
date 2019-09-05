@@ -7,6 +7,7 @@ using System.IO;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -76,7 +77,43 @@ namespace Regi.Test.Services
         [Fact]
         public void GetTcpMessage_returns_message_as_string_when_recieved()
         {
-            throw new NotImplementedException();
+            _runtimeInfoMock.Setup(m => m.IsWindows).Returns(false).Verifiable();
+
+            string expectedMessage = "the foo is wicked bar today";
+            string actualMessage = "test";
+
+            var service = CreateService();
+
+            var getMessageThread = new Thread(() =>
+            {
+                actualMessage = service.GetTcpMessage(Constants.LocalAddress, Constants.LocalPort);
+            });
+
+            getMessageThread.Start();
+
+            var listener = TcpListener.Create(Constants.LocalPort);
+
+            listener.Start();
+
+            using (var tcpClient = listener.AcceptTcpClient())
+            {
+                using (var stream = tcpClient.GetStream())
+                {
+                    stream.Write(Encoding.UTF8.GetBytes(expectedMessage));
+                }
+
+                //var service = CreateService();
+
+                //string actualMessage = service.GetTcpMessage(Constants.LocalAddress, Constants.LocalPort);
+
+
+                tcpClient.Close();
+            }
+
+            getMessageThread.Join();
+
+            Assert.Equal(ThreadState.Stopped, getMessageThread.ThreadState);
+            Assert.Equal(expectedMessage, actualMessage);
         }
 
         [Fact]

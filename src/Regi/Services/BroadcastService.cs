@@ -68,7 +68,7 @@ namespace Regi.Services
                         {
                             string data = Encoding.UTF8.GetString(bytes, 0, i);
 
-                            Console.WriteLine(data);
+                            Console.WriteLine(data); // Handle to create stream connection
                         }
                     }
 
@@ -76,7 +76,5 @@ namespace Regi.Services
                 }
             }
         }
-
-
     }
 }
