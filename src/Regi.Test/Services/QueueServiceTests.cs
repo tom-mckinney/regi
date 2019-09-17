@@ -4,18 +4,19 @@ using Regi.Services;
 using Regi.Test.Helpers;
 using System.Collections.Generic;
 using System.Net;
+using System.Threading;
+using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace Regi.Test.Services
 {
-    [Collection("Parallel")]
+    [Collection(TestCollections.NoParallel)]
     public class QueueServiceTests
     {
         private readonly IQueueService _service;
         private readonly Mock<INetworkingService> _networkingServiceMock = new Mock<INetworkingService>(MockBehavior.Strict);
         private readonly TestConsole _console;
-        private readonly object _lock = new object();
 
         public QueueServiceTests(ITestOutputHelper output)
         {
@@ -24,62 +25,56 @@ namespace Regi.Test.Services
         }
 
         [Fact]
-        public void Queue_adds_to_parallel_by_default_and_serial_if_specified()
+        public async Task Queue_adds_to_async_by_default_and_serial_if_specified()
         {
-            lock (_lock)
+            int taskCount = 5;
+            int asyncExecutions = 0;
+            int serialExecutions = 0;
+
+            for (int i = 0; i < taskCount; i++)
             {
-                int taskCount = 5;
-                int parallelExecutions = 0;
-                int serialExecutions = 0;
-
-                for (int i = 0; i < taskCount; i++)
+                _service.Queue(false, () =>
                 {
-                    _service.Queue(false, () =>
-                    {
-                        parallelExecutions++;
-                    });
+                    asyncExecutions++;
+                }, CancellationToken.None);
 
-                    _service.Queue(true, () =>
-                    {
-                        serialExecutions++;
-                    });
-                }
-
-                _service.RunAll();
-
-                Assert.Equal(taskCount, parallelExecutions);
-                Assert.Equal(taskCount, ((QueueService)_service).ParallelActions.Count);
-
-                Assert.Equal(taskCount, serialExecutions);
-                Assert.Equal(taskCount, ((QueueService)_service).SerialActions.Count);
+                _service.Queue(true, () =>
+                {
+                    serialExecutions++;
+                }, CancellationToken.None);
             }
+
+            await _service.RunAllAsync(CancellationToken.None);
+
+            Assert.Equal(taskCount, asyncExecutions);
+            Assert.Equal(taskCount, ((QueueService)_service).AsyncActions.Count);
+
+            Assert.Equal(taskCount, serialExecutions);
+            Assert.Equal(taskCount, ((QueueService)_service).SerialActions.Count);
         }
 
         [Fact]
-        public void QueueParallel_can_add_and_run_all_tasks()
+        public async Task QueueAsync_can_add_and_run_all_tasks()
         {
-            lock (_lock)
+            int taskCount = 5;
+            int executions = 0;
+
+            for (int i = 0; i < taskCount; i++)
             {
-                int taskCount = 5;
-                int executions = 0;
-
-                for (int i = 0; i < taskCount; i++)
+                _service.QueueAsync(() =>
                 {
-                    _service.QueueParallel(() =>
-                    {
-                        executions++;
-                    });
-                }
-
-                _service.RunAll();
-
-                Assert.Equal(taskCount, executions);
-                Assert.Equal(taskCount, ((QueueService)_service).ParallelActions.Count);
+                    executions++;
+                }, CancellationToken.None);
             }
+
+            await _service.RunAllAsync(CancellationToken.None);
+
+            Assert.Equal(taskCount, executions);
+            Assert.Equal(taskCount, ((QueueService)_service).AsyncActions.Count);
         }
 
         [Fact]
-        public void QueueSerial_can_add_and_run_all_tasks()
+        public async Task QueueSerial_can_add_and_run_all_tasks()
         {
             int taskCount = 5;
             int executions = 0;
@@ -92,7 +87,7 @@ namespace Regi.Test.Services
                 });
             }
 
-            _service.RunAll();
+            await _service.RunAllAsync(CancellationToken.None);
 
             Assert.Equal(taskCount, executions);
             Assert.Equal(taskCount, ((QueueService)_service).SerialActions.Count);
@@ -102,22 +97,22 @@ namespace Regi.Test.Services
         [InlineData(3)]
         [InlineData(4)]
         [InlineData(5)]
-        public void Queue_adds_and_runs_serial_actions_after_parallel_actions(int taskCount)
+        public async Task Queue_adds_and_runs_serial_actions_after_async_actions(int taskCount)
         {
-            int parallelRunCount = 0;
+            int asyncRunCount = 0;
             int serialRunCount = 0;
 
-            _service.QueueParallel(() => parallelRunCount++);
-            _service.QueueParallel(() => parallelRunCount++);
+            _service.QueueAsync(() => asyncRunCount++, CancellationToken.None);
+            _service.QueueAsync(() => asyncRunCount++, CancellationToken.None);
 
             for (int i = 0; i < taskCount; i++)
             {
                 _service.QueueSerial(() => serialRunCount++);
             }
 
-            _service.RunAll();
+            await _service.RunAllAsync(CancellationToken.None);
 
-            Assert.Equal(2, parallelRunCount);
+            Assert.Equal(2, asyncRunCount);
             Assert.Equal(taskCount, serialRunCount);
         }
 
@@ -125,7 +120,7 @@ namespace Regi.Test.Services
         [InlineData(1)]
         [InlineData(2)]
         [InlineData(3)]
-        public void WaitOnPorts_waits_until_all_required_ports_are_being_listened_on(int expectedCallCount)
+        public async Task WaitOnPorts_waits_until_all_required_ports_are_being_listened_on(int expectedCallCount)
         {
             int port = 9080;
 
@@ -141,28 +136,28 @@ namespace Regi.Test.Services
                 })
                 .Verifiable();
 
-            _service.ConfirmProjectsStarted(new List<Project> { new Project { Name = "TestProject", Port = port } });
+            await _service.ConfirmProjectsStartedAsync(new List<Project> { new Project { Name = "TestProject", Port = port } }, CancellationToken.None);
 
             _networkingServiceMock.Verify(m => m.IsPortListening(port), Times.Exactly(expectedCallCount));
             Assert.Equal(callCount, expectedCallCount);
         }
 
         [Fact]
-        public void RunParallel_invokes_all_parallel_actions_in_parallel()
+        public async Task RunAsync_invokes_all_async_actions_asynchronously()
         {
             int callCount = 0;
 
-            _service.QueueParallel(() => callCount++);
-            _service.QueueParallel(() => callCount++);
-            _service.QueueParallel(() => callCount++);
+            _service.QueueAsync(() => callCount++, CancellationToken.None);
+            _service.QueueAsync(() => callCount++, CancellationToken.None);
+            _service.QueueAsync(() => callCount++, CancellationToken.None);
 
-            _service.RunParallel();
+            await ((QueueService)_service).RunAsyncActions(CancellationToken.None);
 
             Assert.Equal(3, callCount);
         }
 
         [Fact]
-        public void RunSerial_invokes_all_serial_actions_in_order_added()
+        public async Task RunSerial_invokes_all_serial_actions_in_order_added()
         {
             int callCount = 0;
 
@@ -170,28 +165,28 @@ namespace Regi.Test.Services
             _service.QueueSerial(() => callCount = 2);
             _service.QueueSerial(() => callCount = 3);
 
-            _service.RunSerial();
+            await ((QueueService)_service).RunSerialActions(CancellationToken.None);
 
             Assert.Equal(3, callCount);
         }
 
         [Fact]
-        public void RunAll_runs_all_parallel_actions_and_then_all_serial_actions()
+        public async Task RunAll_runs_all_async_actions_and_then_all_serial_actions()
         {
-            int parallelCount = 0;
+            int asyncCount = 0;
             int serialCount = 0;
 
-            _service.QueueParallel(() => parallelCount++);
-            _service.QueueParallel(() => parallelCount++);
-            _service.QueueParallel(() => parallelCount++);
+            _service.QueueAsync(() => asyncCount++, CancellationToken.None);
+            _service.QueueAsync(() => asyncCount++, CancellationToken.None);
+            _service.QueueAsync(() => asyncCount++, CancellationToken.None);
 
             _service.QueueSerial(() => serialCount++);
             _service.QueueSerial(() => serialCount++);
             _service.QueueSerial(() => serialCount++);
 
-            _service.RunAll();
+            await _service.RunAllAsync(CancellationToken.None);
 
-            Assert.Equal(3, parallelCount);
+            Assert.Equal(3, asyncCount);
             Assert.Equal(3, serialCount);
         }
     }

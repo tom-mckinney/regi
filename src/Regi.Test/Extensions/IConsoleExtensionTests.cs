@@ -29,7 +29,7 @@ namespace Regi.Test.Extensions
         {
             _console.WriteEmphasizedLine("Testo", style);
 
-            Assert.Equal(newLineCount, _console.LogOutput.Count(o => o == '\r'));
+            Assert.Equal(newLineCount, _console.LogOutput.Count(o => o == '\n'));
         }
     }
 }

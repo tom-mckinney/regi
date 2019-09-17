@@ -5,6 +5,7 @@ using Regi.Test.Helpers;
 using Regi.Utilities;
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using System.Text;
 using Xunit;
 using Xunit.Abstractions;
@@ -35,8 +36,8 @@ namespace Regi.Test.Services
             Assert.Equal(SampleProjects.ConfigurationGood.Apps.Count, output.Apps.Count);
             Assert.Equal(SampleProjects.ConfigurationGood.Tests.Count, output.Tests.Count);
 
-            Assert.Contains("Apps:", _console.LogOutput);
-            Assert.Contains("Tests:", _console.LogOutput);
+            Assert.Contains("Apps:", _console.LogOutput, StringComparison.InvariantCulture);
+            Assert.Contains("Tests:", _console.LogOutput, StringComparison.InvariantCulture);
         }
 
         [Theory]
@@ -53,9 +54,9 @@ namespace Regi.Test.Services
             Assert.Equal(testCount, output.Tests.Count);
 
             if (appCount <= 0)
-                Assert.DoesNotContain("Apps:", _console.LogOutput);
+                Assert.DoesNotContain("Apps:", _console.LogOutput, StringComparison.InvariantCulture);
             if (testCount <= 0)
-                Assert.DoesNotContain("Tests:", _console.LogOutput);
+                Assert.DoesNotContain("Tests:", _console.LogOutput, StringComparison.InvariantCulture);
         }
 
         [Fact]
@@ -76,11 +77,11 @@ namespace Regi.Test.Services
             Assert.Equal(0, outputSummary.FailCount);
             Assert.Equal(0, outputSummary.UnknownCount);
 
-            string expectedOutput = "\r";
-            expectedOutput += $" PASS  {SampleProjects.XunitTests.Name}\r";
-            expectedOutput += "\rTest projects: 1 succeeded, 1 total\rElapsed time: 100ms\r\r";
+            string expectedOutput = "";
+            expectedOutput += $" PASS  {SampleProjects.XunitTests.Name}";
+            expectedOutput += "Test projects: 1 succeeded, 1 totalElapsed time: 100ms";
 
-            Assert.Equal(expectedOutput, _console.LogOutput);
+            Assert.Equal(expectedOutput, _console.LogOutput.Replace(Environment.NewLine, string.Empty, StringComparison.InvariantCulture));
         }
 
         [Fact]
@@ -103,14 +104,14 @@ namespace Regi.Test.Services
             Assert.Equal(0, outputSummary.FailCount);
             Assert.Equal(0, outputSummary.UnknownCount);
 
-            string expectedOutput = "\r";
-            expectedOutput += $" PASS  {SampleProjects.TestCollection.Name}\r";
-            expectedOutput += $"  PASS  {DirectoryUtility.GetDirectoryShortName(SampleProjects.TestCollection.Paths[2])}\r";
-            expectedOutput += $"  PASS  {DirectoryUtility.GetDirectoryShortName(SampleProjects.TestCollection.Paths[1])}\r";
-            expectedOutput += $"  PASS  {DirectoryUtility.GetDirectoryShortName(SampleProjects.TestCollection.Paths[0])}\r";
-            expectedOutput += "\rTest projects: 1 succeeded, 1 total\rElapsed time: 100ms\r\r";
+            string expectedOutput = "";
+            expectedOutput += $" PASS  {SampleProjects.TestCollection.Name}";
+            expectedOutput += $"  PASS  {DirectoryUtility.GetDirectoryShortName(SampleProjects.TestCollection.Paths[2])}";
+            expectedOutput += $"  PASS  {DirectoryUtility.GetDirectoryShortName(SampleProjects.TestCollection.Paths[1])}";
+            expectedOutput += $"  PASS  {DirectoryUtility.GetDirectoryShortName(SampleProjects.TestCollection.Paths[0])}";
+            expectedOutput += "Test projects: 1 succeeded, 1 totalElapsed time: 100ms";
 
-            Assert.Equal(expectedOutput, _console.LogOutput);
+            Assert.Equal(expectedOutput, _console.LogOutput.Replace(Environment.NewLine, string.Empty, StringComparison.InvariantCulture));
         }
 
         [Fact]
@@ -133,14 +134,14 @@ namespace Regi.Test.Services
             Assert.Equal(1, outputSummary.FailCount);
             Assert.Equal(0, outputSummary.UnknownCount);
 
-            string expectedOutput = "\r";
-            expectedOutput += $" FAIL  {SampleProjects.TestCollection.Name}\r";
-            expectedOutput += $"  PASS  {DirectoryUtility.GetDirectoryShortName(SampleProjects.TestCollection.Paths[2])}\r";
-            expectedOutput += $"  PASS  {DirectoryUtility.GetDirectoryShortName(SampleProjects.TestCollection.Paths[1])}\r";
-            expectedOutput += $"  FAIL  {DirectoryUtility.GetDirectoryShortName(SampleProjects.TestCollection.Paths[0])}\r";
-            expectedOutput += "\rTest projects: 1 failed, 1 total\rElapsed time: 100ms\r\r";
+            string expectedOutput = "";
+            expectedOutput += $" FAIL  {SampleProjects.TestCollection.Name}";
+            expectedOutput += $"  PASS  {DirectoryUtility.GetDirectoryShortName(SampleProjects.TestCollection.Paths[2])}";
+            expectedOutput += $"  PASS  {DirectoryUtility.GetDirectoryShortName(SampleProjects.TestCollection.Paths[1])}";
+            expectedOutput += $"  FAIL  {DirectoryUtility.GetDirectoryShortName(SampleProjects.TestCollection.Paths[0])}";
+            expectedOutput += "Test projects: 1 failed, 1 totalElapsed time: 100ms";
 
-            Assert.Equal(expectedOutput, _console.LogOutput);
+            Assert.Equal(expectedOutput, _console.LogOutput.Replace(Environment.NewLine, string.Empty, StringComparison.InvariantCulture));
         }
     }
 }

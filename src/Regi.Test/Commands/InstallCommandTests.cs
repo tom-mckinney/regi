@@ -5,6 +5,8 @@ using Regi.Services;
 using Regi.Test.Helpers;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading;
+using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -34,25 +36,25 @@ namespace Regi.Test.Commands
         }
 
         [Fact]
-        public void Will_install_dependencies_for_all_projects_by_default()
+        public async Task Will_install_dependencies_for_all_projects_by_default()
         {
             _configServiceMock.Setup(m => m.GetConfiguration())
                 .Returns(SampleProjects.ConfigurationDefault)
                 .Verifiable();
-            _runnerServiceMock.Setup(m => m.Install(It.IsAny<IList<Project>>(), It.IsAny<RegiOptions>()))
-                .Callback<IList<Project>, RegiOptions>((projects, options) =>
+            _runnerServiceMock.Setup(m => m.InstallAsync(It.IsAny<IList<Project>>(), It.IsAny<RegiOptions>(), It.IsAny<CancellationToken>()))
+                .Callback((IList<Project> projects, RegiOptions options, CancellationToken token) =>
                 {
                     foreach (var p in projects)
                     {
                         p.Processes.Add(new AppProcess(new Process(), AppTask.Install, AppStatus.Success));
                     }
                 })
-                .Returns<IList<Project>, RegiOptions>((projects, options) => projects)
+                .Returns((IList<Project> projects, RegiOptions options, CancellationToken token) => Task.FromResult(projects))
                 .Verifiable();
 
             InstallCommand command = CreateCommand();
 
-            int statusCode = command.OnExecute();
+            int statusCode = await command.OnExecute();
 
             Assert.Equal(0, statusCode);
 
@@ -61,22 +63,22 @@ namespace Regi.Test.Commands
         }
 
         [Fact]
-        public void Returns_fail_count_as_exit_code()
+        public async Task Returns_fail_count_as_exit_code()
         {
             _configServiceMock.Setup(m => m.GetConfiguration())
                 .Returns(SampleProjects.ConfigurationDefault)
                 .Verifiable();
-            _runnerServiceMock.Setup(m => m.Install(It.IsAny<IList<Project>>(), It.IsAny<RegiOptions>()))
-                .Callback<IList<Project>, RegiOptions>((projects, options) =>
+            _runnerServiceMock.Setup(m => m.InstallAsync(It.IsAny<IList<Project>>(), It.IsAny<RegiOptions>(), It.IsAny<CancellationToken>()))
+                .Callback((IList<Project> projects, RegiOptions options, CancellationToken token) =>
                 {
                     projects[0].Processes.Add(new AppProcess(new Process(), AppTask.Install, AppStatus.Failure));
                 })
-                .Returns<IList<Project>, RegiOptions>((projects, options) => projects)
+                .Returns((IList<Project> projects, RegiOptions options, CancellationToken token) => Task.FromResult(projects))
                 .Verifiable();
 
             InstallCommand command = CreateCommand();
 
-            int testProjectCount = command.OnExecute();
+            int testProjectCount = await command.OnExecute();
 
             Assert.Equal(1, testProjectCount);
 

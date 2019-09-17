@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Regi.Models;
 using Regi.Services;
+using Regi.Services.Frameworks;
 using Regi.Test.Helpers;
 using System;
 using System.Collections.Generic;
@@ -51,7 +52,7 @@ namespace Regi.Test.Services
                     {
                         _console.WriteLine($"Failed to get framework service for framework type {projectFramework}. Details:\n{e}");
 
-                        throw e;
+                        throw;
                     }
                 }
             }

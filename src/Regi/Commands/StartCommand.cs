@@ -5,6 +5,7 @@ using Regi.Services;
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Regi.Commands
 {
@@ -23,13 +24,13 @@ namespace Regi.Commands
 
         protected override Func<StartupConfig, IEnumerable<Project>> GetTargetProjects => (c) => c.Apps;
 
-        protected override int Execute(IList<Project> projects)
+        protected override async Task<int> ExecuteAsync(IList<Project> projects, CancellationToken cancellationToken)
         {
-            _runnerService.Start(projects, Options);
+            await _runnerService.StartAsync(projects, Options, cancellationToken);
 
-            while (_options.RunIndefinitely)
+            while (_options.RunIndefinitely && !cancellationToken.IsCancellationRequested)
             {
-                Thread.Sleep(200);
+                await Task.Delay(200);
             }
 
             return 0;

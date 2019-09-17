@@ -20,6 +20,11 @@ namespace Regi.Utilities
             return name + extension;
         }
 
+        public static void KillProcessWindows(int processId, out string stdout, out string stderr)
+        {
+            RunProcessAndWaitForExit("taskkill", $"/T /F /PID {processId}", out stdout, out stderr);
+        }
+
         public static void GetAllChildIdsUnix(int parentId, ISet<int> children)
         {
             var exitCode = RunProcessAndWaitForExit(
@@ -79,7 +84,7 @@ namespace Regi.Utilities
             };
         }
 
-        public static int RunProcessAndWaitForExit(string fileName, string arguments, out string stdout, out string stderr)
+        public static int RunProcessAndWaitForExit(string fileName, string arguments, out string stdout, out string stderr, int waitToExitMs = 10_000)
         {
             using (var process = CreateProcess(fileName, arguments))
             {
@@ -87,7 +92,7 @@ namespace Regi.Utilities
 
                 stdout = null;
                 stderr = null;
-                if (process.WaitForExit((int)TimeSpan.FromSeconds(30).TotalMilliseconds))
+                if (process.WaitForExit(waitToExitMs))
                 {
                     stdout = process.StandardOutput.ReadToEnd();
                     stderr = process.StandardError.ReadToEnd();

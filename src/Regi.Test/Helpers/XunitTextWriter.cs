@@ -27,6 +27,8 @@ namespace Regi.Test.Helpers
         {
             lock (_writerLock)
             {
+                _sb.Append(ch);
+
                 if (ch == '\n')
                 {
                     string output = _sb?.ToString();
@@ -45,10 +47,6 @@ namespace Regi.Test.Helpers
 
                         _sb.Clear();
                     }
-                }
-                else
-                {
-                    _sb.Append(ch);
                 }
             }
         }

@@ -4,21 +4,25 @@ using Regi.Models;
 using Regi.Services;
 using System;
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Regi.Commands
 {
     public abstract class CommandBase : RegiOptions
     {
-        private readonly IProjectManager projectManager;
-        private readonly IConfigurationService configurationService;
-        protected readonly IConsole console;
+        private readonly IProjectManager _projectManager;
+        private readonly IConfigurationService _configurationService;
+        protected readonly IConsole _console;
 
         public CommandBase(IProjectManager projectManager, IConfigurationService configurationService, IConsole console)
         {
-            this.projectManager = projectManager;
-            this.configurationService = configurationService;
-            this.console = console;
+            _projectManager = projectManager;
+            _configurationService = configurationService;
+            _console = console;
         }
+
+        //public CancellationTokenSource CancellationTokenSource = new CancellationTokenSource();
 
         public RegiOptions Options
         {
@@ -45,13 +49,13 @@ namespace Regi.Commands
             {
                 if (RequireStartupConfig)
                 {
-                    Config = configurationService.GetConfiguration();
+                    Config = _configurationService.GetConfiguration();
 
-                    Options.VariableList = new VariableList(Config);
+                    Options.VariableList = new EnvironmentVariableDictionary(Config);
 
                     if (FilterProjects)
                     {
-                        projectManager.FilterAndTrackProjects(Options, Config, GetTargetProjects);
+                        _projectManager.FilterAndTrackProjects(Options, Config, GetTargetProjects);
                     }
                 }
             }
@@ -63,23 +67,23 @@ namespace Regi.Commands
                 }
                 else if (Options.Verbose)
                 {
-                    console.WriteWarningLine(e.Message);
+                    _console.WriteWarningLine(e.Message);
                 }
             }
         }
 
-        protected abstract int Execute(IList<Project> projects);
+        protected abstract Task<int> ExecuteAsync(IList<Project> projects, CancellationToken cancellationToken);
 
         protected virtual void AfterExecute()
         {
-            projectManager.KillAllProcesses(Options);
+            _projectManager.KillAllProcesses(Options);
         }
 
-        public virtual int OnExecute()
+        public virtual async Task<int> OnExecute()
         {
             BeforeExecute();
 
-            int statusCode = Execute(projectManager.Projects);
+            int statusCode = await ExecuteAsync(_projectManager.Projects, _projectManager.CancellationTokenSource.Token);
 
             AfterExecute();
 

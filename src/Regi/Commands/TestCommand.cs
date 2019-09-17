@@ -4,6 +4,8 @@ using Regi.Services;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Regi.Commands
 {
@@ -22,13 +24,13 @@ namespace Regi.Commands
 
         protected override Func<StartupConfig, IEnumerable<Project>> GetTargetProjects => (c) => c.Tests;
 
-        protected override int Execute(IList<Project> projects)
+        protected override async Task<int> ExecuteAsync(IList<Project> projects, CancellationToken cancellationToken)
         {
             Stopwatch stopwatch = new Stopwatch();
 
             stopwatch.Start();
 
-            _runnerService.Test(projects, Options);
+            await _runnerService.TestAsync(projects, Options, cancellationToken);
 
             stopwatch.Stop();
 

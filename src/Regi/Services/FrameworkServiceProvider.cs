@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Regi.Models;
+using Regi.Services.Frameworks;
 using System;
 using System.Collections.Generic;
 using System.Text;

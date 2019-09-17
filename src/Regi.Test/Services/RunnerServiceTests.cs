@@ -1,6 +1,7 @@
 ﻿using Moq;
 using Regi.Models;
 using Regi.Services;
+using Regi.Services.Frameworks;
 using Regi.Test.Helpers;
 using Regi.Utilities;
 using System;
@@ -8,12 +9,14 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace Regi.Test.Services
 {
-    [Collection("FileSystem")]
+    [Collection(TestCollections.NoParallel)]
     public class RunnerServiceTests
     {
         private readonly ITestOutputHelper _output;
@@ -46,7 +49,7 @@ namespace Regi.Test.Services
         }
 
         [Fact]
-        public void Start_returns_a_project_for_every_app_in_startup_config()
+        public async Task Start_returns_a_project_for_every_app_in_startup_config()
         {
             var configuration = SampleProjects.ConfigurationGood;
 
@@ -57,7 +60,7 @@ namespace Regi.Test.Services
                 .Returns<Project, string, RegiOptions>((p, s, o) => new AppProcess(new Process(), AppTask.Start, AppStatus.Success, p?.Port))
                 .Verifiable();
 
-            var processes = _runnerService.Start(configuration.Apps, TestOptions.Create());
+            var processes = await _runnerService.StartAsync(configuration.Apps, TestOptions.Create(), CancellationToken.None);
 
             Assert.Equal(configuration.Apps.Count, processes.Count);
             Assert.Single(processes, p => p.Port == 9080);
@@ -68,7 +71,7 @@ namespace Regi.Test.Services
         }
 
         [Fact]
-        public void Start_sets_port_and_url_variables_for_every_app_and_waits_on_port()
+        public async Task Start_sets_port_and_url_variables_for_every_app_and_waits_on_port()
         {
             _dotnetServiceMock.Setup(m => m.StartProject(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<RegiOptions>()))
                 .Returns<Project, string, RegiOptions>((p, s, o) => new AppProcess(new Process(), AppTask.Start, AppStatus.Success, p?.Port))
@@ -77,7 +80,7 @@ namespace Regi.Test.Services
                 .Returns<Project, string, RegiOptions>((p, s, b) => new AppProcess(new Process(), AppTask.Start, AppStatus.Success, p?.Port))
                 .Verifiable();
 
-            var projects = _runnerService.Start(SampleProjects.ConfigurationGood.Apps, TestOptions.Create());
+            var projects = await _runnerService.StartAsync(SampleProjects.ConfigurationGood.Apps, TestOptions.Create(), CancellationToken.None);
 
             foreach (var p in projects)
             {
@@ -91,7 +94,7 @@ namespace Regi.Test.Services
         }
 
         [Fact]
-        public void Start_adds_serial_projects_to_serial_queue_and_all_others_to_parallel_queue()
+        public async Task Start_adds_serial_projects_to_serial_queue_and_all_others_to_async_queue()
         {
             _dotnetServiceMock.Setup(m => m.StartProject(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<RegiOptions>()))
                 .Returns<Project, string, RegiOptions>((p, s, o) => new AppProcess(new Process(), AppTask.Start, AppStatus.Success, p?.Port))
@@ -100,9 +103,9 @@ namespace Regi.Test.Services
                 .Returns<Project, string, RegiOptions>((p, s, b) => new AppProcess(new Process(), AppTask.Start, AppStatus.Success, p?.Port))
                 .Verifiable();
 
-            var projects = _runnerService.Start(SampleProjects.ConfigurationGood.Apps, TestOptions.Create());
+            var projects = await _runnerService.StartAsync(SampleProjects.ConfigurationGood.Apps, TestOptions.Create(), CancellationToken.None);
 
-            Assert.Equal(2, _queueService.ParallelActions.Count);
+            Assert.Equal(2, _queueService.AsyncActions.Count);
             Assert.Single(_queueService.SerialActions);
         }
 
@@ -110,7 +113,7 @@ namespace Regi.Test.Services
         [InlineData(1)]
         [InlineData(2)]
         [InlineData(3)]
-        public void Start_creates_an_AppProcess_for_every_path_in_Project(int pathCount)
+        public async Task Start_creates_an_AppProcess_for_every_path_in_Project(int pathCount)
         {
             var appCollection = SampleProjects.AppCollection;
             appCollection.Paths = appCollection.Paths.Take(pathCount).ToList();
@@ -125,9 +128,9 @@ namespace Regi.Test.Services
             _nodeServiceMock.Setup(m => m.StartProject(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<RegiOptions>()))
                 .Throws(new System.Exception("Should not be called"));
 
-            var projects = _runnerService.Start(config.Apps, TestOptions.Create());
+            var projects = await _runnerService.StartAsync(config.Apps, TestOptions.Create(), CancellationToken.None);
 
-            Assert.Equal(pathCount, _queueService.ParallelActions.Count);
+            Assert.Equal(pathCount, _queueService.AsyncActions.Count);
             _dotnetServiceMock.Verify(m => m.StartProject(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<RegiOptions>()), Times.Exactly(pathCount));
 
             var project = Assert.Single(projects);
@@ -135,11 +138,11 @@ namespace Regi.Test.Services
         }
 
         [Fact]
-        public void Start_runs_simple_script_before_starting_if_they_are_specified()
+        public async Task Start_runs_simple_script_before_starting_if_they_are_specified()
         {
             var configuration = SampleProjects.ConfigurationGood;
 
-            configuration.Apps[0].Scripts = new ProjectOptions<object>
+            configuration.Apps[0].Scripts = new CommandDictionary<object>
             {
                 { "start", new List<object> { "foo bar -v" } }
             };
@@ -147,19 +150,19 @@ namespace Regi.Test.Services
             _platformServiceMock.Setup(m => m.RunAnonymousScript("foo bar -v", It.IsAny<RegiOptions>(), null))
                 .Verifiable();
 
-            var processes = _runnerService.Start(configuration.Apps, TestOptions.Create());
+            var processes = await _runnerService.StartAsync(configuration.Apps, TestOptions.Create(), CancellationToken.None);
 
             _platformServiceMock.Verify();
         }
 
         [Fact]
-        public void Start_runs_app_script_in_working_directory_before_starting_if_they_are_specified()
+        public async Task Start_runs_app_script_in_working_directory_before_starting_if_they_are_specified()
         {
             string workingDirectory = PathHelper.SampleDirectoryPath("ConfigurationGood");
 
             var configuration = SampleProjects.ConfigurationGood;
 
-            configuration.Apps[0].Scripts = new ProjectOptions<object>
+            configuration.Apps[0].Scripts = new CommandDictionary<object>
             {
                 { "start", new List<object> { new AppScript("foo bar -v", workingDirectory) } }
             };
@@ -167,17 +170,17 @@ namespace Regi.Test.Services
             _platformServiceMock.Setup(m => m.RunAnonymousScript("foo bar -v", It.IsAny<RegiOptions>(), workingDirectory))
                 .Verifiable();
 
-            var processes = _runnerService.Start(configuration.Apps, TestOptions.Create());
+            var processes = await _runnerService.StartAsync(configuration.Apps, TestOptions.Create(), CancellationToken.None);
 
             _platformServiceMock.Verify();
         }
 
         [Fact]
-        public void Start_does_not_run_script_if_it_is_not_string_or_app_script()
+        public async Task Start_does_not_run_script_if_it_is_not_string_or_app_script()
         {
             var configuration = SampleProjects.ConfigurationGood;
 
-            configuration.Apps[0].Scripts = new ProjectOptions<object>
+            configuration.Apps[0].Scripts = new CommandDictionary<object>
             {
                 { "start", new List<object> { new { Foo = "Bar" } } }
             };
@@ -185,19 +188,19 @@ namespace Regi.Test.Services
             _platformServiceMock.Setup(m => m.RunAnonymousScript(It.IsAny<string>(), It.IsAny<RegiOptions>(), It.IsAny<string>()))
                 .Throws(new Exception("This should not be called"));
 
-            var processes = _runnerService.Start(configuration.Apps, TestOptions.Create());
+            var processes = await _runnerService.StartAsync(configuration.Apps, TestOptions.Create(), CancellationToken.None);
 
             _platformServiceMock.Verify();
         }
 
         [Fact]
-        public void Test_returns_a_project_for_every_test_in_startup_config()
+        public async Task Test_returns_a_project_for_every_test_in_startup_config()
         {
             _dotnetServiceMock.Setup(m => m.TestProject(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<RegiOptions>()))
                 .Returns<Project, string, RegiOptions>((p, d, o) => new AppProcess(new Process(), AppTask.Start, AppStatus.Success, p?.Port))
                 .Verifiable();
 
-            var processes = _runnerService.Test(SampleProjects.ConfigurationGood.Tests, TestOptions.Create());
+            var processes = await _runnerService.TestAsync(SampleProjects.ConfigurationGood.Tests, TestOptions.Create(), CancellationToken.None);
 
             Assert.Equal(SampleProjects.ConfigurationGood.Tests.Count, processes.Count);
 
@@ -205,7 +208,7 @@ namespace Regi.Test.Services
         }
 
         [Fact]
-        public void Test_also_starts_every_requirement_for_each_test()
+        public async Task Test_also_starts_every_requirement_for_each_test()
         {
             TestQueueService dependencyQueueService = new TestQueueService(_console);
 
@@ -216,6 +219,7 @@ namespace Regi.Test.Services
             _frameworkServiceProviderMock.Setup(m => m.CreateScopedQueueService())
                 .Returns(dependencyQueueService)
                 .Verifiable();
+
             _nodeServiceMock.Setup(m => m.TestProject(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<RegiOptions>()))
                 .Returns(new AppProcess(new Process(), AppTask.Test, AppStatus.Success))
                 .Verifiable();
@@ -229,7 +233,7 @@ namespace Regi.Test.Services
                 .Returns(new AppProcess(new Process(), AppTask.Start, AppStatus.Success))
                 .Verifiable();
 
-            var projects = _runnerService.Test(tests, TestOptions.Create());
+            var projects = await _runnerService.TestAsync(tests, TestOptions.Create(), CancellationToken.None);
 
             Assert.Equal(tests.Count, projects.Count);
 
@@ -258,7 +262,7 @@ namespace Regi.Test.Services
         }
 
         [Fact]
-        public void Test_requirements_with_multiple_paths_will_start_every_path()
+        public async Task Test_requirements_with_multiple_paths_will_start_every_path()
         {
             var dependencyQueue = new TestQueueService(_console);
             var appCollection = SampleProjects.AppCollection;
@@ -280,7 +284,7 @@ namespace Regi.Test.Services
                     .Verifiable();
             }
 
-            var projects = _runnerService.Test(new List<Project> { testProject }, TestOptions.Create());
+            var projects = await _runnerService.TestAsync(new List<Project> { testProject }, TestOptions.Create(), CancellationToken.None);
 
             var actualTestProject = Assert.Single(projects);
             Assert.Same(testProject, actualTestProject);
@@ -288,27 +292,27 @@ namespace Regi.Test.Services
             var requiredProject = Assert.Single(testProject.RequiredProjects);
             Assert.Same(appCollection, requiredProject);
             Assert.Equal(3, requiredProject.Processes.Count);
-            Assert.Equal(3, dependencyQueue.ParallelActions.Count);
+            Assert.Equal(3, dependencyQueue.AsyncActions.Count);
 
             _dotnetServiceMock.Verify();
             _frameworkServiceProviderMock.Verify();
         }
 
         [Fact]
-        public void Test_adds_serial_projects_to_serial_queue_and_all_others_to_parallel_queue()
+        public async Task Test_adds_serial_projects_to_serial_queue_and_all_others_to_async_queue()
         {
             _dotnetServiceMock.Setup(m => m.TestProject(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<RegiOptions>()))
                 .Returns<Project, string, RegiOptions>((p, d, o) => new AppProcess(new Process(), AppTask.Start, AppStatus.Success, p?.Port))
                 .Verifiable();
 
-            var processes = _runnerService.Test(SampleProjects.ConfigurationGood.Tests, TestOptions.Create());
+            var processes = await _runnerService.TestAsync(SampleProjects.ConfigurationGood.Tests, TestOptions.Create(), CancellationToken.None);
 
-            Assert.Single(_queueService.ParallelActions);
+            Assert.Single(_queueService.AsyncActions);
             Assert.Single(_queueService.SerialActions);
         }
 
         [Fact]
-        public void Install_returns_a_process_for_every_app_and_test_project()
+        public async Task Install_returns_a_process_for_every_app_and_test_project()
         {
             _dotnetServiceMock.Setup(m => m.InstallProject(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<RegiOptions>()))
                 .Returns(new AppProcess(new Process(), AppTask.Install, AppStatus.Success))
@@ -321,7 +325,7 @@ namespace Regi.Test.Services
                 .Concat(SampleProjects.ConfigurationGood.Tests)
                 .ToList();
 
-            var processes = _runnerService.Install(projects, TestOptions.Create());
+            var processes = await _runnerService.InstallAsync(projects, TestOptions.Create(), CancellationToken.None);
 
             int appsCount = SampleProjects.ConfigurationGood.Apps.Count;
             int testsCount = SampleProjects.ConfigurationGood.Tests.Count;
@@ -331,7 +335,7 @@ namespace Regi.Test.Services
         }
 
         [Fact]
-        public void Install_sets_package_repo_to_value_configured_startup_file()
+        public async Task Install_sets_package_repo_to_value_configured_startup_file()
         {
             var projects = SampleProjects.ConfigurationGood.Apps
                 .Concat(SampleProjects.ConfigurationGood.Tests)
@@ -346,7 +350,7 @@ namespace Regi.Test.Services
                 .Returns(new AppProcess(new Process(), AppTask.Install, AppStatus.Success))
                 .Verifiable();
 
-            var processes = _runnerService.Install(projects, TestOptions.Create());
+            var processes = await _runnerService.InstallAsync(projects, TestOptions.Create(), CancellationToken.None);
 
             var dotnetApp = Assert.Single(processes, p => p.Framework == ProjectFramework.Dotnet && p.Type == ProjectType.Web && p.Port.HasValue);
             var nodeApp = Assert.Single(processes, p => p.Framework == ProjectFramework.Node && p.Type == ProjectType.Web && p.Port.HasValue);
@@ -356,7 +360,7 @@ namespace Regi.Test.Services
         }
 
         [Fact]
-        public void Install_will_also_install_for_any_required_dependencies()
+        public async Task Install_will_also_install_for_any_required_dependencies()
         {
             TestQueueService dependencyQueueService = new TestQueueService(_console);
 
@@ -376,7 +380,7 @@ namespace Regi.Test.Services
 
             ProjectManager.LinkProjectRequirements(projects, options, SampleProjects.ConfigurationDefault);
 
-            var outputProjects = _runnerService.Install(projects, options);
+            var outputProjects = await _runnerService.InstallAsync(projects, options, CancellationToken.None);
 
             var integrationTestProject = Assert.Single(outputProjects);
 
@@ -396,7 +400,7 @@ namespace Regi.Test.Services
         }
 
         [Fact]
-        public void Install_will_not_install_a_dependency_if_it_is_also_a_top_level_filtered_project()
+        public async Task Install_will_not_install_a_dependency_if_it_is_also_a_top_level_filtered_project()
         {
             TestQueueService dependencyQueueService = new TestQueueService(_console);
 
@@ -416,7 +420,7 @@ namespace Regi.Test.Services
 
             ProjectManager.LinkProjectRequirements(projects, TestOptions.Create(), SampleProjects.ConfigurationDefault);
 
-            var outputProjects = _runnerService.Install(projects, TestOptions.Create());
+            var outputProjects = await _runnerService.InstallAsync(projects, TestOptions.Create(), CancellationToken.None);
 
             var allAppsAndTests = SampleProjects.ConfigurationDefault.Apps
                 .Concat(SampleProjects.ConfigurationDefault.Tests)
@@ -441,7 +445,7 @@ namespace Regi.Test.Services
         }
 
         [Fact]
-        public void Install_will_not_install_a_dependency_if_it_has_already_been_installed_as_another_project_dependency()
+        public async Task Install_will_not_install_a_dependency_if_it_has_already_been_installed_as_another_project_dependency()
         {
             var app = SampleProjects.Backend;
 
@@ -472,7 +476,7 @@ namespace Regi.Test.Services
                 .Returns(() => new AppProcess(new Process(), AppTask.Install, AppStatus.Success))
                 .Verifiable();
 
-            var outputProjects = _runnerService.Install(config.Tests, options);
+            var outputProjects = await _runnerService.InstallAsync(config.Tests, options, CancellationToken.None);
 
             Assert.Equal(2, outputProjects.Count);
 
@@ -485,7 +489,78 @@ namespace Regi.Test.Services
         }
 
         [Fact]
-        public void Kill_calls_service_to_kill_for_each_ProjectFramework()
+        public async Task Build_will_build_every_project_for_given_framework()
+        {
+            var backend = SampleProjects.Backend;
+            var frontend = SampleProjects.Frontend;
+            var projects = new[] { backend, frontend };
+
+            var options = TestOptions.Create();
+
+            var backendBuildProccess = new AppProcess(new Process(), AppTask.Build, AppStatus.Success);
+            _dotnetServiceMock.Setup(m => m.BuildProject(backend, backend.AppDirectoryPaths[0], options))
+                .Returns(backendBuildProccess)
+                .Verifiable();
+
+            var frontendBuildProcess = new AppProcess(new Process(), AppTask.Build, AppStatus.Success);
+            _nodeServiceMock.Setup(m => m.BuildProject(frontend, frontend.AppDirectoryPaths[0], options))
+                .Returns(frontendBuildProcess)
+                .Verifiable();
+
+            var output = await _runnerService.BuildAsync(projects, options, CancellationToken.None);
+
+            Assert.Same(backend, output[0]);
+            Assert.Same(backendBuildProccess, output[0].Processes.First());
+            
+            Assert.Same(frontend, output[1]);
+            Assert.Same(frontendBuildProcess, output[1].Processes.First());
+
+            _dotnetServiceMock.Verify();
+            _nodeServiceMock.Verify();
+        }
+
+        [Fact]
+        public async Task Build_will_build_async_by_default()
+        {
+            var projects = new[] { SampleProjects.Backend, SampleProjects.Backend };
+
+            var options = TestOptions.Create();
+
+            _dotnetServiceMock.Setup(m => m.BuildProject(It.IsAny<Project>(), It.IsAny<string>(), options))
+                .Returns(new AppProcess(new Process(), AppTask.Build, AppStatus.Success))
+                .Verifiable();
+
+            await _runnerService.BuildAsync(projects, options, CancellationToken.None);
+
+            Assert.Equal(projects.Length, _queueService.AsyncActions.Count);
+            Assert.Empty(_queueService.SerialActions);
+
+            _dotnetServiceMock.Verify();
+        }
+
+        [Fact]
+        public async Task Build_will_build_in_serial_if_specified()
+        {
+            var projects = new[] { SampleProjects.Backend, SampleProjects.Backend };
+
+            var options = TestOptions.Create();
+            
+            options.NoParallel = true;
+
+            _dotnetServiceMock.Setup(m => m.BuildProject(It.IsAny<Project>(), It.IsAny<string>(), options))
+                .Returns(new AppProcess(new Process(), AppTask.Build, AppStatus.Success))
+                .Verifiable();
+
+            await _runnerService.BuildAsync(projects, options, CancellationToken.None);
+
+            Assert.Equal(projects.Length, _queueService.SerialActions.Count);
+            Assert.Empty(_queueService.AsyncActions);
+
+            _dotnetServiceMock.Verify();
+        }
+
+        [Fact]
+        public async Task Kill_calls_service_to_kill_for_each_ProjectFramework()
         {
             _nodeServiceMock.Setup(m => m.KillProcesses(It.IsAny<RegiOptions>()))
                 .Returns(new AppProcess(null, AppTask.Kill, AppStatus.Success))
@@ -497,14 +572,14 @@ namespace Regi.Test.Services
             var projects = SampleProjects.ConfigurationGood.Apps.Concat(SampleProjects.ConfigurationGood.Tests).ToList();
             var options = TestOptions.Create();
 
-            _runnerService.Kill(projects, options);
+            await _runnerService.KillAsync(projects, options, CancellationToken.None);
 
             _nodeServiceMock.Verify(m => m.KillProcesses(options), Times.Once);
             _dotnetServiceMock.Verify(m => m.KillProcesses(options), Times.Once);
         }
 
         [Fact]
-        public void Kill_will_call_kill_for_every_type_of_ProjectFramework_if_there_are_no_projects()
+        public async Task Kill_will_call_kill_for_every_type_of_ProjectFramework_if_there_are_no_projects()
         {
             _frameworkServiceProviderMock.Setup(m => m.GetAllProjectFrameworkTypes())
                 .Returns(new List<ProjectFramework> { ProjectFramework.Dotnet, ProjectFramework.Node })
@@ -518,7 +593,7 @@ namespace Regi.Test.Services
 
             var options = TestOptions.Create();
 
-            _runnerService.Kill(null, options);
+            await _runnerService.KillAsync(null, options, CancellationToken.None);
 
             _frameworkServiceProviderMock.Verify();
             _nodeServiceMock.Verify(m => m.KillProcesses(options), Times.Once);

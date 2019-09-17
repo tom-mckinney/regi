@@ -10,10 +10,10 @@ namespace Regi.Models
         [Argument(0, Description = "Name of the project")]
         public string Name { get; set; }
 
-        public string[] RemainingArguments { get; set; }
+        public List<string> RemainingArguments { get; set; }
 
         [Option(CommandOptionType.MultipleValue, Description = "Search pattern to exclude from the command")]
-        public string[] Exclude { get; set; }
+        public List<string> Exclude { get; set; }
 
         [Option(Description = "Project type")]
         public ProjectType? Type { get; set; }
@@ -22,7 +22,7 @@ namespace Regi.Models
         public bool Verbose { get; set; } = false;
 
         [Option(CommandOptionType.MultipleValue, Template = "-o --show-output", Description = "Show all output for given project or projects (verbose for individual project)")]
-        public string[] ShowOutput { get; set; }
+        public List<string> ShowOutput { get; set; }
 
         [Option(CommandOptionType.SingleValue, Description = "Source to install dependencies from")]
         public string Source { get; set; }
@@ -33,7 +33,7 @@ namespace Regi.Models
         [Option(CommandOptionType.NoValue, Description = "Return raw output without any formatting or verbosity settings")]
         public bool RawOutput { get; set; } = false;
 
-        public VariableList VariableList { get; set; }
+        public EnvironmentVariableDictionary VariableList { get; set; }
 
         public bool KillProcessesOnExit { get; set; } = true;
 

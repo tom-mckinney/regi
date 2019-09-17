@@ -63,5 +63,10 @@ namespace Regi.Utilities
 
             return Path.GetFileName(path);
         }
+
+        public static void ResetTargetDirectory()
+        {
+            _targetDirectoryPath = null;
+        }
     }
 }

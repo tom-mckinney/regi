@@ -102,7 +102,7 @@ namespace Regi.Extensions
             }
         }
 
-        public static void WritePropertyIfSpecified(this IConsole console, string propertyName, ProjectOptions propertyValue, int indentCount = 2)
+        public static void WritePropertyIfSpecified(this IConsole console, string propertyName, CommandDictionary propertyValue, int indentCount = 2)
         {
             if (propertyValue?.Count > 0)
             {

@@ -6,6 +6,6 @@ namespace Regi
 {
     public static class Constants
     {
-        public static TimeSpan DefaultTimeout = TimeSpan.FromSeconds(10);
+        public static readonly TimeSpan DefaultTimeout = TimeSpan.FromSeconds(10);
     }
 }

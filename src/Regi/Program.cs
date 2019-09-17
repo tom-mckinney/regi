@@ -8,6 +8,7 @@ using Regi.Extensions;
 using Regi.Models;
 using Regi.Models.Exceptions;
 using Regi.Services;
+using Regi.Services.Frameworks;
 using System;
 
 namespace Regi
@@ -28,8 +29,8 @@ namespace Regi
         {
             var services = ConfigureServices(console);
 
-            var app = new CommandLineApplication<Program>();
-
+            using var app = new CommandLineApplication<Program>();
+            
             app.Conventions
                 .UseDefaultConventions()
                 .UseConstructorInjection(services);
@@ -44,18 +45,17 @@ namespace Regi
             {
                 return e.LogAndReturnStatus(console);
             }
-            catch (JsonSerializationException e)
-            {
-                return e.LogAndReturnStatus(console);
-            }
-            catch (Exception e) when (e.InnerException is JsonSerializationException jsonException)
-            {
-                return jsonException.LogAndReturnStatus(console);
-            }
             catch (Exception e)
             {
-                return e.LogAndReturnStatus(console);
+                return e.LogAllDetailsAndReturnStatus(console);
             }
+            finally
+            {
+                var projectManager = app.GetRequiredService<IProjectManager>();
+
+                projectManager.KillAllProcesses(new RegiOptions());
+            }
+
         }
 
         public static IServiceProvider ConfigureServices(IConsole console)

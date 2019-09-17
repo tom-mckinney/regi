@@ -1,25 +1,23 @@
 ﻿using McMaster.Extensions.CommandLineUtils;
-using Newtonsoft.Json;
 using Regi.Extensions;
 using Regi.Models;
 using Regi.Utilities;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Net;
-using System.Net.NetworkInformation;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Regi.Services
 {
     public interface IRunnerService
     {
-        IList<Project> Start(IList<Project> projects, RegiOptions options);
-        IList<Project> Test(IList<Project> projects, RegiOptions options);
-        IList<Project> Build(IList<Project> projects, RegiOptions options);
-        IList<Project> Install(IList<Project> projects, RegiOptions options);
-        void Kill(IList<Project> projects, RegiOptions options);
+        Task<IList<Project>> StartAsync(IList<Project> projects, RegiOptions options, CancellationToken cancellationToken);
+        Task<IList<Project>> TestAsync(IList<Project> projects, RegiOptions options, CancellationToken cancellationToken);
+        Task<IList<Project>> BuildAsync(IList<Project> projects, RegiOptions options, CancellationToken cancellationToken);
+        Task<IList<Project>> InstallAsync(IList<Project> projects, RegiOptions options, CancellationToken cancellationToken);
+        Task KillAsync(IList<Project> projects, RegiOptions options, CancellationToken cancellationToken);
     }
 
     public class RunnerService : IRunnerService
@@ -47,7 +45,7 @@ namespace Regi.Services
             _console = console;
         }
 
-        public IList<Project> Start(IList<Project> projects, RegiOptions options)
+        public async Task<IList<Project>> StartAsync(IList<Project> projects, RegiOptions options, CancellationToken cancellationToken)
         {
             if (projects.Count <= 0)
                 _console.WriteEmphasizedLine("No projects found");
@@ -58,21 +56,21 @@ namespace Regi.Services
 
                 foreach (var path in project.AppDirectoryPaths)
                 {
-                    _queueService.Queue(project.Serial || options.NoParallel, () =>
+                    _queueService.Queue(project.Serial || options.NoParallel, async () =>
                     {
-                        InternalStartProject(project, path, options);
-                    });
+                        await InternalStartProject(project, path, options, cancellationToken);
+                    }, cancellationToken);
                 }
             }
 
-            _queueService.RunAll();
+            await _queueService.RunAllAsync(cancellationToken);
 
-            _queueService.ConfirmProjectsStarted(projects);
+            await _queueService.ConfirmProjectsStartedAsync(projects, cancellationToken);
 
             return projects;
         }
 
-        private AppProcess InternalStartProject(Project project, string applicationDirectoryPath, RegiOptions options)
+        private async Task<AppProcess> InternalStartProject(Project project, string applicationDirectoryPath, RegiOptions options, CancellationToken cancellationToken)
         {
             _console.WriteEmphasizedLine($"Starting project {project.Name} ({applicationDirectoryPath})");
 
@@ -85,12 +83,12 @@ namespace Regi.Services
                 project.Processes.Add(process);
             }
 
-            _queueService.WaitOnPort(project);
+            await _queueService.WaitOnPortAsync(project, cancellationToken);
 
             return process;
         }
 
-        public IList<Project> Test(IList<Project> projects, RegiOptions options)
+        public async Task<IList<Project>> TestAsync(IList<Project> projects, RegiOptions options, CancellationToken cancellationToken)
         {
             if (projects.Count <= 0)
                 _console.WriteEmphasizedLine("No projects found");
@@ -101,7 +99,7 @@ namespace Regi.Services
 
                 foreach (var path in project.AppDirectoryPaths)
                 {
-                    _queueService.Queue(project.Serial || options.NoParallel, () =>
+                    _queueService.Queue(project.Serial || options.NoParallel, async () =>
                     {
                         string appName = project.AppDirectoryPaths.Count > 1 ? $"{DirectoryUtility.GetDirectoryShortName(path)} ({project.Name})" : project.Name;
                         _console.WriteEmphasizedLine($"Starting tests for {appName}");
@@ -138,16 +136,16 @@ namespace Regi.Services
 
                                     foreach (var requiredPath in requiredProject.AppDirectoryPaths)
                                     {
-                                        dependencyQueue.Queue(noParallel, () =>
+                                        dependencyQueue.Queue(noParallel, async () =>
                                         {
-                                            InternalStartProject(requiredProject, requiredPath, requiredOptions);
-                                        });
+                                            await InternalStartProject(requiredProject, requiredPath, requiredOptions, cancellationToken);
+                                        }, cancellationToken);
                                     }
                                 }
                             }
 
-                            dependencyQueue.RunAll();
-                            dependencyQueue.ConfirmProjectsStarted(requiredProjectsWithPorts);
+                            await dependencyQueue.RunAllAsync(cancellationToken);
+                            await dependencyQueue.ConfirmProjectsStartedAsync(requiredProjectsWithPorts, cancellationToken);
                         }
 
                         var testProcess = _frameworkServiceProvider
@@ -168,16 +166,16 @@ namespace Regi.Services
 
                             _projectManager.KillAllProcesses(project.RequiredProjects, options);
                         }
-                    });
+                    }, cancellationToken);
                 }
             }
 
-            _queueService.RunAll();
+            await _queueService.RunAllAsync(cancellationToken);
 
             return projects;
         }
 
-        public IList<Project> Build(IList<Project> projects, RegiOptions options)
+        public async Task<IList<Project>> BuildAsync(IList<Project> projects, RegiOptions options, CancellationToken cancellationToken)
         {
             if (projects.Count <= 0)
                 _console.WriteEmphasizedLine("No projects found");
@@ -186,13 +184,15 @@ namespace Regi.Services
             {
                 foreach (var path in project.AppDirectoryPaths)
                 {
-                    _queueService.QueueSerial(() =>
+                    _queueService.Queue(project.Serial || options.NoParallel, () =>
                     {
                         _console.WriteEmphasizedLine($"Starting build for project {project.Name}");
 
-                        project.Processes.Add(_frameworkServiceProvider
+                        var buildProcess = _frameworkServiceProvider
                             .GetFrameworkService(project.Framework)
-                            .BuildProject(project, path, options));
+                            .BuildProject(project, path, options);
+
+                        project.Processes.Add(buildProcess);
 
                         if (project.OutputStatus == AppStatus.Success)
                         {
@@ -202,16 +202,16 @@ namespace Regi.Services
                         {
                             _console.WriteErrorLine($"Build for project {project.Name} exited with status {project.OutputStatus}", ConsoleLineStyle.LineAfter);
                         }
-                    });
+                    }, cancellationToken);
                 }
             }
 
-            _queueService.RunAll();
+            await _queueService.RunAllAsync(cancellationToken);
 
             return projects;
         }
 
-        public IList<Project> Install(IList<Project> projects, RegiOptions options)
+        public async Task<IList<Project>> InstallAsync(IList<Project> projects, RegiOptions options, CancellationToken cancellationToken)
         {
             if (projects.Count <= 0)
                 _console.WriteEmphasizedLine("No projects found");
@@ -255,18 +255,18 @@ namespace Regi.Services
                                         dependencyQueue.Queue(requiredProject.Serial || options.NoParallel, () =>
                                         {
                                             InternalInstallProject(requiredProject, requiredPath, requiredOptions);
-                                        });
+                                        }, cancellationToken);
                                     }
                                 }
                             }
 
-                            dependencyQueue.RunAll();
+                            dependencyQueue.RunAllAsync(cancellationToken).Wait(cancellationToken);
                         }
-                    });
+                    }, cancellationToken);
                 }
             }
 
-            _queueService.RunAll();
+            await _queueService.RunAllAsync(cancellationToken);
 
             return projects;
         }
@@ -286,7 +286,7 @@ namespace Regi.Services
             return process;
         }
 
-        public void Kill(IList<Project> projects, RegiOptions options)
+        public Task KillAsync(IList<Project> projects, RegiOptions options, CancellationToken cancellationToken)
         {
             _console.WriteEmphasizedLine("Committing regicide...");
 
@@ -310,6 +310,8 @@ namespace Regi.Services
             }
 
             _console.WriteSuccessLine("Finished killing processess successfuly", ConsoleLineStyle.LineBeforeAndAfter);
+
+            return Task.CompletedTask;
         }
 
         private void RunScriptsForTask(Project project, AppTask task, RegiOptions options)

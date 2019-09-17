@@ -15,7 +15,7 @@ using Xunit.Abstractions;
 
 namespace Regi.Test.Services
 {
-    [Collection("FileSystem")]
+    [Collection(TestCollections.NoParallel)]
     public class ConfigurationServiceTests
     {
         private readonly IConsole _console;
@@ -67,9 +67,10 @@ namespace Regi.Test.Services
 
             var service = CreateService();
 
-            var ex = Assert.Throws<JsonSerializationException>(() => service.GetConfiguration());
+            var ex = Assert.Throws<RegiException>(() => service.GetConfiguration());
 
-            _console.WriteErrorLine(nameof(ProjectType));
+            Assert.IsType<JsonSerializationException>(ex.InnerException);
+
             ex.LogAndReturnStatus(_console);
         }
 

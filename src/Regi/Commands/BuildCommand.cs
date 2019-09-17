@@ -4,6 +4,8 @@ using Regi.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Regi.Commands
 {
@@ -20,9 +22,9 @@ namespace Regi.Commands
 
         protected override Func<StartupConfig, IEnumerable<Project>> GetTargetProjects => (c) => c.Apps.Concat(c.Tests);
 
-        protected override int Execute(IList<Project> projects)
+        protected override async Task<int> ExecuteAsync(IList<Project> projects, CancellationToken cancellationToken)
         {
-            _runnerService.Build(projects, Options);
+            await _runnerService.BuildAsync(projects, Options, cancellationToken);
 
             return 0;
         }

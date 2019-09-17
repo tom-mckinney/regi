@@ -12,24 +12,26 @@ namespace Regi.Services
 {
     public interface IQueueService
     {
-        ParallelOptions ParallelOptions { get; }
+        void Queue(bool isSerial, Action action, CancellationToken cancellationToken);
+        void Queue(bool isSerial, Func<Task> action, CancellationToken cancellationToken);
 
-        void Queue(bool isSerial, Action action);
-        void QueueParallel(Action action);
+        void QueueAsync(Action action, CancellationToken cancellationToken);
+        void QueueAsync(Func<Task> action, CancellationToken cancellationToken);
+        
         void QueueSerial(Action action);
+        void QueueSerial(Func<Task> action);
 
-        void RunAll();
-        void RunParallel();
-        void RunSerial();
+        Task RunAllAsync(CancellationToken cancellationToken);
 
-        void ConfirmProjectsStarted(IList<Project> projects);
-        void ConfirmProjectsStarted(IDictionary<int, Project> projects);
+        Task ConfirmProjectsStartedAsync(IList<Project> projects, CancellationToken cancellationToken);
+        Task ConfirmProjectsStartedAsync(IDictionary<int, Project> projects, CancellationToken cancellationToken);
 
-        void WaitOnPort(Project project);
+        Task WaitOnPortAsync(Project project, CancellationToken cancellationToken);
     }
 
     public class QueueService : IQueueService
     {
+        private readonly SemaphoreSlim semaphore = new SemaphoreSlim(3, 3);
         private readonly IConsole _console;
         private readonly INetworkingService _networkingService;
 
@@ -39,79 +41,107 @@ namespace Regi.Services
             _networkingService = networkingService;
         }
 
-        public ConcurrentQueue<Action> ParallelActions { get; } = new ConcurrentQueue<Action>();
-        public ConcurrentQueue<Action> SerialActions { get; } = new ConcurrentQueue<Action>();
+        public ConcurrentQueue<Func<Task>> AsyncActions { get; } = new ConcurrentQueue<Func<Task>>();
+        public ConcurrentQueue<Func<Task>> SerialActions { get; } = new ConcurrentQueue<Func<Task>>();
 
-        public ParallelOptions ParallelOptions => new ParallelOptions
+
+        public void Queue(bool isSerial, Action action, CancellationToken cancellationToken)
         {
-            MaxDegreeOfParallelism = 3
-        };
+            Queue(isSerial, () => Task.Run(action), cancellationToken);
+        }
 
-        public void Queue(bool isSerial, Action action)
+        public void Queue(bool isSerial, Func<Task> action, CancellationToken cancellationToken)
         {
             if (isSerial)
                 QueueSerial(action);
             else
-                QueueParallel(action);
+                QueueAsync(action, cancellationToken);
         }
 
-        public void QueueParallel(Action action)
+        public void QueueAsync(Action action, CancellationToken cancellationToken)
         {
-            ParallelActions.Enqueue(action);
+            QueueAsync(() => Task.Run(action), cancellationToken);
+        }
+
+        public void QueueAsync(Func<Task> action, CancellationToken cancellationToken)
+        {
+            AsyncActions.Enqueue(action);
         }
 
         public void QueueSerial(Action action)
         {
+            QueueSerial(() => Task.Run(action));
+        }
+
+        public void QueueSerial(Func<Task> action)
+        {
             SerialActions.Enqueue(action);
         }
 
-        public void RunAll()
+        public async Task RunAllAsync(CancellationToken cancellationToken)
         {
-            RunParallel();
+            cancellationToken.ThrowIfCancellationRequested();
 
-            RunSerial();
+            await RunAsyncActions(cancellationToken);
+
+            cancellationToken.ThrowIfCancellationRequested();
+
+            await RunSerialActions(cancellationToken);
         }
 
-        public void RunParallel()
+        public async Task RunAsyncActions(CancellationToken cancellationToken)
         {
-            Parallel.Invoke(ParallelOptions, ParallelActions.ToArray());
-        }
-
-        public void RunSerial()
-        {
-            foreach (var action in SerialActions)
+            foreach (var action in AsyncActions)
             {
-                action();
+                await semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
+
+                cancellationToken.ThrowIfCancellationRequested();
+
+                await action();
+
+                semaphore.Release();
             }
         }
 
-        public virtual void WaitOnPort(Project project)
+        public async Task RunSerialActions(CancellationToken cancellationToken)
+        {
+            foreach (var action in SerialActions)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+
+                await action();
+            }
+        }
+
+        public virtual async Task WaitOnPortAsync(Project project, CancellationToken cancellationToken)
         {
             if (project.Port.HasValue)
             {
                 bool isListening = false;
 
-                while (!isListening)
+                while (!isListening && !cancellationToken.IsCancellationRequested)
                 {
-                    Thread.Sleep(200);
+                    await Task.Delay(200);
 
                     isListening = _networkingService.IsPortListening(project.Port.Value);
                 }
+
+                cancellationToken.ThrowIfCancellationRequested();
 
                 _console.WriteSuccessLine($"{project.Name} is now listening on port {project.Port}");
             }
         }
 
-        public void ConfirmProjectsStarted(IList<Project> projects)
+        public Task ConfirmProjectsStartedAsync(IList<Project> projects, CancellationToken cancellationToken)
         {
             IDictionary<int, Project> projectsWithPorts = projects
                 .Where(p => p.Port.HasValue)
                 .ToDictionary(p => p.Port.Value);
 
-            ConfirmProjectsStarted(projectsWithPorts);
+            return ConfirmProjectsStartedAsync(projectsWithPorts, cancellationToken);
         }
 
-        public virtual void ConfirmProjectsStarted(IDictionary<int, Project> projects)
+        public virtual async Task ConfirmProjectsStartedAsync(IDictionary<int, Project> projects, CancellationToken cancellationToken)
         {
             string projectPluralization = projects.Count == 1 ? "project" : "projects";
             string hasPluralization = projects.Count == 1 ? "has" : "have";
@@ -119,9 +149,9 @@ namespace Regi.Services
 
             IList<int> activePorts = new List<int>();
 
-            while (projects.Count > activePorts.Count)
+            while (projects.Count > activePorts.Count && !cancellationToken.IsCancellationRequested)
             {
-                Thread.Sleep(200);
+                await Task.Delay(200);
 
                 foreach (var port in projects.Keys.Where(k => !activePorts.Contains(k)))
                 {
@@ -131,6 +161,8 @@ namespace Regi.Services
                     }
                 }
             }
+
+            cancellationToken.ThrowIfCancellationRequested();
 
             _console.WriteSuccessLine("All projects started", ConsoleLineStyle.LineBeforeAndAfter);
         }

@@ -3,6 +3,8 @@ using Regi.Models;
 using Regi.Services;
 using System;
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Regi.Commands
 {
@@ -19,11 +21,11 @@ namespace Regi.Commands
 
         protected override Func<StartupConfig, IEnumerable<Project>> GetTargetProjects => (c) => new List<Project>();
 
-        protected override int Execute(IList<Project> projects)
+        protected override Task<int> ExecuteAsync(IList<Project> projects, CancellationToken cancellationToken)
         {
             summaryService.PrintDomainSummary(Config, Options);
 
-            return 0;
+            return Task.FromResult(0);
         }
     }
 }

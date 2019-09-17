@@ -12,13 +12,13 @@ namespace Regi.Extensions
 {
     public static class ProcessExtensions
     {
-        public static void CopyEnvironmentVariables(this ProcessStartInfo startInfo, VariableList varList)
+        public static void CopyEnvironmentVariables(this ProcessStartInfo startInfo, EnvironmentVariableDictionary varList)
         {
-            if (varList != null && varList.Any())
+            if (varList?.Any() == true)
             {
                 foreach (var env in varList)
                 {
-                    startInfo.EnvironmentVariables.TryAdd(env.Key, env.Value);
+                    startInfo?.EnvironmentVariables.TryAdd(env.Key, env.Value);
                 }
             }
         }

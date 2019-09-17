@@ -5,8 +5,8 @@ using Regi.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 
 namespace Regi
 {
@@ -14,8 +14,9 @@ namespace Regi
     {
         IList<Project> Projects { get; }
 
+        CancellationTokenSource CancellationTokenSource { get; }
+
         IList<Project> FilterAndTrackProjects(RegiOptions options, StartupConfig config, Func<StartupConfig, IEnumerable<Project>> getTargetProjects);
-        IList<Project> FilterAndTrackProjects(RegiOptions options, params IEnumerable<Project>[] projectCollections);
         IList<Project> FilterByOptions(IEnumerable<Project> projects, RegiOptions options);
         void KillAllProcesses(RegiOptions options);
         void KillAllProcesses(IEnumerable<Project> projects, RegiOptions options);
@@ -34,6 +35,8 @@ namespace Regi
 
         public IList<Project> Projects { get; private set; } = new List<Project>();
 
+        public CancellationTokenSource CancellationTokenSource { get; } = new CancellationTokenSource();
+
         public IList<Project> FilterAndTrackProjects(RegiOptions options, StartupConfig config, Func<StartupConfig, IEnumerable<Project>> getTargetProjects)
         {
             var targetProjects = getTargetProjects(config);
@@ -42,18 +45,7 @@ namespace Regi
 
             LinkProjectRequirements(Projects, options, config);
 
-            _console.CancelKeyPress += HandleCancelEvent(options);
-
-            return Projects;
-        }
-
-        public IList<Project> FilterAndTrackProjects(RegiOptions options, params IEnumerable<Project>[] projectCollections)
-        {
-            var targetProjects = projectCollections.Aggregate((acc, list) => acc.Concat(list));
-
-            Projects = FilterByOptions(targetProjects, options);
-
-            _console.CancelKeyPress += HandleCancelEvent(options);
+            _console.CancelKeyPress += HandleCancelEvent;
 
             return Projects;
         }
@@ -144,9 +136,9 @@ namespace Regi
             _cleanupService.ShutdownBuildServers(options);
         }
 
-        public ConsoleCancelEventHandler HandleCancelEvent(RegiOptions options) => (o, e) =>
+        public ConsoleCancelEventHandler HandleCancelEvent => (o, e) =>
         {
-            KillAllProcesses(options);
+            CancellationTokenSource.Cancel();
         };
     }
 }

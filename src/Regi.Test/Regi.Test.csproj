@@ -1,96 +1,22 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <TargetFramework>netcoreapp3.0</TargetFramework>
+
     <IsPackable>false</IsPackable>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="_SampleProjects_\**" />
-    <EmbeddedResource Remove="_SampleProjects_\**" />
-    <None Remove="_SampleProjects_\**" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Remove="_SampleProjects_\Backend\Program.cs" />
-    <Compile Remove="_SampleProjects_\Backend\Startup.cs" />
-    <Compile Remove="_SampleProjects_\SampleAppError\Program.cs" />
-    <Compile Remove="_SampleProjects_\SampleAppLong\Program.cs" />
-    <Compile Remove="_SampleProjects_\SampleAppLong\Startup.cs" />
-    <Compile Remove="_SampleProjects_\SampleApp\Program.cs" />
-    <Compile Remove="_SampleProjects_\SampleFailedTests\UnitTest1.cs" />
-    <Compile Remove="_SampleProjects_\SampleSuccessfulTests\UnitTest1.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="_SampleProjects_\AppCollection\App1\Program.cs">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="_SampleProjects_\AppCollection\App1\Startup.cs">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="_SampleProjects_\AppCollection\App2\Program.cs">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="_SampleProjects_\AppCollection\App2\Startup.cs">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="_SampleProjects_\AppCollection\App3\Program.cs">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="_SampleProjects_\AppCollection\App3\Startup.cs">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="_SampleProjects_\AppCollection\App1\App1.csproj">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="_SampleProjects_\AppCollection\App2\App2.csproj">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="_SampleProjects_\AppCollection\App3\App3.csproj">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="_SampleProjects_\TestCollection\Test1\UnitTest1.cs">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="_SampleProjects_\TestCollection\Test2\UnitTest2.cs">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="_SampleProjects_\TestCollection\Test3\UnitTest3.cs">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="_SampleProjects_\ConfigurationBad\regi.json" />
-    <Content Include="_SampleProjects_\ConfigurationComplete\regi.json" />
-    <Content Include="_SampleProjects_\ConfigurationGood\regi.json" />
-    <Content Include="_SampleProjects_\ConfigurationRequires\regi.json" />
-    <Content Include="_SampleProjects_\ConfigurationWrongEnum\regi.json" />
-    <Content Include="_SampleProjects_\Frontend\package-lock.json" />
-    <Content Include="_SampleProjects_\Frontend\package.json" />
-    <Content Include="_SampleProjects_\IntegrationTests\package-lock.json" />
-    <Content Include="_SampleProjects_\IntegrationTests\package.json" />
-    <Content Include="_SampleProjects_\regi.json" />
-    <Content Include="_SampleProjects_\SampleNodeApp\package-lock.json" />
-    <Content Include="_SampleProjects_\SampleNodeApp\package.json" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="McMaster.Extensions.CommandLineUtils" Version="2.3.4" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.2.0" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.1.1" />
-    <PackageReference Include="Moq" Version="4.12.0" />
-    <PackageReference Include="xunit" Version="2.4.1" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.1">
+    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.9.6">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <DotNetCliToolReference Include="dotnet-xunit" Version="2.3.1" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="3.0.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.3.0" />
+    <PackageReference Include="Moq" Version="4.13.0" />
+    <PackageReference Include="xunit" Version="2.4.0" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.0" />
+    <PackageReference Include="coverlet.collector" Version="1.0.1" />
   </ItemGroup>
 
   <ItemGroup>
@@ -98,106 +24,25 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="_SampleProjects_\Backend\Backend.csproj">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="_SampleProjects_\Backend\Program.cs">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="_SampleProjects_\Backend\Startup.cs">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="_SampleProjects_\Dockerfile" />
-    <None Include="_SampleProjects_\Frontend\pages\index.js" />
-    <None Include="_SampleProjects_\Frontend\pages\index.styles.js" />
-    <None Include="_SampleProjects_\IntegrationTests\.babelrc" />
-    <None Include="_SampleProjects_\IntegrationTests\jest-puppeteer.config.js" />
-    <None Include="_SampleProjects_\IntegrationTests\journeys\homepage.test.js" />
-    <None Include="_SampleProjects_\SampleAppError\Program.cs">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="_SampleProjects_\SampleAppError\SampleAppError.csproj">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="_SampleProjects_\SampleAppLong\Program.cs">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="_SampleProjects_\SampleAppLong\SampleAppLong.csproj">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="_SampleProjects_\SampleAppLong\Startup.cs">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="_SampleProjects_\SampleApp\Program.cs">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="_SampleProjects_\SampleApp\SampleApp.csproj">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="_SampleProjects_\SampleFailedTests\SampleFailedTests.csproj">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="_SampleProjects_\SampleFailedTests\UnitTest1.cs">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="_SampleProjects_\SampleNodeApp\failing.test.js" />
-    <None Include="_SampleProjects_\SampleNodeApp\index.js" />
-    <None Include="_SampleProjects_\SampleNodeApp\passing.test.js" />
-    <None Include="_SampleProjects_\SampleSuccessfulTests\SampleSuccessfulTests.csproj">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="_SampleProjects_\SampleSuccessfulTests\UnitTest1.cs">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="_SampleProjects_\TestCollection\Test1\Test1.csproj">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="_SampleProjects_\TestCollection\Test2\Test2.csproj">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="_SampleProjects_\TestCollection\Test3\Test3.csproj">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    <Compile Remove="_SampleProjects_\**" />
+    <EmbeddedResource Remove="_SampleProjects_\**" />
+    <None Remove="_SampleProjects_\**" />
   </ItemGroup>
-
+  
   <ItemGroup>
-    <None Update="SystemResponses\Mac\MacNetstat-CLOSE_WAIT.txt">
+    <None Include="SystemResponses\**\*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="SystemResponses\Mac\MacNetstat.txt">
+    <None Include="_SampleProjects_\**\*.csproj" Exclude="**\obj\**\*;**\bin\**\*;**\node_modules\**\*;**\.next\**\*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="_SampleProjects_\Backend\Properties\launchSettings.json">
+    <None Include="_SampleProjects_\**\*.cs" Exclude="**\obj\**\*;**\bin\**\*;**\node_modules\**\*;**\.next\**\*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="_SampleProjects_\ConfigurationBad\startup.json">
+    <None Include="_SampleProjects_\**\*.json" Exclude="**\obj\**\*;**\bin\**\*;**\node_modules\**\*;**\.next\**\*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="_SampleProjects_\ConfigurationComplete\startup.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="_SampleProjects_\ConfigurationRequires\startup.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="_SampleProjects_\ConfigurationGood\startup.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="_SampleProjects_\ConfigurationWrongEnum\startup.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="_SampleProjects_\SampleNodeApp\failing.test.js">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="_SampleProjects_\SampleNodeApp\index.js">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="_SampleProjects_\SampleNodeApp\package-lock.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="_SampleProjects_\SampleNodeApp\package.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="_SampleProjects_\SampleNodeApp\passing.test.js">
+    <None Include="_SampleProjects_\**\*.js" Exclude="**\obj\**\*;**\bin\**\*;**\node_modules\**\*;**\.next\**\*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

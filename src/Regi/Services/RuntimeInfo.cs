@@ -23,7 +23,7 @@ namespace Regi.Services
 
         public bool IsLinux => RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
 
-        public bool IsWindowsLinux => IsLinux && RuntimeInformation.OSDescription.Contains("Microsoft");
+        public bool IsWindowsLinux => IsLinux && RuntimeInformation.OSDescription.Contains("Microsoft", StringComparison.InvariantCultureIgnoreCase);
 
         public string NewLine => Environment.NewLine;
     }

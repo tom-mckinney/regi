@@ -1,6 +1,7 @@
 ﻿using Moq;
 using Regi.Models;
 using Regi.Services;
+using Regi.Services.Frameworks;
 using Regi.Test.Helpers;
 using System;
 using System.Collections.Generic;

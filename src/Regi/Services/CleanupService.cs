@@ -1,6 +1,7 @@
 ﻿using McMaster.Extensions.CommandLineUtils;
 using Regi.Extensions;
 using Regi.Models;
+using Regi.Services.Frameworks;
 using Regi.Utilities;
 using System;
 using System.Collections.Generic;
@@ -36,12 +37,18 @@ namespace Regi.Services
 
         public void KillProcessTree(AppProcess process, RegiOptions options, TimeSpan timeout)
         {
+            if (process == null)
+            {
+                throw new ArgumentNullException(nameof(process));
+            }
+
+
             string stdout;
             string stderr;
 
             if (_isWindows)
             {
-                ProcessUtility.RunProcessAndWaitForExit("taskkill", $"/T /F /PID {process.ProcessId}", out stdout, out stderr);
+                ProcessUtility.KillProcessWindows(process.ProcessId, out stdout, out stderr);
                 LogOutputs(stdout, stderr, options);
             }
             else

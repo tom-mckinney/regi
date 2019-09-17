@@ -77,12 +77,12 @@ namespace Regi.Models
             }
         }
 
+        public Action<int> OnKill { get; set; }
+
         public void WaitForExit()
         {
             Process?.WaitForExit();
         }
-
-        public Action<int> OnKill { get; set; }
 
         public void Kill(IConsole console = null)
         {
@@ -97,6 +97,7 @@ namespace Regi.Models
             {
                 try
                 {
+                    Process?.Kill(true);
                     Process?.WaitForExit(timeout.Milliseconds);
                 }
                 catch (Exception e)

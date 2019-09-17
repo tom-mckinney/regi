@@ -45,7 +45,7 @@ namespace Regi.Services
                 }
                 catch (Exception e)
                 {
-                    throw new JsonSerializationException($"Configuration file was not properly formatted: {startupFile.FullName}{Environment.NewLine}{e.Message}", e);
+                    throw new RegiException($"Configuration file was not properly formatted: {startupFile.FullName}{Environment.NewLine}{e.Message}", e);
                 }
             }
         }

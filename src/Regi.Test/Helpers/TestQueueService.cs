@@ -2,9 +2,11 @@
 using Regi.Models;
 using Regi.Services;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Regi.Test.Helpers
@@ -15,12 +17,12 @@ namespace Regi.Test.Helpers
         {
         }
 
-        public IList<int> ActivePorts { get; } = new List<int>();
+        public ConcurrentBag<int> ActivePorts { get; } = new ConcurrentBag<int>();
 
         public int WaitOnPortListCallCount = 0;
         public int WaitOnPortCallCount = 0;
 
-        public override void ConfirmProjectsStarted(IDictionary<int, Project> projects)
+        public override Task ConfirmProjectsStartedAsync(IDictionary<int, Project> projects, CancellationToken cancellationToken)
         {
             WaitOnPortListCallCount++;
 
@@ -28,9 +30,11 @@ namespace Regi.Test.Helpers
             {
                 ActivePorts.Add(p.Key);
             }
+
+            return Task.CompletedTask;
         }
 
-        public override void WaitOnPort(Project project)
+        public override Task WaitOnPortAsync(Project project, CancellationToken cancellationToken)
         {
             if (project.Port.HasValue)
             {
@@ -38,6 +42,8 @@ namespace Regi.Test.Helpers
 
                 ActivePorts.Add(project.Port.Value);
             }
+
+            return Task.CompletedTask;
         }
     }
 }

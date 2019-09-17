@@ -1,5 +1,6 @@
 ﻿using McMaster.Extensions.CommandLineUtils;
-using System.Diagnostics;
+using Regi.Utilities;
+using System;
 using System.Linq;
 using System.Net.NetworkInformation;
 using System.Text.RegularExpressions;
@@ -21,47 +22,23 @@ namespace Regi.Services
         {
             _console = console;
             _runtime = runtime;
-            
-            if (_runtime.IsWindows)
-            {
-                _ipGlobalProperties = IPGlobalProperties.GetIPGlobalProperties();
-            }
+            _ipGlobalProperties = IPGlobalProperties.GetIPGlobalProperties();
         }
 
         public bool IsPortListening(int port)
         {
-            if (_runtime.IsWindows && _ipGlobalProperties != null)
+            if (_runtime.IsWindowsLinux || _ipGlobalProperties == null) // IPGlobalProperties is not implemented for WSL at this time
             {
-                var activeTcpPorts = _ipGlobalProperties.GetActiveTcpListeners();
+                string netstat = _runtime.IsWindows || _runtime.IsWindowsLinux ? "netstat.exe" : "netstat";
 
-                return activeTcpPorts.Any(p => p.Port == port);
+                ProcessUtility.RunProcessAndWaitForExit(netstat, "-tna", out string output, out string _, 5_000);
+
+                return ContainsNetstatPort(output, port);
             }
 
-            Process netstat = new Process
-            {
-                StartInfo =
-                {
-                    FileName =  _runtime.IsWindows || _runtime.IsWindowsLinux ? "netstat.exe" : "netstat",
-                    Arguments = "-tna",
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true,
-                    RedirectStandardInput = true
-                }
-            };
+            var activeTcpPorts = _ipGlobalProperties.GetActiveTcpListeners();
 
-            var output = string.Empty;
-
-            netstat.OutputDataReceived += (o, e) =>
-            {
-                output += e.Data;
-            };
-
-            netstat.Start();
-            netstat.BeginOutputReadLine();
-
-            netstat.WaitForExit(2000);
-
-            return ContainsNetstatPort(output, port);
+            return activeTcpPorts.Any(p => p.Port == port);
         }
 
         public bool ContainsNetstatPort(string netstatResponse, int port)
@@ -70,7 +47,7 @@ namespace Regi.Services
                 .Split(_runtime.NewLine)
                 .Any(o =>
                 {
-                    bool isListening = o.Contains("LISTEN");
+                    bool isListening = o.Contains("LISTEN", StringComparison.InvariantCultureIgnoreCase);
 
                     if (_runtime.IsMac)
                     {
@@ -78,7 +55,7 @@ namespace Regi.Services
                     }
                     else
                     {
-                        isListening = isListening && o.Contains($":{port}");
+                        isListening = isListening && o.Contains($":{port}", StringComparison.InvariantCultureIgnoreCase);
                     }
 
                     return isListening;

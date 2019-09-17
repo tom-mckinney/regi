@@ -26,7 +26,7 @@ namespace Regi.Test
             Path = PathHelper.SampleDirectoryPath("Backend/Backend.csproj"),
             Framework = ProjectFramework.Dotnet,
             Port = 5000,
-            Options = new ProjectOptions
+            Options = new CommandDictionary
             {
                 { "*", new List<string> { "--foo bar" } }
             }

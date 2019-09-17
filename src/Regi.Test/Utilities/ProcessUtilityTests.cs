@@ -7,6 +7,7 @@ using Xunit;
 
 namespace Regi.Test.Utilities
 {
+    [Collection(TestCollections.NoParallel)]
     public class ProcessUtilityTests
     {
         [Fact]

@@ -13,5 +13,9 @@ namespace Regi.Models.Exceptions
         public RegiException(string message) : base(message)
         {
         }
+
+        public RegiException(string message, Exception innerException) : base(message, innerException)
+        {
+        }
     }
 }

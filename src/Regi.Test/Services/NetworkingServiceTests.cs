@@ -1,12 +1,10 @@
 ﻿using Moq;
 using Regi.Services;
 using Regi.Test.Helpers;
+using Regi.Utilities;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Net.Sockets;
-using System.Runtime.InteropServices;
-using System.Text;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -20,6 +18,8 @@ namespace Regi.Test.Services
         public NetworkingServiceTests(ITestOutputHelper output)
         {
             _console = new TestConsole(output);
+
+            DirectoryUtility.ResetTargetDirectory();
         }
 
         private INetworkingService CreateService()
@@ -30,10 +30,12 @@ namespace Regi.Test.Services
         [Fact]
         public void IsPortListening_gets_list_of_all_active_ports()
         {
-            _runtimeInfoMock.Setup(m => m.IsWindows).Returns(RuntimeInformation.IsOSPlatform(OSPlatform.Windows));
-            _runtimeInfoMock.Setup(m => m.IsWindowsLinux).Returns(false);
-            _runtimeInfoMock.Setup(m => m.IsMac).Returns(RuntimeInformation.IsOSPlatform(OSPlatform.OSX));
-            _runtimeInfoMock.Setup(m => m.NewLine).Returns(Environment.NewLine);
+            var realRuntimeInfo = new RuntimeInfo();
+
+            _runtimeInfoMock.Setup(m => m.IsWindowsLinux).Returns(realRuntimeInfo.IsWindowsLinux);
+            _runtimeInfoMock.Setup(m => m.IsWindows).Returns(realRuntimeInfo.IsWindows);
+            _runtimeInfoMock.Setup(m => m.IsMac).Returns(realRuntimeInfo.IsMac);
+            _runtimeInfoMock.Setup(m => m.NewLine).Returns(realRuntimeInfo.NewLine);
 
             int port = new Random().Next(10000, 30000);
 
@@ -58,11 +60,10 @@ namespace Regi.Test.Services
             FileInfo responseFile = new FileInfo(Path.Combine(Directory.GetCurrentDirectory(), "SystemResponses", "Mac", fileName));
 
             if (!responseFile.Exists)
-                throw new FileNotFoundException("Could not find test file");
+                throw new FileNotFoundException($"Could not find test file: {responseFile.FullName}");
 
-            _runtimeInfoMock.Setup(m => m.IsMac).Returns(true).Verifiable();
-            _runtimeInfoMock.Setup(m => m.IsWindows).Returns(false).Verifiable();
             _runtimeInfoMock.Setup(m => m.NewLine).Returns("\n").Verifiable();
+            _runtimeInfoMock.Setup(m => m.IsMac).Returns(true).Verifiable();
 
             string netstatResponse = File.ReadAllText(responseFile.FullName);
 

@@ -11,7 +11,7 @@ using Xunit.Abstractions;
 
 namespace Regi.Test.Services
 {
-    [Collection("FileSystem")]
+    [Collection(TestCollections.NoParallel)]
     public class FileServiceTests
     {
         private IFileService _service;

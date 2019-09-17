@@ -19,7 +19,7 @@ namespace Regi.Test.Models
                 }
             };
 
-            var variableList = new VariableList();
+            var variableList = new EnvironmentVariableDictionary();
 
             variableList.AddProject(testProject);
 

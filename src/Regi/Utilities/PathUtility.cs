@@ -67,7 +67,7 @@ namespace Regi.Utilities
                 throw new ArgumentException("Script cannot be null, empty, or white space");
             }
 
-            int separatorIndex = script.IndexOf(' ');
+            int separatorIndex = script.IndexOf(' ', StringComparison.InvariantCulture);
             return script.Substring(0, separatorIndex != -1 ? separatorIndex : script.Length);
         }
     }
