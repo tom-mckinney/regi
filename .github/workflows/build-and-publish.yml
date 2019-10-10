@@ -24,6 +24,7 @@ jobs:
 
     - name: Initialize sample projects
       run: ./initialize.sh
+      shell: pwsh
 
     - name: Run xunit tests
       run: dotnet test ./src/Regi.sln
