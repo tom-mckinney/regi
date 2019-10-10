@@ -5,6 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Regi.Services.Frameworks
 {
@@ -68,49 +70,52 @@ namespace Regi.Services.Frameworks
             }
         }
 
-        public override AppProcess InstallProject(Project project, string appDirectoryPath, RegiOptions options)
+        public override async Task<AppProcess> InstallProject(Project project, string appDirectoryPath, RegiOptions options, CancellationToken cancellationToken)
         {
             AppProcess install = CreateProcess(FrameworkCommands.Dotnet.Restore, project, appDirectoryPath, options);
 
             install.Start();
 
-            install.WaitForExit();
+            await install.WaitForExitAsync(cancellationToken);
 
             return install;
         }
 
-        public override AppProcess StartProject(Project project, string appDirectoryPath, RegiOptions options)
+        public override Task<AppProcess> StartProject(Project project, string appDirectoryPath, RegiOptions options, CancellationToken cancellationToken)
         {
-            AppProcess start = CreateProcess(FrameworkCommands.Dotnet.Run, project, appDirectoryPath, options);
+            return Task.Run(() =>
+            {
+                AppProcess start = CreateProcess(FrameworkCommands.Dotnet.Run, project, appDirectoryPath, options);
 
-            start.Start();
+                start.Start();
 
-            return start;
+                return start;
+            }, cancellationToken);
         }
 
-        public override AppProcess TestProject(Project project, string appDirectoryPath, RegiOptions options)
+        public override async Task<AppProcess> TestProject(Project project, string appDirectoryPath, RegiOptions options, CancellationToken cancellationToken)
         {
             AppProcess test = CreateProcess(FrameworkCommands.Dotnet.Test, project, appDirectoryPath, options);
 
             test.Start();
 
-            test.WaitForExit();
+            await test.WaitForExitAsync(cancellationToken);
 
             return test;
         }
 
-        public override AppProcess BuildProject(Project project, string appDirectoryPath, RegiOptions options)
+        public override async Task<AppProcess> BuildProject(Project project, string appDirectoryPath, RegiOptions options, CancellationToken cancellationToken)
         {
             AppProcess build = CreateProcess(FrameworkCommands.Dotnet.Build, project, appDirectoryPath, options);
 
             build.Start();
 
-            build.WaitForExit();
+            await build.WaitForExitAsync(cancellationToken);
 
             return build;
         }
 
-        public override AppProcess KillProcesses(RegiOptions options)
+        public override async Task<AppProcess> KillProcesses(RegiOptions options, CancellationToken cancellationToken)
         {
             AppProcess process = new AppProcess(_platformService.GetKillProcess("dotnet", options),
                 AppTask.Kill,
@@ -121,7 +126,7 @@ namespace Regi.Services.Frameworks
                 if (options.KillProcessesOnExit)
                 {
                     process.Start();
-                    process.WaitForExit();
+                    await process.WaitForExitAsync(cancellationToken);
                 }
 
                 process.Status = AppStatus.Success;

@@ -18,8 +18,8 @@ namespace Regi
 
         IList<Project> FilterAndTrackProjects(RegiOptions options, StartupConfig config, Func<StartupConfig, IEnumerable<Project>> getTargetProjects);
         IList<Project> FilterByOptions(IEnumerable<Project> projects, RegiOptions options);
-        void KillAllProcesses(RegiOptions options);
-        void KillAllProcesses(IEnumerable<Project> projects, RegiOptions options);
+        void KillAllProcesses(RegiOptions options, bool logKillCount = false);
+        void KillAllProcesses(IEnumerable<Project> projects, RegiOptions options, bool logKillCount = false);
     }
 
     public class ProjectManager : IProjectManager
@@ -105,18 +105,21 @@ namespace Regi
             }
         }
 
-        public void KillAllProcesses(RegiOptions options)
+        public void KillAllProcesses(RegiOptions options, bool logKillCount = false)
         {
-            KillAllProcesses(Projects, options);
+            KillAllProcesses(Projects, options, logKillCount);
         }
 
-        public void KillAllProcesses(IEnumerable<Project> projects, RegiOptions options)
+        public void KillAllProcesses(IEnumerable<Project> projects, RegiOptions options, bool logKillCount = false)
         {
             int projectCount = projects.Count();
             if (projectCount > 0)
             {
-                string projectPluralization = projectCount == 1 ? "project" : "projects";
-                _console.WriteDefaultLine($"Killing processes for {projects.Count()} {projectPluralization}");
+                if (logKillCount)
+                {
+                    string projectPluralization = projectCount == 1 ? "project" : "projects";
+                    _console.WriteDefaultLine($"Killing processes for {projects.Count()} {projectPluralization}");
+                }
 
                 foreach (var project in projects)
                 {
@@ -138,6 +141,17 @@ namespace Regi
 
         public ConsoleCancelEventHandler HandleCancelEvent => (o, e) =>
         {
+            _console.WriteDefaultLine("Starting shutdown...");
+
+            //foreach (var project in Projects)
+            //{
+            //    foreach (var process in project?.Processes)
+            //    {
+            //        process?.Process?.Kill(true);
+            //    }
+            //}
+            //KillAllProcesses(options);
+
             CancellationTokenSource.Cancel();
         };
     }

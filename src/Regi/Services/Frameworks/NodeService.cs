@@ -5,6 +5,8 @@ using Regi.Utilities;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Regi.Services.Frameworks
 {
@@ -56,45 +58,48 @@ namespace Regi.Services.Frameworks
 
         protected override string FormatAdditionalArguments(IEnumerable<string> args) => $"-- {string.Join(' ', args)}";
 
-        public override AppProcess InstallProject(Project project, string appDirectoryPath, RegiOptions options)
+        public override async Task<AppProcess> InstallProject(Project project, string appDirectoryPath, RegiOptions options, CancellationToken cancellationToken)
         {
             AppProcess install = CreateProcess(FrameworkCommands.Node.Install, project, appDirectoryPath, options);
 
             install.Start();
 
-            install.WaitForExit();
+            await install.WaitForExitAsync(cancellationToken);
 
             return install;
         }
 
-        public override AppProcess StartProject(Project project, string appDirectoryPath, RegiOptions options)
+        public override Task<AppProcess> StartProject(Project project, string appDirectoryPath, RegiOptions options, CancellationToken cancellationToken)
         {
-            AppProcess start = CreateProcess(FrameworkCommands.Node.Start, project, appDirectoryPath, options);
+            return Task.Run(() =>
+            {
+                AppProcess start = CreateProcess(FrameworkCommands.Node.Start, project, appDirectoryPath, options);
 
-            start.Start();
+                start.Start();
 
-            return start;
+                return start;
+            }, cancellationToken);
         }
 
-        public override AppProcess TestProject(Project project, string appDirectoryPath, RegiOptions options)
+        public override async Task<AppProcess> TestProject(Project project, string appDirectoryPath, RegiOptions options, CancellationToken cancellationToken)
         {
             AppProcess test = CreateProcess(FrameworkCommands.Node.Test, project, appDirectoryPath, options);
 
             test.Start();
 
-            test.WaitForExit();
+            await test.WaitForExitAsync(cancellationToken);
 
             return test;
         }
 
-        public override AppProcess BuildProject(Project project, string appDirectoryPath, RegiOptions options)
+        public override Task<AppProcess> BuildProject(Project project, string appDirectoryPath, RegiOptions options, CancellationToken cancellationToken)
         {
             _console.WriteWarningLine($"Did not build {project.Name}. No implementation for {nameof(BuildProject)} in {nameof(NodeService)}.");
 
-            return new AppProcess(null, AppTask.Build, AppStatus.Unknown);
+            return Task.FromResult(new AppProcess(null, AppTask.Build, AppStatus.Unknown));
         }
 
-        public override AppProcess KillProcesses(RegiOptions options)
+        public override async Task<AppProcess> KillProcesses(RegiOptions options, CancellationToken cancellationToken)
         {
             AppProcess process = new AppProcess(_platformService.GetKillProcess("node", options),
                 AppTask.Kill,
@@ -105,7 +110,7 @@ namespace Regi.Services.Frameworks
                 if (options.KillProcessesOnExit)
                 {
                     process.Start();
-                    process.WaitForExit();
+                    await process.WaitForExitAsync(cancellationToken);
                 }
 
                 process.Status = AppStatus.Success;

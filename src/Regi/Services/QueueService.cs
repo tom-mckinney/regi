@@ -47,7 +47,7 @@ namespace Regi.Services
 
         public void Queue(bool isSerial, Action action, CancellationToken cancellationToken)
         {
-            Queue(isSerial, () => Task.Run(action), cancellationToken);
+            Queue(isSerial, () => Task.Run(action, cancellationToken), cancellationToken);
         }
 
         public void Queue(bool isSerial, Func<Task> action, CancellationToken cancellationToken)
@@ -60,7 +60,7 @@ namespace Regi.Services
 
         public void QueueAsync(Action action, CancellationToken cancellationToken)
         {
-            QueueAsync(() => Task.Run(action), cancellationToken);
+            QueueAsync(() => Task.Run(action, cancellationToken), cancellationToken);
         }
 
         public void QueueAsync(Func<Task> action, CancellationToken cancellationToken)
@@ -89,18 +89,53 @@ namespace Regi.Services
             await RunSerialActions(cancellationToken);
         }
 
-        public async Task RunAsyncActions(CancellationToken cancellationToken)
+        public Task RunAsyncActions(CancellationToken cancellationToken)
         {
+            List<Task> tasks = new List<Task>();
+
             foreach (var action in AsyncActions)
             {
-                await semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
+                tasks.Add(Task.Run(async () =>
+                {
+                    await Task.Yield();
 
-                cancellationToken.ThrowIfCancellationRequested();
+                    await semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
 
-                await action();
+                    cancellationToken.ThrowIfCancellationRequested();
 
-                semaphore.Release();
+                    await action();
+
+                    semaphore.Release();
+                }, cancellationToken));                    
             }
+
+            return Task.WhenAll(tasks);
+
+            //return Task.WhenAll(AsyncActions.Select((action) => Task.Run(async () =>
+            //{
+            //    await Task.Yield();
+
+            //    await semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
+
+            //    cancellationToken.ThrowIfCancellationRequested();
+
+            //    await action();
+
+            //    semaphore.Release();
+            //}, cancellationToken)));
+
+            //return Task.WhenAll(AsyncActions.Select(async (action) =>
+            //{
+            //    await Task.Yield();
+
+            //    await semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
+
+            //    cancellationToken.ThrowIfCancellationRequested();
+
+            //    await action();
+
+            //    semaphore.Release();
+            //}));
         }
 
         public async Task RunSerialActions(CancellationToken cancellationToken)

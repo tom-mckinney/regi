@@ -7,16 +7,18 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Regi.Services.Frameworks
 {
     public interface IFrameworkService
     {
-        AppProcess InstallProject(Project project, string appDirectoryPath, RegiOptions options);
-        AppProcess StartProject(Project project, string appDirectoryPath, RegiOptions options);
-        AppProcess TestProject(Project project, string appDirectoryPath, RegiOptions options);
-        AppProcess BuildProject(Project project, string appDirectoryPath, RegiOptions options);
-        AppProcess KillProcesses(RegiOptions options);
+        Task<AppProcess> InstallProject(Project project, string appDirectoryPath, RegiOptions options, CancellationToken cancellationToken);
+        Task<AppProcess> StartProject(Project project, string appDirectoryPath, RegiOptions options, CancellationToken cancellationToken);
+        Task<AppProcess> TestProject(Project project, string appDirectoryPath, RegiOptions options, CancellationToken cancellationToken);
+        Task<AppProcess> BuildProject(Project project, string appDirectoryPath, RegiOptions options, CancellationToken cancellationToken);
+        Task<AppProcess> KillProcesses(RegiOptions options, CancellationToken cancellationToken);
     }
 
     public abstract class FrameworkService : IFrameworkService
@@ -39,10 +41,11 @@ namespace Regi.Services.Frameworks
             _frameworkExePath = frameworkExePath;
         }
 
-        public abstract AppProcess InstallProject(Project project, string appDirectoryPath, RegiOptions options);
-        public abstract AppProcess StartProject(Project project, string appDirectoryPath, RegiOptions options);
-        public abstract AppProcess TestProject(Project project, string appDirectoryPath, RegiOptions options);
-        public abstract AppProcess BuildProject(Project project, string appDirectoryPath, RegiOptions options);
+        public abstract Task<AppProcess> InstallProject(Project project, string appDirectoryPath, RegiOptions options, CancellationToken cancellationToken);
+        public abstract Task<AppProcess> StartProject(Project project, string appDirectoryPath, RegiOptions options, CancellationToken cancellationToken);
+        public abstract Task<AppProcess> TestProject(Project project, string appDirectoryPath, RegiOptions options, CancellationToken cancellationToken);
+        public abstract Task<AppProcess> BuildProject(Project project, string appDirectoryPath, RegiOptions options, CancellationToken cancellationToken);
+        public abstract Task<AppProcess> KillProcesses(RegiOptions options, CancellationToken cancellationToken);
 
         protected virtual void SetEnvironmentVariables(Process process, Project project)
         {
@@ -287,7 +290,5 @@ namespace Regi.Services.Frameworks
                 _console.WriteEmphasizedLine($"Disposing process for project {project.Name} ({processId})");
             }
         }
-
-        public abstract AppProcess KillProcesses(RegiOptions options);
     }
 }

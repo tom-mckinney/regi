@@ -40,10 +40,8 @@ namespace Regi.Services
 
         public IQueueService CreateScopedQueueService()
         {
-            using (var scope = _serviceProvider.CreateScope())
-            {
-                return scope.ServiceProvider.GetRequiredService<IQueueService>();
-            }
+            using var scope = _serviceProvider.CreateScope();
+            return scope.ServiceProvider.GetRequiredService<IQueueService>();
         }
 
         public IList<ProjectFramework> GetAllProjectFrameworkTypes()

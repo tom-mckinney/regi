@@ -56,9 +56,9 @@ namespace Regi.Services
 
                 foreach (var path in project.AppDirectoryPaths)
                 {
-                    _queueService.Queue(project.Serial || options.NoParallel, async () =>
+                    _queueService.Queue(project.Serial || options.NoParallel, () =>
                     {
-                        await InternalStartProject(project, path, options, cancellationToken);
+                        return InternalStartProject(project, path, options, cancellationToken);
                     }, cancellationToken);
                 }
             }
@@ -74,14 +74,16 @@ namespace Regi.Services
         {
             _console.WriteEmphasizedLine($"Starting project {project.Name} ({applicationDirectoryPath})");
 
-            AppProcess process = _frameworkServiceProvider
+            AppProcess process = await _frameworkServiceProvider
                 .GetFrameworkService(project.Framework)
-                .StartProject(project, applicationDirectoryPath, options);
+                .StartProject(project, applicationDirectoryPath, options, cancellationToken);
 
             if (process != null)
             {
                 project.Processes.Add(process);
             }
+
+            cancellationToken.ThrowIfCancellationRequested();
 
             await _queueService.WaitOnPortAsync(project, cancellationToken);
 
@@ -95,12 +97,16 @@ namespace Regi.Services
 
             foreach (var project in projects)
             {
+                cancellationToken.ThrowIfCancellationRequested();
+
                 RunScriptsForTask(project, AppTask.Test, options);
 
                 foreach (var path in project.AppDirectoryPaths)
                 {
                     _queueService.Queue(project.Serial || options.NoParallel, async () =>
                     {
+                        cancellationToken.ThrowIfCancellationRequested();
+
                         string appName = project.AppDirectoryPaths.Count > 1 ? $"{DirectoryUtility.GetDirectoryShortName(path)} ({project.Name})" : project.Name;
                         _console.WriteEmphasizedLine($"Starting tests for {appName}");
 
@@ -148,9 +154,9 @@ namespace Regi.Services
                             await dependencyQueue.ConfirmProjectsStartedAsync(requiredProjectsWithPorts, cancellationToken);
                         }
 
-                        var testProcess = _frameworkServiceProvider
+                        var testProcess = await _frameworkServiceProvider
                             .GetFrameworkService(project.Framework)
-                            .TestProject(project, path, options);
+                            .TestProject(project, path, options, cancellationToken);
 
                         project.Processes.Add(testProcess);
 
@@ -184,13 +190,13 @@ namespace Regi.Services
             {
                 foreach (var path in project.AppDirectoryPaths)
                 {
-                    _queueService.Queue(project.Serial || options.NoParallel, () =>
+                    _queueService.Queue(project.Serial || options.NoParallel, async () =>
                     {
                         _console.WriteEmphasizedLine($"Starting build for project {project.Name}");
 
-                        var buildProcess = _frameworkServiceProvider
+                        var buildProcess = await _frameworkServiceProvider
                             .GetFrameworkService(project.Framework)
-                            .BuildProject(project, path, options);
+                            .BuildProject(project, path, options, cancellationToken);
 
                         project.Processes.Add(buildProcess);
 
@@ -222,12 +228,12 @@ namespace Regi.Services
             {
                 foreach (var path in project.AppDirectoryPaths)
                 {
-                    _queueService.Queue(project.Serial || options.NoParallel, () =>
+                    _queueService.Queue(project.Serial || options.NoParallel, async () =>
                     {
                         if (!installedProjects.Contains(project.Name))
                         {
                             installedProjects.Add(project.Name);
-                            InternalInstallProject(project, path, options);
+                            await InternalInstallProject(project, path, options, cancellationToken);
                         }
 
                         if (project.RequiredProjects.Any())
@@ -254,13 +260,13 @@ namespace Regi.Services
                                     {
                                         dependencyQueue.Queue(requiredProject.Serial || options.NoParallel, () =>
                                         {
-                                            InternalInstallProject(requiredProject, requiredPath, requiredOptions);
+                                            return InternalInstallProject(requiredProject, requiredPath, requiredOptions, cancellationToken);
                                         }, cancellationToken);
                                     }
                                 }
                             }
 
-                            dependencyQueue.RunAllAsync(cancellationToken).Wait(cancellationToken);
+                            await dependencyQueue.RunAllAsync(cancellationToken);
                         }
                     }, cancellationToken);
                 }
@@ -271,13 +277,13 @@ namespace Regi.Services
             return projects;
         }
 
-        private AppProcess InternalInstallProject(Project project, string appDirectoryPath, RegiOptions options)
+        private async Task<AppProcess> InternalInstallProject(Project project, string appDirectoryPath, RegiOptions options, CancellationToken cancellationToken)
         {
             _console.WriteEmphasizedLine($"Starting install for project {project.Name}");
 
-            var process = _frameworkServiceProvider
+            var process = await _frameworkServiceProvider
                 .GetFrameworkService(project.Framework)
-                .InstallProject(project, appDirectoryPath, options);
+                .InstallProject(project, appDirectoryPath, options, cancellationToken);
 
             _console.WriteSuccessLine($"Finished installing project {project.Name}");
 
@@ -286,7 +292,7 @@ namespace Regi.Services
             return process;
         }
 
-        public Task KillAsync(IList<Project> projects, RegiOptions options, CancellationToken cancellationToken)
+        public async Task KillAsync(IList<Project> projects, RegiOptions options, CancellationToken cancellationToken)
         {
             _console.WriteEmphasizedLine("Committing regicide...");
 
@@ -304,14 +310,12 @@ namespace Regi.Services
             {
                 _console.WriteEmphasizedLine($"Killing processes for framework: {framework}", ConsoleLineStyle.LineBefore);
 
-                _frameworkServiceProvider
+                await _frameworkServiceProvider
                     .GetFrameworkService(framework)
-                    .KillProcesses(options);
+                    .KillProcesses(options, cancellationToken);
             }
 
             _console.WriteSuccessLine("Finished killing processess successfuly", ConsoleLineStyle.LineBeforeAndAfter);
-
-            return Task.CompletedTask;
         }
 
         private void RunScriptsForTask(Project project, AppTask task, RegiOptions options)

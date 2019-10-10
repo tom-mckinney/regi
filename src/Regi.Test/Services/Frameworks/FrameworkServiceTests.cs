@@ -6,6 +6,8 @@ using Regi.Test.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading;
+using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -179,33 +181,33 @@ namespace Regi.Test.Services.Frameworks
             return $"***{string.Join(' ', args)}***";
         }
 
-        public override AppProcess InstallProject(Project project, string appDirectoryPath, RegiOptions options)
+        public override Task<AppProcess> InstallProject(Project project, string appDirectoryPath, RegiOptions options, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }
 
-        public override AppProcess StartProject(Project project, string appDirectoryPath, RegiOptions options)
+        public override Task<AppProcess> StartProject(Project project, string appDirectoryPath, RegiOptions options, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }
 
-        public override AppProcess TestProject(Project project, string appDirectoryPath, RegiOptions options)
+        public override Task<AppProcess> TestProject(Project project, string appDirectoryPath, RegiOptions options, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }
 
-        public override AppProcess BuildProject(Project project, string appDirectoryPath, RegiOptions options)
+        public override Task<AppProcess> BuildProject(Project project, string appDirectoryPath, RegiOptions options, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override Task<AppProcess> KillProcesses(RegiOptions options, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }
 
         protected override void SetEnvironmentVariables(Process process, Project project)
         {
-        }
-
-        public override AppProcess KillProcesses(RegiOptions options)
-        {
-            throw new NotImplementedException();
         }
     }
 }

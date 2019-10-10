@@ -35,7 +35,7 @@ namespace Regi.Test.Services
             {
                 _service.Queue(false, () =>
                 {
-                    asyncExecutions++;
+                    Interlocked.Increment(ref asyncExecutions);
                 }, CancellationToken.None);
 
                 _service.Queue(true, () =>
@@ -63,7 +63,7 @@ namespace Regi.Test.Services
             {
                 _service.QueueAsync(() =>
                 {
-                    executions++;
+                    Interlocked.Increment(ref executions);
                 }, CancellationToken.None);
             }
 
@@ -102,8 +102,8 @@ namespace Regi.Test.Services
             int asyncRunCount = 0;
             int serialRunCount = 0;
 
-            _service.QueueAsync(() => asyncRunCount++, CancellationToken.None);
-            _service.QueueAsync(() => asyncRunCount++, CancellationToken.None);
+            _service.QueueAsync(() => Interlocked.Increment(ref asyncRunCount), CancellationToken.None);
+            _service.QueueAsync(() => Interlocked.Increment(ref asyncRunCount), CancellationToken.None);
 
             for (int i = 0; i < taskCount; i++)
             {
@@ -147,9 +147,9 @@ namespace Regi.Test.Services
         {
             int callCount = 0;
 
-            _service.QueueAsync(() => callCount++, CancellationToken.None);
-            _service.QueueAsync(() => callCount++, CancellationToken.None);
-            _service.QueueAsync(() => callCount++, CancellationToken.None);
+            _service.QueueAsync(() => Interlocked.Increment(ref callCount), CancellationToken.None);
+            _service.QueueAsync(() => Interlocked.Increment(ref callCount), CancellationToken.None);
+            _service.QueueAsync(() => Interlocked.Increment(ref callCount), CancellationToken.None);
 
             await ((QueueService)_service).RunAsyncActions(CancellationToken.None);
 
@@ -176,9 +176,9 @@ namespace Regi.Test.Services
             int asyncCount = 0;
             int serialCount = 0;
 
-            _service.QueueAsync(() => asyncCount++, CancellationToken.None);
-            _service.QueueAsync(() => asyncCount++, CancellationToken.None);
-            _service.QueueAsync(() => asyncCount++, CancellationToken.None);
+            _service.QueueAsync(() => Interlocked.Increment(ref asyncCount), CancellationToken.None);
+            _service.QueueAsync(() => Interlocked.Increment(ref asyncCount), CancellationToken.None);
+            _service.QueueAsync(() => Interlocked.Increment(ref asyncCount), CancellationToken.None);
 
             _service.QueueSerial(() => serialCount++);
             _service.QueueSerial(() => serialCount++);

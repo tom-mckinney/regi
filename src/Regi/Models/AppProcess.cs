@@ -2,6 +2,8 @@
 using Regi.Extensions;
 using System;
 using System.Diagnostics;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Regi.Models
 {
@@ -82,6 +84,14 @@ namespace Regi.Models
         public void WaitForExit()
         {
             Process?.WaitForExit();
+        }
+
+        public Task WaitForExitAsync(CancellationToken cancellationToken)
+        {
+            if (Process == null)
+                return System.Threading.Tasks.Task.CompletedTask;
+
+            return Process.WaitForExitAsync(cancellationToken);
         }
 
         public void Kill(IConsole console = null)

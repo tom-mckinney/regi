@@ -57,7 +57,7 @@ namespace Regi
             {
                 var projectManager = app.GetRequiredService<IProjectManager>();
 
-                projectManager.KillAllProcesses(new RegiOptions());
+                projectManager.KillAllProcesses(new RegiOptions(), true);
             }
 
         }
