@@ -10,6 +10,9 @@ namespace Regi.Models
         [Argument(0, Description = "Name of the project")]
         public string Name { get; set; }
 
+        [Option(CommandOptionType.SingleValue, Template = "-c --configuration", Description = "Path to the configuration file")]
+        public string ConfigurationPath { get; set; }
+
         public List<string> RemainingArguments { get; set; }
 
         [Option(CommandOptionType.MultipleValue, Description = "Search pattern to exclude from the command")]

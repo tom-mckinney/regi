@@ -92,7 +92,7 @@ namespace Regi.Services.Frameworks
                 {
                     FileName = fileName,
                     Arguments = args,
-                    WorkingDirectory = DirectoryUtility.TargetDirectoryPath,
+                    WorkingDirectory = DirectoryUtility.WorkingDirectory,
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
                     CreateNoWindow = true

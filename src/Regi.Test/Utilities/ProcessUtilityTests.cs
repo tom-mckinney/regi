@@ -15,7 +15,7 @@ namespace Regi.Test.Utilities
         {
             string targetDirectory = PathHelper.SampleDirectoryPath("ConfigurationGood");
 
-            DirectoryUtility.SetTargetDirectory(targetDirectory);
+            DirectoryUtility.SetWorkingDirectory(targetDirectory);
 
             var process = ProcessUtility.CreateProcess("wumbo", "--foo bar");
 
@@ -34,7 +34,7 @@ namespace Regi.Test.Utilities
             string targetDirectory = PathHelper.SampleDirectoryPath("ConfigurationBad");
             string workingDirectory = PathHelper.SampleDirectoryPath("ConfigurationGood");
 
-            DirectoryUtility.SetTargetDirectory(targetDirectory);
+            DirectoryUtility.SetWorkingDirectory(targetDirectory);
 
             var process = ProcessUtility.CreateProcess("wumbo", "--foo bar", "../ConfigurationGood"); // relative
 
@@ -53,7 +53,7 @@ namespace Regi.Test.Utilities
             string targetDirectory = PathHelper.SampleDirectoryPath("ConfigurationBad");
             string workingDirectory = PathHelper.SampleDirectoryPath("ConfigurationGood");
 
-            DirectoryUtility.SetTargetDirectory(targetDirectory);
+            DirectoryUtility.SetWorkingDirectory(targetDirectory);
 
             var process = ProcessUtility.CreateProcess("wumbo", "--foo bar", workingDirectory); // absolute
 

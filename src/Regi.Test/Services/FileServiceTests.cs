@@ -39,7 +39,7 @@ namespace Regi.Test.Services
                 Directory.CreateDirectory(newConfigurationPath);
             }
 
-            DirectoryUtility.SetTargetDirectory(newConfigurationPath);
+            DirectoryUtility.SetWorkingDirectory(newConfigurationPath);
 
             FileInfo configFile = _service.CreateConfigFile();
 
@@ -63,7 +63,7 @@ namespace Regi.Test.Services
                 stream.Close();
             }
 
-            DirectoryUtility.SetTargetDirectory(newConfigurationPath);
+            DirectoryUtility.SetWorkingDirectory(newConfigurationPath);
 
             Assert.Throws<InvalidOperationException>(() => _service.CreateConfigFile());
 

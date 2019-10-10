@@ -12,16 +12,27 @@ namespace Regi.Services
 {
     public interface IConfigurationService
     {
-        StartupConfig GetConfiguration();
+        StartupConfig GetConfiguration(RegiOptions options);
     }
 
     public class ConfigurationService : IConfigurationService
     {
-        public StartupConfig GetConfiguration()
+        public StartupConfig GetConfiguration(RegiOptions options)
         {
-            DirectoryInfo directory = new DirectoryInfo(DirectoryUtility.TargetDirectoryPath);
+            DirectoryInfo directory;
 
-            if (!directory.Exists)
+            if (!string.IsNullOrWhiteSpace(options?.ConfigurationPath))
+            {
+                string configDirectory = DirectoryUtility.GetDirectoryPath(options.ConfigurationPath, true, "directory");
+                DirectoryUtility.SetWorkingDirectory(configDirectory);
+                directory = new DirectoryInfo(configDirectory);
+            }
+            else
+            {
+                directory = new DirectoryInfo(DirectoryUtility.WorkingDirectory);
+            }
+
+            if (directory?.Exists == false)
             {
                 throw new DirectoryNotFoundException($"Could not find directory: {directory.FullName}");
             }
@@ -41,7 +52,11 @@ namespace Regi.Services
 
                 try
                 {
-                    return serializer.Deserialize<StartupConfig>(reader);
+                    var startupConfig = serializer.Deserialize<StartupConfig>(reader);
+
+                    startupConfig.Path = startupFile.FullName;
+
+                    return startupConfig;
                 }
                 catch (Exception e)
                 {

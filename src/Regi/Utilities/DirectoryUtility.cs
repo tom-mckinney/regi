@@ -5,26 +5,26 @@ namespace Regi.Utilities
 {
     public static class DirectoryUtility
     {
-        private static string _targetDirectoryPath;
-        public static string TargetDirectoryPath
+        private static string _workingDirectory;
+        public static string WorkingDirectory
         {
             get
             {
-                if (_targetDirectoryPath == null)
+                if (_workingDirectory == null)
                 {
-                    _targetDirectoryPath = Directory.GetCurrentDirectory();
+                    _workingDirectory = Directory.GetCurrentDirectory();
                 }
 
-                return _targetDirectoryPath;
+                return _workingDirectory;
             }
         }
 
-        public static void SetTargetDirectory(string path)
+        public static void SetWorkingDirectory(string path)
         {
-            _targetDirectoryPath = path;
+            _workingDirectory = path;
         }
 
-        public static string GetDirectoryPath(string path, bool throwIfNotFound = true)
+        public static string GetDirectoryPath(string path, bool throwIfNotFound = true, string targetObj = "project")
         {
             if (string.IsNullOrWhiteSpace(path))
             {
@@ -38,7 +38,7 @@ namespace Regi.Utilities
                 }
             }
 
-            string absolutePath = Path.GetFullPath(path, TargetDirectoryPath);
+            string absolutePath = Path.GetFullPath(path, WorkingDirectory);
 
             if (Directory.Exists(absolutePath))
             {
@@ -50,7 +50,7 @@ namespace Regi.Utilities
             }
             else if (throwIfNotFound)
             {
-                throw new DirectoryNotFoundException($"Could not find project, {absolutePath}");
+                throw new DirectoryNotFoundException($"Could not find {targetObj}, {absolutePath}");
             }
 
             return null;
@@ -66,7 +66,7 @@ namespace Regi.Utilities
 
         public static void ResetTargetDirectory()
         {
-            _targetDirectoryPath = null;
+            _workingDirectory = null;
         }
     }
 }

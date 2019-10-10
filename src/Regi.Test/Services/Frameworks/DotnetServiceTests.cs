@@ -263,7 +263,7 @@ namespace Regi.Test.Services.Frameworks
         [Fact]
         public void ShutdownBuildServer_shuts_down_all_build_servers()
         {
-            DirectoryUtility.SetTargetDirectory(PathHelper.ProjectRootPath);
+            DirectoryUtility.SetWorkingDirectory(PathHelper.ProjectRootPath);
 
             var process = _service.ShutdownBuildServer(TestOptions.Create());
 

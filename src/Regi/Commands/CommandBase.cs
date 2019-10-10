@@ -49,7 +49,7 @@ namespace Regi.Commands
             {
                 if (RequireStartupConfig)
                 {
-                    Config = _configurationService.GetConfiguration();
+                    Config = _configurationService.GetConfiguration(Options);
 
                     Options.VariableList = new EnvironmentVariableDictionary(Config);
 

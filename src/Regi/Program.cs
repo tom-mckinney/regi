@@ -45,6 +45,10 @@ namespace Regi
             {
                 return e.LogAndReturnStatus(console);
             }
+            catch (CommandParsingException e)
+            {
+                return e.LogAndReturnStatus(console);
+            }
             catch (Exception e)
             {
                 return e.LogAllDetailsAndReturnStatus(console);

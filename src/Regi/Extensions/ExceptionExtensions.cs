@@ -9,7 +9,7 @@ namespace Regi.Extensions
 {
     public static class ExceptionExtensions
     {
-        public static int LogAndReturnStatus(this RegiException e, IConsole console)
+        public static int LogAndReturnStatus(this Exception e, IConsole console)
         {
             console.WriteErrorLine(e.Message);
 

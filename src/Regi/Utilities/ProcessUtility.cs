@@ -69,7 +69,7 @@ namespace Regi.Utilities
         {
             var startInfo = new ProcessStartInfo
             {
-                WorkingDirectory = DirectoryUtility.GetDirectoryPath(workingDirectory, false) ?? DirectoryUtility.TargetDirectoryPath,
+                WorkingDirectory = DirectoryUtility.GetDirectoryPath(workingDirectory, false) ?? DirectoryUtility.WorkingDirectory,
                 FileName = fileName,
                 Arguments = arguments,
                 RedirectStandardOutput = true,

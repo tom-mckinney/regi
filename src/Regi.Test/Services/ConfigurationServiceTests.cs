@@ -41,21 +41,21 @@ namespace Regi.Test.Services
         [Fact]
         public void GetStatupConfig_throws_exception_when_directory_not_found()
         {
-            DirectoryUtility.SetTargetDirectory(PathHelper.SampleDirectoryPath("BUNK_DIRECTORY"));
+            DirectoryUtility.SetWorkingDirectory(PathHelper.SampleDirectoryPath("BUNK_DIRECTORY"));
 
             var service = CreateService();
 
-            Assert.Throws<DirectoryNotFoundException>(() => service.GetConfiguration());
+            Assert.Throws<DirectoryNotFoundException>(() => service.GetConfiguration(null));
         }
 
         [Fact]
         public void GetStatupConfig_throws_exception_when_startup_config_not_found()
         {
-            DirectoryUtility.SetTargetDirectory(PathHelper.SampleDirectoryPath("SampleAppError"));
+            DirectoryUtility.SetWorkingDirectory(PathHelper.SampleDirectoryPath("SampleAppError"));
 
             var service = CreateService();
 
-            Assert.Throws<RegiException>(() => service.GetConfiguration());
+            Assert.Throws<RegiException>(() => service.GetConfiguration(null));
         }
 
         [Theory]
@@ -63,11 +63,11 @@ namespace Regi.Test.Services
         [InlineData("ConfigurationWrongEnum")]
         public void GetStatupConfig_throws_exception_when_startup_config_has_bad_format(string configuration)
         {
-            DirectoryUtility.SetTargetDirectory(PathHelper.SampleDirectoryPath(configuration));
+            DirectoryUtility.SetWorkingDirectory(PathHelper.SampleDirectoryPath(configuration));
 
             var service = CreateService();
 
-            var ex = Assert.Throws<RegiException>(() => service.GetConfiguration());
+            var ex = Assert.Throws<RegiException>(() => service.GetConfiguration(null));
 
             Assert.IsType<JsonSerializationException>(ex.InnerException);
 
@@ -77,15 +77,62 @@ namespace Regi.Test.Services
         [Fact]
         public void GetStartupConfig_returns_configuration_model_when_run_in_directory_with_startup_file()
         {
-            DirectoryUtility.SetTargetDirectory(PathHelper.SampleDirectoryPath("ConfigurationGood"));
+            string expectedPath = PathHelper.SampleDirectoryPath("ConfigurationGood");
+
+            DirectoryUtility.SetWorkingDirectory(expectedPath);
 
             var service = CreateService();
 
-            StartupConfig startupConfig = service.GetConfiguration();
+            StartupConfig startupConfig = service.GetConfiguration(null);
+
+            Assert.StartsWith(expectedPath, startupConfig.Path, StringComparison.InvariantCulture);
+            Assert.Equal(totalAppCount, startupConfig.Apps.Count);
+            Assert.Equal(totalTestCount, startupConfig.Tests.Count);
+            Assert.Empty(startupConfig.Services);
+        }
+
+        [Theory]
+        [InlineData("")]
+        [InlineData("/regi.json")]
+        public void GetStartupConfig_will_use_ConfigurationPath_if_specified(string file)
+        {
+            string expectedPath = PathHelper.SampleDirectoryPath("ConfigurationGood");
+
+            DirectoryUtility.SetWorkingDirectory(PathHelper.SampleDirectoryPath("BUNK_DIRECTORY"));
+
+            var options = new RegiOptions
+            {
+                ConfigurationPath = expectedPath + file
+            };
+
+            var service = CreateService();
+
+            StartupConfig startupConfig = service.GetConfiguration(options);
+
+            Assert.StartsWith(expectedPath, startupConfig.Path, StringComparison.InvariantCulture);
+            Assert.Equal(expectedPath, DirectoryUtility.WorkingDirectory);
+
 
             Assert.Equal(totalAppCount, startupConfig.Apps.Count);
             Assert.Equal(totalTestCount, startupConfig.Tests.Count);
             Assert.Empty(startupConfig.Services);
+        }
+
+        [Fact]
+        public void GetStartupConfig_throws_if_ConfigurationPath_is_specified_but_does_not_exist()
+        {
+            string expectedPath = PathHelper.SampleDirectoryPath("BUNK_DIRECTORY");
+
+            DirectoryUtility.SetWorkingDirectory(PathHelper.SampleDirectoryPath("ConfigurationGood"));
+
+            var options = new RegiOptions
+            {
+                ConfigurationPath = expectedPath
+            };
+
+            var service = CreateService();
+
+            Assert.Throws<DirectoryNotFoundException>(() => service.GetConfiguration(options));
         }
     }
 }

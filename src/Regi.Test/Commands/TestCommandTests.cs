@@ -41,7 +41,7 @@ namespace Regi.Test.Commands
         [Fact]
         public async Task Will_run_all_test_if_no_name_or_type_is_specified()
         {
-            _configServiceMock.Setup(m => m.GetConfiguration())
+            _configServiceMock.Setup(m => m.GetConfiguration(It.IsAny<RegiOptions>()))
                 .Returns(SampleProjects.ConfigurationDefault)
                 .Verifiable();
             _runnerServiceMock.Setup(m => m.TestAsync(It.IsAny<IList<Project>>(), It.IsAny<RegiOptions>(), It.IsAny<CancellationToken>()))
@@ -68,7 +68,7 @@ namespace Regi.Test.Commands
         [Fact]
         public async Task Returns_fail_count_as_exit_code()
         {
-            _configServiceMock.Setup(m => m.GetConfiguration())
+            _configServiceMock.Setup(m => m.GetConfiguration(It.IsAny<RegiOptions>()))
                 .Returns(SampleProjects.ConfigurationDefault)
                 .Verifiable();
             _runnerServiceMock.Setup(m => m.TestAsync(It.IsAny<IList<Project>>(), It.IsAny<RegiOptions>(), It.IsAny<CancellationToken>()))
@@ -94,7 +94,7 @@ namespace Regi.Test.Commands
         [InlineData(ProjectType.Integration)]
         public async Task Will_only_run_tests_with_matching_type_if_specified(ProjectType? type)
         {
-            _configServiceMock.Setup(m => m.GetConfiguration())
+            _configServiceMock.Setup(m => m.GetConfiguration(It.IsAny<RegiOptions>()))
                 .Returns(SampleProjects.ConfigurationDefault)
                 .Verifiable();
             _runnerServiceMock.Setup(m => m.TestAsync(It.Is<IList<Project>>(projects => projects.All(p => p.Type == type)), It.Is<RegiOptions>(o => o.Type == type), It.IsAny<CancellationToken>()))

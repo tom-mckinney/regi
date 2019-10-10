@@ -7,6 +7,9 @@ namespace Regi.Models
 {
     public class StartupConfig
     {
+        [JsonIgnore]
+        public string Path { get; set; }
+
         [JsonProperty("apps")]
         public List<Project> Apps { get; set; } = new List<Project>();
 
