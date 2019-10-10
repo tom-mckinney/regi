@@ -9,8 +9,8 @@ jobs:
   test:
     strategy:
       matrix:
-        # os: [windows-2019, ubuntu-18.04, macOS-10.14] # TODO: enable macOS once setup-dotnet has been fixed
         os: [windows-2019, ubuntu-18.04]
+        # os: [windows-2019, ubuntu-18.04, macOS-10.14] # TODO: enable macOS once setup-dotnet has been fixed
     name: Test on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     env:
@@ -22,9 +22,8 @@ jobs:
     #   with:
     #     dotnet-version: '3.0.100'
 
-    - name: Initialize sample projects
-      run: ./initialize.sh
-      shell: pwsh
+    - name: Install sample project dependencies
+      run: dotnet run -p ./src/Regi/Regi.csproj -- install --configuration ./src/Regi.Test/_SampleProjects_
 
     - name: Run xunit tests
       run: dotnet test ./src/Regi.sln
