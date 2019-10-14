@@ -4,12 +4,21 @@
     <ToolCommandName>regi</ToolCommandName>
     <TargetFramework>netcoreapp3.0</TargetFramework>
     <OutputType>Exe</OutputType>
-    <VersionPrefix>0.2.1</VersionPrefix>
     <IsPackable>true</IsPackable>
     <PackAsTool>true</PackAsTool>
     <!-- Optional performance setting - enables tiered JIT compilation-->
     <TieredCompilation>true</TieredCompilation>
     <AssemblyName>Regi</AssemblyName>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <Title>Regi</Title>
+    <PackageId>Regi</PackageId>
+    <Authors>Tom McKinney</Authors>
+    <Description>Command line tool for running, testing, and managing microservices in development and CI/CD environments.</Description>
+    <PackageTags>microservice;run;test;development;CLI</PackageTags>
+    <RepositoryUrl>https://github.com/tom-mckinney/regi</RepositoryUrl>
+    <PackageReleaseNotes>https://github.com/tom-mckinney/regi/releases</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>

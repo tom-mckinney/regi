@@ -46,7 +46,7 @@ jobs:
     - name: Create NuGet package
       run: dotnet pack --configuration Release --output nupkgs ./src/Regi
 
-    - name: Publish NuGet package
+    - name: Publish NuGet package ${{ github.ref }}
       run: echo "Hello, World!"
 
 
