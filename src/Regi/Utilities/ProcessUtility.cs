@@ -86,28 +86,25 @@ namespace Regi.Utilities
 
         public static int RunProcessAndWaitForExit(string fileName, string arguments, out string stdout, out string stderr, int waitToExitMs = 10_000)
         {
-            using (var process = CreateProcess(fileName, arguments))
+            using var process = CreateProcess(fileName, arguments);
+
+            process.Start();
+
+            stdout = null;
+            stderr = null;
+            if (process.WaitForExit(waitToExitMs))
             {
-                process.Start();
-
-                stdout = null;
-                stderr = null;
-                if (process.WaitForExit(waitToExitMs))
-                {
-                    stdout = process.StandardOutput.ReadToEnd();
-                    stderr = process.StandardError.ReadToEnd();
-                }
-                else
-                {
-                    process.Kill();
-
-                    // Kill is asynchronous so we should still wait a little
-                    //
-                    process.WaitForExit((int)TimeSpan.FromSeconds(1).TotalMilliseconds);
-                }
-
-                return process.HasExited ? process.ExitCode : -1;
+                stdout = process.StandardOutput.ReadToEnd();
+                stderr = process.StandardError.ReadToEnd();
             }
+            else
+            {
+                process.Kill();
+
+                process.WaitForExit((int)TimeSpan.FromSeconds(1).TotalMilliseconds); // Kill is asynchronous so we should still wait a little
+            }
+
+            return process.HasExited ? process.ExitCode : -1;
         }
 
         public static DataReceivedEventHandler WriteOutput(IConsole console, ConsoleLogLevel logLevel = ConsoleLogLevel.Default)

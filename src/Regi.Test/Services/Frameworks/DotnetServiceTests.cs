@@ -1,5 +1,6 @@
 ﻿using McMaster.Extensions.CommandLineUtils;
 using Moq;
+using Regi.Extensions;
 using Regi.Models;
 using Regi.Services;
 using Regi.Services.Frameworks;
@@ -255,11 +256,11 @@ namespace Regi.Test.Services.Frameworks
         }
 
         [Fact]
-        public void ShutdownBuildServer_shuts_down_all_build_servers()
+        public async Task ShutdownBuildServer_shuts_down_all_build_servers()
         {
             DirectoryUtility.SetWorkingDirectory(PathHelper.ProjectRootPath);
 
-            var process = _service.ShutdownBuildServer(TestOptions.Create());
+            var process =  await _service.ShutdownBuildServer(TestOptions.Create(), CancellationToken.None);
 
             Assert.Equal(AppStatus.Success, process.Status);
             Assert.Equal(AppTask.Cleanup, process.Task);

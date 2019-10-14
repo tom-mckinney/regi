@@ -10,6 +10,8 @@ using Regi.Models.Exceptions;
 using Regi.Services;
 using Regi.Services.Frameworks;
 using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Regi
 {
@@ -23,9 +25,9 @@ namespace Regi
     [Subcommand(typeof(VersionCommand))]
     public class Program
     {
-        public static int Main(string[] args) => MainWithConsole(PhysicalConsole.Singleton, args);
+        public static Task<int> Main(string[] args) => MainWithConsole(PhysicalConsole.Singleton, args);
 
-        public static int MainWithConsole(IConsole console, string[] args)
+        public static async Task<int> MainWithConsole(IConsole console, string[] args)
         {
             var services = ConfigureServices(console);
 
@@ -35,7 +37,7 @@ namespace Regi
                 .UseDefaultConventions()
                 .UseConstructorInjection(services);
 
-            app.OnExecute(() => Main(new string[] { "--help" }));
+            app.OnExecuteAsync(c => Main(new string[] { "--help" }));
 
             try
             {
@@ -57,9 +59,9 @@ namespace Regi
             {
                 var projectManager = app.GetRequiredService<IProjectManager>();
 
-                projectManager.KillAllProcesses(new RegiOptions(), true);
+                var shutdownCts = new CancellationTokenSource(5000);
+                await projectManager.KillAllProcesses(new RegiOptions(), shutdownCts.Token, true);
             }
-
         }
 
         public static IServiceProvider ConfigureServices(IConsole console)

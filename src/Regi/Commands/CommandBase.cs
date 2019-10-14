@@ -76,7 +76,7 @@ namespace Regi.Commands
 
         protected virtual void AfterExecute()
         {
-            _projectManager.KillAllProcesses(Options);
+            //_projectManager.KillAllProcesses(Options);
         }
 
         public virtual async Task<int> OnExecute()

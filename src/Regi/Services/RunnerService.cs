@@ -170,7 +170,7 @@ namespace Regi.Services
                             else
                                 _console.WriteErrorLine(outputMessage);
 
-                            _projectManager.KillAllProcesses(project.RequiredProjects, options);
+                            await _projectManager.KillAllProcesses(project.RequiredProjects, options, cancellationToken);
                         }
                     }, cancellationToken);
                 }

@@ -29,6 +29,8 @@ namespace Regi.Extensions
         {
             if (process == null) throw new ArgumentNullException(nameof(process));
 
+            if (process.HasExited) return Task.CompletedTask;
+
             var tcs = new TaskCompletionSource<object>();
 
             process.EnableRaisingEvents = true;

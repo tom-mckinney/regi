@@ -12,7 +12,7 @@ namespace Regi.Services.Frameworks
 {
     public interface IDotnetService : IFrameworkService
     {
-        AppProcess ShutdownBuildServer(RegiOptions options);
+        Task<AppProcess> ShutdownBuildServer(RegiOptions options, CancellationToken cancellationToken);
     }
 
     public class DotnetService : FrameworkService, IDotnetService
@@ -139,12 +139,12 @@ namespace Regi.Services.Frameworks
             return process;
         }
 
-        public AppProcess ShutdownBuildServer(RegiOptions options)
+        public async Task<AppProcess> ShutdownBuildServer(RegiOptions options, CancellationToken cancellationToken)
         {
             AppProcess shutdownBuildServer = CreateProcess(FrameworkCommands.Dotnet.ShutdownBuildServer, options);
 
             shutdownBuildServer.Start();
-            shutdownBuildServer.WaitForExit();
+            await shutdownBuildServer.WaitForExitAsync(cancellationToken);
 
             return shutdownBuildServer;
         }

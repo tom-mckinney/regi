@@ -7,6 +7,8 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -28,18 +30,18 @@ namespace Regi.Test.Services
         }
 
         [Fact]
-        public void ShutdownBuildServers_shuts_down_dotnet_build_servers()
+        public async Task ShutdownBuildServers_shuts_down_dotnet_build_servers()
         {
             var options = TestOptions.Create();
 
             var dotnetShutdownBuildServer = new AppProcess(new Process(), AppTask.Cleanup, AppStatus.Success);
-            dotnetServiceMock.Setup(m => m.ShutdownBuildServer(options))
-                .Returns(dotnetShutdownBuildServer)
+            dotnetServiceMock.Setup(m => m.ShutdownBuildServer(options, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(dotnetShutdownBuildServer)
                 .Verifiable();
 
             var service = CreateService();
 
-            var processes = service.ShutdownBuildServers(options);
+            var processes = await service.ShutdownBuildServers(options, CancellationToken.None);
 
             Assert.Equal(1, processes.Count);
             Assert.Same(dotnetShutdownBuildServer, processes[0]);

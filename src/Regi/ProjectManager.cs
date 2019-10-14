@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Regi
 {
@@ -18,8 +19,8 @@ namespace Regi
 
         IList<Project> FilterAndTrackProjects(RegiOptions options, StartupConfig config, Func<StartupConfig, IEnumerable<Project>> getTargetProjects);
         IList<Project> FilterByOptions(IEnumerable<Project> projects, RegiOptions options);
-        void KillAllProcesses(RegiOptions options, bool logKillCount = false);
-        void KillAllProcesses(IEnumerable<Project> projects, RegiOptions options, bool logKillCount = false);
+        Task KillAllProcesses(RegiOptions options, CancellationToken cancellationToken, bool logKillCount = false);
+        Task KillAllProcesses(IEnumerable<Project> projects, RegiOptions options, CancellationToken cancellationToken, bool logKillCount = false);
     }
 
     public class ProjectManager : IProjectManager
@@ -105,12 +106,12 @@ namespace Regi
             }
         }
 
-        public void KillAllProcesses(RegiOptions options, bool logKillCount = false)
+        public Task KillAllProcesses(RegiOptions options, CancellationToken cancellationToken, bool logKillCount = false)
         {
-            KillAllProcesses(Projects, options, logKillCount);
+            return KillAllProcesses(Projects, options, cancellationToken, logKillCount);
         }
 
-        public void KillAllProcesses(IEnumerable<Project> projects, RegiOptions options, bool logKillCount = false)
+        public async Task KillAllProcesses(IEnumerable<Project> projects, RegiOptions options, CancellationToken cancellationToken, bool logKillCount = false)
         {
             int projectCount = projects.Count();
             if (projectCount > 0)
@@ -136,7 +137,7 @@ namespace Regi
                 }
             }
 
-            _cleanupService.ShutdownBuildServers(options);
+            await _cleanupService.ShutdownBuildServers(options, cancellationToken);
         }
 
         public ConsoleCancelEventHandler HandleCancelEvent => (o, e) =>

@@ -7,6 +7,8 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Regi.Services
 {
@@ -14,7 +16,7 @@ namespace Regi.Services
     {
         void KillProcessTree(AppProcess process, RegiOptions options);
         void KillProcessTree(AppProcess process, RegiOptions options, TimeSpan timeout);
-        IReadOnlyList<AppProcess> ShutdownBuildServers(RegiOptions options);
+        Task<IReadOnlyList<AppProcess>> ShutdownBuildServers(RegiOptions options, CancellationToken cancellationToken);
     }
 
     public class CleanupService : ICleanupService
@@ -42,7 +44,6 @@ namespace Regi.Services
                 throw new ArgumentNullException(nameof(process));
             }
 
-
             string stdout;
             string stderr;
 
@@ -68,11 +69,12 @@ namespace Regi.Services
             process.Kill(timeout, console);
         }
 
-        public IReadOnlyList<AppProcess> ShutdownBuildServers(RegiOptions options)
+        public async Task<IReadOnlyList<AppProcess>> ShutdownBuildServers(RegiOptions options, CancellationToken cancellationToken)
         {
-            var output = new List<AppProcess>();
-
-            output.Add(dotnetService.ShutdownBuildServer(options));
+            var output = new List<AppProcess>
+            {
+                await dotnetService.ShutdownBuildServer(options, cancellationToken)
+            };
 
             return output.AsReadOnly();
         }
