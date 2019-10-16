@@ -1,6 +1,9 @@
 using McMaster.Extensions.CommandLineUtils;
 using McMaster.Extensions.CommandLineUtils.Abstractions;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json;
 using Regi.Abstractions;
 using Regi.Commands;
@@ -41,7 +44,17 @@ namespace Regi
 
             try
             {
+                var protoServer = Host.CreateDefaultBuilder(args)
+                    .ConfigureWebHostDefaults(webBuilder =>
+                    {
+                        webBuilder.UseStartup<ProtoServerStartup>();
+                    })
+                    .Build();
+
+                protoServer.RunAsync();
+
                 return app.Execute(args);
+
             }
             catch (RegiException e)
             {
@@ -68,7 +81,7 @@ namespace Regi
         {
             Console.OutputEncoding = System.Text.Encoding.UTF8;
 
-            return new ServiceCollection()
+            var services = new ServiceCollection()
                 .Configure<Settings>(o =>
                 {
                     o.RunIndefinitely = true;
@@ -87,8 +100,14 @@ namespace Regi
                 .AddSingleton<ISummaryService, SummaryService>()
                 .AddSingleton<ICleanupService, CleanupService>()
                 .AddSingleton(console)
-                .AddSingleton<CommandLineContext, DefaultCommandLineContext>()
-                .BuildServiceProvider();
+                .AddSingleton<CommandLineContext, DefaultCommandLineContext>();
+
+            services.AddTransient<System.Diagnostics.DiagnosticListener>();
+            services.AddRouting();
+            services.AddGrpc();
+            services.AddLogging();
+
+            return services.BuildServiceProvider();
         }
     }
 }
