@@ -23,7 +23,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Protobuf Include="Protos\greet.proto" GrpcServices="Server" />
+    <Protobuf Include="Protos\greet.proto" />
+    <Protobuf Include="Protos\handshake.proto" />
   </ItemGroup>
 
   <ItemGroup>

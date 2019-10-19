@@ -1,0 +1,17 @@
+﻿syntax = "proto3";
+
+option csharp_namespace = "Regi";
+
+package Handshake;
+
+service Handshake {
+  rpc ShakeHands (HandshakeRequest) returns (HandshakeReply);
+}
+
+message HandshakeRequest {
+  string apps = 1;
+}
+
+message HandshakeReply {
+  string pipename = 1;
+}

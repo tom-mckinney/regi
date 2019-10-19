@@ -5,15 +5,12 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Regi.Services
+namespace Regi.Services.Grpc
 {
     public class GreeterService : Greeter.GreeterBase
     {
-        private readonly IConsole _console;
-
-        public GreeterService(IConsole console)
+        public GreeterService()
         {
-            _console = console;
         }
 
         public override Task<HelloReply> SayHello(HelloRequest request, ServerCallContext context)

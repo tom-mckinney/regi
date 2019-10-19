@@ -26,6 +26,7 @@ namespace Regi
     [Subcommand(typeof(ListCommand))]
     [Subcommand(typeof(KillCommand))]
     [Subcommand(typeof(VersionCommand))]
+    [Subcommand(typeof(SpyCommand))]
     public class Program
     {
         public static Task<int> Main(string[] args) => MainWithConsole(PhysicalConsole.Singleton, args);
@@ -44,14 +45,15 @@ namespace Regi
 
             try
             {
-                var protoServer = Host.CreateDefaultBuilder(args)
-                    .ConfigureWebHostDefaults(webBuilder =>
-                    {
-                        webBuilder.UseStartup<ProtoServerStartup>();
-                    })
-                    .Build();
+                //var protoServer = Host.CreateDefaultBuilder(args)
+                //    .ConfigureWebHostDefaults(webBuilder =>
+                //    {
+                //        webBuilder.UseUrls("http://localhost:10420/");
+                //        webBuilder.UseStartup<ProtoServerStartup>();
+                //    })
+                //    .Build();
 
-                protoServer.RunAsync();
+                //await protoServer.RunAsync();
 
                 return app.Execute(args);
 

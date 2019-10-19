@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
-using Regi.Services;
+using Regi.Services.Grpc;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -21,6 +21,7 @@ namespace Regi
             app.UseRouting();
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapGrpcService<HandshakeService>();
                 endpoints.MapGrpcService<GreeterService>();
 
                 endpoints.MapGet("/", async context =>

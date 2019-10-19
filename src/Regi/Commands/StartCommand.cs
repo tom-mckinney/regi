@@ -1,4 +1,6 @@
 ﻿using McMaster.Extensions.CommandLineUtils;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Regi.Models;
 using Regi.Services;
@@ -26,6 +28,21 @@ namespace Regi.Commands
 
         protected override async Task<int> ExecuteAsync(IList<Project> projects, CancellationToken cancellationToken)
         {
+            var serverThread = new Thread(async () =>
+            {
+                var protoServer = Host.CreateDefaultBuilder()
+                    .ConfigureWebHostDefaults(webBuilder =>
+                    {
+                        webBuilder.UseUrls("https://localhost:5051/");
+                        webBuilder.UseStartup<ProtoServerStartup>();
+                    })
+                    .Build();
+
+                await protoServer.RunAsync(cancellationToken);
+            });
+
+            serverThread.Start();
+
             await _runnerService.StartAsync(projects, Options, cancellationToken);
 
             while (_options.RunIndefinitely && !cancellationToken.IsCancellationRequested)
