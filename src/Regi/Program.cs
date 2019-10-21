@@ -1,10 +1,6 @@
 using McMaster.Extensions.CommandLineUtils;
 using McMaster.Extensions.CommandLineUtils.Abstractions;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Newtonsoft.Json;
 using Regi.Abstractions;
 using Regi.Commands;
 using Regi.Extensions;
@@ -45,18 +41,7 @@ namespace Regi
 
             try
             {
-                //var protoServer = Host.CreateDefaultBuilder(args)
-                //    .ConfigureWebHostDefaults(webBuilder =>
-                //    {
-                //        webBuilder.UseUrls("http://localhost:10420/");
-                //        webBuilder.UseStartup<ProtoServerStartup>();
-                //    })
-                //    .Build();
-
-                //await protoServer.RunAsync();
-
                 return app.Execute(args);
-
             }
             catch (RegiException e)
             {
