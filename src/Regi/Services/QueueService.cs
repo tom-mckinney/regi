@@ -31,7 +31,8 @@ namespace Regi.Services
 
     public class QueueService : IQueueService
     {
-        private readonly SemaphoreSlim semaphore = new SemaphoreSlim(3, 3);
+        private const int _maxParallelCount = 3;
+        private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(_maxParallelCount, _maxParallelCount);
         private readonly IConsole _console;
         private readonly INetworkingService _networkingService;
 
@@ -99,43 +100,19 @@ namespace Regi.Services
                 {
                     await Task.Yield();
 
-                    await semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
+                    await _semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
 
                     cancellationToken.ThrowIfCancellationRequested();
 
+                    await Task.Delay(100); // This is to prevent processes from clobbering each other
+
                     await action();
 
-                    semaphore.Release();
+                    _semaphore.Release();
                 }, cancellationToken));                    
             }
 
             return Task.WhenAll(tasks);
-
-            //return Task.WhenAll(AsyncActions.Select((action) => Task.Run(async () =>
-            //{
-            //    await Task.Yield();
-
-            //    await semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
-
-            //    cancellationToken.ThrowIfCancellationRequested();
-
-            //    await action();
-
-            //    semaphore.Release();
-            //}, cancellationToken)));
-
-            //return Task.WhenAll(AsyncActions.Select(async (action) =>
-            //{
-            //    await Task.Yield();
-
-            //    await semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
-
-            //    cancellationToken.ThrowIfCancellationRequested();
-
-            //    await action();
-
-            //    semaphore.Release();
-            //}));
         }
 
         public async Task RunSerialActions(CancellationToken cancellationToken)

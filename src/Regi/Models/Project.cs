@@ -45,6 +45,8 @@ namespace Regi.Models
 
         public CommandDictionary<object> Scripts { get; set; }
 
+        public bool Optional { get; set; }
+
         [JsonIgnore]
         public ConcurrentBag<AppProcess> Processes { get; set; } = new ConcurrentBag<AppProcess>();
 

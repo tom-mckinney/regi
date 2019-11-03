@@ -22,8 +22,6 @@ namespace Regi.Commands
             _console = console;
         }
 
-        //public CancellationTokenSource CancellationTokenSource = new CancellationTokenSource();
-
         public RegiOptions Options
         {
             get => this;

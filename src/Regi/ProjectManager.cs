@@ -80,6 +80,12 @@ namespace Regi
                     .Where(p => p.Type == options.Type);
             }
 
+            if (!options.IncludeOptional)
+            {
+                projects = projects
+                    .Where(p => p.Optional == false);
+            }
+
             return projects.ToList();
         }
 

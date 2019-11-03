@@ -36,6 +36,9 @@ namespace Regi.Models
         [Option(CommandOptionType.NoValue, Description = "Return raw output without any formatting or verbosity settings")]
         public bool RawOutput { get; set; } = false;
 
+        [Option(CommandOptionType.NoValue, Template = "-i --include-optional", Description = "Include optional projects")]
+        public bool IncludeOptional { get; set; }
+
         public EnvironmentVariableDictionary VariableList { get; set; }
 
         public bool KillProcessesOnExit { get; set; } = true;
