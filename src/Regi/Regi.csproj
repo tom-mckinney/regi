@@ -3,6 +3,7 @@
   <PropertyGroup>
     <ToolCommandName>regi</ToolCommandName>
     <TargetFramework>netcoreapp3.0</TargetFramework>
+    <Version>$(VERSION)</Version>
     <OutputType>Exe</OutputType>
     <IsPackable>true</IsPackable>
     <PackAsTool>true</PackAsTool>
