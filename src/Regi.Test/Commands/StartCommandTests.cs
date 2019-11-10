@@ -17,9 +17,10 @@ namespace Regi.Test.Commands
     {
         private readonly ITestOutputHelper _output;
         private readonly TestConsole _console;
+        private readonly Mock<IBroadcastService> _broadcastServiceMock = new Mock<IBroadcastService>();
+        private readonly Mock<IRunnerService> _runnerServiceMock = new Mock<IRunnerService>();
         private readonly IProjectManager _projectManager;
         private readonly Mock<ICleanupService> _cleanupServiceMock = new Mock<ICleanupService>();
-        private readonly Mock<IRunnerService> _runnerServiceMock = new Mock<IRunnerService>();
         private readonly Mock<IConfigurationService> _configServiceMock = new Mock<IConfigurationService>();
         private readonly IOptions<Settings> _options = Options.Create(new Settings { RunIndefinitely = false });
 
@@ -32,7 +33,7 @@ namespace Regi.Test.Commands
 
         StartCommand CreateCommand()
         {
-            return new StartCommand(_runnerServiceMock.Object, _projectManager, _configServiceMock.Object, _console, _options);
+            return new StartCommand(_broadcastServiceMock.Object, _runnerServiceMock.Object, _projectManager, _configServiceMock.Object, _console, _options);
         }
 
         [Fact]

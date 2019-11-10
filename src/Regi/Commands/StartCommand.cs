@@ -14,12 +14,14 @@ namespace Regi.Commands
     [Command("start", AllowArgumentSeparator = true)]
     public class StartCommand : CommandBase
     {
+        private readonly IBroadcastService _broadcastService;
         private readonly IRunnerService _runnerService;
         private readonly Settings _options;
 
-        public StartCommand(IRunnerService runnerService, IProjectManager projectManager, IConfigurationService configurationService, IConsole console, IOptions<Settings> options)
+        public StartCommand(IBroadcastService broadcastService, IRunnerService runnerService, IProjectManager projectManager, IConfigurationService configurationService, IConsole console, IOptions<Settings> options)
             : base(projectManager, configurationService, console)
         {
+            _broadcastService = broadcastService;
             _runnerService = runnerService;
             _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
         }
@@ -28,6 +30,8 @@ namespace Regi.Commands
 
         protected override async Task<int> ExecuteAsync(IList<Project> projects, CancellationToken cancellationToken)
         {
+            await _broadcastService.StartBroadcastServer(cancellationToken);
+
             await _runnerService.StartAsync(projects, Options, cancellationToken);
 
             while (_options.RunIndefinitely && !cancellationToken.IsCancellationRequested)

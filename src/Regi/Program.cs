@@ -86,6 +86,8 @@ namespace Regi
                 .AddSingleton<IRuntimeInfo, RuntimeInfo>()
                 .AddSingleton<ISummaryService, SummaryService>()
                 .AddSingleton<ICleanupService, CleanupService>()
+                .AddSingleton<IBroadcastService, BroadcastService>()
+
                 .AddSingleton(console)
                 .AddSingleton<CommandLineContext, DefaultCommandLineContext>();
 

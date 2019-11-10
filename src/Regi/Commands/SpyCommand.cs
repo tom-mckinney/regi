@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.IO.Pipes;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -24,9 +26,29 @@ namespace Regi.Commands
             var channel = GrpcChannel.ForAddress("https://localhost:5051/");
             var client = new Handshake.HandshakeClient(channel);
             var reply = await client.ShakeHandsAsync(new HandshakeRequest { Apps = string.Join(',', projects.Select(p => p.Name)) });
-            //var reply = await client.SayHelloAsync(new HelloRequest { Name = "Wumbo!" });
 
-            _console.WriteLine($"Greeting: {reply.Pipename}");
+            _console.WriteLine($"Handshake: {reply.Pipename}");
+
+            using (var PipeClient = new NamedPipeClientStream(".", $"regi_Backend", PipeDirection.In))
+            {
+                Console.WriteLine("Connecting to server...\n");
+                await PipeClient.ConnectAsync(cancellationToken);
+
+                Console.WriteLine("Connected to pipe.");
+                Console.WriteLine("There are currently {0} pipe server instances open.", PipeClient.NumberOfServerInstances);
+
+                using StreamReader sr = new StreamReader(PipeClient);
+
+                while (!cancellationToken.IsCancellationRequested)
+                {
+                    string temp;
+                    while ((temp = await sr.ReadLineAsync()) != null)
+                    {
+                        Console.WriteLine("Received from server: {0}", temp);
+                    }
+                    await Task.Delay(200);
+                }
+            }
 
             return 0;
         }

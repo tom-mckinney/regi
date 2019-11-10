@@ -23,13 +23,15 @@ namespace Regi.Services.Frameworks
 
     public abstract class FrameworkService : IFrameworkService
     {
+        private readonly IBroadcastService _broadcastService;
         protected readonly IConsole _console;
         protected readonly IPlatformService _platformService;
         protected readonly string _frameworkExePath;
         protected readonly object _lock = new object();
 
-        public FrameworkService(IConsole console, IPlatformService platformService, string frameworkExePath)
+        public FrameworkService(IBroadcastService broadcastService, IConsole console, IPlatformService platformService, string frameworkExePath)
         {
+            _broadcastService = broadcastService;
             _console = console;
             _platformService = platformService;
 
@@ -229,7 +231,18 @@ namespace Regi.Services.Frameworks
 
         public virtual DataReceivedEventHandler HandleOutputDataRecieved(string name) => new DataReceivedEventHandler((o, e) =>
         {
-            _console.WriteDefaultLine(name + ": " + e.Data, ConsoleLineStyle.Normal);
+            if (_broadcastService.ServerStreams.TryGetValue($"regi_{name}", out System.IO.Pipes.NamedPipeServerStream serverStream))
+            {
+                if (serverStream.IsConnected)
+                {
+                    using var writer = new System.IO.StreamWriter(serverStream);
+                    writer.WriteLine(name + ": " + e.Data);
+                }
+            }
+            else
+            {
+                _console.WriteDefaultLine(name + ": " + e.Data, ConsoleLineStyle.Normal);
+            }
         });
 
         public virtual DataReceivedEventHandler HandleErrorDataReceived(string name, AppProcess output) => new DataReceivedEventHandler((o, e) =>
