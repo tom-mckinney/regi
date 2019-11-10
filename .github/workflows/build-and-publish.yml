@@ -12,7 +12,8 @@ jobs:
   test:
     strategy:
       matrix:
-        os: [windows-2019, ubuntu-18.04]
+        os: [ubuntu-18.04]
+        # os: [windows-2019, ubuntu-18.04] # TODO: fix flakey tests that rely on DirectoryHelper
         # os: [windows-2019, ubuntu-18.04, macOS-10.14] # TODO: enable macOS once setup-dotnet has been fixed
     name: Test on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
@@ -48,11 +49,9 @@ jobs:
       run: |
         REF="${{ github.ref }}"
         FILTER="refs/tags/v"
-        VERSION="${REF//$FILTER}"
+        export VERSION="${REF//$FILTER}"
+        echo "Building Regi v${VERSION}"
         dotnet pack --configuration Release --output nupkgs ./src/Regi
 
     - name: Publish NuGet package ${{ github.ref }}
       run: echo "Hello, World!"
-
-
-
