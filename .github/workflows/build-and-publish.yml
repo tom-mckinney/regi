@@ -41,7 +41,7 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-18.04
     env:
-      DOTNET_CLI_TELEMETRY_OPTOUT: 1    
+      DOTNET_CLI_TELEMETRY_OPTOUT: 1
     steps:
     - uses: actions/checkout@v1
 
@@ -54,4 +54,6 @@ jobs:
         dotnet pack --configuration Release --output nupkgs ./src/Regi
 
     - name: Publish NuGet package ${{ github.ref }}
-      run: echo "Hello, World!"
+      run: |
+        PACKAGE=$(find ./nupkgs/ -name "Regi.*.nupkg")
+        dotnet nuget push $PACKAGE -k ${{ secrets.NuGetApiKey }} -s https://api.nuget.org/v3/index.json
