@@ -1,9 +1,9 @@
-cd src/Regi
+rm -r ./nupkgs/ &> /dev/null
 
-rm Regi.*.nupkg
+export VERSION="1.0.0-dev"
 
-dotnet pack --output ./
+dotnet pack --output ./nupkgs/ ./src/Regi
 
 dotnet tool uninstall -g regi
 
-dotnet tool install -g regi --add-source ./ --ignore-failed-sources
+dotnet tool install -g regi --add-source ./nupkgs/ --ignore-failed-sources --version $VERSION

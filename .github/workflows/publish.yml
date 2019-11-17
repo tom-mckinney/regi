@@ -1,9 +1,6 @@
-name: Build and Publish
+name: Publish Package
 
 on:
-  push:
-    branches:
-    - master
   release:
     types:
     - published
