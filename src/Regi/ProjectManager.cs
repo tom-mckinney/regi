@@ -56,7 +56,6 @@ namespace Regi
             if (!string.IsNullOrWhiteSpace(options.Name))
             {
                 projects = projects.Where(p => new Regex(options.Name, RegexOptions.IgnoreCase).IsMatch(p.Name));
-
             }
 
             if (options.Exclude != null && options.Exclude.Any())
@@ -83,7 +82,7 @@ namespace Regi
             if (!options.IncludeOptional)
             {
                 projects = projects
-                    .Where(p => p.Optional == false);
+                    .Where(p => p.Required == true);
             }
 
             return projects.ToList();
