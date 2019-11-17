@@ -16,17 +16,18 @@ namespace Regi.Test.Services
 {
     public class CleanupServiceTests
     {
-        Mock<IDotnetService> dotnetServiceMock = new Mock<IDotnetService>();
-        private readonly TestConsole console;
+        private readonly Mock<IDotnetService> _dotnetServiceMock = new Mock<IDotnetService>();
+        private readonly TestFileSystem _fileSystem = new TestFileSystem();
+        private readonly TestConsole _console;
 
         public CleanupServiceTests(ITestOutputHelper outputHelper)
         {
-            this.console = new TestConsole(outputHelper);
+            this._console = new TestConsole(outputHelper);
         }
 
         ICleanupService CreateService()
         {
-            return new CleanupService(dotnetServiceMock.Object, console);
+            return new CleanupService(_dotnetServiceMock.Object, _fileSystem, _console);
         }
 
         [Fact]
@@ -35,7 +36,7 @@ namespace Regi.Test.Services
             var options = TestOptions.Create();
 
             var dotnetShutdownBuildServer = new AppProcess(new Process(), AppTask.Cleanup, AppStatus.Success);
-            dotnetServiceMock.Setup(m => m.ShutdownBuildServer(options, It.IsAny<CancellationToken>()))
+            _dotnetServiceMock.Setup(m => m.ShutdownBuildServer(options, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(dotnetShutdownBuildServer)
                 .Verifiable();
 

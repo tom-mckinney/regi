@@ -9,6 +9,8 @@ namespace Regi.Test
 {
     public partial class TestBase
     {
+        protected static readonly TestFileSystem _fileSystem = new TestFileSystem();
+
         protected static void CleanupApp(AppProcess app)
         {
             if (app == null)
@@ -20,18 +22,18 @@ namespace Regi.Test
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                ProcessUtility.KillProcessWindows(processId, out string _, out string _);
+                ProcessUtility.KillProcessWindows(processId, _fileSystem, out string _, out string _);
             }
             else
             {
                 var children = new HashSet<int>();
-                ProcessUtility.GetAllChildIdsUnix(processId, children);
+                ProcessUtility.GetAllChildIdsUnix(processId, children, _fileSystem);
                 foreach (var childId in children)
                 {
-                    ProcessUtility.KillProcessUnix(childId, out string _, out string _);
+                    ProcessUtility.KillProcessUnix(childId, _fileSystem, out string _, out string _);
                 }
 
-                ProcessUtility.KillProcessUnix(processId, out string _, out string _);
+                ProcessUtility.KillProcessUnix(processId,  _fileSystem, out string _, out string _);
             }
         }
     }

@@ -1,5 +1,6 @@
 ﻿using McMaster.Extensions.CommandLineUtils;
 using Regi.Extensions;
+using Regi.Services;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -20,16 +21,17 @@ namespace Regi.Utilities
             return name + extension;
         }
 
-        public static void KillProcessWindows(int processId, out string stdout, out string stderr)
+        public static void KillProcessWindows(int processId, IFileSystem fileSystem, out string stdout, out string stderr)
         {
-            RunProcessAndWaitForExit("taskkill", $"/T /F /PID {processId}", out stdout, out stderr);
+            RunProcessAndWaitForExit("taskkill", $"/T /F /PID {processId}", fileSystem, out stdout, out stderr);
         }
 
-        public static void GetAllChildIdsUnix(int parentId, ISet<int> children)
+        public static void GetAllChildIdsUnix(int parentId, ISet<int> children, IFileSystem fileSystem)
         {
             var exitCode = RunProcessAndWaitForExit(
                 "pgrep",
                 $"-P {parentId}",
+                fileSystem,
                 out string stdout,
                 out string _);
 
@@ -50,26 +52,27 @@ namespace Regi.Utilities
                         {
                             children.Add(id);
                             // Recursively get the children
-                            GetAllChildIdsUnix(id, children);
+                            GetAllChildIdsUnix(id, children, fileSystem);
                         }
                     }
                 }
             }
         }
 
-        public static void KillProcessUnix(int processId, out string stdout, out string stderr)
+        public static void KillProcessUnix(int processId, IFileSystem fileSystem, out string stdout, out string stderr)
         {
             RunProcessAndWaitForExit(
                 "kill",
                 $"-TERM {processId}",
+                fileSystem,
                 out stdout, out stderr);
         }
 
-        public static Process CreateProcess(string fileName, string arguments, string workingDirectory = null)
+        public static Process CreateProcess(string fileName, string arguments, IFileSystem fileSystem, string workingDirectory = null)
         {
             var startInfo = new ProcessStartInfo
             {
-                WorkingDirectory = DirectoryUtility.GetDirectoryPath(workingDirectory, false) ?? DirectoryUtility.WorkingDirectory,
+                WorkingDirectory = fileSystem.GetDirectoryPath(workingDirectory, false) ?? fileSystem.WorkingDirectory,
                 FileName = fileName,
                 Arguments = arguments,
                 RedirectStandardOutput = true,
@@ -84,9 +87,9 @@ namespace Regi.Utilities
             };
         }
 
-        public static int RunProcessAndWaitForExit(string fileName, string arguments, out string stdout, out string stderr, int waitToExitMs = 10_000)
+        public static int RunProcessAndWaitForExit(string fileName, string arguments, IFileSystem fileSystem, out string stdout, out string stderr, int waitToExitMs = 10_000)
         {
-            using var process = CreateProcess(fileName, arguments);
+            using var process = CreateProcess(fileName, arguments, fileSystem);
 
             process.Start();
 

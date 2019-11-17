@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.RegularExpressions;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -15,6 +16,7 @@ namespace Regi.Test.Services
     public class SummaryServiceTests
     {
         private readonly TestConsole _console;
+        private readonly TestFileSystem _fileSystem = new TestFileSystem();
 
         public SummaryServiceTests(ITestOutputHelper outputHelper)
         {
@@ -23,7 +25,7 @@ namespace Regi.Test.Services
 
         ISummaryService CreateService()
         {
-            return new SummaryService(new ProjectManager(_console, new Mock<ICleanupService>().Object), _console);
+            return new SummaryService(new ProjectManager(_console, new Mock<ICleanupService>().Object), _fileSystem, _console);
         }
 
         [Fact]
@@ -57,6 +59,28 @@ namespace Regi.Test.Services
                 Assert.DoesNotContain("Apps:", _console.LogOutput, StringComparison.InvariantCulture);
             if (testCount <= 0)
                 Assert.DoesNotContain("Tests:", _console.LogOutput, StringComparison.InvariantCulture);
+        }
+
+        [Fact]
+        public void PrintDomainSummary_prints_optional_projects_even_if_include_optional_is_not_specified()
+        {
+            var service = CreateService();
+
+            var config = SampleProjects.ConfigurationGood;
+
+            foreach (var app in config.Apps)
+            {
+                app.Required = false;
+            }
+
+            var output = service.PrintDomainSummary(config, TestOptions.Create());
+
+            Assert.Equal(SampleProjects.ConfigurationGood.Apps.Count, output.Apps.Count);
+            Assert.Equal(SampleProjects.ConfigurationGood.Tests.Count, output.Tests.Count);
+
+            Assert.Contains("Apps:", _console.LogOutput, StringComparison.InvariantCulture);
+            Assert.Equal(config.Apps.Count, new Regex("(Optional)").Matches(_console.LogOutput).Count);
+            Assert.Contains("Tests:", _console.LogOutput, StringComparison.InvariantCulture);
         }
 
         [Fact]
@@ -106,9 +130,9 @@ namespace Regi.Test.Services
 
             string expectedOutput = "";
             expectedOutput += $" PASS  {SampleProjects.TestCollection.Name}";
-            expectedOutput += $"  PASS  {DirectoryUtility.GetDirectoryShortName(SampleProjects.TestCollection.Paths[2])}";
-            expectedOutput += $"  PASS  {DirectoryUtility.GetDirectoryShortName(SampleProjects.TestCollection.Paths[1])}";
-            expectedOutput += $"  PASS  {DirectoryUtility.GetDirectoryShortName(SampleProjects.TestCollection.Paths[0])}";
+            expectedOutput += $"  PASS  {PathUtility.GetDirectoryShortName(SampleProjects.TestCollection.Paths[2])}";
+            expectedOutput += $"  PASS  {PathUtility.GetDirectoryShortName(SampleProjects.TestCollection.Paths[1])}";
+            expectedOutput += $"  PASS  {PathUtility.GetDirectoryShortName(SampleProjects.TestCollection.Paths[0])}";
             expectedOutput += "Test projects: 1 succeeded, 1 totalElapsed time: 100ms";
 
             Assert.Equal(expectedOutput, _console.LogOutput.Replace(Environment.NewLine, string.Empty, StringComparison.InvariantCulture));
@@ -136,9 +160,9 @@ namespace Regi.Test.Services
 
             string expectedOutput = "";
             expectedOutput += $" FAIL  {SampleProjects.TestCollection.Name}";
-            expectedOutput += $"  PASS  {DirectoryUtility.GetDirectoryShortName(SampleProjects.TestCollection.Paths[2])}";
-            expectedOutput += $"  PASS  {DirectoryUtility.GetDirectoryShortName(SampleProjects.TestCollection.Paths[1])}";
-            expectedOutput += $"  FAIL  {DirectoryUtility.GetDirectoryShortName(SampleProjects.TestCollection.Paths[0])}";
+            expectedOutput += $"  PASS  {PathUtility.GetDirectoryShortName(SampleProjects.TestCollection.Paths[2])}";
+            expectedOutput += $"  PASS  {PathUtility.GetDirectoryShortName(SampleProjects.TestCollection.Paths[1])}";
+            expectedOutput += $"  FAIL  {PathUtility.GetDirectoryShortName(SampleProjects.TestCollection.Paths[0])}";
             expectedOutput += "Test projects: 1 failed, 1 totalElapsed time: 100ms";
 
             Assert.Equal(expectedOutput, _console.LogOutput.Replace(Environment.NewLine, string.Empty, StringComparison.InvariantCulture));

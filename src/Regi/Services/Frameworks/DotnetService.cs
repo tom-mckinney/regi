@@ -17,8 +17,11 @@ namespace Regi.Services.Frameworks
 
     public class DotnetService : FrameworkService, IDotnetService
     {
-        public DotnetService(IConsole console, IPlatformService platformService) : base(console, platformService, DotNetExe.FullPathOrDefault())
+        IFileSystem _fileSystem;
+
+        public DotnetService(IFileSystem fileSystem, IConsole console, IPlatformService platformService) : base(console, platformService, DotNetExe.FullPathOrDefault())
         {
+            _fileSystem = fileSystem;
         }
 
         protected override CommandDictionary FrameworkOptions { get; } = new CommandDictionary
@@ -141,7 +144,7 @@ namespace Regi.Services.Frameworks
 
         public async Task<AppProcess> ShutdownBuildServer(RegiOptions options, CancellationToken cancellationToken)
         {
-            AppProcess shutdownBuildServer = CreateProcess(FrameworkCommands.Dotnet.ShutdownBuildServer, options);
+            AppProcess shutdownBuildServer = CreateProcess(FrameworkCommands.Dotnet.ShutdownBuildServer, options, _fileSystem);
 
             shutdownBuildServer.Start();
             await shutdownBuildServer.WaitForExitAsync(cancellationToken);

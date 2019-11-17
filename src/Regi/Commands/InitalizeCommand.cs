@@ -11,9 +11,9 @@ namespace Regi.Commands
     [Command("init")]
     public class InitalizeCommand : CommandBase
     {
-        private readonly IFileService fileService;
+        private readonly IFileSystem fileService;
 
-        public InitalizeCommand(IFileService fileService, IProjectManager projectManager, IConfigurationService configurationService, IConsole console)
+        public InitalizeCommand(IFileSystem fileService, IProjectManager projectManager, IConfigurationService configurationService, IConsole console)
             : base(projectManager, configurationService, console)
         {
             this.fileService = fileService;

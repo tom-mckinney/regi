@@ -10,14 +10,16 @@ namespace Regi.Test.Utilities
     [Collection(TestCollections.NoParallel)]
     public class ProcessUtilityTests
     {
+        private readonly TestFileSystem _fileSystem = new TestFileSystem();
+
         [Fact]
         public void CreateProcess_returns_process_with_fileName_and_arguments_in_target_directory()
         {
             string targetDirectory = PathHelper.SampleDirectoryPath("ConfigurationGood");
 
-            DirectoryUtility.SetWorkingDirectory(targetDirectory);
+            _fileSystem.WorkingDirectory = targetDirectory;
 
-            var process = ProcessUtility.CreateProcess("wumbo", "--foo bar");
+            var process = ProcessUtility.CreateProcess("wumbo", "--foo bar", _fileSystem);
 
             Assert.Equal("wumbo", process.StartInfo.FileName);
             Assert.Equal("--foo bar", process.StartInfo.Arguments);
@@ -34,9 +36,9 @@ namespace Regi.Test.Utilities
             string targetDirectory = PathHelper.SampleDirectoryPath("ConfigurationBad");
             string workingDirectory = PathHelper.SampleDirectoryPath("ConfigurationGood");
 
-            DirectoryUtility.SetWorkingDirectory(targetDirectory);
+            _fileSystem.WorkingDirectory = targetDirectory;
 
-            var process = ProcessUtility.CreateProcess("wumbo", "--foo bar", "../ConfigurationGood"); // relative
+            var process = ProcessUtility.CreateProcess("wumbo", "--foo bar", _fileSystem, "../ConfigurationGood"); // relative
 
             Assert.Equal("wumbo", process.StartInfo.FileName);
             Assert.Equal("--foo bar", process.StartInfo.Arguments);
@@ -53,9 +55,9 @@ namespace Regi.Test.Utilities
             string targetDirectory = PathHelper.SampleDirectoryPath("ConfigurationBad");
             string workingDirectory = PathHelper.SampleDirectoryPath("ConfigurationGood");
 
-            DirectoryUtility.SetWorkingDirectory(targetDirectory);
+            _fileSystem.WorkingDirectory = targetDirectory;
 
-            var process = ProcessUtility.CreateProcess("wumbo", "--foo bar", workingDirectory); // absolute
+            var process = ProcessUtility.CreateProcess("wumbo", "--foo bar", _fileSystem, workingDirectory); // absolute
 
             Assert.Equal("wumbo", process.StartInfo.FileName);
             Assert.Equal("--foo bar", process.StartInfo.Arguments);

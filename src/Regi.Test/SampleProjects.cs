@@ -56,7 +56,7 @@ namespace Regi.Test
             RawOutput = true,
             Serial = true,
             Port = 5000,
-            Environment = new Dictionary<string, string>
+            Environment = new Dictionary<string, object>
             {
                 { "HEADLESS", bool.FalseString }
             }
@@ -147,10 +147,10 @@ namespace Regi.Test
                 }
             },
             Services = new List<Project>(),
-            Sources = new Dictionary<ProjectFramework, string>
+            RawSources = new Dictionary<string, string>
             {
-                { ProjectFramework.Dotnet, "http://nuget.org/api" },
-                { ProjectFramework.Node, "http://npmjs.org" }
+                { ProjectFramework.Dotnet.ToString(), "http://nuget.org/api" },
+                { ProjectFramework.Node.ToString(), "http://npmjs.org" }
             }
         };
     }

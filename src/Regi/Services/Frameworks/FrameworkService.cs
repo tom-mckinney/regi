@@ -81,7 +81,8 @@ namespace Regi.Services.Frameworks
 
         protected virtual string FormatAdditionalArguments(IEnumerable<string> args) => string.Join(' ', args);
 
-        public virtual AppProcess CreateProcess(string command, RegiOptions options, string fileName = null)
+        /// TODO: this should be part of <see cref="ProcessUtility"/>
+        public virtual AppProcess CreateProcess(string command, RegiOptions options, IFileSystem fileSystem, string fileName = null)
         {
             fileName = fileName ?? _frameworkExePath;
             string args = command;
@@ -95,7 +96,7 @@ namespace Regi.Services.Frameworks
                 {
                     FileName = fileName,
                     Arguments = args,
-                    WorkingDirectory = DirectoryUtility.WorkingDirectory,
+                    WorkingDirectory = fileSystem.WorkingDirectory,
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
                     CreateNoWindow = true

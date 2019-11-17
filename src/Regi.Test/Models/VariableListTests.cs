@@ -13,7 +13,7 @@ namespace Regi.Test.Models
         {
             Project testProject = new Project
             {
-                Environment = new Dictionary<string, string>
+                Environment = new Dictionary<string, object>
                 {
                     { "FOO", "bar" }
                 }

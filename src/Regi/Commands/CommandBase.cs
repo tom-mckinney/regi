@@ -41,13 +41,13 @@ namespace Regi.Commands
 
         protected abstract Func<StartupConfig, IEnumerable<Project>> GetTargetProjects { get; }
 
-        protected virtual void BeforeExecute()
+        protected virtual async Task BeforeExecuteAsync()
         {
             try
             {
                 if (RequireStartupConfig)
                 {
-                    Config = _configurationService.GetConfiguration(Options);
+                    Config = await _configurationService.GetConfigurationAsync(Options);
 
                     Options.VariableList = new EnvironmentVariableDictionary(Config);
 
@@ -79,7 +79,7 @@ namespace Regi.Commands
 
         public virtual async Task<int> OnExecute()
         {
-            BeforeExecute();
+            await BeforeExecuteAsync();
 
             int statusCode = await ExecuteAsync(_projectManager.Projects, _projectManager.CancellationTokenSource.Token);
 
