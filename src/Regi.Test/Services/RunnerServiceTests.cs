@@ -3,11 +3,9 @@ using Regi.Models;
 using Regi.Services;
 using Regi.Services.Frameworks;
 using Regi.Test.Helpers;
-using Regi.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -28,6 +26,7 @@ namespace Regi.Test.Services
         private readonly Mock<INetworkingService> _networkingServiceMock = new Mock<INetworkingService>();
         private readonly Mock<IPlatformService> _platformServiceMock = new Mock<IPlatformService>();
         private readonly IRunnerService _runnerService;
+        private readonly TestFileSystem _fileSystem = new TestFileSystem();
 
         public RunnerServiceTests(ITestOutputHelper output)
         {
@@ -45,6 +44,7 @@ namespace Regi.Test.Services
                 _queueService,
                 _networkingServiceMock.Object,
                 _platformServiceMock.Object,
+                _fileSystem,
                 _console);
         }
 
@@ -504,13 +504,15 @@ namespace Regi.Test.Services
 
             var options = TestOptions.Create();
 
+            var backendDirectoryPaths = backend.GetAppDirectoryPaths(_fileSystem);
             var backendBuildProccess = new AppProcess(new Process(), AppTask.Build, AppStatus.Success);
-            _dotnetServiceMock.Setup(m => m.BuildProject(backend, backend.AppDirectoryPaths[0], options, It.IsAny<CancellationToken>()))
+            _dotnetServiceMock.Setup(m => m.BuildProject(backend, backendDirectoryPaths[0], options, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(backendBuildProccess)
                 .Verifiable();
 
+            var frontendDirectoryPaths = frontend.GetAppDirectoryPaths(_fileSystem);
             var frontendBuildProcess = new AppProcess(new Process(), AppTask.Build, AppStatus.Success);
-            _nodeServiceMock.Setup(m => m.BuildProject(frontend, frontend.AppDirectoryPaths[0], options, It.IsAny<CancellationToken>()))
+            _nodeServiceMock.Setup(m => m.BuildProject(frontend, frontendDirectoryPaths[0], options, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(frontendBuildProcess)
                 .Verifiable();
 

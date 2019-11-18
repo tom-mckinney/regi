@@ -38,8 +38,8 @@ namespace Regi.Test.Commands
         [Fact]
         public async Task Will_start_all_projects_by_default()
         {
-            _configServiceMock.Setup(m => m.GetConfiguration(It.IsAny<RegiOptions>()))
-                .Returns(SampleProjects.ConfigurationDefault)
+            _configServiceMock.Setup(m => m.GetConfigurationAsync(It.IsAny<RegiOptions>()))
+                .ReturnsAsync(SampleProjects.ConfigurationDefault)
                 .Verifiable();
             _runnerServiceMock.Setup(m => m.StartAsync(It.IsAny<IList<Project>>(), It.IsAny<RegiOptions>(), It.IsAny<CancellationToken>()))
                 .Callback((IList<Project> projects, RegiOptions options, CancellationToken token) =>

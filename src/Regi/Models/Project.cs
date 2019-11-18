@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Regi.Services;
 using Regi.Utilities;
 using System;
 using System.Collections.Concurrent;
@@ -35,7 +36,7 @@ namespace Regi.Models
 
         public int? Port { get; set; }
 
-        public IDictionary<string, string> Environment { get; set; } = new Dictionary<string, string>();
+        public IDictionary<string, object> Environment { get; set; } = new Dictionary<string, object>();
 
         public bool Serial { get; set; } = false;
 
@@ -109,29 +110,26 @@ namespace Regi.Models
         }
 
         private IList<string> _appDirectoryPaths;
-        public IList<string> AppDirectoryPaths
+        public IList<string> GetAppDirectoryPaths(IFileSystem fileSystem)
         {
-            get
+            if (_appDirectoryPaths == null)
             {
-                if (_appDirectoryPaths == null)
-                {
-                    _appDirectoryPaths = new List<string>();
+                _appDirectoryPaths = new List<string>();
 
-                    if (Paths?.Count > 0)
+                if (Paths?.Count > 0)
+                {
+                    foreach (var path in Paths)
                     {
-                        foreach (var path in Paths)
-                        {
-                            _appDirectoryPaths.Add(DirectoryUtility.GetDirectoryPath(path));
-                        }
-                    }
-                    else if (!string.IsNullOrWhiteSpace(Path))
-                    {
-                        _appDirectoryPaths.Add(DirectoryUtility.GetDirectoryPath(Path));
+                        _appDirectoryPaths.Add(fileSystem.GetDirectoryPath(path));
                     }
                 }
-
-                return _appDirectoryPaths;
+                else if (!string.IsNullOrWhiteSpace(Path))
+                {
+                    _appDirectoryPaths.Add(fileSystem.GetDirectoryPath(Path));
+                }
             }
+
+            return _appDirectoryPaths;
         }
     }
 }

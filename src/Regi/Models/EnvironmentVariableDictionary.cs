@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace Regi.Models
 {
-    public class EnvironmentVariableDictionary : Dictionary<string, string>, IDictionary<string, string>
+    public class EnvironmentVariableDictionary : Dictionary<string, object>, IDictionary<string, object>
     {
         public EnvironmentVariableDictionary() : base() { }
 

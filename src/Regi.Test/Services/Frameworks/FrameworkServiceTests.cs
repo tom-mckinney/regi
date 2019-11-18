@@ -15,6 +15,7 @@ namespace Regi.Test.Services.Frameworks
 {
     public class FrameworkServiceTests
     {
+        private readonly TestFileSystem _fileSystem = new TestFileSystem();
         private readonly IConsole _console;
 
         public FrameworkServiceTests(ITestOutputHelper output)
@@ -109,7 +110,7 @@ namespace Regi.Test.Services.Frameworks
 
             options.Verbose = isVerbose;
 
-            var process = service.CreateProcess(FrameworkCommands.Dotnet.Run, SampleProjects.Backend, SampleProjects.Backend.AppDirectoryPaths[0], options, "dotnet");
+            var process = service.CreateProcess(FrameworkCommands.Dotnet.Run, SampleProjects.Backend, SampleProjects.Backend.GetAppDirectoryPaths(_fileSystem)[0], options, "dotnet");
 
             Assert.True(process.ErrorDataHandled);
         }
@@ -125,7 +126,7 @@ namespace Regi.Test.Services.Frameworks
 
             options.Verbose = isVerbose;
 
-            var process = service.CreateProcess(FrameworkCommands.Dotnet.Run, SampleProjects.Backend, SampleProjects.Backend.AppDirectoryPaths[0], options, "dotnet");
+            var process = service.CreateProcess(FrameworkCommands.Dotnet.Run, SampleProjects.Backend, SampleProjects.Backend.GetAppDirectoryPaths(_fileSystem)[0], options, "dotnet");
 
             if (isVerbose)
                 Assert.True(process.OutputDataHandled);
@@ -144,7 +145,7 @@ namespace Regi.Test.Services.Frameworks
 
             options.ShowOutput = new List<string> { SampleProjects.Backend.Name };            
 
-            var process = service.CreateProcess(FrameworkCommands.Dotnet.Run, SampleProjects.Backend, SampleProjects.Backend.AppDirectoryPaths[0], options, "dotnet");
+            var process = service.CreateProcess(FrameworkCommands.Dotnet.Run, SampleProjects.Backend, SampleProjects.Backend.GetAppDirectoryPaths(_fileSystem)[0], options, "dotnet");
 
             Assert.True(process.OutputDataHandled);
         }
@@ -160,7 +161,7 @@ namespace Regi.Test.Services.Frameworks
 
             options.ShowOutput = new List<string> { "Wumbo" };
 
-            var process = service.CreateProcess(FrameworkCommands.Dotnet.Run, SampleProjects.Backend, SampleProjects.Backend.AppDirectoryPaths[0], options, "dotnet");
+            var process = service.CreateProcess(FrameworkCommands.Dotnet.Run, SampleProjects.Backend, SampleProjects.Backend.GetAppDirectoryPaths(_fileSystem)[0], options, "dotnet");
 
             Assert.False(process.OutputDataHandled);
         }
@@ -169,7 +170,7 @@ namespace Regi.Test.Services.Frameworks
     internal class WumboService : FrameworkService
     {
 
-        public WumboService(IConsole console) : base(console, new PlatformService(console, new RuntimeInfo()), "wumbo") { }
+        public WumboService(IConsole console) : base(console, new PlatformService(new RuntimeInfo(), new TestFileSystem(), console), "wumbo") { }
 
         protected override CommandDictionary FrameworkOptions => new CommandDictionary
         {

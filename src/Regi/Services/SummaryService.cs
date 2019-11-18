@@ -17,21 +17,25 @@ namespace Regi.Services
 
     public class SummaryService : ISummaryService
     {
-        private readonly IProjectManager projectManager;
-        private readonly IConsole console;
+        private readonly IProjectManager _projectManager;
+        private readonly IFileSystem _fileSystemService;
+        private readonly IConsole _console;
 
-        public SummaryService(IProjectManager projectManager, IConsole console)
+        public SummaryService(IProjectManager projectManager, IFileSystem fileSystem, IConsole console)
         {
-            this.projectManager = projectManager;
-            this.console = console;
+            _projectManager = projectManager;
+            _fileSystemService = fileSystem;
+            _console = console;
         }
 
         public OutputSummary PrintDomainSummary(StartupConfig config, RegiOptions options)
         {
+            options.IncludeOptional = true; // Always include optional projects that match criteria
+
             OutputSummary output = new OutputSummary();
 
-            var apps = projectManager.FilterByOptions(config.Apps, options);
-            var tests = projectManager.FilterByOptions(config.Tests, options);
+            var apps = _projectManager.FilterByOptions(config.Apps, options);
+            var tests = _projectManager.FilterByOptions(config.Tests, options);
 
             PrintAppGroupDetails(apps, output.Apps, "Apps");
             PrintAppGroupDetails(tests, output.Tests, "Tests");
@@ -40,25 +44,34 @@ namespace Regi.Services
             {
                 if (inputApps != null && inputApps.Any())
                 {
-                    console.WriteEmphasizedLine($"{groupName}:");
+                    _console.WriteEmphasizedLine($"{groupName}:");
                     foreach (var app in inputApps)
                     {
                         outputApps.Add(app);
 
-                        console.WriteLine("  " + app.Name);
+                        _console.Write($"  {app.Name}");
+
+                        if (!app.Required)
+                        {
+                            _console.ForegroundColor = ConsoleColor.DarkGray;
+                            _console.Write(" (Optional)");
+                            _console.ResetColor();
+                        }
+
+                        _console.WriteLine();
 
                         if (options.Verbose)
                         {
-                            console.WritePropertyIfSpecified("Framework", app.Framework);
-                            console.WritePropertyIfSpecified("Type", app.Type);
-                            console.WritePropertyIfSpecified("Paths", app.AppDirectoryPaths, true, 2);
-                            console.WritePropertyIfSpecified("Port", app.Port);
-                            console.WritePropertyIfSpecified("Commands", app.Commands);
-                            console.WritePropertyIfSpecified("Requires", app.Requires);
-                            console.WritePropertyIfSpecified("Options", app.Options);
-                            console.WritePropertyIfSpecified("Environment", app.Environment);
-                            console.WritePropertyIfSpecified("Serial", app.Serial);
-                            console.WritePropertyIfSpecified("Raw Output", app.RawOutput);
+                            _console.WritePropertyIfSpecified("Framework", app.Framework);
+                            _console.WritePropertyIfSpecified("Type", app.Type);
+                            _console.WritePropertyIfSpecified("Paths", app.GetAppDirectoryPaths(_fileSystemService), true, 2);
+                            _console.WritePropertyIfSpecified("Port", app.Port);
+                            _console.WritePropertyIfSpecified("Commands", app.Commands);
+                            _console.WritePropertyIfSpecified("Requires", app.Requires);
+                            _console.WritePropertyIfSpecified("Options", app.Options);
+                            _console.WritePropertyIfSpecified("Environment", app.Environment);
+                            _console.WritePropertyIfSpecified("Serial", app.Serial);
+                            _console.WritePropertyIfSpecified("Raw Output", app.RawOutput);
                         }
                     }
                 }
@@ -74,7 +87,7 @@ namespace Regi.Services
             int runningCount = 0;
             int unknownCount = 0;
 
-            console.WriteLine(); // Padding
+            _console.WriteLine(); // Padding
 
             foreach (var project in projects)
             {
@@ -100,13 +113,13 @@ namespace Regi.Services
                         throw new InvalidOperationException("Recieved project with invalid status.");
                 }
 
-                console.WriteLine($" {project.Name}");
+                _console.WriteLine($" {project.Name}");
 
                 if (project.Processes?.Count > 1)
                 {
                     foreach (var process in project.Processes)
                     {
-                        console.Write(' ');
+                        _console.Write(' ');
 
                         switch (process.Status)
                         {
@@ -126,7 +139,7 @@ namespace Regi.Services
                                 throw new InvalidOperationException("Recieved project with invalid status.");
                         }
 
-                        console.WriteLine($" {DirectoryUtility.GetDirectoryShortName(process.Path)}");
+                        _console.WriteLine($" {PathUtility.GetDirectoryShortName(process.Path)}");
                     }                    
                 }
             }
@@ -153,25 +166,25 @@ namespace Regi.Services
             outputDescriptors.Add(($"{projects.Count} total", ConsoleColor.White));
 
 
-            console.WriteLine(); // Padding
-            console.Write("Test projects: ");
+            _console.WriteLine(); // Padding
+            _console.Write("Test projects: ");
 
             for (int i = 0; i < outputDescriptors.Count; i++)
             {
                 if (i != 0)
                 {
-                    console.ResetColor();
-                    console.Write(", ");
+                    _console.ResetColor();
+                    _console.Write(", ");
                 }
 
                 var (Message, Color) = outputDescriptors[i];
 
-                console.ForegroundColor = Color;
-                console.Write(Message);
-                console.ResetColor();
+                _console.ForegroundColor = Color;
+                _console.Write(Message);
+                _console.ResetColor();
             }
 
-            console.WriteLine();
+            _console.WriteLine();
             PrintElapsedTime(timespan);
 
             return new OutputSummary
@@ -184,22 +197,22 @@ namespace Regi.Services
 
         private void PrintElapsedTime(TimeSpan elapsed)
         {
-            console.WriteDefaultLine($"Elapsed time: {elapsed.ToHumanFriendlyString()}", ConsoleLineStyle.LineAfter);
+            _console.WriteDefaultLine($"Elapsed time: {elapsed.ToHumanFriendlyString()}", ConsoleLineStyle.LineAfter);
         }
 
         private void PrintBadge(string status, ConsoleColor backgroundColor, int? indentCount = null)
         {
             if (indentCount.HasValue)
             {
-                console.Write(new string(' ', indentCount.Value * 2));
+                _console.Write(new string(' ', indentCount.Value * 2));
             }
 
-            console.BackgroundColor = backgroundColor;
-            console.ForegroundColor = ConsoleColor.Black;
+            _console.BackgroundColor = backgroundColor;
+            _console.ForegroundColor = ConsoleColor.Black;
 
-            console.Write($" {status} ");
+            _console.Write($" {status} ");
 
-            console.ResetColor();
+            _console.ResetColor();
         }
     }
 }

@@ -13,18 +13,17 @@ namespace Regi.Test.Services
     public class NetworkingServiceTests
     {
         private readonly TestConsole _console;
+        private readonly TestFileSystem _fileSystem = new TestFileSystem();
         private readonly Mock<IRuntimeInfo> _runtimeInfoMock = new Mock<IRuntimeInfo>(MockBehavior.Strict);
 
         public NetworkingServiceTests(ITestOutputHelper output)
         {
             _console = new TestConsole(output);
-
-            DirectoryUtility.ResetTargetDirectory();
         }
 
         private INetworkingService CreateService()
         {
-            return new NetworkingService(_console, _runtimeInfoMock.Object);
+            return new NetworkingService(_fileSystem, _runtimeInfoMock.Object, _console);
         }
 
         [Fact]

@@ -21,15 +21,17 @@ namespace Regi.Services
 
     public class CleanupService : ICleanupService
     {
-        private readonly IDotnetService dotnetService;
-        private readonly IConsole console;
+        private readonly IDotnetService _dotnetService;
+        private readonly IFileSystem _fileSystem;
+        private readonly IConsole _console;
         private readonly bool _isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
         private readonly TimeSpan _defaultTimeout = TimeSpan.FromSeconds(10);
 
-        public CleanupService(IDotnetService dotnetService, IConsole console)
+        public CleanupService(IDotnetService dotnetService, IFileSystem fileSystem, IConsole console)
         {
-            this.dotnetService = dotnetService;
-            this.console = console;
+            _dotnetService = dotnetService;
+            _fileSystem = fileSystem;
+            _console = console;
         }
 
         public void KillProcessTree(AppProcess process, RegiOptions options)
@@ -49,31 +51,31 @@ namespace Regi.Services
 
             if (_isWindows)
             {
-                ProcessUtility.KillProcessWindows(process.ProcessId, out stdout, out stderr);
+                ProcessUtility.KillProcessWindows(process.ProcessId, _fileSystem, out stdout, out stderr);
                 LogOutputs(stdout, stderr, options);
             }
             else
             {
                 var children = new HashSet<int>();
-                ProcessUtility.GetAllChildIdsUnix(process.ProcessId, children);
+                ProcessUtility.GetAllChildIdsUnix(process.ProcessId, children, _fileSystem);
                 foreach (var childId in children)
                 {
-                    ProcessUtility.KillProcessUnix(childId, out stdout, out stderr);
+                    ProcessUtility.KillProcessUnix(childId, _fileSystem, out stdout, out stderr);
                     LogOutputs(stdout, stderr, options);
                 }
 
-                ProcessUtility.KillProcessUnix(process.ProcessId, out stdout, out stderr);
+                ProcessUtility.KillProcessUnix(process.ProcessId, _fileSystem, out stdout, out stderr);
                 LogOutputs(stdout, stderr, options);
             }
 
-            process.Kill(timeout, console);
+            process.Kill(timeout, _console);
         }
 
         public async Task<IReadOnlyList<AppProcess>> ShutdownBuildServers(RegiOptions options, CancellationToken cancellationToken)
         {
             var output = new List<AppProcess>
             {
-                await dotnetService.ShutdownBuildServer(options, cancellationToken)
+                await _dotnetService.ShutdownBuildServer(options, cancellationToken)
             };
 
             return output.AsReadOnly();
@@ -81,15 +83,15 @@ namespace Regi.Services
 
         private void LogOutputs(string stdout, string stderr, RegiOptions options)
         {
-            if (console != null && options.Verbose)
+            if (_console != null && options.Verbose)
             {
                 if (!string.IsNullOrWhiteSpace(stdout))
                 {
-                    console.WriteDefaultLine(stdout);
+                    _console.WriteDefaultLine(stdout);
                 }
                 if (!string.IsNullOrWhiteSpace(stderr))
                 {
-                    console.WriteErrorLine(stderr);
+                    _console.WriteErrorLine(stderr);
                 }
             }
         }

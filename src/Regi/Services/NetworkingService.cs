@@ -14,14 +14,16 @@ namespace Regi.Services
 
     public class NetworkingService : INetworkingService
     {
-        private readonly IConsole _console;
+        private readonly IFileSystem _fileSystem;
         private readonly IRuntimeInfo _runtime;
+        private readonly IConsole _console;
         private readonly IPGlobalProperties _ipGlobalProperties;
 
-        public NetworkingService(IConsole console, IRuntimeInfo runtime)
+        public NetworkingService(IFileSystem fileSystem, IRuntimeInfo runtime, IConsole console)
         {
-            _console = console;
+            _fileSystem = fileSystem;
             _runtime = runtime;
+            _console = console;
             _ipGlobalProperties = IPGlobalProperties.GetIPGlobalProperties();
         }
 
@@ -31,7 +33,7 @@ namespace Regi.Services
             {
                 string netstat = _runtime.IsWindows || _runtime.IsWindowsLinux ? "netstat.exe" : "netstat";
 
-                ProcessUtility.RunProcessAndWaitForExit(netstat, "-tna", out string output, out string _, 5_000);
+                ProcessUtility.RunProcessAndWaitForExit(netstat, "-tna", _fileSystem, out string output, out string _, 5_000);
 
                 return ContainsNetstatPort(output, port);
             }

@@ -1,35 +1,40 @@
-﻿using Newtonsoft.Json;
-using Regi.Extensions;
+﻿using Regi.Extensions;
 using Regi.Models;
 using Regi.Models.Exceptions;
-using Regi.Utilities;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Text;
+using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace Regi.Services
 {
     public interface IConfigurationService
     {
-        StartupConfig GetConfiguration(RegiOptions options);
+        Task<StartupConfig> GetConfigurationAsync(RegiOptions options);
     }
 
     public class ConfigurationService : IConfigurationService
     {
-        public StartupConfig GetConfiguration(RegiOptions options)
+        private readonly IFileSystem _fileSystem;
+
+        public ConfigurationService(IFileSystem fileSystem)
+        {
+            _fileSystem = fileSystem;
+        }
+
+        public async Task<StartupConfig> GetConfigurationAsync(RegiOptions options)
         {
             DirectoryInfo directory;
 
             if (!string.IsNullOrWhiteSpace(options?.ConfigurationPath))
             {
-                string configDirectory = DirectoryUtility.GetDirectoryPath(options.ConfigurationPath, true, "directory");
-                DirectoryUtility.SetWorkingDirectory(configDirectory);
+                string configDirectory = _fileSystem.GetDirectoryPath(options.ConfigurationPath, true, "directory");
+                _fileSystem.WorkingDirectory = configDirectory;
                 directory = new DirectoryInfo(configDirectory);
             }
             else
             {
-                directory = new DirectoryInfo(DirectoryUtility.WorkingDirectory);
+                directory = new DirectoryInfo(_fileSystem.WorkingDirectory);
             }
 
             if (directory?.Exists == false)
@@ -44,24 +49,20 @@ namespace Regi.Services
                 throw new RegiException($"Could not find regi.json or startup.json in directory: {directory.FullName}");
             }
 
-            using (StreamReader sr = new StreamReader(startupFile.OpenRead()))
-            using (JsonReader reader = new JsonTextReader(sr))
+            using var stream = startupFile.OpenRead();
+
+            try
             {
-                var serializer = JsonSerializer.CreateDefault();
-                serializer.MissingMemberHandling = MissingMemberHandling.Error;
+                
+                StartupConfig config = await JsonSerializer.DeserializeAsync<StartupConfig>(stream, Constants.DefaultSerializerOptions);
 
-                try
-                {
-                    var startupConfig = serializer.Deserialize<StartupConfig>(reader);
+                config.Path = startupFile.FullName;
 
-                    startupConfig.Path = startupFile.FullName;
-
-                    return startupConfig;
-                }
-                catch (Exception e)
-                {
-                    throw new RegiException($"Configuration file was not properly formatted: {startupFile.FullName}{Environment.NewLine}{e.Message}", e);
-                }
+                return config;
+            }
+            catch (Exception e)
+            {
+                throw new RegiException($"Configuration file was not properly formatted: {startupFile.FullName}{Environment.NewLine}{e.Message}", e);
             }
         }
     }

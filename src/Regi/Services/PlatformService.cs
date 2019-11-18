@@ -19,12 +19,14 @@ namespace Regi.Services
 
     public class PlatformService : IPlatformService
     {
+        private readonly IFileSystem _fileSystem;
         private readonly IConsole _console;
 
-        public PlatformService(IConsole console, IRuntimeInfo runtimeInfo)
+        public PlatformService(IRuntimeInfo runtimeInfo, IFileSystem fileSystem, IConsole console)
         {
-            _console = console;
             RuntimeInfo = runtimeInfo;
+            _fileSystem = fileSystem;
+            _console = console;
         }
 
         public IRuntimeInfo RuntimeInfo { get; private set; }
@@ -92,7 +94,7 @@ namespace Regi.Services
                 _console.WriteDefaultLine($"Executing '{fileName} {script}'");
             }
 
-            using (var process = ProcessUtility.CreateProcess(fileName, script, workingDirectory))
+            using (var process = ProcessUtility.CreateProcess(fileName, script, _fileSystem, workingDirectory))
             {
                 process.ErrorDataReceived += ProcessUtility.WriteOutput(_console, ConsoleLogLevel.Error);
                 if (options.Verbose)

@@ -27,6 +27,7 @@ namespace Regi.Services
         private readonly IQueueService _queueService;
         private readonly INetworkingService _networkingService;
         private readonly IPlatformService _platformService;
+        private readonly IFileSystem _fileSystem;
         private readonly IConsole _console;
 
         public RunnerService(
@@ -35,6 +36,7 @@ namespace Regi.Services
             IQueueService queueService,
             INetworkingService networkingService,
             IPlatformService platformService,
+            IFileSystem fileSystem,
             IConsole console)
         {
             _projectManager = projectManager;
@@ -42,6 +44,7 @@ namespace Regi.Services
             _queueService = queueService;
             _networkingService = networkingService;
             _platformService = platformService;
+            _fileSystem = fileSystem;
             _console = console;
         }
 
@@ -54,7 +57,7 @@ namespace Regi.Services
             {
                 RunScriptsForTask(project, AppTask.Start, options);
 
-                foreach (var path in project.AppDirectoryPaths)
+                foreach (var path in project.GetAppDirectoryPaths(_fileSystem))
                 {
                     _queueService.Queue(project.Serial || options.NoParallel, () =>
                     {
@@ -101,13 +104,15 @@ namespace Regi.Services
 
                 RunScriptsForTask(project, AppTask.Test, options);
 
-                foreach (var path in project.AppDirectoryPaths)
+                var projectAppDirectoryPaths = project.GetAppDirectoryPaths(_fileSystem);
+
+                foreach (var path in projectAppDirectoryPaths)
                 {
                     _queueService.Queue(project.Serial || options.NoParallel, async () =>
                     {
                         cancellationToken.ThrowIfCancellationRequested();
 
-                        string appName = project.AppDirectoryPaths.Count > 1 ? $"{DirectoryUtility.GetDirectoryShortName(path)} ({project.Name})" : project.Name;
+                        string appName = projectAppDirectoryPaths.Count > 1 ? $"{PathUtility.GetDirectoryShortName(path)} ({project.Name})" : project.Name;
                         _console.WriteEmphasizedLine($"Starting tests for {appName}");
 
                         if (project.RequiredProjects.Any())
@@ -140,7 +145,7 @@ namespace Regi.Services
 
                                     bool noParallel = requiredProject.Serial || options.NoParallel;
 
-                                    foreach (var requiredPath in requiredProject.AppDirectoryPaths)
+                                    foreach (var requiredPath in requiredProject.GetAppDirectoryPaths(_fileSystem))
                                     {
                                         dependencyQueue.Queue(noParallel, async () =>
                                         {
@@ -188,7 +193,7 @@ namespace Regi.Services
 
             foreach (var project in projects)
             {
-                foreach (var path in project.AppDirectoryPaths)
+                foreach (var path in project.GetAppDirectoryPaths(_fileSystem))
                 {
                     _queueService.Queue(project.Serial || options.NoParallel, async () =>
                     {
@@ -226,7 +231,7 @@ namespace Regi.Services
 
             foreach (var project in projects)
             {
-                foreach (var path in project.AppDirectoryPaths)
+                foreach (var path in project.GetAppDirectoryPaths(_fileSystem))
                 {
                     _queueService.Queue(project.Serial || options.NoParallel, async () =>
                     {
@@ -256,7 +261,7 @@ namespace Regi.Services
 
                                     installedProjects.Add(requiredProject.Name);
 
-                                    foreach (var requiredPath in requiredProject.AppDirectoryPaths)
+                                    foreach (var requiredPath in requiredProject.GetAppDirectoryPaths(_fileSystem))
                                     {
                                         dependencyQueue.Queue(requiredProject.Serial || options.NoParallel, () =>
                                         {

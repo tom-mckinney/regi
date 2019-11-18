@@ -70,5 +70,13 @@ namespace Regi.Utilities
             int separatorIndex = script.IndexOf(' ', StringComparison.InvariantCulture);
             return script.Substring(0, separatorIndex != -1 ? separatorIndex : script.Length);
         }
+
+        public static string GetDirectoryShortName(string path)
+        {
+            if (string.IsNullOrWhiteSpace(path))
+                throw new ArgumentException("Must specify a valid directory path", nameof(path));
+
+            return Path.GetFileName(path);
+        }
     }
 }

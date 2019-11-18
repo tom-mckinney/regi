@@ -44,18 +44,19 @@
     //     "HEADLESS": true
     //   }
     // },
-    // {
-    //   "name": "IntegrationTests-Cypress",
-    //   "path": "./IntegrationTests-Cypress",
-    //   "framework": "node",
-    //   "type": "integration",
-    //   "requires": [ "Frontend", "Backend" ],
-    //   "rawOutput": true,
-    //   "serial": true,
-    //   "environment": {
-    //     "HEADLESS": true
-    //   }
-    // }
+    {
+      "name": "IntegrationTests-Cypress",
+      "path": "./IntegrationTests-Cypress",
+      "framework": "node",
+      "type": "integration",
+      "requires": [ "Frontend", "Backend" ],
+      "required": false,
+      "rawOutput": true,
+      "serial": true,
+      "environment": {
+        "HEADLESS": true
+      }
+    }
   ],
   "services": []
 }

@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
+using Microsoft.Extensions.Hosting;
+using System.Text.Json;
 
 namespace Backend
 {
@@ -20,7 +16,7 @@ namespace Backend
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
             {
@@ -31,14 +27,12 @@ namespace Backend
             {
                 context.Response.ContentType = "application/json";
 
-                JsonSerializerSettings jsonSettings = new JsonSerializerSettings
+                JsonSerializerOptions jsonOptions = new JsonSerializerOptions
                 {
-                    ContractResolver = new DefaultContractResolver
-                    {
-                        NamingStrategy = new CamelCaseNamingStrategy()
-                    }
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
                 };
-                await context.Response.WriteAsync(JsonConvert.SerializeObject(new { Title = "Rules of Wumbo" }, jsonSettings));
+
+                await context.Response.WriteAsync(JsonSerializer.Serialize(new { Title = "Rules of Wumbo" }, jsonOptions));
             });
         }
     }
