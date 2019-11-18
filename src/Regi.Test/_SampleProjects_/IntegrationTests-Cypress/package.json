@@ -1,5 +1,5 @@
 {
-  "name": "IntegrationTests-Cypress",
+  "name": "integration-tests",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -10,6 +10,6 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "cypress": "^3.4.0"
+    "cypress": "^3.6.1"
   }
 }
