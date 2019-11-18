@@ -26,11 +26,11 @@ namespace Regi.Test
         }
 
         [Fact]
-        public void FilterByOptions_excluded_not_required_projects_by_default()
+        public void FilterByOptions_excludes_optional_projects_by_default()
         {
             var optionalProject = SampleProjects.Backend;
 
-            optionalProject.Required = false;
+            optionalProject.Optional = true;
 
             var projectManager = CreateProjectManager();
 
@@ -40,11 +40,11 @@ namespace Regi.Test
         }
 
         [Fact]
-        public void FilterByOptions_includes_not_required_if_include_optional_is_specified()
+        public void FilterByOptions_includes_optional_if_include_optional_is_specified()
         {
             var optionalProject = SampleProjects.Backend;
 
-            optionalProject.Required = false;
+            optionalProject.Optional = true;
 
             var projectManager = CreateProjectManager();
 

@@ -14,7 +14,7 @@
       "path": "./Backend/Backend.csproj",
       "framework": "dotnet",
       "port": 5000,
-      "options": {
+      "arguments": {
         "*": [ "--foo bar" ]
       }
     }
@@ -50,7 +50,7 @@
       "framework": "node",
       "type": "integration",
       "requires": [ "Frontend", "Backend" ],
-      "required": false,
+      "optional": true,
       "rawOutput": true,
       "serial": true,
       "environment": {

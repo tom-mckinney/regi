@@ -82,7 +82,7 @@ namespace Regi
             if (!options.IncludeOptional)
             {
                 projects = projects
-                    .Where(p => p.Required == true);
+                    .Where(p => p.Optional == false);
             }
 
             return projects.ToList();

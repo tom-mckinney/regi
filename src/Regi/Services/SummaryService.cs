@@ -51,7 +51,7 @@ namespace Regi.Services
 
                         _console.Write($"  {app.Name}");
 
-                        if (!app.Required)
+                        if (app.Optional)
                         {
                             _console.ForegroundColor = ConsoleColor.DarkGray;
                             _console.Write(" (Optional)");
@@ -68,7 +68,7 @@ namespace Regi.Services
                             _console.WritePropertyIfSpecified("Port", app.Port);
                             _console.WritePropertyIfSpecified("Commands", app.Commands);
                             _console.WritePropertyIfSpecified("Requires", app.Requires);
-                            _console.WritePropertyIfSpecified("Options", app.Options);
+                            _console.WritePropertyIfSpecified("Arguments", app.Arguments);
                             _console.WritePropertyIfSpecified("Environment", app.Environment);
                             _console.WritePropertyIfSpecified("Serial", app.Serial);
                             _console.WritePropertyIfSpecified("Raw Output", app.RawOutput);

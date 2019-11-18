@@ -70,7 +70,7 @@ namespace Regi.Test.Services
 
             foreach (var app in config.Apps)
             {
-                app.Required = false;
+                app.Optional = true;
             }
 
             var output = service.PrintDomainSummary(config, TestOptions.Create());

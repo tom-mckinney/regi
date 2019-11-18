@@ -51,7 +51,7 @@ namespace Regi.Test.Services.Frameworks
 
             var project = new Project
             {
-                Options = new CommandDictionary
+                Arguments = new CommandDictionary
                 {
                     { "*", new List<string> { "-v", "--runtime ubuntu.18.04-x64" } }
                 }
@@ -67,7 +67,7 @@ namespace Regi.Test.Services.Frameworks
 
             var project = new Project
             {
-                Options = new CommandDictionary
+                Arguments = new CommandDictionary
                 {
                     { "*", new List<string> { "--wumbo" } },
                     { "foo", new List<string> { "--t bar" } },

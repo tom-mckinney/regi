@@ -216,9 +216,9 @@ namespace Regi.Services.Frameworks
 
         public virtual void AddCommandOptions(StringBuilder builder, string command, Project project, RegiOptions options)
         {
-            if (project?.Options?.Count > 0)
+            if (project?.Arguments?.Count > 0)
             {
-                foreach (var commandOption in project.Options)
+                foreach (var commandOption in project.Arguments)
                 {
                     if (commandOption.Key == command || (commandOption.Key == "*" && !FrameworkCommandWildcardExclusions.Contains(command)))
                     {
