@@ -1,10 +1,12 @@
 ﻿using McMaster.Extensions.CommandLineUtils;
 using Regi.Extensions;
+using Regi.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
+using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace Regi.Services
 {
@@ -13,9 +15,12 @@ namespace Regi.Services
         string WorkingDirectory { get; set; }
 
         string GetDirectoryPath(string path, bool throwIfNotFound = true, string targetObj = "project");
-        FileInfo CreateConfigFile();
+        string GetRelativePath(string path);
+        ValueTask<FileInfo> CreateConfigFileAsync(StartupConfig config);
         List<FileInfo> FindAllProjectFiles();
         string FindFileOrDirectory(string fileName);
+        IEnumerable<DirectoryInfo> GetChildDirectories(DirectoryInfo directory);
+        IFileSystemDictionary GetAllChildren(DirectoryInfo directory);
     }
 
     public class FileSystem : IFileSystem
@@ -61,29 +66,51 @@ namespace Regi.Services
             return null;
         }
 
-        public FileInfo CreateConfigFile()
+        public string GetRelativePath(string path)
+        {
+            if (string.IsNullOrEmpty(path))
+                throw new ArgumentNullException(nameof(path));
+
+            string relativePath = Path.GetRelativePath(WorkingDirectory, path).Replace('\\', '/');
+
+            if (relativePath.Length > 2)
+            {
+                if (relativePath[0] == '.' && (relativePath[1] == '.' || relativePath[1] == '/'))
+                {
+                    return relativePath;
+                }
+                else
+                {
+                    return $"./{relativePath}";
+                }
+            }
+            else if (relativePath[0] == '.')
+            {
+                return "./";
+            }
+            else
+            {
+                throw new InvalidOperationException($"Unexpected relative path: {relativePath}");
+            }
+        }
+
+        public async ValueTask<FileInfo> CreateConfigFileAsync(StartupConfig config)
         {
             string configFilePath = Path.Combine(WorkingDirectory, "regi.json");
 
             if (File.Exists(configFilePath))
             {
-                throw new InvalidOperationException($"There is already a {nameof(Regi)} configuration file at path: {configFilePath}");
+                throw new RegiException($"There is already a {nameof(Regi)} configuration file at path: {configFilePath}");
             }
 
             _console.WriteEmphasizedLine($"Creating config file: {configFilePath}");
 
             FileInfo configFile = new FileInfo(configFilePath);
-            using (var stream = configFile.Create())
-            {
-                byte[] content = Encoding.UTF8.GetBytes(@"{
-  ""apps"": [],
-  ""tests"": [],
-  ""services"": []
-}");
-                stream.Write(content, 0, content.Length);
-            }
 
-            _console.WriteEmphasizedLine($"Success!");
+            using var fileStream = configFile.Create();
+            await JsonSerializer.SerializeAsync(fileStream, config, Constants.DefaultSerializerOptions);
+
+            _console.WriteEmphasizedLine($"Job's done.");
 
             return configFile;
         }
@@ -103,6 +130,26 @@ namespace Regi.Services
         public string FindFileOrDirectory(string fileName)
         {
             throw new NotImplementedException();
+        }
+
+        public IEnumerable<DirectoryInfo> GetChildDirectories(DirectoryInfo directory)
+        {
+            if (directory?.Exists != true)
+            {
+                throw new ArgumentException($"Directory must exist. Recieved: {directory?.FullName}", nameof(directory));
+            }
+
+            return directory.GetDirectories();
+        }
+
+        public IFileSystemDictionary GetAllChildren(DirectoryInfo directory)
+        {
+            if (directory?.Exists != true)
+            {
+                throw new ArgumentException($"Directory must exist. Recieved: {directory?.FullName}", nameof(directory));
+            }
+
+            return new FileSystemDictionary(directory);
         }
     }
 }

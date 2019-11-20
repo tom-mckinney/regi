@@ -8,7 +8,7 @@
     },
     {
       "name": "NodeApp",
-      "path": "../SampleNodeApp/package.json",
+      "path": "../NodeApp/package.json",
       "type": "web",
       "framework": "node",
       "port": 9081
@@ -22,7 +22,7 @@
     },
     {
       "name": "NodeApp",
-      "path": "../SampleNodeApp/package.json",
+      "path": "../NodeApp/package.json",
       "framework": "node"
     }
   ],

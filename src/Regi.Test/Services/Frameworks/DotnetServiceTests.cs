@@ -129,6 +129,8 @@ namespace Regi.Test.Services.Frameworks
 
             process.WaitForExit();
 
+            await Task.Delay(100); // flakes out for some reason
+
             Assert.Equal(AppTask.Start, process.Task);
             Assert.Equal(AppStatus.Success, process.Status);
             Assert.Null(_console.LogOutput);
@@ -248,7 +250,7 @@ namespace Regi.Test.Services.Frameworks
         [Fact]
         public async Task ShutdownBuildServer_shuts_down_all_build_servers()
         {
-            _fileSystem.WorkingDirectory = PathHelper.ProjectRootPath;
+            _fileSystem.WorkingDirectory = PathHelper.RegiTestRootPath;
 
             var process =  await _service.ShutdownBuildServer(TestOptions.Create(), CancellationToken.None);
 

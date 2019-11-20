@@ -28,7 +28,7 @@
     },
     {
       "name": "NodeApp",
-      "path": "./SampleNodeApp",
+      "path": "./NodeApp",
       "framework": "node",
       "type": "unit"
     },

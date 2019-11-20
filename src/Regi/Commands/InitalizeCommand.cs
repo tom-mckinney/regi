@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using McMaster.Extensions.CommandLineUtils;
@@ -11,12 +12,18 @@ namespace Regi.Commands
     [Command("init")]
     public class InitalizeCommand : CommandBase
     {
-        private readonly IFileSystem fileService;
+        private readonly IDiscoveryService _discoveryService;
+        private readonly IFileSystem _fileSystem;
 
-        public InitalizeCommand(IFileSystem fileService, IProjectManager projectManager, IConfigurationService configurationService, IConsole console)
+        public InitalizeCommand(IDiscoveryService discoveryService,
+            IFileSystem fileSystem,
+            IProjectManager projectManager,
+            IConfigurationService configurationService,
+            IConsole console)
             : base(projectManager, configurationService, console)
         {
-            this.fileService = fileService;
+            _discoveryService = discoveryService;
+            _fileSystem = fileSystem;
         }
 
         public override bool RequireStartupConfig => false;
@@ -24,11 +31,17 @@ namespace Regi.Commands
 
         protected override Func<StartupConfig, IEnumerable<Project>> GetTargetProjects => (s) => new List<Project>();
 
-        protected override Task<int> ExecuteAsync(IList<Project> projects, CancellationToken cancellationToken)
+        protected override async Task<int> ExecuteAsync(IList<Project> projects, CancellationToken cancellationToken)
         {
-            fileService.CreateConfigFile();
+            var directory = new DirectoryInfo(_fileSystem.WorkingDirectory);
 
-            return Task.FromResult(0);
+            var existingProjects = await _discoveryService.IdentifyAllProjectsAsync(directory);
+
+            var config = await _configurationService.CreateConfigurationAsync(existingProjects, Options);
+
+            await _fileSystem.CreateConfigFileAsync(config);
+
+            return 0;
         }
     }
 }

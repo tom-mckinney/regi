@@ -8,11 +8,19 @@ namespace Regi.Test
 {
     public static class SampleProjects
     {
+        public static Project ClassLib => new Project
+        {
+            Name = "ClassLib",
+            Paths = new[] { PathHelper.GetSampleProjectPath("ClassLib") },
+            Type = ProjectType.Web, // TODO: have a classlib type
+        };
+
         public static Project Frontend => new Project
         {
             Name = "Frontend",
-            Path = PathHelper.SampleDirectoryPath("Frontend"),
+            Path = PathHelper.GetSampleProjectPath("Frontend"),
             Framework = ProjectFramework.Node,
+            Type = ProjectType.Web,
             Port = 3000,
             Commands = new Dictionary<string, string>
             {
@@ -23,8 +31,9 @@ namespace Regi.Test
         public static Project Backend => new Project
         {
             Name = "Backend",
-            Path = PathHelper.SampleDirectoryPath("Backend/Backend.csproj"),
+            Path = PathHelper.GetSampleProjectPath("Backend"),
             Framework = ProjectFramework.Dotnet,
+            Type = ProjectType.Web,
             Port = 5000,
             Arguments = new CommandDictionary
             {
@@ -35,7 +44,7 @@ namespace Regi.Test
         public static Project XunitTests => new Project
         {
             Name = "SampleSuccessfulTests",
-            Path = PathHelper.SampleDirectoryPath("SampleSuccessfulTests"),
+            Path = PathHelper.GetSampleProjectPath("SampleSuccessfulTests"),
             Framework = ProjectFramework.Dotnet,
             Type = ProjectType.Unit
         };
@@ -43,14 +52,14 @@ namespace Regi.Test
         public static Project JestTests => new Project
         {
             Name = "NodeApp",
-            Path = PathHelper.SampleDirectoryPath("SampleNodeApp/package.json"),
+            Path = PathHelper.GetSampleProjectPath("NodeApp/package.json"),
             Framework = ProjectFramework.Node
         };
 
         public static Project IntegrationTests => new Project
         {
             Name = "IntegrationTests",
-            Path = PathHelper.SampleDirectoryPath("IntegrationTests/package.json"),
+            Path = PathHelper.GetSampleProjectPath("IntegrationTests/package.json"),
             Framework = ProjectFramework.Node,
             Requires = new List<string> { Frontend.Name, Backend.Name },
             RawOutput = true,
@@ -67,9 +76,9 @@ namespace Regi.Test
             Name = "AppCollection",
             Paths = new List<string>
             {
-                PathHelper.SampleDirectoryPath("AppCollection/App1/App1.csproj"),
-                PathHelper.SampleDirectoryPath("AppCollection/App2/App2.csproj"),
-                PathHelper.SampleDirectoryPath("AppCollection/App3/App3.csproj"),
+                PathHelper.GetSampleProjectPath("AppCollection/App1/App1.csproj"),
+                PathHelper.GetSampleProjectPath("AppCollection/App2/App2.csproj"),
+                PathHelper.GetSampleProjectPath("AppCollection/App3/App3.csproj"),
             },
             Framework = ProjectFramework.Dotnet,
             Type = ProjectType.Web
@@ -80,9 +89,9 @@ namespace Regi.Test
             Name = "TestCollection",
             Paths = new List<string>
             {
-                PathHelper.SampleDirectoryPath("TestCollection/Test1/Test1.csproj"),
-                PathHelper.SampleDirectoryPath("TestCollection/Test2/Test2.csproj"),
-                PathHelper.SampleDirectoryPath("TestCollection/Test3/Test3.csproj"),
+                PathHelper.GetSampleProjectPath("TestCollection/Test1/Test1.csproj"),
+                PathHelper.GetSampleProjectPath("TestCollection/Test2/Test2.csproj"),
+                PathHelper.GetSampleProjectPath("TestCollection/Test3/Test3.csproj"),
             },
             Framework = ProjectFramework.Dotnet,
             Type = ProjectType.Unit
@@ -90,8 +99,8 @@ namespace Regi.Test
 
         public static Project SimpleNodeApp => new Project
         {
-            Name = "SampleNodeApp",
-            Path = PathHelper.SampleDirectoryPath("SampleNodeApp/package.json"),
+            Name = "NodeApp",
+            Path = PathHelper.GetSampleProjectPath("NodeApp/package.json"),
             Type = ProjectType.Web,
             Framework = ProjectFramework.Node,
             Port = 9081
@@ -117,13 +126,13 @@ namespace Regi.Test
                 new Project
                 {
                     Name = "SampleApp1",
-                    Path = PathHelper.SampleDirectoryPath("SampleApp/SampleApp.csproj"),
+                    Path = PathHelper.GetSampleProjectPath("SampleApp/SampleApp.csproj"),
                     Type = ProjectType.Web
                 },
                 new Project
                 {
                     Name = "SampleApp2",
-                    Path = PathHelper.SampleDirectoryPath("SampleApp/SampleApp.csproj"),
+                    Path = PathHelper.GetSampleProjectPath("SampleApp/SampleApp.csproj"),
                     Type = ProjectType.Web,
                     Port = 9080,
                     Serial = true
@@ -135,13 +144,13 @@ namespace Regi.Test
                 new Project
                 {
                     Name = "SampleSuccessfulTests",
-                    Path = PathHelper.SampleDirectoryPath("SampleSuccessfulTests/SampleSuccessfulTests.csproj"),
+                    Path = PathHelper.GetSampleProjectPath("SampleSuccessfulTests/SampleSuccessfulTests.csproj"),
                     Type = ProjectType.Unit
                 },
                 new Project
                 {
                     Name = "SampleSuccessfulTests",
-                    Path = PathHelper.SampleDirectoryPath("SampleSuccessfulTests/SampleSuccessfulTests.csproj"),
+                    Path = PathHelper.GetSampleProjectPath("SampleSuccessfulTests/SampleSuccessfulTests.csproj"),
                     Type = ProjectType.Integration,
                     Serial = true
                 }

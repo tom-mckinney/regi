@@ -1,11 +1,10 @@
 ﻿using McMaster.Extensions.CommandLineUtils;
 using Regi.Extensions;
 using Regi.Models;
-using Regi.Models.Exceptions;
 using Regi.Services;
 using Regi.Test.Helpers;
-using Regi.Utilities;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -38,10 +37,35 @@ namespace Regi.Test.Services
             return new ConfigurationService(_fileSystem);
         }
 
+        [Theory]
+        [InlineData(3, 3)]
+        [InlineData(3, 0)]
+        [InlineData(0, 3)]
+        public async Task CreateStartupConfig_sorts_projects_into_categories(int appCount, int testCount)
+        {
+            var projects = new List<Project>();
+
+            for (int i = 0; i < appCount; i++)
+            {
+                projects.Add(SampleProjects.Backend);
+            }
+            for (int i = 0; i < testCount; i++)
+            {
+                projects.Add(SampleProjects.XunitTests);
+            }
+
+            var service = CreateService();
+
+            var config = await service.CreateConfigurationAsync(projects, TestOptions.Create());
+
+            Assert.Equal(appCount, config.Apps.Count);
+            Assert.Equal(testCount, config.Tests.Count);
+        }
+
         [Fact]
         public async Task GetStartupConfig_returns_configuration_model_when_run_in_directory_with_startup_file()
         {
-            string expectedPath = PathHelper.SampleDirectoryPath("ConfigurationGood");
+            string expectedPath = PathHelper.GetSampleProjectPath("ConfigurationGood");
 
             _fileSystem.WorkingDirectory = expectedPath;
 
@@ -62,9 +86,9 @@ namespace Regi.Test.Services
         [InlineData("/regi.json")]
         public async Task GetStartupConfig_will_use_ConfigurationPath_if_specified(string file)
         {
-            string expectedPath = PathHelper.SampleDirectoryPath("ConfigurationGood");
+            string expectedPath = PathHelper.GetSampleProjectPath("ConfigurationGood");
 
-            _fileSystem.WorkingDirectory = PathHelper.SampleDirectoryPath("BUNK_DIRECTORY");
+            _fileSystem.WorkingDirectory = PathHelper.GetSampleProjectPath("BUNK_DIRECTORY");
 
             var options = new RegiOptions
             {
@@ -102,9 +126,9 @@ namespace Regi.Test.Services
         [Fact]
         public async Task GetStartupConfig_throws_if_ConfigurationPath_is_specified_but_does_not_exist()
         {
-            string expectedPath = PathHelper.SampleDirectoryPath("BUNK_DIRECTORY");
+            string expectedPath = PathHelper.GetSampleProjectPath("BUNK_DIRECTORY");
 
-            _fileSystem.WorkingDirectory = PathHelper.SampleDirectoryPath("ConfigurationGood");
+            _fileSystem.WorkingDirectory = PathHelper.GetSampleProjectPath("ConfigurationGood");
 
             var options = new RegiOptions
             {
@@ -119,7 +143,7 @@ namespace Regi.Test.Services
         [Fact]
         public async Task GetStatupConfig_throws_exception_when_directory_not_found()
         {
-            _fileSystem.WorkingDirectory = PathHelper.SampleDirectoryPath("BUNK_DIRECTORY");
+            _fileSystem.WorkingDirectory = PathHelper.GetSampleProjectPath("BUNK_DIRECTORY");
 
             var service = CreateService();
 
@@ -129,7 +153,7 @@ namespace Regi.Test.Services
         [Fact]
         public async Task GetStatupConfig_throws_exception_when_startup_config_not_found()
         {
-            _fileSystem.WorkingDirectory = PathHelper.SampleDirectoryPath("SampleAppError");
+            _fileSystem.WorkingDirectory = PathHelper.GetSampleProjectPath("SampleAppError");
 
             var service = CreateService();
 
@@ -139,7 +163,7 @@ namespace Regi.Test.Services
         [Fact]
         public async Task GetStatupConfig_throws_exception_when_config_uses_an_invalid_enum()
         {
-            _fileSystem.WorkingDirectory = PathHelper.SampleDirectoryPath("ConfigurationWrongEnum");
+            _fileSystem.WorkingDirectory = PathHelper.GetSampleProjectPath("ConfigurationWrongEnum");
 
             var service = CreateService();
 
@@ -153,7 +177,7 @@ namespace Regi.Test.Services
         [Fact(Skip = "Enable this when .NET 5 serializer supports required properties")]
         public async Task GetConfiguration_throws_when_required_properties_are_missing()
         {
-            _fileSystem.WorkingDirectory = PathHelper.SampleDirectoryPath("ConfigurationBad");
+            _fileSystem.WorkingDirectory = PathHelper.GetSampleProjectPath("ConfigurationBad");
 
             var service = CreateService();
 
