@@ -100,8 +100,8 @@ namespace Regi.Models
                 {
                     Source = options.Source;
                 }
-                else if (config.Sources?.Count > 0
-                    && (config.Sources.TryGetValue(Framework, out string source) || config.Sources.TryGetValue(ProjectFramework.Any, out source))
+                else if (config.GetSources()?.Count > 0
+                    && (config.GetSources().TryGetValue(Framework, out string source) || config.GetSources().TryGetValue(ProjectFramework.Any, out source))
                     && !string.IsNullOrWhiteSpace(source))
                 {
                     Source = source;

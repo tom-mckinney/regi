@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Regi.Models.Exceptions;
+using System;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
@@ -22,27 +23,33 @@ namespace Regi.Models
         [JsonPropertyName("sources")]
         public IDictionary<string, string> RawSources { get; set; } = new Dictionary<string, string>();
 
-        private Dictionary<ProjectFramework, string> _sources;
 
-        [JsonIgnore]
-        public IDictionary<ProjectFramework, string> Sources
+        private IDictionary<ProjectFramework, string> _sources;
+
+        public IDictionary<ProjectFramework, string> GetSources()
         {
-            get
+            if (_sources == null)
             {
-                if (_sources == null)
+                _sources = new Dictionary<ProjectFramework, string>();
+
+                foreach (var source in RawSources)
                 {
-                    _sources = new Dictionary<ProjectFramework, string>();
-
-                    foreach (var source in RawSources)
+                    try
                     {
-                        var key = Enum.Parse<ProjectFramework>(source.Key);
-
+                        var key = Enum.Parse<ProjectFramework>(source.Key, true);
+                            
                         _sources.Add(key, source.Value);
                     }
-                }
+                    catch (ArgumentException)
+                    {
+                        var projectFrameworkValues = string.Join(", ", typeof(ProjectFramework).GetEnumNames());
 
-                return _sources;
+                        throw new RegiException($"Recieved invalid source key:'{source.Key}'. Must be one of the following: {projectFrameworkValues}");
+                    }
+                }
             }
+
+            return _sources;
         }
     }
 }
