@@ -15,7 +15,7 @@ namespace Regi.Test.Utilities
         [Fact]
         public void CreateProcess_returns_process_with_fileName_and_arguments_in_target_directory()
         {
-            string targetDirectory = PathHelper.SampleDirectoryPath("ConfigurationGood");
+            string targetDirectory = PathHelper.GetSampleProjectPath("ConfigurationGood");
 
             _fileSystem.WorkingDirectory = targetDirectory;
 
@@ -33,8 +33,8 @@ namespace Regi.Test.Utilities
         [Fact]
         public void CreateProcess_returns_process_with_fileName_and_arguments_in_working_directory_is_relative_path()
         {
-            string targetDirectory = PathHelper.SampleDirectoryPath("ConfigurationBad");
-            string workingDirectory = PathHelper.SampleDirectoryPath("ConfigurationGood");
+            string targetDirectory = PathHelper.GetSampleProjectPath("ConfigurationBad");
+            string workingDirectory = PathHelper.GetSampleProjectPath("ConfigurationGood");
 
             _fileSystem.WorkingDirectory = targetDirectory;
 
@@ -52,8 +52,8 @@ namespace Regi.Test.Utilities
         [Fact]
         public void CreateProcess_returns_process_with_fileName_and_arguments_in_working_directory_is_absolute_path()
         {
-            string targetDirectory = PathHelper.SampleDirectoryPath("ConfigurationBad");
-            string workingDirectory = PathHelper.SampleDirectoryPath("ConfigurationGood");
+            string targetDirectory = PathHelper.GetSampleProjectPath("ConfigurationBad");
+            string workingDirectory = PathHelper.GetSampleProjectPath("ConfigurationGood");
 
             _fileSystem.WorkingDirectory = targetDirectory;
 

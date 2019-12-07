@@ -1,10 +1,7 @@
-﻿using Newtonsoft.Json;
-using Regi.Services;
-using Regi.Utilities;
-using System;
+﻿using Regi.Services;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.IO;
+using System.Text.Json.Serialization;
 
 namespace Regi.Models
 {

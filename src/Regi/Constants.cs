@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -20,10 +21,20 @@ namespace Regi
                     PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
                     DictionaryKeyPolicy = JsonNamingPolicy.CamelCase,
                     WriteIndented = true,
+                    IgnoreNullValues = true
                 };
-                options.Converters.Add(new JsonStringEnumConverter());
+                options.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
                 return options;
             }
         }
+
+        public static readonly HashSet<string> DiscoverIgnore = new HashSet<string>
+        {
+            ".git",
+            ".vs",
+            "bin",
+            "node_modules",
+            "obj",
+        };
     }
 }

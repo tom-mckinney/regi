@@ -165,7 +165,7 @@ namespace Regi.Test.Services
         [Fact]
         public async Task Start_runs_app_script_in_working_directory_before_starting_if_they_are_specified()
         {
-            string workingDirectory = PathHelper.SampleDirectoryPath("ConfigurationGood");
+            string workingDirectory = PathHelper.GetSampleProjectPath("ConfigurationGood");
 
             var configuration = SampleProjects.ConfigurationGood;
 

@@ -11,6 +11,7 @@ using System.Diagnostics.CodeAnalysis;
 [assembly: SuppressMessage("Reliability", "CA2007:Consider calling ConfigureAwait on the awaited task", Justification = "Configure await is ugly...")]
 [assembly: SuppressMessage("Globalization", "CA1303:Do not pass literals as localized parameters", Justification = "Used for mocking exceptions")]
 [assembly: SuppressMessage("Design", "CA1065:Do not raise exceptions in unexpected locations", Justification = "Used for making test stubs")]
-[assembly: SuppressMessage("Design", "CA1031:Do not catch general exception types")]
+[assembly: SuppressMessage("Design", "CA1062:Validate arguments of public methods", Justification = "Not necessary for a test project")]
+[assembly: SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "Not necessary for a test project")]
 
 // Specific instances

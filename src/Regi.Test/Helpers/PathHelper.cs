@@ -7,29 +7,24 @@ namespace Regi.Test.Helpers
 {
     public static class PathHelper
     {
-        private static readonly char Slash = Path.DirectorySeparatorChar;
+        internal static string GetSampleProjectPath(string name) => Path.Combine(SampleProjectsRootPath, name);
 
-        internal static string SampleDirectoryPath(string name)
-        {
-            string path = $"{ProjectRootPath}{Slash}_SampleProjects_{Slash}{name}";
+        internal static string SampleProjectsRootPath => Path.Combine(RegiTestRootPath, "_SampleProjects_");
 
-            return path;
-        }
-
-        private static string _projectRootPath;
-        internal static string ProjectRootPath
+        private static string _regiTestRootPath;
+        internal static string RegiTestRootPath
         {
             get
             {
-                if (string.IsNullOrWhiteSpace(_projectRootPath))
+                if (string.IsNullOrWhiteSpace(_regiTestRootPath))
                 {
                     DirectoryInfo currentDirectory = new DirectoryInfo(Directory.GetCurrentDirectory());
-                    while (string.IsNullOrWhiteSpace(_projectRootPath) && currentDirectory != null && currentDirectory.Exists)
+                    while (string.IsNullOrWhiteSpace(_regiTestRootPath) && currentDirectory != null && currentDirectory.Exists)
                     {
                         var projectFiles = currentDirectory.GetFiles("*.csproj", SearchOption.TopDirectoryOnly);
                         if (projectFiles.Length > 0)
                         {
-                            _projectRootPath = currentDirectory.FullName;
+                            _regiTestRootPath = currentDirectory.FullName;
                         }
                         else
                         {
@@ -38,7 +33,7 @@ namespace Regi.Test.Helpers
                     }
                 }
 
-                return _projectRootPath;
+                return _regiTestRootPath;
             }
         }
     }

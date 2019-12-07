@@ -17,7 +17,7 @@ namespace Regi.Test
 
         public TestFileSystem(IConsole console) : base(console)
         {
-            WorkingDirectory = PathHelper.ProjectRootPath;
+            WorkingDirectory = PathHelper.RegiTestRootPath;
         }
     }
 }

@@ -1,14 +1,13 @@
 using McMaster.Extensions.CommandLineUtils;
 using McMaster.Extensions.CommandLineUtils.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
-using Newtonsoft.Json;
 using Regi.Abstractions;
 using Regi.Commands;
 using Regi.Extensions;
 using Regi.Models;
-using Regi.Models.Exceptions;
 using Regi.Services;
 using Regi.Services.Frameworks;
+using Regi.Services.Identifiers;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -59,7 +58,7 @@ namespace Regi
             {
                 var projectManager = app.GetRequiredService<IProjectManager>();
 
-                var shutdownCts = new CancellationTokenSource(5000);
+                using var shutdownCts = new CancellationTokenSource(5000);
                 await projectManager.KillAllProcesses(new RegiOptions(), shutdownCts.Token, true);
             }
         }
@@ -86,6 +85,11 @@ namespace Regi
                 .AddSingleton<IRuntimeInfo, RuntimeInfo>()
                 .AddSingleton<ISummaryService, SummaryService>()
                 .AddSingleton<ICleanupService, CleanupService>()
+                .AddSingleton<IDiscoveryService, DiscoveryService>()
+
+                .AddIdentifer<DotnetCoreIdentifier>()
+                .AddIdentifer<NodeIdentifier>()
+
                 .AddSingleton(console)
                 .AddSingleton<CommandLineContext, DefaultCommandLineContext>()
                 .BuildServiceProvider();

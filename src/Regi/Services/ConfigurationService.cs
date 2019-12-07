@@ -1,7 +1,7 @@
 ﻿using Regi.Extensions;
 using Regi.Models;
-using Regi.Models.Exceptions;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -11,6 +11,7 @@ namespace Regi.Services
     public interface IConfigurationService
     {
         Task<StartupConfig> GetConfigurationAsync(RegiOptions options);
+        ValueTask<StartupConfig> CreateConfigurationAsync(IEnumerable<Project> projects, RegiOptions options);
     }
 
     public class ConfigurationService : IConfigurationService
@@ -20,6 +21,25 @@ namespace Regi.Services
         public ConfigurationService(IFileSystem fileSystem)
         {
             _fileSystem = fileSystem;
+        }
+
+        public ValueTask<StartupConfig> CreateConfigurationAsync(IEnumerable<Project> projects, RegiOptions options)
+        {
+            var config = new StartupConfig();
+
+            foreach (var project in projects)
+            {
+                if (project.Type == ProjectType.Unit || project.Type == ProjectType.Integration)
+                {
+                    config.Tests.Add(project);
+                }
+                else
+                {
+                    config.Apps.Add(project);
+                }
+            }
+
+            return new ValueTask<StartupConfig>(config);
         }
 
         public async Task<StartupConfig> GetConfigurationAsync(RegiOptions options)

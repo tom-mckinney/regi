@@ -11,8 +11,8 @@ namespace Regi.Commands
 {
     public abstract class CommandBase : RegiOptions
     {
-        private readonly IProjectManager _projectManager;
-        private readonly IConfigurationService _configurationService;
+        protected readonly IProjectManager _projectManager;
+        protected readonly IConfigurationService _configurationService;
         protected readonly IConsole _console;
 
         public CommandBase(IProjectManager projectManager, IConfigurationService configurationService, IConsole console)

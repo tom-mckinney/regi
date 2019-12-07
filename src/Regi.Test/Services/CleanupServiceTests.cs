@@ -22,7 +22,7 @@ namespace Regi.Test.Services
 
         public CleanupServiceTests(ITestOutputHelper outputHelper)
         {
-            this._console = new TestConsole(outputHelper);
+            _console = new TestConsole(outputHelper);
         }
 
         ICleanupService CreateService()

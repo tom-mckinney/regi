@@ -3,6 +3,8 @@ using Regi.Test.Helpers;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -21,18 +23,16 @@ namespace Regi.Test.Services
         [Fact]
         public void GetDirectoryPath_returns_full_path_for_directory()
         {
-            string expectedDirectoryPath = PathHelper.SampleDirectoryPath("SampleSuccessfulTests");
+            string expectedDirectoryPath = PathHelper.GetSampleProjectPath("SampleSuccessfulTests");
 
             Assert.Equal(expectedDirectoryPath, _service.GetDirectoryPath(expectedDirectoryPath));
-
-
         }
 
         [Fact]
         public void GetDirectoryPath_returns_full_path_for_file()
         {
-            string expectedDirectoryPath = PathHelper.SampleDirectoryPath("SampleSuccessfulTests");
-            string filePath = PathHelper.SampleDirectoryPath("SampleSuccessfulTests/SampleSuccessfulTests.csproj");
+            string expectedDirectoryPath = PathHelper.GetSampleProjectPath("SampleSuccessfulTests");
+            string filePath = PathHelper.GetSampleProjectPath("SampleSuccessfulTests/SampleSuccessfulTests.csproj");
 
             Assert.Equal(expectedDirectoryPath, _service.GetDirectoryPath(filePath));
         }
@@ -40,7 +40,7 @@ namespace Regi.Test.Services
         [Fact]
         public void GetDirectoryPath_throws_if_directory_does_not_exist()
         {
-            string path = PathHelper.SampleDirectoryPath("FAKE_DIRECTORY");
+            string path = PathHelper.GetSampleProjectPath("FAKE_DIRECTORY");
 
             Assert.Throws<DirectoryNotFoundException>(() => _service.GetDirectoryPath(path));
         }
@@ -48,7 +48,7 @@ namespace Regi.Test.Services
         [Fact]
         public void GetDirectoryPath_throws_if_file_does_not_exist()
         {
-            string path = PathHelper.SampleDirectoryPath("FAKE_DIRECTORY/Fake.csproj");
+            string path = PathHelper.GetSampleProjectPath("FAKE_DIRECTORY/Fake.csproj");
 
             Assert.Throws<DirectoryNotFoundException>(() => _service.GetDirectoryPath(path));
         }
@@ -56,9 +56,54 @@ namespace Regi.Test.Services
         [Fact]
         public void GetDirectoryPath_with_file_that_does_not_exist_does_not_throw_if_throwIfNotFound_is_false()
         {
-            string path = PathHelper.SampleDirectoryPath("FAKE_DIRECTORY/Fake.csproj");
+            string path = PathHelper.GetSampleProjectPath("FAKE_DIRECTORY/Fake.csproj");
 
             Assert.Null(_service.GetDirectoryPath(path, false));
+        }
+
+        [Fact]
+        public void GetRelativePath_success()
+        {
+            string absolutePath = PathHelper.GetSampleProjectPath("ClassLib");
+            string expectedRelativePath = Path.GetRelativePath(_service.WorkingDirectory, absolutePath).Replace('\\', '/');
+
+            string actualRelativePath = _service.GetRelativePath(absolutePath);
+
+            Assert.Equal(expectedRelativePath, actualRelativePath);
+        }
+
+        [Fact]
+        public void GetRelativePath_one_folder_down()
+        {
+            string absolutePath = PathHelper.GetSampleProjectPath("ClassLib");
+            _service.WorkingDirectory = new DirectoryInfo(absolutePath).Parent.FullName;
+            string expectedRelativePath = Path.GetRelativePath(_service.WorkingDirectory, absolutePath).Replace('\\', '/');
+
+            string actualRelativePath = _service.GetRelativePath(absolutePath);
+
+            Assert.Equal("./ClassLib", actualRelativePath);
+            Assert.NotEqual(expectedRelativePath, actualRelativePath);
+        }
+
+        [Fact]
+        public void GetRelativePath_success_same_folder()
+        {
+            string absolutePath = PathHelper.GetSampleProjectPath("ClassLib");
+            _service.WorkingDirectory = new DirectoryInfo(absolutePath).FullName;
+            string expectedRelativePath = Path.GetRelativePath(_service.WorkingDirectory, absolutePath).Replace('\\', '/');
+
+            string actualRelativePath = _service.GetRelativePath(absolutePath);
+
+            Assert.Equal("./", actualRelativePath);
+            Assert.NotEqual(expectedRelativePath, actualRelativePath);
+        }
+
+        [Theory]
+        [InlineData("")]
+        [InlineData(null)]
+        public void GetRelativePath_null(string path)
+        {
+            Assert.Throws<ArgumentNullException>(() => _service.GetRelativePath(path));
         }
 
         [Theory]
@@ -80,17 +125,69 @@ namespace Regi.Test.Services
         }
 
         [Fact]
+        public void GetChildDirectories_success()
+        {
+            var directory = new DirectoryInfo(PathHelper.SampleProjectsRootPath);
+            var expectedChildDirectories = directory.GetDirectories();
+
+            var actualChildDirectories = _service.GetChildDirectories(directory);
+
+            for (int i = 0; i < actualChildDirectories.Count(); i++)
+            {
+                var expected = expectedChildDirectories[i];
+                var actual = actualChildDirectories.ElementAt(i);
+
+                Assert.Equal(expected.FullName, actual.FullName);
+            }
+        }
+
+        [Theory]
+        [InlineData("wumbo")]
+        [InlineData(null)]
+        public void GetChildDirectories_throws_if_directory_does_not_exist(string path)
+        {
+            DirectoryInfo directory = path == null ? null : new DirectoryInfo(path);
+            Assert.Throws<ArgumentException>(() => _service.GetChildDirectories(directory));
+        }
+
+        [Fact]
+        public void GetAllChildren_success()
+        {
+            var directory = new DirectoryInfo(PathHelper.SampleProjectsRootPath);
+            var expectedChildren = directory.GetFileSystemInfos();
+
+            var actualChildDirectories = _service.GetAllChildren(directory);
+
+            for (int i = 0; i < actualChildDirectories.Count; i++)
+            {
+                var expected = expectedChildren[i];
+                var actual = actualChildDirectories.ElementAt(i).Value;
+
+                Assert.Equal(expected.FullName, actual.FullName);
+            }
+        }
+
+        [Theory]
+        [InlineData("wumbo")]
+        [InlineData(null)]
+        public void GetAllChildren_throws_if_directory_does_not_exist(string path)
+        {
+            DirectoryInfo directory = path == null ? null : new DirectoryInfo(path);
+            Assert.Throws<ArgumentException>(() => _service.GetChildDirectories(directory));
+        }
+
+        [Fact]
         public void FindAllProjectFiles_returns_a_list_of_dotnet_projects()
         {
             List<FileInfo> projectFiles = _service.FindAllProjectFiles();
 
-            Assert.Equal(12, projectFiles.Count);
+            Assert.Equal(13, projectFiles.Count);
         }
 
         [Fact]
-        public void CreateConfigFile_creates_a_new_file()
+        public async Task CreateConfigFile_creates_a_new_file()
         {
-            string newConfigurationPath = PathHelper.SampleDirectoryPath($"temp/{Guid.NewGuid()}");
+            string newConfigurationPath = PathHelper.GetSampleProjectPath($"temp/{Guid.NewGuid()}");
 
             if (!Directory.Exists(newConfigurationPath))
             {
@@ -99,7 +196,7 @@ namespace Regi.Test.Services
 
             _service.WorkingDirectory = newConfigurationPath;
 
-            FileInfo configFile = _service.CreateConfigFile();
+            FileInfo configFile = await _service.CreateConfigFileAsync(SampleProjects.ConfigurationDefault);
 
             Assert.True(configFile.Exists, $"Config File does not exist: {configFile.FullName}");
 
@@ -107,9 +204,9 @@ namespace Regi.Test.Services
         }
 
         [Fact]
-        public void CreateConfigFile_throws_if_config_file_already_exists()
+        public async Task CreateConfigFile_throws_if_config_file_already_exists()
         {
-            string newConfigurationPath = PathHelper.SampleDirectoryPath($"temp/{Guid.NewGuid()}");
+            string newConfigurationPath = PathHelper.GetSampleProjectPath($"temp/{Guid.NewGuid()}");
 
             if (!Directory.Exists(newConfigurationPath))
             {
@@ -123,7 +220,7 @@ namespace Regi.Test.Services
 
             _service.WorkingDirectory = newConfigurationPath;
 
-            Assert.Throws<InvalidOperationException>(() => _service.CreateConfigFile());
+            await Assert.ThrowsAsync<RegiException>(() => _service.CreateConfigFileAsync(SampleProjects.ConfigurationDefault).AsTask());
 
             Directory.Delete(newConfigurationPath, true);
         }

@@ -12,8 +12,8 @@
       "port": 9080
     },
     {
-      "name": "SampleNodeApp",
-      "path": "../SampleNodeApp/package.json",
+      "name": "NodeApp",
+      "path": "../NodeApp/package.json",
       "type": "web",
       "framework": "node",
       "port": 9081

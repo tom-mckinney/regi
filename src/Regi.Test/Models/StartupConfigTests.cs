@@ -1,8 +1,5 @@
 ﻿using Regi.Models;
-using Regi.Models.Exceptions;
-using System;
 using System.Collections.Generic;
-using System.Text;
 using Xunit;
 
 namespace Regi.Test.Models
