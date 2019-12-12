@@ -1,0 +1,56 @@
+﻿<Window x:Class="Regi.UI.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Regi.UI"
+        mc:Ignorable="d"
+        Title="Regi" Height="450" Width="800">
+    <Grid Margin="20,10,20,20">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="auto" />
+                <ColumnDefinition Width="auto" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto" />
+                <RowDefinition Height="auto" />
+            </Grid.RowDefinitions>
+
+            <Label Grid.Column="0" Grid.Row="0">Search</Label>
+            <TextBox Grid.Column="0" Grid.Row="1" TextChanged="Search_TextChanged" />
+
+            <Label Grid.Column="1" Grid.Row="0"  Margin="20,0">Start</Label>
+            <DatePicker Grid.Column="1" Grid.Row="1" Margin="20,0" />
+
+            <Label Grid.Column="2" Grid.Row="0">End</Label>
+            <DatePicker Grid.Column="2" Grid.Row="1" />
+        </Grid>
+
+        <!--<DataGrid Grid.Row="1" x:Name="Projects" ItemsSource="{Binding}" Margin="0,20,0,0">
+            <DataGrid.Columns>
+            </DataGrid.Columns>
+        </DataGrid>-->
+        
+        <ListView Grid.Row="1" x:Name="Projects" ItemsSource="{Binding}" Margin="0,20,0,0">
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn Header="Foo" DisplayMemberBinding="{Binding Path=Bar}" />
+                    <GridViewColumn>
+                        Test
+                    </GridViewColumn>
+                </GridView>
+            </ListView.View>
+        </ListView>
+    </Grid>
+</Window>
