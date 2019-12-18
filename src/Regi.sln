@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Regi.Test", "Regi.Test\Regi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Regi.UWP", "Regi.UWP\Regi.UWP.csproj", "{449B1CFD-452D-499D-AF04-3CC7B37FC006}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Regi.UI", "Regi.UI\Regi.UI.csproj", "{CEA2CEC9-62FD-45D7-BAD3-F8450BCB44AA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -91,6 +93,26 @@ Global
 		{449B1CFD-452D-499D-AF04-3CC7B37FC006}.Release|x86.ActiveCfg = Release|x86
 		{449B1CFD-452D-499D-AF04-3CC7B37FC006}.Release|x86.Build.0 = Release|x86
 		{449B1CFD-452D-499D-AF04-3CC7B37FC006}.Release|x86.Deploy.0 = Release|x86
+		{CEA2CEC9-62FD-45D7-BAD3-F8450BCB44AA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CEA2CEC9-62FD-45D7-BAD3-F8450BCB44AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CEA2CEC9-62FD-45D7-BAD3-F8450BCB44AA}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{CEA2CEC9-62FD-45D7-BAD3-F8450BCB44AA}.Debug|ARM.Build.0 = Debug|Any CPU
+		{CEA2CEC9-62FD-45D7-BAD3-F8450BCB44AA}.Debug|ARM64.ActiveCfg = Debug|Any CPU
+		{CEA2CEC9-62FD-45D7-BAD3-F8450BCB44AA}.Debug|ARM64.Build.0 = Debug|Any CPU
+		{CEA2CEC9-62FD-45D7-BAD3-F8450BCB44AA}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{CEA2CEC9-62FD-45D7-BAD3-F8450BCB44AA}.Debug|x64.Build.0 = Debug|Any CPU
+		{CEA2CEC9-62FD-45D7-BAD3-F8450BCB44AA}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{CEA2CEC9-62FD-45D7-BAD3-F8450BCB44AA}.Debug|x86.Build.0 = Debug|Any CPU
+		{CEA2CEC9-62FD-45D7-BAD3-F8450BCB44AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CEA2CEC9-62FD-45D7-BAD3-F8450BCB44AA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CEA2CEC9-62FD-45D7-BAD3-F8450BCB44AA}.Release|ARM.ActiveCfg = Release|Any CPU
+		{CEA2CEC9-62FD-45D7-BAD3-F8450BCB44AA}.Release|ARM.Build.0 = Release|Any CPU
+		{CEA2CEC9-62FD-45D7-BAD3-F8450BCB44AA}.Release|ARM64.ActiveCfg = Release|Any CPU
+		{CEA2CEC9-62FD-45D7-BAD3-F8450BCB44AA}.Release|ARM64.Build.0 = Release|Any CPU
+		{CEA2CEC9-62FD-45D7-BAD3-F8450BCB44AA}.Release|x64.ActiveCfg = Release|Any CPU
+		{CEA2CEC9-62FD-45D7-BAD3-F8450BCB44AA}.Release|x64.Build.0 = Release|Any CPU
+		{CEA2CEC9-62FD-45D7-BAD3-F8450BCB44AA}.Release|x86.ActiveCfg = Release|Any CPU
+		{CEA2CEC9-62FD-45D7-BAD3-F8450BCB44AA}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
