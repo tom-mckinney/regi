@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <ToolCommandName>wumbo</ToolCommandName>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <PackAsTool>true</PackAsTool>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="3.1.0" />
+    <PackageReference Include="System.CommandLine.Experimental" Version="0.3.0-alpha.19577.1" />
+    <PackageReference Include="System.CommandLine.Hosting" Version="0.3.0-alpha.19577.1" />
+    <PackageReference Include="System.CommandLine.Rendering" Version="0.3.0-alpha.19577.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Regi\Regi.csproj" />
+  </ItemGroup>
+
+</Project>
