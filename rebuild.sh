@@ -2,7 +2,7 @@ rm -r ./nupkgs/ &> /dev/null
 
 export VERSION="1.0.0-dev"
 
-dotnet pack --output ./nupkgs/ ./src/Regi
+dotnet pack --output ./nupkgs/ ./src/Regi.CommandLine
 
 dotnet tool uninstall -g regi
 

@@ -19,18 +19,18 @@ jobs:
     steps:
     - uses: actions/checkout@v1
 
-    # - uses: actions/setup-dotnet@v1 # TODO: enable once setup-dotnet has been fixed to explicitly set version
-    #   with:
-    #     dotnet-version: '3.0.100'
+    - uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '3.1.101'
 
     - name: Install sample project dependencies
-      run: dotnet run -p ./src/Regi/Regi.csproj -- install --configuration ./src/Regi.Test/_SampleProjects_
+      run: dotnet run -p ./src/Regi.CommandLine/Regi.CommandLine.csproj -- install --configuration ./src/Regi.Test/_SampleProjects_
 
     - name: Run xunit tests
       run: dotnet test ./src/Regi.sln
 
     - name: Build with dotnet
-      run: dotnet pack --configuration Release --output nupkgs ./src/Regi
+      run: dotnet pack --configuration Release --output nupkgs ./src/Regi.CommandLine
 
   publish:
     name: Publish package

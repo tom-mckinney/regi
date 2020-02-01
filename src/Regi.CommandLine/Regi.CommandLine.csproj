@@ -1,0 +1,37 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <ToolCommandName>regi</ToolCommandName>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <Version>$(VERSION)</Version>
+    <OutputType>Exe</OutputType>
+    <IsPackable>true</IsPackable>
+    <PackAsTool>true</PackAsTool>
+    <!-- Optional performance setting - enables tiered JIT compilation-->
+    <TieredCompilation>true</TieredCompilation>
+    <RuntimeIdentifiers>win-x64;osx-x64;linux-x64</RuntimeIdentifiers>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <Title>Regi</Title>
+    <PackageId>Regi</PackageId>
+    <Authors>Tom McKinney</Authors>
+    <Description>Command line tool for running, testing, and managing microservices in development and CI/CD environments.</Description>
+    <PackageTags>microservice;run;test;development;CLI</PackageTags>
+    <RepositoryUrl>https://github.com/tom-mckinney/regi</RepositoryUrl>
+    <PackageReleaseNotes>https://github.com/tom-mckinney/regi/releases</PackageReleaseNotes>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Regi\Regi.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="McMaster.Extensions.CommandLineUtils" Version="2.5.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.9.8">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+</Project>

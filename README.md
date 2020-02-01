@@ -1,4 +1,9 @@
-# Regiment
+# Regi
+
+> [ rej-ee ]
+
+[![nuget](https://img.shields.io/nuget/v/Regi)](https://www.nuget.org/packages/Regi/) ![Publish Package](https://github.com/tom-mckinney/regi/workflows/Publish%20Package/badge.svg) ![Run Tests](https://github.com/tom-mckinney/regi/workflows/Run%20Tests/badge.svg?branch=master)
+
 
 ## Installation
 

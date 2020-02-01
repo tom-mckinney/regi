@@ -9,7 +9,7 @@ namespace Regi.Models
 {
     public class AppProcess
     {
-        private object _lock = new object();
+        private static readonly object _lock = new object();
 
         public AppProcess(Process process, AppTask task, AppStatus status, int? port = null)
         {
@@ -107,7 +107,7 @@ namespace Regi.Models
             {
                 try
                 {
-                    Process?.Kill(true);
+                    Process?.Kill();
                     Process?.WaitForExit(timeout.Milliseconds);
                 }
                 catch (Exception e)
