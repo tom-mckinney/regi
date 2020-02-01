@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Options;
 using Moq;
-using Regi.Commands;
+using Regi.CommandLine.Commands;
 using Regi.Models;
 using Regi.Services;
 using Regi.Test.Helpers;
@@ -15,7 +15,6 @@ namespace Regi.Test.Commands
 {
     public class StartCommandTests
     {
-        private readonly ITestOutputHelper _output;
         private readonly TestConsole _console;
         private readonly IProjectManager _projectManager;
         private readonly Mock<ICleanupService> _cleanupServiceMock = new Mock<ICleanupService>();
@@ -25,7 +24,6 @@ namespace Regi.Test.Commands
 
         public StartCommandTests(ITestOutputHelper output)
         {
-            _output = output;
             _console = new TestConsole(output);
             _projectManager = new ProjectManager(_console, _cleanupServiceMock.Object);
         }

@@ -1,6 +1,7 @@
 ﻿using McMaster.Extensions.CommandLineUtils;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
+using Regi.CommandLine;
 using Regi.Models;
 using Regi.Services;
 using Regi.Services.Frameworks;

@@ -1,5 +1,5 @@
 ﻿using Moq;
-using Regi.Commands;
+using Regi.CommandLine.Commands;
 using Regi.Models;
 using Regi.Services;
 using Regi.Test.Helpers;
@@ -15,7 +15,6 @@ namespace Regi.Test.Commands
 {
     public class TestCommandTests
     {
-        private readonly ITestOutputHelper _testOutput;
         private readonly TestConsole _console;
         private readonly Mock<IRunnerService> _runnerServiceMock = new Mock<IRunnerService>();
         private readonly IProjectManager _projectManager;
@@ -24,7 +23,6 @@ namespace Regi.Test.Commands
 
         public TestCommandTests(ITestOutputHelper testOutput)
         {
-            _testOutput = testOutput;
             _console = new TestConsole(testOutput);
             _projectManager = new ProjectManager(_console, new Mock<ICleanupService>().Object);
             _summaryService = new SummaryService(_projectManager, new TestFileSystem(), _console);
