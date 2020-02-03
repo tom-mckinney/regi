@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Regi.Test", "Regi.Test\Regi
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Regi.CommandLine", "Regi.CommandLine\Regi.CommandLine.csproj", "{BF34CB1C-6D85-49EA-9D82-8B130D53F93D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Regi", "Regi\Regi.csproj", "{4F8400DB-35E6-4C48-8052-E6267415504A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Regi.Core", "Regi.Core\Regi.Core.csproj", "{0F754A92-B0CF-4AD8-BE8D-7FEECBA25A3A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,10 +23,10 @@ Global
 		{BF34CB1C-6D85-49EA-9D82-8B130D53F93D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BF34CB1C-6D85-49EA-9D82-8B130D53F93D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BF34CB1C-6D85-49EA-9D82-8B130D53F93D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4F8400DB-35E6-4C48-8052-E6267415504A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4F8400DB-35E6-4C48-8052-E6267415504A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4F8400DB-35E6-4C48-8052-E6267415504A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4F8400DB-35E6-4C48-8052-E6267415504A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0F754A92-B0CF-4AD8-BE8D-7FEECBA25A3A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0F754A92-B0CF-4AD8-BE8D-7FEECBA25A3A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0F754A92-B0CF-4AD8-BE8D-7FEECBA25A3A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0F754A92-B0CF-4AD8-BE8D-7FEECBA25A3A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
