@@ -23,7 +23,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Regi\Regi.csproj" />
+    <ProjectReference Include="..\Regi.Core\Regi.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>

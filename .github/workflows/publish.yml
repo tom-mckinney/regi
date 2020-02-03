@@ -33,7 +33,7 @@ jobs:
       run: dotnet pack --configuration Release --output nupkgs ./src/Regi.CommandLine
 
   publish:
-    name: Publish package
+    name: Publish packages
     needs: [test]
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-18.04
@@ -42,15 +42,22 @@ jobs:
     steps:
     - uses: actions/checkout@v1
 
-    - name: Create NuGet package
+    - name: Get package version
       run: |
         REF="${{ github.ref }}"
         FILTER="refs/tags/v"
         export VERSION="${REF//$FILTER}"
-        echo "Building Regi v${VERSION}"
-        dotnet pack --configuration Release --output nupkgs ./src/Regi
 
-    - name: Publish NuGet package ${{ github.ref }}
+    - name: Create Regi.Core NuGet package
       run: |
-        PACKAGE=$(find ./nupkgs/ -name "Regi.*.nupkg")
-        dotnet nuget push $PACKAGE -k ${{ secrets.NuGetApiKey }} -s https://api.nuget.org/v3/index.json
+        echo "Building Regi.Core v${VERSION}"
+        dotnet pack --configuration Release --output nupkgs ./src/Regi.Core
+
+    - name: Create Regi NuGet package
+      run: |
+        echo "Building Regi v${VERSION}"
+        dotnet pack --configuration Release --output nupkgs ./src/Regi.CommandLine
+
+    - name: Publish NuGet packages ${{ github.ref }}
+      run: |
+        find ./nupkgs/ -name "Regi.*.nupkg" -exec dotnet nuget push {} -k ${{ secrets.NuGetApiKey }} -s https://api.nuget.org/v3/index.json \;
