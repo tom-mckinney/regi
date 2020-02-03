@@ -29,9 +29,6 @@ jobs:
     - name: Run xunit tests
       run: dotnet test ./src/Regi.sln
 
-    - name: Build with dotnet
-      run: dotnet pack --configuration Release --output nupkgs ./src/Regi.CommandLine
-
   publish:
     name: Publish packages
     needs: [test]
@@ -47,13 +44,14 @@ jobs:
         REF="${{ github.ref }}"
         FILTER="refs/tags/v"
         export VERSION="${REF//$FILTER}"
+        echo "::set-env name=VERSION::${VERSION}"
 
-    - name: Create Regi.Core NuGet package
+    - name: Package Regi.Core library
       run: |
         echo "Building Regi.Core v${VERSION}"
         dotnet pack --configuration Release --output nupkgs ./src/Regi.Core
 
-    - name: Create Regi NuGet package
+    - name: Package Regi Global Tool
       run: |
         echo "Building Regi v${VERSION}"
         dotnet pack --configuration Release --output nupkgs ./src/Regi.CommandLine
