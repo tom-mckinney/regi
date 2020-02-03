@@ -39,6 +39,10 @@ jobs:
     steps:
     - uses: actions/checkout@v1
 
+    - uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '3.1.101'
+
     - name: Get package version
       run: |
         REF="${{ github.ref }}"
