@@ -1,12 +1,11 @@
 ﻿using McMaster.Extensions.CommandLineUtils;
 using Regi.Extensions;
+using Regi.Frameworks;
 using Regi.Models;
-using Regi.Services.Frameworks;
 using Regi.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -21,13 +20,13 @@ namespace Regi.Services
 
     public class CleanupService : ICleanupService
     {
-        private readonly IDotnetService _dotnetService;
+        private readonly IDotnet _dotnetService;
         private readonly IFileSystem _fileSystem;
         private readonly IConsole _console;
         private readonly bool _isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
         private readonly TimeSpan _defaultTimeout = TimeSpan.FromSeconds(10);
 
-        public CleanupService(IDotnetService dotnetService, IFileSystem fileSystem, IConsole console)
+        public CleanupService(IDotnet dotnetService, IFileSystem fileSystem, IConsole console)
         {
             _dotnetService = dotnetService;
             _fileSystem = fileSystem;

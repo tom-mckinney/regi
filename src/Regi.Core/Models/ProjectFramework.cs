@@ -4,6 +4,7 @@
     {
         Any = 1,
         Dotnet,
-        Node
+        Node,
+        RubyOnRails,
     }
 }

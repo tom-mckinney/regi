@@ -1,7 +1,7 @@
 ﻿using Moq;
+using Regi.Frameworks;
 using Regi.Models;
 using Regi.Services;
-using Regi.Services.Frameworks;
 using Regi.Test.Helpers;
 using System;
 using System.IO;
@@ -11,13 +11,13 @@ using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Regi.Test.Services.Frameworks
+namespace Regi.Test.Frameworks
 {
     [Collection(TestCollections.NoParallel)]
-    public class DotnetServiceTests : TestBase
+    public class DotnetTests : TestBase
     {
         private readonly TestConsole _console;
-        private readonly IDotnetService _service;
+        private readonly IDotnet _service;
         private readonly Mock<IRuntimeInfo> _runtimeInfoMock = new Mock<IRuntimeInfo>();
 
         private readonly Project _successfulTests;
@@ -26,10 +26,10 @@ namespace Regi.Test.Services.Frameworks
         private readonly Project _applicationError;
         private readonly Project _applicationLong;
 
-        public DotnetServiceTests(ITestOutputHelper testOutput)
+        public DotnetTests(ITestOutputHelper testOutput)
         {
             _console = new TestConsole(testOutput);
-            _service = new DotnetService(_fileSystem, _console, new PlatformService(_runtimeInfoMock.Object, _fileSystem, _console));
+            _service = new Dotnet(_fileSystem, _console, new PlatformService(_runtimeInfoMock.Object, _fileSystem, _console));
 
             _successfulTests = new Project("SampleSuccessfulTests", new DirectoryInfo(Directory.GetCurrentDirectory())
                 .GetFiles("SampleSuccessfulTests.csproj", SearchOption.AllDirectories)
@@ -56,7 +56,7 @@ namespace Regi.Test.Services.Frameworks
         [Fact]
         public async Task TestProject_on_success_returns_status()
         {
-            AppProcess unitTest = await _service.TestProject(_successfulTests, _successfulTests.GetAppDirectoryPaths(_fileSystem)[0], TestOptions.Create(), CancellationToken.None);
+            AppProcess unitTest = await _service.Test(_successfulTests, _successfulTests.GetAppDirectoryPaths(_fileSystem)[0], TestOptions.Create(), CancellationToken.None);
 
             Assert.Equal(AppTask.Test, unitTest.Task);
             Assert.Equal(AppStatus.Success, unitTest.Status);
@@ -65,7 +65,7 @@ namespace Regi.Test.Services.Frameworks
         [Fact]
         public async Task TestProject_verbose_on_success_prints_all_output()
         {
-            AppProcess unitTest = await _service.TestProject(_successfulTests, _successfulTests.GetAppDirectoryPaths(_fileSystem)[0], TestOptions.Create(), CancellationToken.None);
+            AppProcess unitTest = await _service.Test(_successfulTests, _successfulTests.GetAppDirectoryPaths(_fileSystem)[0], TestOptions.Create(), CancellationToken.None);
 
             Assert.Equal(AppTask.Test, unitTest.Task);
             Assert.Equal(AppStatus.Success, unitTest.Status);
@@ -75,7 +75,7 @@ namespace Regi.Test.Services.Frameworks
         [Fact]
         public async Task TestProject_on_failure_prints_only_exception_info()
         {
-            AppProcess unitTest = await _service.TestProject(_failedTests, _failedTests.GetAppDirectoryPaths(_fileSystem)[0], TestOptions.Create(), CancellationToken.None);
+            AppProcess unitTest = await _service.Test(_failedTests, _failedTests.GetAppDirectoryPaths(_fileSystem)[0], TestOptions.Create(), CancellationToken.None);
 
             Assert.Equal(AppTask.Test, unitTest.Task);
             Assert.Equal(AppStatus.Failure, unitTest.Status);
@@ -85,7 +85,7 @@ namespace Regi.Test.Services.Frameworks
         [Fact]
         public async Task TestProject_verbose_on_failure_prints_all_output()
         {
-            AppProcess unitTest = await _service.TestProject(_failedTests, _failedTests.GetAppDirectoryPaths(_fileSystem)[0], TestOptions.Create(), CancellationToken.None);
+            AppProcess unitTest = await _service.Test(_failedTests, _failedTests.GetAppDirectoryPaths(_fileSystem)[0], TestOptions.Create(), CancellationToken.None);
 
             Assert.Equal(AppTask.Test, unitTest.Task);
             Assert.Equal(AppStatus.Failure, unitTest.Status);
@@ -97,7 +97,7 @@ namespace Regi.Test.Services.Frameworks
         {
             var options = TestOptions.Create();
 
-            AppProcess process = await _service.StartProject(_application, _application.GetAppDirectoryPaths(_fileSystem)[0], options, CancellationToken.None);
+            AppProcess process = await _service.Start(_application, _application.GetAppDirectoryPaths(_fileSystem)[0], options, CancellationToken.None);
 
             Assert.Equal(AppStatus.Running, process.Status);
 
@@ -111,7 +111,7 @@ namespace Regi.Test.Services.Frameworks
         [Fact]
         public async Task RunProject_returns_failure_status_on_thrown_exception()
         {
-            AppProcess process = await _service.StartProject(_applicationError, _applicationError.GetAppDirectoryPaths(_fileSystem)[0], TestOptions.Create(), CancellationToken.None);
+            AppProcess process = await _service.Start(_applicationError, _applicationError.GetAppDirectoryPaths(_fileSystem)[0], TestOptions.Create(), CancellationToken.None);
 
             await process.WaitForExitAsync(CancellationToken.None);
 
@@ -125,7 +125,7 @@ namespace Regi.Test.Services.Frameworks
         {
             RegiOptions optionsWithoutVerbose = new RegiOptions { Verbose = false, KillProcessesOnExit = false };
 
-            AppProcess process = await _service.StartProject(_application, _application.GetAppDirectoryPaths(_fileSystem)[0], optionsWithoutVerbose, CancellationToken.None);
+            AppProcess process = await _service.Start(_application, _application.GetAppDirectoryPaths(_fileSystem)[0], optionsWithoutVerbose, CancellationToken.None);
 
             process.WaitForExit();
 
@@ -141,7 +141,7 @@ namespace Regi.Test.Services.Frameworks
         [Fact]
         public async Task RunProject_verbose_starts_and_prints_all_output()
         {
-            AppProcess process = await _service.StartProject(_application, _application.GetAppDirectoryPaths(_fileSystem)[0], TestOptions.Create(), CancellationToken.None);
+            AppProcess process = await _service.Start(_application, _application.GetAppDirectoryPaths(_fileSystem)[0], TestOptions.Create(), CancellationToken.None);
 
             process.WaitForExit();
 
@@ -155,7 +155,7 @@ namespace Regi.Test.Services.Frameworks
         [Fact]
         public async Task RunProject_long_starts_and_prints_nothing()
         {
-            AppProcess process = await _service.StartProject(_applicationLong, _applicationLong.GetAppDirectoryPaths(_fileSystem)[0], TestOptions.Create(), CancellationToken.None);
+            AppProcess process = await _service.Start(_applicationLong, _applicationLong.GetAppDirectoryPaths(_fileSystem)[0], TestOptions.Create(), CancellationToken.None);
 
             Thread.Sleep(1000);
 
@@ -171,7 +171,7 @@ namespace Regi.Test.Services.Frameworks
         {
             _applicationLong.Port = 8080;
 
-            AppProcess process = await _service.StartProject(_applicationLong, _applicationLong.GetAppDirectoryPaths(_fileSystem)[0], TestOptions.Create(), CancellationToken.None);
+            AppProcess process = await _service.Start(_applicationLong, _applicationLong.GetAppDirectoryPaths(_fileSystem)[0], TestOptions.Create(), CancellationToken.None);
 
             Thread.Sleep(1000);
 
@@ -192,7 +192,7 @@ namespace Regi.Test.Services.Frameworks
                 { "foo", "bar" }
             };
 
-            AppProcess process = await _service.StartProject(_applicationLong, _applicationLong.GetAppDirectoryPaths(_fileSystem)[0], TestOptions.Create(varList), CancellationToken.None);
+            AppProcess process = await _service.Start(_applicationLong, _applicationLong.GetAppDirectoryPaths(_fileSystem)[0], TestOptions.Create(varList), CancellationToken.None);
 
             Thread.Sleep(500);
 
@@ -210,7 +210,7 @@ namespace Regi.Test.Services.Frameworks
         {
             _application.Source = "http://artifactory.org/nuget";
 
-            AppProcess process = await _service.InstallProject(_application, _application.GetAppDirectoryPaths(_fileSystem)[0], TestOptions.Create(), CancellationToken.None);
+            AppProcess process = await _service.Install(_application, _application.GetAppDirectoryPaths(_fileSystem)[0], TestOptions.Create(), CancellationToken.None);
 
             Assert.Equal(AppTask.Install, process.Task);
             Assert.Equal(AppStatus.Success, process.Status);
@@ -223,7 +223,7 @@ namespace Regi.Test.Services.Frameworks
             string source = "http://artifactory.org/nuget";
             _application.Source = source;
 
-            AppProcess process = await _service.InstallProject(_application, _application.GetAppDirectoryPaths(_fileSystem)[0], TestOptions.Create(), CancellationToken.None);
+            AppProcess process = await _service.Install(_application, _application.GetAppDirectoryPaths(_fileSystem)[0], TestOptions.Create(), CancellationToken.None);
 
             Assert.Contains($"--source {source}", process.Process.StartInfo.Arguments, StringComparison.InvariantCulture);
         }
@@ -235,7 +235,7 @@ namespace Regi.Test.Services.Frameworks
         {
             _runtimeInfoMock.Setup(m => m.IsWindows).Returns(isWindows).Verifiable();
 
-            AppProcess process = await _service.KillProcesses(TestOptions.Create(), CancellationToken.None);
+            AppProcess process = await _service.Kill(TestOptions.Create(), CancellationToken.None);
 
             Assert.Equal(AppStatus.Success, process.Status);
             Assert.Equal(AppTask.Kill, process.Task);
@@ -259,7 +259,7 @@ namespace Regi.Test.Services.Frameworks
 
             var startInfo = process.Process.StartInfo;
             Assert.Contains("dotnet", startInfo.FileName, StringComparison.InvariantCulture);
-            Assert.Equal(FrameworkCommands.Dotnet.ShutdownBuildServer, startInfo.Arguments);
+            Assert.Equal(FrameworkCommands.DotnetCore.ShutdownBuildServer, startInfo.Arguments);
         }
 
         [Fact]
@@ -269,7 +269,7 @@ namespace Regi.Test.Services.Frameworks
             project.Arguments.AddOptions("*", "--dont-do-this-on-restore");
             project.Arguments.AddOptions("restore", "--foo bar");
 
-            var command = ((DotnetService)_service).BuildCommand(FrameworkCommands.Dotnet.Restore, project, TestOptions.Create());
+            var command = ((Dotnet)_service).BuildCommandArguments(FrameworkCommands.DotnetCore.Restore, project, TestOptions.Create());
 
             Assert.Equal("restore --foo bar", command);
         }

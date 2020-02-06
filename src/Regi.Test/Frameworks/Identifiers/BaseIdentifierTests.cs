@@ -1,7 +1,7 @@
 ﻿using Moq;
+using Regi.Frameworks.Identifiers;
 using Regi.Models;
 using Regi.Services;
-using Regi.Services.Identifiers;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -9,7 +9,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace Regi.Test.Services.Identifiers
+namespace Regi.Test.Identifiers
 {
     public class BaseIdentifierTests
     {

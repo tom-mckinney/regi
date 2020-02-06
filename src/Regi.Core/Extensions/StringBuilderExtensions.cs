@@ -6,14 +6,22 @@ namespace Regi.Extensions
 {
     public static class StringBuilderExtensions
     {
+        private static readonly object _lock = new object();
+
         public static StringBuilder AppendCliOption(this StringBuilder builder, string option)
         {
-            return builder.Append(' ').Append(option);
+            lock (_lock)
+            {
+                return builder.Append(' ').Append(option);
+            }
         }
 
         public static StringBuilder AppendJoinCliOptions(this StringBuilder builder, IEnumerable<string> options)
         {
-            return builder.Append(' ').AppendJoin(' ', options);
+            lock (_lock)
+            {
+                return builder.Append(' ').AppendJoin(' ', options);
+            }
         }
     }
 }

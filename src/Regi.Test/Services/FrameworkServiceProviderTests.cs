@@ -1,15 +1,10 @@
 ﻿using McMaster.Extensions.CommandLineUtils;
 using Microsoft.Extensions.DependencyInjection;
-using Moq;
 using Regi.CommandLine;
 using Regi.Models;
 using Regi.Services;
-using Regi.Services.Frameworks;
 using Regi.Test.Helpers;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -47,7 +42,7 @@ namespace Regi.Test.Services
                 {
                     try
                     {
-                        Assert.IsAssignableFrom<IFrameworkService>(service.GetFrameworkService(projectFramework));
+                        Assert.IsAssignableFrom<IFramework>(service.GetFrameworkService(projectFramework));
                     }
                     catch (Exception e)
                     {

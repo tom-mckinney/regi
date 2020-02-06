@@ -1,11 +1,9 @@
 ﻿using Regi.Models;
-using System;
+using Regi.Services;
 using System.Collections.Generic;
-using System.IO;
-using System.Text;
 using System.Threading.Tasks;
 
-namespace Regi.Services.Identifiers
+namespace Regi.Frameworks.Identifiers
 {
     public abstract class BaseIdentifier : IIdentifier
     {

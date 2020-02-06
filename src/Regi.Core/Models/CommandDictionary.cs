@@ -1,10 +1,16 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Regi.Models
 {
-    public class CommandDictionary<TValue> : Dictionary<string, IList<TValue>>
+    public class CommandDictionary<TValue> : Dictionary<string, ICollection<TValue>>
     {
+        public CommandDictionary() : base(StringComparer.InvariantCultureIgnoreCase)
+        {
+
+        }
+
         public void AddOptions(string command, params TValue[] options)
         {
             if (ContainsKey(command) && this[command] != null)
@@ -20,18 +26,18 @@ namespace Regi.Models
             }
         }
 
-        public bool TryGetValue(AppTask task, out IList<TValue> options)
+        public bool TryGetValue(AppTask task, out ICollection<TValue> options)
         {
             IEnumerable<TValue> values = new List<TValue>();
 
-            string key = task.ToString().ToLowerInvariant();
+            string key = task.ToString();
 
-            if (TryGetValue(key, out IList<TValue> taskOptions))
+            if (TryGetValue(key, out ICollection<TValue> taskOptions))
             {
                 values = values.Concat(taskOptions);
             }
 
-            if (TryGetValue("*", out IList<TValue> anyOptions))
+            if (TryGetValue("*", out ICollection<TValue> anyOptions))
             {
                 values = values.Concat(anyOptions);
             }

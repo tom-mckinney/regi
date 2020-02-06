@@ -1,24 +1,22 @@
 ﻿using McMaster.Extensions.CommandLineUtils;
+using Regi.Frameworks;
 using Regi.Models;
 using Regi.Services;
-using Regi.Services.Frameworks;
 using Regi.Test.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Threading;
-using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Regi.Test.Services.Frameworks
+namespace Regi.Test.Frameworks
 {
-    public class FrameworkServiceTests
+    public class FrameworkBaseTests
     {
         private readonly TestFileSystem _fileSystem = new TestFileSystem();
         private readonly IConsole _console;
 
-        public FrameworkServiceTests(ITestOutputHelper output)
+        public FrameworkBaseTests(ITestOutputHelper output)
         {
             _console = new TestConsole(output);
         }
@@ -28,7 +26,7 @@ namespace Regi.Test.Services.Frameworks
         {
             var service = new WumboService(_console);
 
-            Assert.Equal("foo", service.BuildCommand("foo", null, null));
+            Assert.Equal("foo", service.BuildCommandArguments("foo", null, null));
         }
 
         [Fact]
@@ -41,7 +39,7 @@ namespace Regi.Test.Services.Frameworks
                 Commands = new Dictionary<string, string> { { "start", "wumbo" } }
             };
 
-            Assert.Equal("wumbo", service.BuildCommand("start", project, null));
+            Assert.Equal("wumbo", service.BuildCommandArguments("start", project, null));
         }
 
         [Fact]
@@ -57,7 +55,7 @@ namespace Regi.Test.Services.Frameworks
                 }
             };
 
-            Assert.Equal("foo -v --runtime ubuntu.18.04-x64", service.BuildCommand("foo", project, null));
+            Assert.Equal("foo -v --runtime ubuntu.18.04-x64", service.BuildCommandArguments("foo", project, null));
         }
 
         [Fact]
@@ -75,7 +73,7 @@ namespace Regi.Test.Services.Frameworks
                 }
             };
 
-            Assert.Equal("foo --wumbo --t bar", service.BuildCommand("foo", project, null));
+            Assert.Equal("foo --wumbo --t bar", service.BuildCommandArguments("foo", project, null));
         }
 
         [Fact]
@@ -83,7 +81,7 @@ namespace Regi.Test.Services.Frameworks
         {
             var service = new WumboService(_console);
 
-            Assert.Equal("super-wumbo --do-the-thing", service.BuildCommand("super-wumbo", null, null));
+            Assert.Equal("super-wumbo --do-the-thing", service.BuildCommandArguments("super-wumbo", null, null));
         }
 
         [Fact]
@@ -96,7 +94,7 @@ namespace Regi.Test.Services.Frameworks
                 RemainingArguments = new List<string> {"--wumbo good", "--verbose"}
             };
 
-            Assert.Equal("foo ***--wumbo good --verbose***", service.BuildCommand("foo", null, options));
+            Assert.Equal("foo ***--wumbo good --verbose***", service.BuildCommandArguments("foo", null, options));
         }
 
         [Theory]
@@ -110,7 +108,7 @@ namespace Regi.Test.Services.Frameworks
 
             options.Verbose = isVerbose;
 
-            var process = service.CreateProcess(FrameworkCommands.Dotnet.Run, SampleProjects.Backend, SampleProjects.Backend.GetAppDirectoryPaths(_fileSystem)[0], options, "dotnet");
+            var process = service.CreateProcess(FrameworkCommands.DotnetCore.Run, SampleProjects.Backend, SampleProjects.Backend.GetAppDirectoryPaths(_fileSystem)[0], options, "dotnet");
 
             Assert.True(process.ErrorDataHandled);
         }
@@ -126,7 +124,7 @@ namespace Regi.Test.Services.Frameworks
 
             options.Verbose = isVerbose;
 
-            var process = service.CreateProcess(FrameworkCommands.Dotnet.Run, SampleProjects.Backend, SampleProjects.Backend.GetAppDirectoryPaths(_fileSystem)[0], options, "dotnet");
+            var process = service.CreateProcess(FrameworkCommands.DotnetCore.Run, SampleProjects.Backend, SampleProjects.Backend.GetAppDirectoryPaths(_fileSystem)[0], options, "dotnet");
 
             if (isVerbose)
                 Assert.True(process.OutputDataHandled);
@@ -145,7 +143,7 @@ namespace Regi.Test.Services.Frameworks
 
             options.ShowOutput = new List<string> { SampleProjects.Backend.Name };            
 
-            var process = service.CreateProcess(FrameworkCommands.Dotnet.Run, SampleProjects.Backend, SampleProjects.Backend.GetAppDirectoryPaths(_fileSystem)[0], options, "dotnet");
+            var process = service.CreateProcess(FrameworkCommands.DotnetCore.Run, SampleProjects.Backend, SampleProjects.Backend.GetAppDirectoryPaths(_fileSystem)[0], options, "dotnet");
 
             Assert.True(process.OutputDataHandled);
         }
@@ -161,16 +159,19 @@ namespace Regi.Test.Services.Frameworks
 
             options.ShowOutput = new List<string> { "Wumbo" };
 
-            var process = service.CreateProcess(FrameworkCommands.Dotnet.Run, SampleProjects.Backend, SampleProjects.Backend.GetAppDirectoryPaths(_fileSystem)[0], options, "dotnet");
+            var process = service.CreateProcess(FrameworkCommands.DotnetCore.Run, SampleProjects.Backend, SampleProjects.Backend.GetAppDirectoryPaths(_fileSystem)[0], options, "dotnet");
 
             Assert.False(process.OutputDataHandled);
         }
     }
 
-    internal class WumboService : FrameworkService
+    internal class WumboService : FrameworkBase
     {
 
         public WumboService(IConsole console) : base(console, new PlatformService(new RuntimeInfo(), new TestFileSystem(), console), "wumbo") { }
+
+        public override ProjectFramework Framework => throw new NotImplementedException();
+        public override IEnumerable<string> ProcessNames => throw new NotImplementedException();
 
         protected override CommandDictionary FrameworkOptions => new CommandDictionary
         {
@@ -180,35 +181,6 @@ namespace Regi.Test.Services.Frameworks
         protected override string FormatAdditionalArguments(IEnumerable<string> args)
         {
             return $"***{string.Join(' ', args)}***";
-        }
-
-        public override Task<AppProcess> InstallProject(Project project, string appDirectoryPath, RegiOptions options, CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override Task<AppProcess> StartProject(Project project, string appDirectoryPath, RegiOptions options, CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override Task<AppProcess> TestProject(Project project, string appDirectoryPath, RegiOptions options, CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override Task<AppProcess> BuildProject(Project project, string appDirectoryPath, RegiOptions options, CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override Task<AppProcess> KillProcesses(RegiOptions options, CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
-        }
-
-        protected override void SetEnvironmentVariables(Process process, Project project)
-        {
         }
     }
 }

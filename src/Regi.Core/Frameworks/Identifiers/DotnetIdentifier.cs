@@ -1,12 +1,15 @@
 ﻿using Regi.Models;
+using Regi.Services;
 using System;
 using System.Threading.Tasks;
 
-namespace Regi.Services.Identifiers
+namespace Regi.Frameworks.Identifiers
 {
-    public class NodeIdentifier : BaseIdentifier
+    public class DotnetIdentifier : BaseIdentifier
     {
-        public NodeIdentifier(IFileSystem fileSystem) : base(fileSystem)
+        private int Port = 8080;
+
+        public DotnetIdentifier(IFileSystem fileSystem) : base(fileSystem)
         {
         }
 
@@ -17,7 +20,7 @@ namespace Regi.Services.Identifiers
 
         public override ValueTask<bool> IsMatchAsync(Project project, IFileSystemDictionary directoryContents)
         {
-            if (project?.Framework == ProjectFramework.Node)
+            if (project?.Framework == ProjectFramework.Dotnet)
             {
                 return new ValueTask<bool>(true);
             }
@@ -26,7 +29,7 @@ namespace Regi.Services.Identifiers
             {
                 foreach (var path in directoryContents.Keys)
                 {
-                    if (path.Equals("package.json", StringComparison.InvariantCultureIgnoreCase))
+                    if (path.EndsWith(".csproj", StringComparison.InvariantCultureIgnoreCase))
                     {
                         return new ValueTask<bool>(true);
                     }
@@ -40,9 +43,19 @@ namespace Regi.Services.Identifiers
         {
             project = await base.CreateOrModifyAsync(project, directoryContents);
 
-            project.Framework = ProjectFramework.Node;
+            project.Framework = ProjectFramework.Dotnet;
 
-            // TODO: determine type
+            if (project.Name.Contains("test", StringComparison.InvariantCultureIgnoreCase))
+            {
+                project.Type = ProjectType.Unit;
+            }
+            else
+            {
+                project.Type = ProjectType.Web;
+                project.Port = Port;
+            }
+
+            Port++;
 
             return project;
         }

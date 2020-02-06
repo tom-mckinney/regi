@@ -1,12 +1,9 @@
 ﻿using Moq;
+using Regi.Frameworks;
 using Regi.Models;
 using Regi.Services;
-using Regi.Services.Frameworks;
 using Regi.Test.Helpers;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
@@ -16,7 +13,7 @@ namespace Regi.Test.Services
 {
     public class CleanupServiceTests
     {
-        private readonly Mock<IDotnetService> _dotnetServiceMock = new Mock<IDotnetService>();
+        private readonly Mock<IDotnet> _dotnetServiceMock = new Mock<IDotnet>();
         private readonly TestFileSystem _fileSystem = new TestFileSystem();
         private readonly TestConsole _console;
 

@@ -1,12 +1,9 @@
-﻿using Regi.Models;
-using Regi.Services.Identifiers;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using Regi.Frameworks.Identifiers;
+using Regi.Models;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace Regi.Test.Services.Identifiers
+namespace Regi.Test.Identifiers
 {
     public class NodeIdentifierTests : BaseIdentifierTests
     {

@@ -79,7 +79,7 @@ namespace Regi.Services
 
             AppProcess process = await _frameworkServiceProvider
                 .GetFrameworkService(project.Framework)
-                .StartProject(project, applicationDirectoryPath, options, cancellationToken);
+                .Start(project, applicationDirectoryPath, options, cancellationToken);
 
             if (process != null)
             {
@@ -161,7 +161,7 @@ namespace Regi.Services
 
                         var testProcess = await _frameworkServiceProvider
                             .GetFrameworkService(project.Framework)
-                            .TestProject(project, path, options, cancellationToken);
+                            .Test(project, path, options, cancellationToken);
 
                         project.Processes.Add(testProcess);
 
@@ -201,7 +201,7 @@ namespace Regi.Services
 
                         var buildProcess = await _frameworkServiceProvider
                             .GetFrameworkService(project.Framework)
-                            .BuildProject(project, path, options, cancellationToken);
+                            .Build(project, path, options, cancellationToken);
 
                         project.Processes.Add(buildProcess);
 
@@ -288,7 +288,7 @@ namespace Regi.Services
 
             var process = await _frameworkServiceProvider
                 .GetFrameworkService(project.Framework)
-                .InstallProject(project, appDirectoryPath, options, cancellationToken);
+                .Install(project, appDirectoryPath, options, cancellationToken);
 
             _console.WriteSuccessLine($"Finished installing project {project.Name}");
 
@@ -317,7 +317,7 @@ namespace Regi.Services
 
                 await _frameworkServiceProvider
                     .GetFrameworkService(framework)
-                    .KillProcesses(options, cancellationToken);
+                    .Kill(options, cancellationToken);
             }
 
             _console.WriteSuccessLine("Finished killing processess successfuly", ConsoleLineStyle.LineBeforeAndAfter);
@@ -325,8 +325,7 @@ namespace Regi.Services
 
         private void RunScriptsForTask(Project project, AppTask task, RegiOptions options)
         {
-            if (project.Scripts?.Count > 0
-                    && project.Scripts.TryGetValue(task, out IList<object> beforeScripts))
+            if (project.Scripts?.Count > 0 && project.Scripts.TryGetValue(task, out ICollection<object> beforeScripts))
             {
                 foreach (var script in beforeScripts)
                 {
