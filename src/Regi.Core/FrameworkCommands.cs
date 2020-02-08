@@ -8,13 +8,19 @@ namespace Regi
     public static class FrameworkCommands
     {
         public const string Any = "*";
+        public const string Install = "install";
+        public const string Start = "start";
         public const string Test = "test";
+        public const string Build = "build";
+        public const string Kill = "kill";
+        public const string Publish = "publish";
+        public const string Package = "package";
 
-        public static class Dotnet
+        public static class DotnetCore
         {
             public const string Run = "run";
             public const string Test = FrameworkCommands.Test;
-            public const string Build = "build";
+            public const string Build = FrameworkCommands.Build;
             public const string Restore = "restore";
             public const string Publish = "publish";
             public const string ShutdownBuildServer = "build-server shutdown";
@@ -22,25 +28,30 @@ namespace Regi
 
         public static class Node
         {
-            public const string Start = "start";
+            public const string Start = FrameworkCommands.Start;
             public const string Test = FrameworkCommands.Test;
             public const string Build = "run build";
-            public const string Install = "install";
+            public const string Install = FrameworkCommands.Install;
+        }
+
+        public static class RubyOnRails
+        {
+            public const string Server = "server";
         }
 
         public static AppTask GetAppTask(string command)
         {
             switch (command)
             {
-                case Dotnet.Run:
-                case Node.Start:
+                case Start:
+                case DotnetCore.Run:
                     return AppTask.Start;
                 case Test:
                     return AppTask.Test;
-                case Dotnet.Build:
+                case Build:
                 case Node.Build:
                     return AppTask.Build;
-                case Dotnet.Restore:
+                case DotnetCore.Restore:
                 case Node.Install:
                     return AppTask.Install;
                 default:

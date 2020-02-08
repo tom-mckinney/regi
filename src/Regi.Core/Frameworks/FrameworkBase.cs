@@ -1,6 +1,7 @@
 ﻿using McMaster.Extensions.CommandLineUtils;
 using Regi.Extensions;
 using Regi.Models;
+using Regi.Services;
 using Regi.Utilities;
 using System;
 using System.Collections.Generic;
@@ -10,25 +11,16 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Regi.Services.Frameworks
+namespace Regi.Frameworks
 {
-    public interface IFrameworkService
-    {
-        Task<AppProcess> InstallProject(Project project, string appDirectoryPath, RegiOptions options, CancellationToken cancellationToken);
-        Task<AppProcess> StartProject(Project project, string appDirectoryPath, RegiOptions options, CancellationToken cancellationToken);
-        Task<AppProcess> TestProject(Project project, string appDirectoryPath, RegiOptions options, CancellationToken cancellationToken);
-        Task<AppProcess> BuildProject(Project project, string appDirectoryPath, RegiOptions options, CancellationToken cancellationToken);
-        Task<AppProcess> KillProcesses(RegiOptions options, CancellationToken cancellationToken);
-    }
-
-    public abstract class FrameworkService : IFrameworkService
+    public abstract class FrameworkBase : IFramework
     {
         protected readonly IConsole _console;
         protected readonly IPlatformService _platformService;
         protected readonly string _frameworkExePath;
         protected readonly object _lock = new object();
 
-        public FrameworkService(IConsole console, IPlatformService platformService, string frameworkExePath)
+        public FrameworkBase(IConsole console, IPlatformService platformService, string frameworkExePath)
         {
             _console = console;
             _platformService = platformService;
@@ -41,11 +33,100 @@ namespace Regi.Services.Frameworks
             _frameworkExePath = frameworkExePath;
         }
 
-        public abstract Task<AppProcess> InstallProject(Project project, string appDirectoryPath, RegiOptions options, CancellationToken cancellationToken);
-        public abstract Task<AppProcess> StartProject(Project project, string appDirectoryPath, RegiOptions options, CancellationToken cancellationToken);
-        public abstract Task<AppProcess> TestProject(Project project, string appDirectoryPath, RegiOptions options, CancellationToken cancellationToken);
-        public abstract Task<AppProcess> BuildProject(Project project, string appDirectoryPath, RegiOptions options, CancellationToken cancellationToken);
-        public abstract Task<AppProcess> KillProcesses(RegiOptions options, CancellationToken cancellationToken);
+        public abstract ProjectFramework Framework { get; }
+        public abstract IEnumerable<string> ProcessNames { get; }
+
+        public virtual string InstallCommand => FrameworkCommands.Install;
+        public virtual string StartCommand => FrameworkCommands.Start;
+        public virtual string TestCommand => FrameworkCommands.Test;
+        public virtual string BuildCommand => FrameworkCommands.Build;
+        public virtual string KillCommand => FrameworkCommands.Kill;
+        public virtual string PublishCommand => FrameworkCommands.Publish;
+        public virtual string PackageCommand => FrameworkCommands.Package;
+
+        public virtual async Task<AppProcess> Install(Project project, string appDirectoryPath, RegiOptions options, CancellationToken cancellationToken)
+        {
+            AppProcess install = CreateProcess(InstallCommand, project, appDirectoryPath, options);
+
+            install.Start();
+
+            await install.WaitForExitAsync(cancellationToken);
+
+            return install;
+        }
+
+        public virtual Task<AppProcess> Start(Project project, string appDirectoryPath, RegiOptions options, CancellationToken cancellationToken)
+        {
+            return Task.Run(() =>
+            {
+                AppProcess start = CreateProcess(StartCommand, project, appDirectoryPath, options);
+
+                start.Start();
+
+                return start;
+            }, cancellationToken);
+        }
+
+        public virtual async Task<AppProcess> Test(Project project, string appDirectoryPath, RegiOptions options, CancellationToken cancellationToken)
+        {
+            AppProcess test = CreateProcess(TestCommand, project, appDirectoryPath, options);
+
+            test.Start();
+
+            await test.WaitForExitAsync(cancellationToken);
+
+            return test;
+        }
+
+        public virtual async Task<AppProcess> Build(Project project, string appDirectoryPath, RegiOptions options, CancellationToken cancellationToken)
+        {
+            AppProcess build = CreateProcess(BuildCommand, project, appDirectoryPath, options);
+
+            build.Start();
+
+            await build.WaitForExitAsync(cancellationToken);
+
+            return build;
+        }
+
+        public virtual async Task<AppProcess> Kill(RegiOptions options, CancellationToken cancellationToken)
+        {
+            var statuses = new List<AppStatus>();
+            AppProcess process = null;
+
+            foreach (var name in ProcessNames)
+            {
+                process = new AppProcess(_platformService.GetKillProcess(name, options),
+                AppTask.Kill,
+                AppStatus.Running);
+
+                try
+                {
+                    if (options.KillProcessesOnExit)
+                    {
+                        process.Start();
+                        await process.WaitForExitAsync(cancellationToken);
+                    }
+
+                    statuses.Add(AppStatus.Success);
+                }
+                catch
+                {
+                    statuses.Add(AppStatus.Failure);
+                }
+            }
+
+            if (statuses.Any(s => s == AppStatus.Failure))
+            {
+                process.Status = AppStatus.Failure;
+            }
+            else
+            {
+                process.Status = AppStatus.Success;
+            }
+
+            return process;
+        }
 
         protected virtual void SetEnvironmentVariables(Process process, Project project)
         {
@@ -54,7 +135,7 @@ namespace Regi.Services.Frameworks
             process.StartInfo.EnvironmentVariables.TryAdd("DONT_STUB_PLAID", bool.FalseString);
         }
 
-        protected abstract CommandDictionary FrameworkOptions { get; }
+        protected virtual CommandDictionary FrameworkOptions { get; } = new CommandDictionary();
 
         protected virtual IList<string> FrameworkWarningIndicators { get; } = new List<string>();
 
@@ -66,12 +147,12 @@ namespace Regi.Services.Frameworks
             {
                 if (FrameworkOptions != null && FrameworkOptions.Any())
                 {
-                    if (FrameworkOptions.TryGetValue(command, out IList<string> defaultOptions))
+                    if (FrameworkOptions.TryGetValue(command, out ICollection<string> defaultOptions))
                     {
                         builder.AppendJoinCliOptions(defaultOptions);
                     }
 
-                    if (FrameworkOptions.TryGetValue(FrameworkCommands.Any, out IList<string> anyCommandOptions))
+                    if (FrameworkOptions.TryGetValue(FrameworkCommands.Any, out ICollection<string> anyCommandOptions))
                     {
                         builder.AppendJoinCliOptions(anyCommandOptions);
                     }
@@ -84,7 +165,7 @@ namespace Regi.Services.Frameworks
         /// TODO: this should be part of <see cref="ProcessUtility"/>
         public virtual AppProcess CreateProcess(string command, RegiOptions options, IFileSystem fileSystem, string fileName = null)
         {
-            fileName = fileName ?? _frameworkExePath;
+            fileName ??= _frameworkExePath;
             string args = command;
 
             if (options.Verbose)
@@ -126,8 +207,8 @@ namespace Regi.Services.Frameworks
 
         public virtual AppProcess CreateProcess(string command, Project project, string appDirectoryPath, RegiOptions options, string fileName = null)
         {
-            fileName = fileName ?? _frameworkExePath;
-            string args = BuildCommand(command, project, options);
+            fileName ??= _frameworkExePath;
+            string args = BuildCommandArguments(command, project, options);
 
             if (options.Verbose)
                 _console.WriteEmphasizedLine($"Executing: {fileName} {args}");
@@ -188,7 +269,7 @@ namespace Regi.Services.Frameworks
             return output;
         }
 
-        public virtual string BuildCommand(string command, Project project, RegiOptions options)
+        public virtual string BuildCommandArguments(string command, Project project, RegiOptions options)
         {
             lock (_lock)
             {

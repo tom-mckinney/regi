@@ -22,6 +22,7 @@ namespace Regi.Test.Models
 
         [Theory]
         [InlineData("dotnet")]
+        [InlineData("Dotnet")]
         [InlineData("DotNet")]
         [InlineData("DOTNET")]
         public void Sources_allows_any_casing_for_enum_names(string framework)

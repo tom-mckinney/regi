@@ -4,10 +4,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Regi.Abstractions;
 using Regi.CommandLine.Commands;
 using Regi.Extensions;
+using Regi.Frameworks;
+using Regi.Frameworks.Identifiers;
 using Regi.Models;
 using Regi.Services;
-using Regi.Services.Frameworks;
-using Regi.Services.Identifiers;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -76,8 +76,6 @@ namespace Regi.CommandLine
                 .AddSingleton<IProjectManager, ProjectManager>()
                 .AddSingleton<IConfigurationService, ConfigurationService>()
                 .AddSingleton<IFrameworkServiceProvider, FrameworkServiceProvider>()
-                .AddSingleton<IDotnetService, DotnetService>()
-                .AddSingleton<INodeService, NodeService>()
                 .AddSingleton<IRunnerService, RunnerService>()
                 .AddSingleton<IFileSystem, FileSystem>()
                 .AddSingleton<INetworkingService, NetworkingService>()
@@ -87,8 +85,13 @@ namespace Regi.CommandLine
                 .AddSingleton<ICleanupService, CleanupService>()
                 .AddSingleton<IDiscoveryService, DiscoveryService>()
 
-                .AddIdentifer<DotnetCoreIdentifier>()
+                .AddFramework<IDotnet, Dotnet>()
+                .AddIdentifer<DotnetIdentifier>()
+
+                .AddFramework<INode, Node>()
                 .AddIdentifer<NodeIdentifier>()
+
+                .AddFramework<IRubyOnRails, RubyOnRails>()
 
                 .AddSingleton(console)
                 .AddSingleton<CommandLineContext, DefaultCommandLineContext>()

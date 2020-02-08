@@ -1,16 +1,16 @@
-﻿using Regi.Models;
-using Regi.Services.Identifiers;
+﻿using Regi.Frameworks.Identifiers;
+using Regi.Models;
 using System;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace Regi.Test.Services.Identifiers
+namespace Regi.Test.Identifiers
 {
-    public class DotnetCoreIdentifierTests : BaseIdentifierTests
+    public class DotnetIdentifierTests : BaseIdentifierTests
     {
         protected override IIdentifier CreateTestClass()
         {
-            return new DotnetCoreIdentifier(_fileSystemMock.Object);
+            return new DotnetIdentifier(_fileSystemMock.Object);
         }
 
         protected override void ShouldHaveMatched(Project expectedProject, bool wasMatch)
