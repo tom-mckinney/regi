@@ -4,6 +4,11 @@
 
 [![nuget](https://img.shields.io/nuget/v/Regi)](https://www.nuget.org/packages/Regi/) ![Publish Package](https://github.com/tom-mckinney/regi/workflows/Publish%20Package/badge.svg) ![Run Tests](https://github.com/tom-mckinney/regi/workflows/Run%20Tests/badge.svg?branch=master)
 
+Regi is a "config-first" microservice orchestrator. The first iteration of this project was created to address the growing complexity of a microservice domain without adding vendor dependencies or cumbersome overhead. This project is still a work in progress, and is likely evolve over its lifetime; however, we are committed to always uphold the following standards:
+
+- **Cross platform support**: Regi is activily used on Windows, Mac, and Linux. We feel very strongly that the development of microservice architecture should be accessible to anyone, no matter their choice of platform or technology.
+- **Painless configuration**: Our goal is to make your life easier&mdash;you shouldn't have to toil with config files or bash scripts! With features such as auto-configuration and route injection, you can focus more on building software and less on how to integrate it.
+- **Open source licensing**: Regi is, and will always be, a free and open source project. Because of this, we are highly receptive to community feedback and contributions. If there's a feature that you'd like added, please submit an [issue](https://github.com/tom-mckinney/regi/issues) or a [pull request](https://github.com/tom-mckinney/regi/pull-requests).
 
 ## Installation
 
@@ -18,18 +23,33 @@ dotnet tool install -g regi
 Windows:
 
 ```powershell
-.\rebuild.cmd
+.\build.cmd
 ```
 
 Mac/Linux:
 
 ```powershell
-./rebuild.sh
+./build.sh
 ```
 
 ## Configuration
 
-Create a file named `regi.json` in a top-level directory.
+Create a file named `regi.json` in a top-level directory with the following command:
+
+```powershell
+regi init
+```
+
+Regi uses a discovery service in conjunction with a project identifier framework to automate the generation of the `regi.json` configuration file. At this time, the identifiers are shipped as part of the `Regi.Core` package; however, we plan to externalize this so that it is easy to add new identifiers or create your own.
+
+## Framework support
+
+Regi currently supports the following frameworks:
+
+- .NET Core
+- NodeJS
+
+There is ongoing work to add native support for a full suite of popular frameworks&mdash;please search for issues with the `Framework` label to check the current state of this initiative. Additionally, we plan to offer an externalization API that could enable 3rd party framework plugins or allow frameworks to be configured within the `regi.json` file. If you have any ideas or strong feeling about the design of this API, please [join the discussion](TODO) and share your thoughts!
 
 Schema:
 
