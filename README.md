@@ -49,7 +49,24 @@ Regi currently supports the following frameworks:
 - .NET Core
 - NodeJS
 
-There is ongoing work to add native support for a full suite of popular frameworks&mdash;please search for issues with the `Framework` label to check the current state of this initiative. Additionally, we plan to offer an externalization API that could enable 3rd party framework plugins or allow frameworks to be configured within the `regi.json` file. If you have any ideas or strong feeling about the design of this API, please [join the discussion](TODO) and share your thoughts!
+There is ongoing work to add native support for a full suite of popular frameworks&mdash;please search for issues with the `Framework` label to check the current state of this initiative. Additionally, we plan to offer an externalization API that could enable 3rd party "plugins" or allow frameworks to be configured within the `regi.json` file. If you have any ideas or strong feelings about the design of this API, please [join the discussion](TODO) and share your thoughts!
+
+## Usage
+
+Regi is most commonly used as a .NET Core Global tool (i.e. a command line application). For a detailed look at all of the commands and options offered, please refer to the [Wiki documentation](TODO). The most common commands used in daily development are listed below:
+
+- `regi start [project]`
+    
+    This command will start every project or any projects that matches the `project` regular expression. It will also start any projects or services that these projects depend on.
+
+- `regi test [project]`
+
+    This command will test every project or any projects that matches the `project` regular expression. If a project has any dependencies, it will start those before executing the tests. Tests are configured to run in parallel by default; however, any project can be configured to run serially by setting the `serial` property to `true`.
+
+- `regi kill [project]`
+
+    This command will kill the processes for every project or any projects that matches the `project` regular expression. By default, Regi will track and kill the processes for every project on shutdown. However, nothing is ever perfect (especially regarding process IO) so this command is quite usefull to cleanup any orphaned processes. **Note:** this command will kill all processes that match a given frameworks criteria. Because of this, it will also kill a `dotnet.exe` process that was started without Regi.
+
 
 Schema:
 
