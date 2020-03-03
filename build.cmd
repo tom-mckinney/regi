@@ -1,4 +1,4 @@
-Remove-Item -r ./nupkgs/ *> $null
+rm -r ./nupkgs/ *> $null
 
 $env:VERSION="1.0.0-dev"
 
