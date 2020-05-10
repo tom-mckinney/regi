@@ -93,6 +93,9 @@ namespace Regi.CommandLine
 
                 .AddFramework<IRubyOnRails, RubyOnRails>()
 
+                .AddFramework<IDjango, Django>()
+                .AddIdentifer<DjangoIdentifier>()
+
                 .AddSingleton(console)
                 .AddSingleton<CommandLineContext, DefaultCommandLineContext>()
                 .BuildServiceProvider();

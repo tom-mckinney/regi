@@ -6,5 +6,6 @@
         Dotnet,
         Node,
         RubyOnRails,
+        Django,
     }
 }

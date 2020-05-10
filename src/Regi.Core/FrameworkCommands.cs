@@ -39,12 +39,18 @@ namespace Regi
             public const string Server = "server";
         }
 
+        public static class Django
+        {
+            public const string RunServer = "./manage.py runserver";
+        }
+
         public static AppTask GetAppTask(string command)
         {
             switch (command)
             {
                 case Start:
                 case DotnetCore.Run:
+                case Django.RunServer:
                     return AppTask.Start;
                 case Test:
                     return AppTask.Test;
