@@ -22,7 +22,7 @@ namespace Regi.CommandLine.Commands
             _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
         }
 
-        protected override Func<StartupConfig, IEnumerable<Project>> GetTargetProjects => (c) => c.Apps;
+        protected override Func<StartupConfig, IEnumerable<Project>> GetTargetProjects => (c) => c.Projects;
 
         protected override async Task<int> ExecuteAsync(IList<Project> projects, CancellationToken cancellationToken)
         {

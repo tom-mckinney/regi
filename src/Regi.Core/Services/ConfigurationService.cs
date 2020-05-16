@@ -3,6 +3,7 @@ using Regi.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 
@@ -25,19 +26,22 @@ namespace Regi.Services
 
         public ValueTask<StartupConfig> CreateConfigurationAsync(IEnumerable<Project> projects, CommandOptions options)
         {
-            var config = new StartupConfig();
-
-            foreach (var project in projects)
+            var config = new StartupConfig
             {
-                if (project.Roles.Contains(ProjectRole.Unit) || project.Roles.Contains(ProjectRole.Integration))
-                {
-                    config.Tests.Add(project);
-                }
-                else
-                {
-                    config.Apps.Add(project);
-                }
-            }
+                Projects = projects.ToList()
+            };
+
+            //foreach (var project in projects)
+            //{
+            //    if (project.Roles.Contains(ProjectRole.Unit) || project.Roles.Contains(ProjectRole.Integration))
+            //    {
+            //        config.Tests.Add(project);
+            //    }
+            //    else
+            //    {
+            //        config.Projects.Add(project);
+            //    }
+            //}
 
             return new ValueTask<StartupConfig>(config);
         }

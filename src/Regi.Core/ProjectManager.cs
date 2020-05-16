@@ -96,7 +96,7 @@ namespace Regi
 
                 foreach (var r in project.Requires)
                 {
-                    var requiredProject = config.Apps.FirstOrDefault(p => p.Name.Contains(r, StringComparison.InvariantCultureIgnoreCase));
+                    var requiredProject = config.Projects.FirstOrDefault(p => p.Name.Contains(r, StringComparison.InvariantCultureIgnoreCase));
 
                     if (requiredProject == null)
                         requiredProject = config.Services.FirstOrDefault(p => p.Name.Contains(r, StringComparison.InvariantCultureIgnoreCase));

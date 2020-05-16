@@ -1,5 +1,5 @@
 {
-  "apps": [
+  "projects": [
     {
       "name": "DotnetApp",
       "path": "../SampleAppLong/SampleAppLong.csproj",
@@ -12,9 +12,7 @@
       "roles": [ "web" ],
       "framework": "node",
       "port": 9081
-    }
-  ],
-  "tests": [
+    },
     {
       "name": "SampleSuccessfulTests",
       "path": "../SampleSuccessfulTests/SampleSuccessfulTests.csproj",

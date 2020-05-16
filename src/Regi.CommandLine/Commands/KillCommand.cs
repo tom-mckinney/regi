@@ -22,7 +22,7 @@ namespace Regi.CommandLine.Commands
 
         public override bool RequireStartupConfig => false;
 
-        protected override Func<StartupConfig, IEnumerable<Project>> GetTargetProjects => (c) => c.Apps.Concat(c.Tests);
+        protected override Func<StartupConfig, IEnumerable<Project>> GetTargetProjects => (c) => c.Projects;
 
         protected override async Task<int> ExecuteAsync(IList<Project> projects, CancellationToken cancellationToken)
         {

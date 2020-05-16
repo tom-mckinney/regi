@@ -9,11 +9,11 @@ namespace Regi.Models
         [JsonIgnore]
         public string Path { get; set; }
 
-        [JsonPropertyName("apps")]
-        public List<Project> Apps { get; set; } = new List<Project>();
+        [JsonPropertyName("projects")]
+        public List<Project> Projects { get; set; } = new List<Project>();
 
-        [JsonPropertyName("tests")]
-        public List<Project> Tests { get; set; } = new List<Project>();
+        //[JsonPropertyName("tests")]
+        //public List<Project> Tests { get; set; } = new List<Project>();
 
         [JsonPropertyName("services")]
         public List<Project> Services { get; set; } = new List<Project>();
@@ -22,9 +22,7 @@ namespace Regi.Models
         [JsonPropertyName("sources")]
         public IDictionary<string, string> RawSources { get; set; } = new Dictionary<string, string>();
 
-
         private IDictionary<ProjectFramework, string> _sources;
-
         public IDictionary<ProjectFramework, string> GetSources()
         {
             if (_sources == null)

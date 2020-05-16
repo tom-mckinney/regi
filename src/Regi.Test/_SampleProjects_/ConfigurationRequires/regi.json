@@ -1,5 +1,5 @@
 {
-  "apps": [
+  "projects": [
     {
       "name": "SampleApp1",
       "path": "../SampleApp/SampleApp.csproj",
@@ -18,9 +18,7 @@
       "roles": [ "web" ],
       "framework": "node",
       "port": 9081
-    }
-  ],
-  "tests": [
+    },
     {
       "name": "SampleSuccessfulTests",
       "path": "../SampleSuccessfulTests/SampleSuccessfulTests.csproj",

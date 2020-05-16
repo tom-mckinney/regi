@@ -34,11 +34,9 @@ namespace Regi.Services
 
             OutputSummary output = new OutputSummary();
 
-            var apps = _projectManager.FilterByOptions(config.Apps, options);
-            var tests = _projectManager.FilterByOptions(config.Tests, options);
+            var projects = _projectManager.FilterByOptions(config.Projects, options);
 
-            PrintAppGroupDetails(apps, output.Apps, "Apps");
-            PrintAppGroupDetails(tests, output.Tests, "Tests");
+            PrintAppGroupDetails(projects, output.Apps, "Projects");
 
             void PrintAppGroupDetails(IList<Project> inputApps, IList<Project> outputApps, string groupName)
             {

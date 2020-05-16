@@ -35,8 +35,7 @@ namespace Regi.Test.Services
 
             var output = service.PrintDomainSummary(SampleProjects.ConfigurationGood, TestOptions.Create());
 
-            Assert.Equal(SampleProjects.ConfigurationGood.Apps.Count, output.Apps.Count);
-            Assert.Equal(SampleProjects.ConfigurationGood.Tests.Count, output.Tests.Count);
+            Assert.Equal(SampleProjects.ConfigurationGood.Projects.Count, output.Apps.Count);
 
             Assert.Contains("Apps:", _console.LogOutput, StringComparison.InvariantCulture);
             Assert.Contains("Tests:", _console.LogOutput, StringComparison.InvariantCulture);
@@ -68,18 +67,17 @@ namespace Regi.Test.Services
 
             var config = SampleProjects.ConfigurationGood;
 
-            foreach (var app in config.Apps)
+            foreach (var app in config.Projects)
             {
                 app.Optional = true;
             }
 
             var output = service.PrintDomainSummary(config, TestOptions.Create());
 
-            Assert.Equal(SampleProjects.ConfigurationGood.Apps.Count, output.Apps.Count);
-            Assert.Equal(SampleProjects.ConfigurationGood.Tests.Count, output.Tests.Count);
+            Assert.Equal(SampleProjects.ConfigurationGood.Projects.Count, output.Apps.Count);
 
             Assert.Contains("Apps:", _console.LogOutput, StringComparison.InvariantCulture);
-            Assert.Equal(config.Apps.Count, new Regex("(Optional)").Matches(_console.LogOutput).Count);
+            Assert.Equal(config.Projects.Count, new Regex("(Optional)").Matches(_console.LogOutput).Count);
             Assert.Contains("Tests:", _console.LogOutput, StringComparison.InvariantCulture);
         }
 

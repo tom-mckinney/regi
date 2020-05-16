@@ -58,8 +58,9 @@ namespace Regi.Test.Services
 
             var config = await service.CreateConfigurationAsync(projects, TestOptions.Create());
 
-            Assert.Equal(appCount, config.Apps.Count);
-            Assert.Equal(testCount, config.Tests.Count);
+            Assert.Equal(appCount + testCount, config.Projects.Count);
+            Assert.Equal(appCount, config.Projects.Count(p => p.Name == SampleProjects.Backend.Name));
+            Assert.Equal(testCount, config.Projects.Count(p => p.Name == SampleProjects.XunitTests.Name));
         }
 
         [Fact]
@@ -74,8 +75,9 @@ namespace Regi.Test.Services
             StartupConfig startupConfig = await service.GetConfigurationAsync(null);
 
             Assert.StartsWith(expectedPath, startupConfig.Path, StringComparison.InvariantCulture);
-            Assert.Equal(totalAppCount, startupConfig.Apps.Count);
-            Assert.Equal(totalTestCount, startupConfig.Tests.Count);
+            Assert.Equal(totalAppCount + totalTestCount, startupConfig.Projects.Count);
+            Assert.Equal(totalAppCount, startupConfig.Projects.WhereApp().Count());
+            Assert.Equal(totalTestCount, startupConfig.Projects.WhereTest().Count());
             Assert.Empty(startupConfig.Services);
 
             AssertAllRuntimePropertiesAreBound(startupConfig, expectedPath);
@@ -103,8 +105,9 @@ namespace Regi.Test.Services
             Assert.Equal(expectedPath, _fileSystem.WorkingDirectory);
 
 
-            Assert.Equal(totalAppCount, startupConfig.Apps.Count);
-            Assert.Equal(totalTestCount, startupConfig.Tests.Count);
+            Assert.Equal(totalAppCount + totalTestCount, startupConfig.Projects.Count);
+            Assert.Equal(totalAppCount, startupConfig.Projects.WhereApp().Count());
+            Assert.Equal(totalTestCount, startupConfig.Projects.WhereTest().Count());
             Assert.Empty(startupConfig.Services);
 
             AssertAllRuntimePropertiesAreBound(startupConfig, expectedPath);
@@ -114,7 +117,7 @@ namespace Regi.Test.Services
         {
             Assert.StartsWith(expectedPath, config.Path, StringComparison.InvariantCulture);
 
-            foreach (var project in config.Apps.Concat(config.Tests))
+            foreach (var project in config.Projects)
             {
                 foreach (var path in project.GetAppDirectoryPaths(_fileSystem))
                 {

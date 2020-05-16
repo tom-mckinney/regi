@@ -21,8 +21,7 @@ namespace Regi.Models
                 throw new ArgumentException("Project list cannot be null when creating VariableList", nameof(config));
             }
 
-            var allProjects = config.Apps
-                .Concat(config.Tests)
+            var allProjects = config.Projects
                 .Concat(config.Services);
 
             foreach (var project in allProjects)

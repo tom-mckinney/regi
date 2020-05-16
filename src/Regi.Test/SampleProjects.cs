@@ -108,20 +108,20 @@ namespace Regi.Test
 
         public static StartupConfig ConfigurationDefault => new StartupConfig
         {
-            Apps = new List<Project>
+            Projects = new List<Project>
             {
-                Frontend, Backend
-            },
-            Tests = new List<Project>
-            {
-                XunitTests, JestTests, IntegrationTests
+                Frontend,
+                Backend,
+                XunitTests,
+                JestTests,
+                IntegrationTests,
             },
             Services = new List<Project>()
         };
 
         public static StartupConfig ConfigurationGood => new StartupConfig
         {
-            Apps = new List<Project>
+            Projects = new List<Project>
             {
                 new Project
                 {
@@ -137,10 +137,7 @@ namespace Regi.Test
                     Port = 9080,
                     Serial = true
                 },
-                SimpleNodeApp
-            },
-            Tests = new List<Project>
-            {
+                SimpleNodeApp,
                 new Project
                 {
                     Name = "SampleSuccessfulTests",

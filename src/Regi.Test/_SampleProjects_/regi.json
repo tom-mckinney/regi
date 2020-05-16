@@ -1,5 +1,5 @@
 {
-  "apps": [
+  "projects": [
     {
       "name": "Frontend",
       "path": "./Frontend/package.json",
@@ -17,9 +17,7 @@
       "arguments": {
         "*": [ "--foo bar" ]
       }
-    }
-  ],
-  "tests": [
+    },
     {
       "name": "SampleSuccessfulTests",
       "path": "./SampleSuccessfulTests",
