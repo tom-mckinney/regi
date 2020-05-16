@@ -357,8 +357,8 @@ namespace Regi.Test.Services
 
             var processes = await _runnerService.InstallAsync(projects, TestOptions.Create(), CancellationToken.None);
 
-            var dotnetApp = Assert.Single(processes, p => p.Framework == ProjectFramework.Dotnet && p.Type == ProjectType.Web && p.Port.HasValue);
-            var nodeApp = Assert.Single(processes, p => p.Framework == ProjectFramework.Node && p.Type == ProjectType.Web && p.Port.HasValue);
+            var dotnetApp = Assert.Single(processes, p => p.Framework == ProjectFramework.Dotnet && p.Roles.Contains(ProjectRole.Web) && p.Port.HasValue);
+            var nodeApp = Assert.Single(processes, p => p.Framework == ProjectFramework.Node && p.Roles.Contains(ProjectRole.Web) && p.Port.HasValue);
 
             Assert.Equal("http://nuget.org/api", dotnetApp.Source);
             Assert.Equal("http://npmjs.org", nodeApp.Source);
@@ -464,7 +464,7 @@ namespace Regi.Test.Services
 
             var options = TestOptions.Create();
             options.NoParallel = true;
-            options.Type = test1.Type;
+            options.Roles = test1.Roles;
 
             var config = new StartupConfig
             {

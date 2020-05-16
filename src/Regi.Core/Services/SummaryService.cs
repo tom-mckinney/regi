@@ -63,7 +63,7 @@ namespace Regi.Services
                         if (options.Verbose)
                         {
                             _console.WritePropertyIfSpecified("Framework", app.Framework);
-                            _console.WritePropertyIfSpecified("Type", app.Type);
+                            _console.WritePropertyIfSpecified("Type", app.Roles);
                             _console.WritePropertyIfSpecified("Paths", app.GetAppDirectoryPaths(_fileSystemService), true, 2);
                             _console.WritePropertyIfSpecified("Port", app.Port);
                             _console.WritePropertyIfSpecified("Commands", app.Commands);

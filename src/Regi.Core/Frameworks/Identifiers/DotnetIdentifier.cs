@@ -47,11 +47,11 @@ namespace Regi.Frameworks.Identifiers
 
             if (project.Name.Contains("test", StringComparison.InvariantCultureIgnoreCase))
             {
-                project.Type = ProjectType.Unit;
+                project.Roles.Add(ProjectRole.Unit);
             }
             else
             {
-                project.Type = ProjectType.Web;
+                project.Roles.Add(ProjectRole.Web);
                 project.Port = Port;
             }
 

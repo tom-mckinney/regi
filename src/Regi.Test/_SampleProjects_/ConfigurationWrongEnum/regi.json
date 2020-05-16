@@ -3,18 +3,18 @@
     {
       "name": "SampleApp1",
       "path": "../SampleApp/SampleApp.csproj",
-      "type": "wumbo"
+      "roles": [ "wumbo" ]
     },
     {
       "name": "SampleApp2",
       "path": "../SampleApp/SampleApp.csproj",
-      "type": "web",
+      "roles": [ "web" ],
       "port": 9080
     },
     {
       "name": "NodeApp",
       "path": "../NodeApp/package.json",
-      "type": "web",
+      "roles": [ "web" ],
       "framework": "node",
       "port": 9081
     }
@@ -23,12 +23,12 @@
     {
       "name": "SampleSuccessfulTests",
       "path": "../SampleSuccessfulTests/SampleSuccessfulTests.csproj",
-      "type": "unit"
+      "roles": [ "unit" ]
     },
     {
       "name": "SampleSuccessfulTests",
       "path": "../SampleSuccessfulTests/SampleSuccessfulTests.csproj",
-      "type": "integration"
+      "roles": [ "integration" ]
     }
   ],
   "services": []

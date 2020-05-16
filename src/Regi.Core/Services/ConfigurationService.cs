@@ -29,7 +29,7 @@ namespace Regi.Services
 
             foreach (var project in projects)
             {
-                if (project.Type == ProjectType.Unit || project.Type == ProjectType.Integration)
+                if (project.Roles.Contains(ProjectRole.Unit) || project.Roles.Contains(ProjectRole.Integration))
                 {
                     config.Tests.Add(project);
                 }

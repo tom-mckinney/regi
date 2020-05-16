@@ -88,14 +88,17 @@ namespace Regi.Test.Commands
         }
 
         [Theory]
-        [InlineData(ProjectType.Unit)]
-        [InlineData(ProjectType.Integration)]
-        public async Task Will_only_run_tests_with_matching_type_if_specified(ProjectType? type)
+        [InlineData(ProjectRole.Unit)]
+        [InlineData(ProjectRole.Integration)]
+        public async Task Will_only_run_tests_with_matching_role_if_specified(ProjectRole type)
         {
             _configServiceMock.Setup(m => m.GetConfigurationAsync(It.IsAny<RegiOptions>()))
                 .ReturnsAsync(SampleProjects.ConfigurationDefault)
                 .Verifiable();
-            _runnerServiceMock.Setup(m => m.TestAsync(It.Is<IList<Project>>(projects => projects.All(p => p.Type == type)), It.Is<RegiOptions>(o => o.Type == type), It.IsAny<CancellationToken>()))
+            _runnerServiceMock.Setup(m => m.TestAsync(
+                It.Is<IList<Project>>(projects => projects.All(p => p.Roles.Contains(type))),
+                It.Is<RegiOptions>(o => o.Roles.Contains(type)),
+                It.IsAny<CancellationToken>()))
                 .Callback((IList<Project> projects, RegiOptions options, CancellationToken token) =>
                 {
                     foreach (var p in projects)
@@ -108,7 +111,7 @@ namespace Regi.Test.Commands
 
             TestCommand command = CreateCommand();
 
-            command.Type = type;
+            command.Roles = new ProjectRole[] { type };
 
             int testProjectCount = await command.OnExecute();
 

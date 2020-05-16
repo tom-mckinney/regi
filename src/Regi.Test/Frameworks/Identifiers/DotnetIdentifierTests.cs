@@ -1,6 +1,7 @@
 ﻿using Regi.Frameworks.Identifiers;
 using Regi.Models;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -33,14 +34,14 @@ namespace Regi.Test.Identifiers
 
             Assert.Equal(ProjectFramework.Dotnet, actualProject.Framework);
 
-            Assert.Equal(expectedProject.Type, actualProject.Type);
+            Assert.Equal(expectedProject.Roles, actualProject.Roles);
 
-            switch (actualProject.Type)
+            switch (actualProject.Roles.Single())
             {
-                case ProjectType.Web:
+                case ProjectRole.Web:
                     Assert.Equal(8080, actualProject.Port);
                     break;
-                case ProjectType.Unit:
+                case ProjectRole.Unit:
                     Assert.Null(actualProject.Port);
                     break;
                 default:

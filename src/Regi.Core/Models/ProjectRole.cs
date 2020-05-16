@@ -1,6 +1,6 @@
 ﻿namespace Regi.Models
 {
-    public enum ProjectType
+    public enum ProjectRole
     {
         Unknown = 0,
         Web,

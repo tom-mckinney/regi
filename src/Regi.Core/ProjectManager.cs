@@ -73,10 +73,10 @@ namespace Regi
                     });
             }
 
-            if (options.Type.HasValue)
+            if (options.Roles?.Any() == true)
             {
                 projects = projects
-                    .Where(p => p.Type == options.Type);
+                    .Where(p => p.Roles.ContainsAny(options.Roles));
             }
 
             if (!options.IncludeOptional)

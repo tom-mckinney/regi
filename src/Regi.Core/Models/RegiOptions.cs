@@ -19,7 +19,7 @@ namespace Regi.Models
         public List<string> Exclude { get; set; }
 
         [Option(Description = "Project type")]
-        public ProjectType? Type { get; set; }
+        public IEnumerable<ProjectRole> Roles { get; set; }
 
         [Option(CommandOptionType.NoValue, Description = "Print all output")]
         public bool Verbose { get; set; } = false;

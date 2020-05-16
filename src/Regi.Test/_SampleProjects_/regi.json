@@ -24,13 +24,13 @@
       "name": "SampleSuccessfulTests",
       "path": "./SampleSuccessfulTests",
       "framework": "dotnet",
-      "type": "unit"
+      "roles": [ "unit" ]
     },
     {
       "name": "NodeApp",
       "path": "./NodeApp",
       "framework": "node",
-      "type": "unit"
+      "roles": [ "unit" ]
     },
     // {
     //   "name": "IntegrationTests",
@@ -48,7 +48,7 @@
       "name": "IntegrationTests-Cypress",
       "path": "./IntegrationTests-Cypress",
       "framework": "node",
-      "type": "integration",
+      "roles": [ "integration" ],
       "requires": [ "Frontend", "Backend" ],
       "optional": true,
       "rawOutput": true,
