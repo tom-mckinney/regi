@@ -10,8 +10,8 @@ namespace Regi.Services
 {
     public interface IConfigurationService
     {
-        Task<StartupConfig> GetConfigurationAsync(RegiOptions options);
-        ValueTask<StartupConfig> CreateConfigurationAsync(IEnumerable<Project> projects, RegiOptions options);
+        Task<StartupConfig> GetConfigurationAsync(CommandOptions options);
+        ValueTask<StartupConfig> CreateConfigurationAsync(IEnumerable<Project> projects, CommandOptions options);
     }
 
     public class ConfigurationService : IConfigurationService
@@ -23,7 +23,7 @@ namespace Regi.Services
             _fileSystem = fileSystem;
         }
 
-        public ValueTask<StartupConfig> CreateConfigurationAsync(IEnumerable<Project> projects, RegiOptions options)
+        public ValueTask<StartupConfig> CreateConfigurationAsync(IEnumerable<Project> projects, CommandOptions options)
         {
             var config = new StartupConfig();
 
@@ -42,7 +42,7 @@ namespace Regi.Services
             return new ValueTask<StartupConfig>(config);
         }
 
-        public async Task<StartupConfig> GetConfigurationAsync(RegiOptions options)
+        public async Task<StartupConfig> GetConfigurationAsync(CommandOptions options)
         {
             DirectoryInfo directory;
 

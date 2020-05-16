@@ -8,10 +8,10 @@ namespace Regi
     {
         ProjectFramework Framework { get; }
 
-        Task<AppProcess> Install(Project project, string appDirectoryPath, RegiOptions options, CancellationToken cancellationToken);
-        Task<AppProcess> Start(Project project, string appDirectoryPath, RegiOptions options, CancellationToken cancellationToken);
-        Task<AppProcess> Test(Project project, string appDirectoryPath, RegiOptions options, CancellationToken cancellationToken);
-        Task<AppProcess> Build(Project project, string appDirectoryPath, RegiOptions options, CancellationToken cancellationToken);
-        Task<AppProcess> Kill(RegiOptions options, CancellationToken cancellationToken);
+        Task<AppProcess> Install(Project project, string appDirectoryPath, CommandOptions options, CancellationToken cancellationToken);
+        Task<AppProcess> Start(Project project, string appDirectoryPath, CommandOptions options, CancellationToken cancellationToken);
+        Task<AppProcess> Test(Project project, string appDirectoryPath, CommandOptions options, CancellationToken cancellationToken);
+        Task<AppProcess> Build(Project project, string appDirectoryPath, CommandOptions options, CancellationToken cancellationToken);
+        Task<AppProcess> Kill(CommandOptions options, CancellationToken cancellationToken);
     }
 }

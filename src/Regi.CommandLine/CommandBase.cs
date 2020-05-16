@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Regi.CommandLine
 {
-    public abstract class CommandBase : RegiOptions
+    public abstract class CommandBase : CommandOptions
     {
         protected readonly IProjectManager _projectManager;
         protected readonly IConfigurationService _configurationService;
@@ -22,7 +22,7 @@ namespace Regi.CommandLine
             _console = console;
         }
 
-        public RegiOptions Options
+        public CommandOptions Options
         {
             get => this;
         }

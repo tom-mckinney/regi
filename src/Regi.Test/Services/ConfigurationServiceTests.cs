@@ -90,7 +90,7 @@ namespace Regi.Test.Services
 
             _fileSystem.WorkingDirectory = PathHelper.GetSampleProjectPath("BUNK_DIRECTORY");
 
-            var options = new RegiOptions
+            var options = new CommandOptions
             {
                 ConfigurationPath = expectedPath + file
             };
@@ -130,7 +130,7 @@ namespace Regi.Test.Services
 
             _fileSystem.WorkingDirectory = PathHelper.GetSampleProjectPath("ConfigurationGood");
 
-            var options = new RegiOptions
+            var options = new CommandOptions
             {
                 ConfigurationPath = expectedPath
             };

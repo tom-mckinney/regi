@@ -51,12 +51,12 @@ namespace Regi.Test.Services
         {
             var configuration = SampleProjects.ConfigurationGood;
 
-            _dotnetServiceMock.Setup(m => m.Start(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<RegiOptions>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync((Project p, string s, RegiOptions o, CancellationToken c) => new AppProcess(new Process(), AppTask.Start, AppStatus.Success, p?.Port))
+            _dotnetServiceMock.Setup(m => m.Start(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<CommandOptions>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync((Project p, string s, CommandOptions o, CancellationToken c) => new AppProcess(new Process(), AppTask.Start, AppStatus.Success, p?.Port))
                 //.ReturnsAsync<Project, string, RegiOptions, CancellationToken>((p, s, o, c) => new AppProcess(new Process(), AppTask.Start, AppStatus.Success, p?.Port))
                 .Verifiable();
-            _nodeServiceMock.Setup(m => m.Start(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<RegiOptions>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync((Project p, string s, RegiOptions o, CancellationToken c) => new AppProcess(new Process(), AppTask.Start, AppStatus.Success, p?.Port))
+            _nodeServiceMock.Setup(m => m.Start(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<CommandOptions>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync((Project p, string s, CommandOptions o, CancellationToken c) => new AppProcess(new Process(), AppTask.Start, AppStatus.Success, p?.Port))
                 //.ReturnsAsync<Project, string, RegiOptions, CancellationToken>((p, s, o, c) => new AppProcess(new Process(), AppTask.Start, AppStatus.Success, p?.Port))
                 .Verifiable();
 
@@ -66,19 +66,19 @@ namespace Regi.Test.Services
             Assert.Single(processes, p => p.Port == 9080);
             Assert.Equal(processes.Count(p => p.Port.HasValue), _queueService.ActivePorts.Distinct().Count());
 
-            _dotnetServiceMock.Verify(m => m.Start(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<RegiOptions>(), It.IsAny<CancellationToken>()), Times.Exactly(configuration.Apps.Count(a => a.Framework == ProjectFramework.Dotnet)));
-            _nodeServiceMock.Verify(m => m.Start(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<RegiOptions>(), It.IsAny<CancellationToken>()), Times.Exactly(configuration.Apps.Count(a => a.Framework == ProjectFramework.Node)));
+            _dotnetServiceMock.Verify(m => m.Start(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<CommandOptions>(), It.IsAny<CancellationToken>()), Times.Exactly(configuration.Apps.Count(a => a.Framework == ProjectFramework.Dotnet)));
+            _nodeServiceMock.Verify(m => m.Start(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<CommandOptions>(), It.IsAny<CancellationToken>()), Times.Exactly(configuration.Apps.Count(a => a.Framework == ProjectFramework.Node)));
         }
 
         [Fact]
         public async Task Start_sets_port_and_url_variables_for_every_app_and_waits_on_port()
         {
-            _dotnetServiceMock.Setup(m => m.Start(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<RegiOptions>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync((Project p, string s, RegiOptions o, CancellationToken c) => new AppProcess(new Process(), AppTask.Start, AppStatus.Success, p?.Port))
+            _dotnetServiceMock.Setup(m => m.Start(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<CommandOptions>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync((Project p, string s, CommandOptions o, CancellationToken c) => new AppProcess(new Process(), AppTask.Start, AppStatus.Success, p?.Port))
                 //.Returns<Project, string, RegiOptions>((p, s, o) => new AppProcess(new Process(), AppTask.Start, AppStatus.Success, p?.Port))
                 .Verifiable();
-            _nodeServiceMock.Setup(m => m.Start(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<RegiOptions>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync((Project p, string s, RegiOptions o, CancellationToken c) => new AppProcess(new Process(), AppTask.Start, AppStatus.Success, p?.Port))
+            _nodeServiceMock.Setup(m => m.Start(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<CommandOptions>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync((Project p, string s, CommandOptions o, CancellationToken c) => new AppProcess(new Process(), AppTask.Start, AppStatus.Success, p?.Port))
                 //.Returns<Project, string, RegiOptions>((p, s, b) => new AppProcess(new Process(), AppTask.Start, AppStatus.Success, p?.Port))
                 .Verifiable();
 
@@ -88,7 +88,7 @@ namespace Regi.Test.Services
             {
                 if (p.Port.HasValue)
                 {
-                    _dotnetServiceMock.Verify(m => m.Start(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<RegiOptions>(), It.IsAny<CancellationToken>()));
+                    _dotnetServiceMock.Verify(m => m.Start(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<CommandOptions>(), It.IsAny<CancellationToken>()));
 
                     Assert.Contains(p.Port.Value, _queueService.ActivePorts);
                 }
@@ -98,12 +98,12 @@ namespace Regi.Test.Services
         [Fact]
         public async Task Start_adds_serial_projects_to_serial_queue_and_all_others_to_async_queue()
         {
-            _dotnetServiceMock.Setup(m => m.Start(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<RegiOptions>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync((Project p, string s, RegiOptions o, CancellationToken c) => new AppProcess(new Process(), AppTask.Start, AppStatus.Success, p?.Port))
+            _dotnetServiceMock.Setup(m => m.Start(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<CommandOptions>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync((Project p, string s, CommandOptions o, CancellationToken c) => new AppProcess(new Process(), AppTask.Start, AppStatus.Success, p?.Port))
                 //.Returns<Project, string, RegiOptions>((p, s, o) => new AppProcess(new Process(), AppTask.Start, AppStatus.Success, p?.Port))
                 .Verifiable();
-            _nodeServiceMock.Setup(m => m.Start(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<RegiOptions>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync((Project p, string s, RegiOptions o, CancellationToken c) => new AppProcess(new Process(), AppTask.Start, AppStatus.Success, p?.Port))
+            _nodeServiceMock.Setup(m => m.Start(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<CommandOptions>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync((Project p, string s, CommandOptions o, CancellationToken c) => new AppProcess(new Process(), AppTask.Start, AppStatus.Success, p?.Port))
                 //.Returns<Project, string, RegiOptions>((p, s, b) => new AppProcess(new Process(), AppTask.Start, AppStatus.Success, p?.Port))
                 .Verifiable();
 
@@ -126,17 +126,17 @@ namespace Regi.Test.Services
                 Apps = new List<Project> { appCollection }
             };
 
-            _dotnetServiceMock.Setup(m => m.Start(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<RegiOptions>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync((Project p, string s, RegiOptions o, CancellationToken c) => new AppProcess(new Process(), AppTask.Start, AppStatus.Success, p?.Port))
+            _dotnetServiceMock.Setup(m => m.Start(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<CommandOptions>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync((Project p, string s, CommandOptions o, CancellationToken c) => new AppProcess(new Process(), AppTask.Start, AppStatus.Success, p?.Port))
                 //.Returns<Project, string, RegiOptions>((p, path, o) => new AppProcess(new Process(), AppTask.Start, AppStatus.Success, p?.Port))
                 .Verifiable();
-            _nodeServiceMock.Setup(m => m.Start(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<RegiOptions>(), It.IsAny<CancellationToken>()))
+            _nodeServiceMock.Setup(m => m.Start(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<CommandOptions>(), It.IsAny<CancellationToken>()))
                 .Throws(new System.Exception("Should not be called"));
 
             var projects = await _runnerService.StartAsync(config.Apps, TestOptions.Create(), CancellationToken.None);
 
             Assert.Equal(pathCount, _queueService.AsyncActions.Count);
-            _dotnetServiceMock.Verify(m => m.Start(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<RegiOptions>(), It.IsAny<CancellationToken>()), Times.Exactly(pathCount));
+            _dotnetServiceMock.Verify(m => m.Start(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<CommandOptions>(), It.IsAny<CancellationToken>()), Times.Exactly(pathCount));
 
             var project = Assert.Single(projects);
             Assert.Equal(pathCount, project.Processes.Count);
@@ -152,7 +152,7 @@ namespace Regi.Test.Services
                 { "start", new List<object> { "foo bar -v" } }
             };
 
-            _platformServiceMock.Setup(m => m.RunAnonymousScript("foo bar -v", It.IsAny<RegiOptions>(), null))
+            _platformServiceMock.Setup(m => m.RunAnonymousScript("foo bar -v", It.IsAny<CommandOptions>(), null))
                 .Verifiable();
 
             var processes = await _runnerService.StartAsync(configuration.Apps, TestOptions.Create(), CancellationToken.None);
@@ -172,7 +172,7 @@ namespace Regi.Test.Services
                 { "start", new List<object> { new AppScript("foo bar -v", workingDirectory) } }
             };
 
-            _platformServiceMock.Setup(m => m.RunAnonymousScript("foo bar -v", It.IsAny<RegiOptions>(), workingDirectory))
+            _platformServiceMock.Setup(m => m.RunAnonymousScript("foo bar -v", It.IsAny<CommandOptions>(), workingDirectory))
                 .Verifiable();
 
             var processes = await _runnerService.StartAsync(configuration.Apps, TestOptions.Create(), CancellationToken.None);
@@ -190,7 +190,7 @@ namespace Regi.Test.Services
                 { "start", new List<object> { new { Foo = "Bar" } } }
             };
 
-            _platformServiceMock.Setup(m => m.RunAnonymousScript(It.IsAny<string>(), It.IsAny<RegiOptions>(), It.IsAny<string>()))
+            _platformServiceMock.Setup(m => m.RunAnonymousScript(It.IsAny<string>(), It.IsAny<CommandOptions>(), It.IsAny<string>()))
                 .Throws(new Exception("This should not be called"));
 
             var processes = await _runnerService.StartAsync(configuration.Apps, TestOptions.Create(), CancellationToken.None);
@@ -201,8 +201,8 @@ namespace Regi.Test.Services
         [Fact]
         public async Task Test_returns_a_project_for_every_test_in_startup_config()
         {
-            _dotnetServiceMock.Setup(m => m.Test(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<RegiOptions>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync((Project p, string d, RegiOptions o, CancellationToken c) => new AppProcess(new Process(), AppTask.Start, AppStatus.Success, p?.Port))
+            _dotnetServiceMock.Setup(m => m.Test(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<CommandOptions>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync((Project p, string d, CommandOptions o, CancellationToken c) => new AppProcess(new Process(), AppTask.Start, AppStatus.Success, p?.Port))
                 .Verifiable();
 
             var processes = await _runnerService.TestAsync(SampleProjects.ConfigurationGood.Tests, TestOptions.Create(), CancellationToken.None);
@@ -225,16 +225,16 @@ namespace Regi.Test.Services
                 .Returns(dependencyQueueService)
                 .Verifiable();
 
-            _nodeServiceMock.Setup(m => m.Test(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<RegiOptions>(), It.IsAny<CancellationToken>()))
+            _nodeServiceMock.Setup(m => m.Test(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<CommandOptions>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new AppProcess(new Process(), AppTask.Test, AppStatus.Success))
                 .Verifiable();
-            _nodeServiceMock.Setup(m => m.Start(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<RegiOptions>(), It.IsAny<CancellationToken>()))
+            _nodeServiceMock.Setup(m => m.Start(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<CommandOptions>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new AppProcess(new Process(), AppTask.Start, AppStatus.Success))
                 .Verifiable();
-            _dotnetServiceMock.Setup(m => m.Test(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<RegiOptions>(), It.IsAny<CancellationToken>()))
+            _dotnetServiceMock.Setup(m => m.Test(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<CommandOptions>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new AppProcess(new Process(), AppTask.Test, AppStatus.Success))
                 .Verifiable();
-            _dotnetServiceMock.Setup(m => m.Start(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<RegiOptions>(), It.IsAny<CancellationToken>()))
+            _dotnetServiceMock.Setup(m => m.Start(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<CommandOptions>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new AppProcess(new Process(), AppTask.Start, AppStatus.Success))
                 .Verifiable();
 
@@ -275,7 +275,7 @@ namespace Regi.Test.Services
             testProject.Requires = new List<string> { appCollection.Name };
             testProject.RequiredProjects.Add(appCollection);
 
-            _dotnetServiceMock.Setup(m => m.Test(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<RegiOptions>(), It.IsAny<CancellationToken>()))
+            _dotnetServiceMock.Setup(m => m.Test(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<CommandOptions>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new AppProcess(new Process(), AppTask.Test, AppStatus.Success))
                 .Verifiable();
             _frameworkServiceProviderMock.Setup(m => m.CreateScopedQueueService())
@@ -284,7 +284,7 @@ namespace Regi.Test.Services
 
             foreach (var path in SampleProjects.AppCollection.Paths)
             {
-                _dotnetServiceMock.Setup(m => m.Start(appCollection, It.IsAny<string>(), It.IsAny<RegiOptions>(), It.IsAny<CancellationToken>()))
+                _dotnetServiceMock.Setup(m => m.Start(appCollection, It.IsAny<string>(), It.IsAny<CommandOptions>(), It.IsAny<CancellationToken>()))
                     .ReturnsAsync(new AppProcess(new Process(), AppTask.Start, AppStatus.Running))
                     .Verifiable();
             }
@@ -306,8 +306,8 @@ namespace Regi.Test.Services
         [Fact]
         public async Task Test_adds_serial_projects_to_serial_queue_and_all_others_to_async_queue()
         {
-            _dotnetServiceMock.Setup(m => m.Test(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<RegiOptions>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync((Project p, string d, RegiOptions o, CancellationToken c) => new AppProcess(new Process(), AppTask.Start, AppStatus.Success, p?.Port))
+            _dotnetServiceMock.Setup(m => m.Test(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<CommandOptions>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync((Project p, string d, CommandOptions o, CancellationToken c) => new AppProcess(new Process(), AppTask.Start, AppStatus.Success, p?.Port))
                 .Verifiable();
 
             var processes = await _runnerService.TestAsync(SampleProjects.ConfigurationGood.Tests, TestOptions.Create(), CancellationToken.None);
@@ -319,10 +319,10 @@ namespace Regi.Test.Services
         [Fact]
         public async Task Install_returns_a_process_for_every_app_and_test_project()
         {
-            _dotnetServiceMock.Setup(m => m.Install(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<RegiOptions>(), It.IsAny<CancellationToken>()))
+            _dotnetServiceMock.Setup(m => m.Install(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<CommandOptions>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new AppProcess(new Process(), AppTask.Install, AppStatus.Success))
                 .Verifiable();
-            _nodeServiceMock.Setup(m => m.Install(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<RegiOptions>(), It.IsAny<CancellationToken>()))
+            _nodeServiceMock.Setup(m => m.Install(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<CommandOptions>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new AppProcess(new Process(), AppTask.Install, AppStatus.Success))
                 .Verifiable();
 
@@ -348,10 +348,10 @@ namespace Regi.Test.Services
 
             ProjectManager.LinkProjectRequirements(projects, TestOptions.Create(), SampleProjects.ConfigurationGood);
 
-            _dotnetServiceMock.Setup(m => m.Install(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<RegiOptions>(), It.IsAny<CancellationToken>()))
+            _dotnetServiceMock.Setup(m => m.Install(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<CommandOptions>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new AppProcess(new Process(), AppTask.Install, AppStatus.Success))
                 .Verifiable();
-            _nodeServiceMock.Setup(m => m.Install(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<RegiOptions>(), It.IsAny<CancellationToken>()))
+            _nodeServiceMock.Setup(m => m.Install(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<CommandOptions>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new AppProcess(new Process(), AppTask.Install, AppStatus.Success))
                 .Verifiable();
 
@@ -372,10 +372,10 @@ namespace Regi.Test.Services
             _frameworkServiceProviderMock.Setup(m => m.CreateScopedQueueService())
                 .Returns(dependencyQueueService)
                 .Verifiable();
-            _dotnetServiceMock.Setup(m => m.Install(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<RegiOptions>(), It.IsAny<CancellationToken>()))
+            _dotnetServiceMock.Setup(m => m.Install(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<CommandOptions>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new AppProcess(new Process(), AppTask.Install, AppStatus.Success))
                 .Verifiable();
-            _nodeServiceMock.Setup(m => m.Install(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<RegiOptions>(), It.IsAny<CancellationToken>()))
+            _nodeServiceMock.Setup(m => m.Install(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<CommandOptions>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new AppProcess(new Process(), AppTask.Install, AppStatus.Success))
                 .Verifiable();
 
@@ -412,10 +412,10 @@ namespace Regi.Test.Services
             _frameworkServiceProviderMock.Setup(m => m.CreateScopedQueueService())
                 .Returns(dependencyQueueService)
                 .Verifiable();
-            _dotnetServiceMock.Setup(m => m.Install(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<RegiOptions>(), It.IsAny<CancellationToken>()))
+            _dotnetServiceMock.Setup(m => m.Install(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<CommandOptions>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new AppProcess(new Process(), AppTask.Install, AppStatus.Success))
                 .Verifiable();
-            _nodeServiceMock.Setup(m => m.Install(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<RegiOptions>(), It.IsAny<CancellationToken>()))
+            _nodeServiceMock.Setup(m => m.Install(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<CommandOptions>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new AppProcess(new Process(), AppTask.Install, AppStatus.Success))
                 .Verifiable();
 
@@ -477,7 +477,7 @@ namespace Regi.Test.Services
             _frameworkServiceProviderMock.Setup(m => m.CreateScopedQueueService())
                 .Returns(() => new TestQueueService(_console))
                 .Verifiable();
-            _dotnetServiceMock.Setup(m => m.Install(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<RegiOptions>(), It.IsAny<CancellationToken>()))
+            _dotnetServiceMock.Setup(m => m.Install(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<CommandOptions>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new AppProcess(new Process(), AppTask.Install, AppStatus.Success))
                 .Verifiable();
 
@@ -490,7 +490,7 @@ namespace Regi.Test.Services
             Assert.Same(test1RequiredProcess, test2RequiredProcess);
 
             _frameworkServiceProviderMock.Verify();
-            _dotnetServiceMock.Verify(m => m.Install(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<RegiOptions>(), It.IsAny<CancellationToken>()), Times.Exactly(3));
+            _dotnetServiceMock.Verify(m => m.Install(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<CommandOptions>(), It.IsAny<CancellationToken>()), Times.Exactly(3));
         }
 
         [Fact]
@@ -569,10 +569,10 @@ namespace Regi.Test.Services
         [Fact]
         public async Task Kill_calls_service_to_kill_for_each_ProjectFramework()
         {
-            _nodeServiceMock.Setup(m => m.Kill(It.IsAny<RegiOptions>(), It.IsAny<CancellationToken>()))
+            _nodeServiceMock.Setup(m => m.Kill(It.IsAny<CommandOptions>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new AppProcess(null, AppTask.Kill, AppStatus.Success))
                 .Verifiable();
-            _dotnetServiceMock.Setup(m => m.Kill(It.IsAny<RegiOptions>(), It.IsAny<CancellationToken>()))
+            _dotnetServiceMock.Setup(m => m.Kill(It.IsAny<CommandOptions>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new AppProcess(null, AppTask.Kill, AppStatus.Success))
                 .Verifiable();
 
@@ -591,10 +591,10 @@ namespace Regi.Test.Services
             _frameworkServiceProviderMock.Setup(m => m.GetAllProjectFrameworkTypes())
                 .Returns(new List<ProjectFramework> { ProjectFramework.Dotnet, ProjectFramework.Node })
                 .Verifiable();
-            _dotnetServiceMock.Setup(m => m.Kill(It.IsAny<RegiOptions>(), It.IsAny<CancellationToken>()))
+            _dotnetServiceMock.Setup(m => m.Kill(It.IsAny<CommandOptions>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new AppProcess(null, AppTask.Kill, AppStatus.Success))
                 .Verifiable();
-            _nodeServiceMock.Setup(m => m.Kill(It.IsAny<RegiOptions>(), It.IsAny<CancellationToken>()))
+            _nodeServiceMock.Setup(m => m.Kill(It.IsAny<CommandOptions>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new AppProcess(null, AppTask.Kill, AppStatus.Success))
                 .Verifiable();
 

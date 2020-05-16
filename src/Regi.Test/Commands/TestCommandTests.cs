@@ -39,18 +39,18 @@ namespace Regi.Test.Commands
         [Fact]
         public async Task Will_run_all_test_if_no_name_or_type_is_specified()
         {
-            _configServiceMock.Setup(m => m.GetConfigurationAsync(It.IsAny<RegiOptions>()))
+            _configServiceMock.Setup(m => m.GetConfigurationAsync(It.IsAny<CommandOptions>()))
                 .ReturnsAsync(SampleProjects.ConfigurationDefault)
                 .Verifiable();
-            _runnerServiceMock.Setup(m => m.TestAsync(It.IsAny<IList<Project>>(), It.IsAny<RegiOptions>(), It.IsAny<CancellationToken>()))
-                .Callback((IList<Project> projects, RegiOptions options, CancellationToken token) =>
+            _runnerServiceMock.Setup(m => m.TestAsync(It.IsAny<IList<Project>>(), It.IsAny<CommandOptions>(), It.IsAny<CancellationToken>()))
+                .Callback((IList<Project> projects, CommandOptions options, CancellationToken token) =>
                 {
                     foreach (var p in projects)
                     {
                         p.Processes.Add(new AppProcess(new Process(), AppTask.Test, AppStatus.Success));
                     }
                 })
-                .Returns((IList<Project> projects, RegiOptions options, CancellationToken token) => Task.FromResult(projects))
+                .Returns((IList<Project> projects, CommandOptions options, CancellationToken token) => Task.FromResult(projects))
                 .Verifiable();
 
             TestCommand command = CreateCommand();
@@ -66,15 +66,15 @@ namespace Regi.Test.Commands
         [Fact]
         public async Task Returns_fail_count_as_exit_code()
         {
-            _configServiceMock.Setup(m => m.GetConfigurationAsync(It.IsAny<RegiOptions>()))
+            _configServiceMock.Setup(m => m.GetConfigurationAsync(It.IsAny<CommandOptions>()))
                 .ReturnsAsync(SampleProjects.ConfigurationDefault)
                 .Verifiable();
-            _runnerServiceMock.Setup(m => m.TestAsync(It.IsAny<IList<Project>>(), It.IsAny<RegiOptions>(), It.IsAny<CancellationToken>()))
-                .Callback((IList<Project> projects, RegiOptions options, CancellationToken token) =>
+            _runnerServiceMock.Setup(m => m.TestAsync(It.IsAny<IList<Project>>(), It.IsAny<CommandOptions>(), It.IsAny<CancellationToken>()))
+                .Callback((IList<Project> projects, CommandOptions options, CancellationToken token) =>
                 {
                     projects[0].Processes.Add(new AppProcess(new Process(), AppTask.Test, AppStatus.Failure));
                 })
-                .Returns((IList<Project> projects, RegiOptions options, CancellationToken token) => Task.FromResult(projects))
+                .Returns((IList<Project> projects, CommandOptions options, CancellationToken token) => Task.FromResult(projects))
                 .Verifiable();
 
             TestCommand command = CreateCommand();
@@ -92,21 +92,21 @@ namespace Regi.Test.Commands
         [InlineData(ProjectRole.Integration)]
         public async Task Will_only_run_tests_with_matching_role_if_specified(ProjectRole type)
         {
-            _configServiceMock.Setup(m => m.GetConfigurationAsync(It.IsAny<RegiOptions>()))
+            _configServiceMock.Setup(m => m.GetConfigurationAsync(It.IsAny<CommandOptions>()))
                 .ReturnsAsync(SampleProjects.ConfigurationDefault)
                 .Verifiable();
             _runnerServiceMock.Setup(m => m.TestAsync(
                 It.Is<IList<Project>>(projects => projects.All(p => p.Roles.Contains(type))),
-                It.Is<RegiOptions>(o => o.Roles.Contains(type)),
+                It.Is<CommandOptions>(o => o.Roles.Contains(type)),
                 It.IsAny<CancellationToken>()))
-                .Callback((IList<Project> projects, RegiOptions options, CancellationToken token) =>
+                .Callback((IList<Project> projects, CommandOptions options, CancellationToken token) =>
                 {
                     foreach (var p in projects)
                     {
                         p.Processes.Add(new AppProcess(new Process(), AppTask.Test, AppStatus.Success));
                     }
                 })
-                .Returns((IList<Project> projects, RegiOptions options, CancellationToken token) => Task.FromResult(projects))
+                .Returns((IList<Project> projects, CommandOptions options, CancellationToken token) => Task.FromResult(projects))
                 .Verifiable();
 
             TestCommand command = CreateCommand();

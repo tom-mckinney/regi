@@ -59,7 +59,7 @@ namespace Regi.CommandLine
                 var projectManager = app.GetRequiredService<IProjectManager>();
 
                 using var shutdownCts = new CancellationTokenSource(5000);
-                await projectManager.KillAllProcesses(new RegiOptions(), shutdownCts.Token, true);
+                await projectManager.KillAllProcesses(new CommandOptions(), shutdownCts.Token, true);
             }
         }
 

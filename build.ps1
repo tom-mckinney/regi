@@ -1,6 +1,6 @@
-rm -r ./nupkgs/ *> $null
+Remove-Item -r ./nupkgs/
 
-$env:VERSION="1.0.0-dev"
+$env:VERSION = "1.0.0-dev"
 
 dotnet pack --output ./nupkgs/ ./src/Regi.CommandLine
 

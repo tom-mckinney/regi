@@ -123,7 +123,7 @@ namespace Regi.Test.Frameworks
         [Fact]
         public async Task RunProject_without_verbose_starts_and_prints_nothing()
         {
-            RegiOptions optionsWithoutVerbose = new RegiOptions { Verbose = false, KillProcessesOnExit = false };
+            CommandOptions optionsWithoutVerbose = new CommandOptions { Verbose = false, KillProcessesOnExit = false };
 
             AppProcess process = await _service.Start(_application, _application.GetAppDirectoryPaths(_fileSystem)[0], optionsWithoutVerbose, CancellationToken.None);
 

@@ -50,7 +50,7 @@ namespace Regi.Test.Services
         {
             var service = CreateService();
 
-            var output = service.PrintDomainSummary(SampleProjects.ConfigurationGood, new RegiOptions { Name = name });
+            var output = service.PrintDomainSummary(SampleProjects.ConfigurationGood, new CommandOptions { Name = name });
 
             Assert.Equal(appCount, output.Apps.Count);
             Assert.Equal(testCount, output.Tests.Count);
