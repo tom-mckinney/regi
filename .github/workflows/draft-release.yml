@@ -14,27 +14,27 @@ jobs:
         with:
           name-template: 'Regi v$NEXT_PATCH_VERSION'
           tag-template: 'v$NEXT_PATCH_VERSION'
-          categories:
-            - title: '🚀 Features'
-              labels:
-                - 'feature'
-                - 'enhancement'
-                - 'framework'
-            - title: '🐛 Bug Fixes'
-              labels:
-                - 'fix'
-                - 'bugfix'
-                - 'bug'
-            - title: '🧰 Maintenance'
-              labels:
-                - 'chore'
-                - 'dependencies'
-                - 'documentation'
-                - 'tech debt'
-          change-template: '- $TITLE @$AUTHOR (#$NUMBER)'
-          template: |
-            ## Changes
+          # categories:
+          #   - title: '🚀 Features'
+          #     labels:
+          #       - 'feature'
+          #       - 'enhancement'
+          #       - 'framework'
+          #   - title: '🐛 Bug Fixes'
+          #     labels:
+          #       - 'fix'
+          #       - 'bugfix'
+          #       - 'bug'
+          #   - title: '🧰 Maintenance'
+          #     labels:
+          #       - 'chore'
+          #       - 'dependencies'
+          #       - 'documentation'
+          #       - 'tech debt'
+          # change-template: '- $TITLE @$AUTHOR (#$NUMBER)'
+          # template: |
+          #   ## Changes
 
-            $CHANGES
+          #   $CHANGES
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
