@@ -1,0 +1,38 @@
+name: Draft Release
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  update_release_draft:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: release-drafter/release-drafter@v5
+        with:
+          name-template: 'Regi v$NEXT_PATCH_VERSION'
+          tag-template: 'v$NEXT_PATCH_VERSION'
+          categories:
+            - title: '🚀 Features'
+              labels:
+                - 'feature'
+                - 'enhancement'
+                - 'framework'
+            - title: '🐛 Bug Fixes'
+              labels:
+                - 'fix'
+                - 'bugfix'
+                - 'bug'
+            - title: '🧰 Maintenance'
+              labels:
+                - 'dependencies'
+                - 'documentation'
+                - 'tech debt'
+          change-template: '- $TITLE @$AUTHOR (#$NUMBER)'
+          template: |
+            ## Changes
+
+            $CHANGES
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
