@@ -13,11 +13,11 @@ namespace Regi.Test.Identifiers
 {
     public class BaseIdentifierTests
     {
-        protected readonly Mock<IFileSystem> _fileSystemMock = new Mock<IFileSystem>(MockBehavior.Strict);
+        protected Mock<IFileSystem> FileSystemMock { get; } = new Mock<IFileSystem>(MockBehavior.Strict);
 
         protected virtual IIdentifier CreateTestClass()
         {
-            return new TestBaseIdentifier(_fileSystemMock.Object);
+            return new TestBaseIdentifier(FileSystemMock.Object);
         }
 
         public static IEnumerable<object[]> DotnetProjects => new List<Project>
@@ -54,7 +54,7 @@ namespace Regi.Test.Identifiers
             var expectedProjectContents = GetFileSystemDictionary(expectedProject);
 
             string expectedPath = $"./{name}";
-            _fileSystemMock.Setup(m => m.GetRelativePath(expectedProjectContents.Path))
+            FileSystemMock.Setup(m => m.GetRelativePath(expectedProjectContents.Path))
                 .Returns(expectedPath);
 
             var identifier = CreateTestClass();
@@ -67,7 +67,7 @@ namespace Regi.Test.Identifiers
 
             var actualProject = await identifier.CreateOrModifyAsync(null, expectedProjectContents); // no project created yet
 
-            _fileSystemMock.VerifyAll();
+            FileSystemMock.VerifyAll();
 
             Assert.Equal(name, actualProject.Name); // used for labeling test
             Assert.Equal(expectedProjectContents.Name, actualProject.Name);

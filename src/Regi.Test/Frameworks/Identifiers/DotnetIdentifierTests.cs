@@ -11,7 +11,7 @@ namespace Regi.Test.Identifiers
     {
         protected override IIdentifier CreateTestClass()
         {
-            return new DotnetIdentifier(_fileSystemMock.Object);
+            return new DotnetIdentifier(FileSystemMock.Object);
         }
 
         protected override void ShouldHaveMatched(Project expectedProject, bool wasMatch)

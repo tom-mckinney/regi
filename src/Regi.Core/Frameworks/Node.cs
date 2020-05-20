@@ -24,7 +24,7 @@ namespace Regi.Frameworks
 
         public override string BuildCommand => FrameworkCommands.Node.Build;
 
-        protected override IList<string> FrameworkWarningIndicators => new List<string>
+        protected override IEnumerable<string> FrameworkWarningIndicators => new []
         {
             "npm warn",
             "npm notice",

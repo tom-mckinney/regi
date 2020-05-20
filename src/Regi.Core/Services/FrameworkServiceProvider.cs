@@ -29,6 +29,7 @@ namespace Regi.Services
                 ProjectFramework.Dotnet => _serviceProvider.GetRequiredService<IDotnet>(),
                 ProjectFramework.Node => _serviceProvider.GetRequiredService<INode>(),
                 ProjectFramework.RubyOnRails => _serviceProvider.GetRequiredService<IRubyOnRails>(),
+                ProjectFramework.Django => _serviceProvider.GetRequiredService<IDjango>(),
                 ProjectFramework.Any => throw new ArgumentException($"Cannot get framework service for project framework type of {framework}", nameof(framework)),
                 _ => throw new NotImplementedException($"There is no implementation for framework of type {framework}"),
             };
@@ -47,6 +48,7 @@ namespace Regi.Services
                 ProjectFramework.Dotnet,
                 ProjectFramework.Node,
                 ProjectFramework.RubyOnRails,
+                ProjectFramework.Django,
             };
         }
     }

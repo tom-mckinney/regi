@@ -9,7 +9,7 @@ namespace Regi.Test.Identifiers
     {
         protected override IIdentifier CreateTestClass()
         {
-            return new NodeIdentifier(_fileSystemMock.Object);
+            return new NodeIdentifier(FileSystemMock.Object);
         }
 
         protected override void ShouldHaveMatched(Project expectedProject, bool wasMatch)
