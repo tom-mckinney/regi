@@ -32,9 +32,9 @@ jobs:
           #       - 'documentation'
           #       - 'tech debt'
           # change-template: '- $TITLE @$AUTHOR (#$NUMBER)'
-          # template: |
-          #   ## Changes
+          template: |
+            ## Changes
 
-          #   $CHANGES
+            $CHANGES
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
