@@ -41,7 +41,7 @@ namespace Regi.Frameworks
             }
         };
 
-        protected override IList<string> FrameworkCommandWildcardExclusions => new List<string>
+        protected override IEnumerable<string> FrameworkCommandWildcardExclusions => new []
         {
             FrameworkCommands.DotnetCore.Restore,
             FrameworkCommands.DotnetCore.Build

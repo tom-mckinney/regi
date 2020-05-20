@@ -137,9 +137,9 @@ namespace Regi.Frameworks
 
         protected virtual CommandDictionary FrameworkOptions { get; } = new CommandDictionary();
 
-        protected virtual IList<string> FrameworkWarningIndicators { get; } = new List<string>();
+        protected virtual IEnumerable<string> FrameworkWarningIndicators { get; } = new List<string>();
 
-        protected virtual IList<string> FrameworkCommandWildcardExclusions { get; } = new List<string>();
+        protected virtual IEnumerable<string> FrameworkCommandWildcardExclusions { get; } = new List<string>();
 
         protected virtual void ApplyFrameworkOptions(StringBuilder builder, string command, Project project, RegiOptions options)
         {

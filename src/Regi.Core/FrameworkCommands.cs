@@ -42,6 +42,7 @@ namespace Regi
         public static class Django
         {
             public const string RunServer = "./manage.py runserver";
+            public const string Test = "./manage.py test";
         }
 
         public static AppTask GetAppTask(string command)
@@ -53,6 +54,7 @@ namespace Regi
                 case Django.RunServer:
                     return AppTask.Start;
                 case Test:
+                case Django.Test:
                     return AppTask.Test;
                 case Build:
                 case Node.Build:

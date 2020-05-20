@@ -1,8 +1,6 @@
 ﻿using Regi.Models;
 using Regi.Services;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Regi.Frameworks.Identifiers
@@ -44,6 +42,7 @@ namespace Regi.Frameworks.Identifiers
             project = await base.CreateOrModifyAsync(project, directoryContents);
 
             project.Framework = ProjectFramework.Django;
+            project.Type = ProjectType.Web;
 
             return project;
         }

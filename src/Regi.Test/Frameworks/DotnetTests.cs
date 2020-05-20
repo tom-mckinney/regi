@@ -2,6 +2,7 @@
 using Regi.Frameworks;
 using Regi.Models;
 using Regi.Services;
+using Regi.Test.Extensions;
 using Regi.Test.Helpers;
 using System;
 using System.IO;

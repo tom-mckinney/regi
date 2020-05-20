@@ -11,21 +11,6 @@ namespace Regi.Models
 
         }
 
-        public void AddOptions(string command, params TValue[] options)
-        {
-            if (ContainsKey(command) && this[command] != null)
-            {
-                foreach (var option in options)
-                {
-                    this[command].Add(option);
-                }
-            }
-            else
-            {
-                this[command] = new List<TValue>(options);
-            }
-        }
-
         public bool TryGetValue(AppTask task, out ICollection<TValue> options)
         {
             IEnumerable<TValue> values = new List<TValue>();
