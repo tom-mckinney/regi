@@ -26,6 +26,7 @@ jobs:
                 - 'bug'
             - title: '🧰 Maintenance'
               labels:
+                - 'chore'
                 - 'dependencies'
                 - 'documentation'
                 - 'tech debt'
