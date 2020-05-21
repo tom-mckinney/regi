@@ -1,4 +1,5 @@
-﻿using Regi.Models;
+﻿using Regi.Extensions;
+using Regi.Models;
 using Regi.Services;
 using System;
 using System.Threading.Tasks;
@@ -47,11 +48,11 @@ namespace Regi.Frameworks.Identifiers
 
             if (project.Name.Contains("test", StringComparison.InvariantCultureIgnoreCase))
             {
-                project.Roles.Add(ProjectRole.Unit);
+                project.Roles.TryAdd(ProjectRole.Unit);
             }
             else
             {
-                project.Roles.Add(ProjectRole.Web);
+                project.Roles.TryAdd(ProjectRole.Web);
                 project.Port = Port;
             }
 

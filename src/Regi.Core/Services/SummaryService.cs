@@ -36,7 +36,7 @@ namespace Regi.Services
 
             var projects = _projectManager.FilterByOptions(config.Projects, options);
 
-            PrintAppGroupDetails(projects, output.Apps, "Projects");
+            PrintAppGroupDetails(projects, output.Projects, "Projects");
 
             void PrintAppGroupDetails(IList<Project> inputApps, IList<Project> outputApps, string groupName)
             {

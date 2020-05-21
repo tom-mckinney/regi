@@ -6,4 +6,4 @@ dotnet pack --output ./nupkgs/ ./src/Regi.CommandLine
 
 dotnet tool uninstall -g regi
 
-dotnet tool install -g regi --add-source ./nupkgs/ --ignore-failed-sources --version %VERSION%
+dotnet tool install -g regi --add-source ./nupkgs/ --ignore-failed-sources --version $env:VERSION

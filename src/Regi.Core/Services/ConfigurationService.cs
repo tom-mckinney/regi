@@ -31,18 +31,6 @@ namespace Regi.Services
                 Projects = projects.ToList()
             };
 
-            //foreach (var project in projects)
-            //{
-            //    if (project.Roles.Contains(ProjectRole.Unit) || project.Roles.Contains(ProjectRole.Integration))
-            //    {
-            //        config.Tests.Add(project);
-            //    }
-            //    else
-            //    {
-            //        config.Projects.Add(project);
-            //    }
-            //}
-
             return new ValueTask<StartupConfig>(config);
         }
 

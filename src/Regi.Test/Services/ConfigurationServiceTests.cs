@@ -144,6 +144,21 @@ namespace Regi.Test.Services
         }
 
         [Fact]
+        public async Task GetStartupConfig_throws_when_using_deprecated_config_file()
+        {
+            _fileSystem.WorkingDirectory = PathHelper.GetSampleProjectPath("ConfigurationDeprecated");
+
+            var service = CreateService();
+
+            var ex = await Assert.ThrowsAsync<RegiException>(() => service.GetConfigurationAsync(null));
+
+            Assert.IsType<RegiException>(ex.InnerException);
+            Assert.Equal("The properties \"apps\" and \"tests\" have been removed. Use \"projects\" instead.", ex.InnerException.Message);
+
+            ex.LogAndReturnStatus(_console);
+        }
+
+        [Fact]
         public async Task GetStatupConfig_throws_exception_when_directory_not_found()
         {
             _fileSystem.WorkingDirectory = PathHelper.GetSampleProjectPath("BUNK_DIRECTORY");

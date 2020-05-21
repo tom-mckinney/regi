@@ -12,8 +12,23 @@ namespace Regi.Models
         [JsonPropertyName("projects")]
         public List<Project> Projects { get; set; } = new List<Project>();
 
-        //[JsonPropertyName("tests")]
-        //public List<Project> Tests { get; set; } = new List<Project>();
+        [Obsolete("This is temporary for interactive documentation. Use Projects instead")]
+        [JsonPropertyName("apps")]
+        public List<object> Apps
+        {
+            get => null;
+#pragma warning restore CA1065 // Do not raise exceptions in unexpected locations
+            set => throw new RegiException("The properties \"apps\" and \"tests\" have been removed. Use \"projects\" instead.");
+        }
+
+        [Obsolete("This is temporary for interactive documentation. Use Projects instead")]
+        [JsonPropertyName("tests")]
+        public List<object> Tests
+        {
+            get => null;
+#pragma warning restore CA1065 // Do not raise exceptions in unexpected locations
+            set => throw new RegiException("The properties \"apps\" and \"tests\" have been removed. Use \"projects\" instead.");
+        }
 
         [JsonPropertyName("services")]
         public List<Project> Services { get; set; } = new List<Project>();

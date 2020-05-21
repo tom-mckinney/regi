@@ -35,5 +35,17 @@ namespace Regi.Extensions
 
             return true;
         }
+
+        public static bool TryAdd<T>(this ICollection<T> self, T item)
+        {
+            if (self.Contains(item))
+            {
+                return false;
+            }
+
+            self.Add(item);
+
+            return true;
+        }
     }
 }

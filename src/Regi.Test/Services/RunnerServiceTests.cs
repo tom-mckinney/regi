@@ -206,9 +206,11 @@ namespace Regi.Test.Services
                 .ReturnsAsync((Project p, string d, CommandOptions o, CancellationToken c) => new AppProcess(new Process(), AppTask.Start, AppStatus.Success, p?.Port))
                 .Verifiable();
 
-            var processes = await _runnerService.TestAsync(SampleProjects.ConfigurationGood.Projects, TestOptions.Create(), CancellationToken.None);
+            var testsProjects = SampleProjects.ConfigurationGood.Projects.WhereTest().ToList();
 
-            Assert.Equal(SampleProjects.ConfigurationGood.Projects.Count, processes.Count);
+            var processes = await _runnerService.TestAsync(testsProjects, TestOptions.Create(), CancellationToken.None);
+
+            Assert.Equal(testsProjects.Count, processes.Count);
 
             _dotnetServiceMock.VerifyAll();
         }
@@ -310,8 +312,10 @@ namespace Regi.Test.Services
             _dotnetServiceMock.Setup(m => m.Test(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<CommandOptions>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync((Project p, string d, CommandOptions o, CancellationToken c) => new AppProcess(new Process(), AppTask.Start, AppStatus.Success, p?.Port))
                 .Verifiable();
+            
+            var testsProjects = SampleProjects.ConfigurationGood.Projects.WhereTest().ToList();
 
-            var processes = await _runnerService.TestAsync(SampleProjects.ConfigurationGood.Projects, TestOptions.Create(), CancellationToken.None);
+            var processes = await _runnerService.TestAsync(testsProjects, TestOptions.Create(), CancellationToken.None);
 
             Assert.Single(_queueService.AsyncActions);
             Assert.Single(_queueService.SerialActions);
