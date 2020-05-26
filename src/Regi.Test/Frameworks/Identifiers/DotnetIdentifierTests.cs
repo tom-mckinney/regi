@@ -38,10 +38,10 @@ namespace Regi.Test.Identifiers
 
             switch (actualProject.Roles.Single())
             {
-                case ProjectRole.Web:
+                case ProjectRole.App:
                     Assert.Equal(8080, actualProject.Port);
                     break;
-                case ProjectRole.Unit:
+                case ProjectRole.Test:
                     Assert.Null(actualProject.Port);
                     break;
                 default:

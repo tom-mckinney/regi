@@ -88,8 +88,7 @@ namespace Regi.Test.Commands
         }
 
         [Theory]
-        [InlineData(ProjectRole.Unit)]
-        [InlineData(ProjectRole.Integration)]
+        [InlineData(ProjectRole.Test)]
         public async Task Will_only_run_tests_with_matching_role_if_specified(ProjectRole type)
         {
             _configServiceMock.Setup(m => m.GetConfigurationAsync(It.IsAny<CommandOptions>()))

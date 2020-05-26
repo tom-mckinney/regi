@@ -48,11 +48,11 @@ namespace Regi.Frameworks.Identifiers
 
             if (project.Name.Contains("test", StringComparison.InvariantCultureIgnoreCase))
             {
-                project.Roles.TryAdd(ProjectRole.Unit);
+                project.Roles.TryAdd(ProjectRole.Test);
             }
             else
             {
-                project.Roles.TryAdd(ProjectRole.Web);
+                project.Roles.TryAdd(ProjectRole.App);
                 project.Port = Port;
             }
 

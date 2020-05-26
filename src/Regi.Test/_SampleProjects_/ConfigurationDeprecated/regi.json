@@ -3,13 +3,13 @@
     {
       "name": "DotnetApp",
       "path": "../SampleAppLong/SampleAppLong.csproj",
-      "roles": [ "web" ],
+      "roles": [ "app" ],
       "port": 9080
     },
     {
       "name": "NodeApp",
       "path": "../NodeApp/package.json",
-      "roles": [ "web" ],
+      "roles": [ "app" ],
       "framework": "node",
       "port": 9081
     }
@@ -18,7 +18,7 @@
     {
       "name": "SampleSuccessfulTests",
       "path": "../SampleSuccessfulTests/SampleSuccessfulTests.csproj",
-      "roles": [ "unit" ]
+      "roles": [ "test" ]
     },
     {
       "name": "NodeApp",

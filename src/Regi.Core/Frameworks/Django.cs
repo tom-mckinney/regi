@@ -41,7 +41,7 @@ namespace Regi.Frameworks
 
         protected override void ApplyFrameworkOptions(StringBuilder builder, string command, Project project, CommandOptions options)
         {
-            if (project.Port.HasValue && project.Roles.Contains(ProjectRole.Web))
+            if (project.Port.HasValue && project.Roles.Contains(ProjectRole.App))
             {
                 if (command == FrameworkCommands.Django.RunServer)
                 {

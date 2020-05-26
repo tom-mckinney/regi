@@ -86,8 +86,8 @@ namespace Regi.Test
         }
 
         [Theory]
-        [InlineData(ProjectRole.Web)]
-        [InlineData(ProjectRole.Unit)]
+        [InlineData(ProjectRole.App)]
+        [InlineData(ProjectRole.Test)]
         public void FilterByOption_only_includes_roles_when_specified(params ProjectRole[] roles)
         {
             var appProject = SampleProjects.Backend;

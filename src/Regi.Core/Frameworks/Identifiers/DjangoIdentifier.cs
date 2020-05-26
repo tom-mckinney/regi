@@ -43,7 +43,7 @@ namespace Regi.Frameworks.Identifiers
             project = await base.CreateOrModifyAsync(project, directoryContents);
 
             project.Framework = ProjectFramework.Django;
-            project.Roles.TryAdd(ProjectRole.Web);
+            project.Roles.TryAdd(ProjectRole.App);
 
             return project;
         }

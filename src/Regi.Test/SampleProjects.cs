@@ -12,7 +12,7 @@ namespace Regi.Test
         {
             Name = "ClassLib",
             Paths = new[] { PathHelper.GetSampleProjectPath("ClassLib") },
-            Roles = new List<ProjectRole> { ProjectRole.Web }, // TODO: have a classlib type
+            Roles = new List<ProjectRole> { ProjectRole.App }, // TODO: have a classlib type
         };
 
         public static Project Frontend => new Project
@@ -20,7 +20,7 @@ namespace Regi.Test
             Name = "Frontend",
             Path = PathHelper.GetSampleProjectPath("Frontend"),
             Framework = ProjectFramework.Node,
-            Roles = new List<ProjectRole> { ProjectRole.Web },
+            Roles = new List<ProjectRole> { ProjectRole.App },
             Port = 3000,
             Commands = new Dictionary<string, string>
             {
@@ -33,7 +33,7 @@ namespace Regi.Test
             Name = "Backend",
             Path = PathHelper.GetSampleProjectPath("Backend"),
             Framework = ProjectFramework.Dotnet,
-            Roles = new List<ProjectRole> { ProjectRole.Web },
+            Roles = new List<ProjectRole> { ProjectRole.App },
             Port = 5000,
             Arguments = new CommandDictionary
             {
@@ -46,7 +46,7 @@ namespace Regi.Test
             Name = "SampleSuccessfulTests",
             Path = PathHelper.GetSampleProjectPath("SampleSuccessfulTests"),
             Framework = ProjectFramework.Dotnet,
-            Roles = new List<ProjectRole> { ProjectRole.Unit }
+            Roles = new List<ProjectRole> { ProjectRole.Test }
         };
 
         public static Project JestTests => new Project
@@ -81,7 +81,7 @@ namespace Regi.Test
                 PathHelper.GetSampleProjectPath("AppCollection/App3/App3.csproj"),
             },
             Framework = ProjectFramework.Dotnet,
-            Roles = new List<ProjectRole> { ProjectRole.Web }
+            Roles = new List<ProjectRole> { ProjectRole.App }
         };
 
         public static Project TestCollection => new Project
@@ -94,14 +94,14 @@ namespace Regi.Test
                 PathHelper.GetSampleProjectPath("TestCollection/Test3/Test3.csproj"),
             },
             Framework = ProjectFramework.Dotnet,
-            Roles = new List<ProjectRole> { ProjectRole.Unit }
+            Roles = new List<ProjectRole> { ProjectRole.Test }
         };
 
         public static Project SimpleNodeApp => new Project
         {
             Name = "NodeApp",
             Path = PathHelper.GetSampleProjectPath("NodeApp/package.json"),
-            Roles = new List<ProjectRole> { ProjectRole.Web },
+            Roles = new List<ProjectRole> { ProjectRole.App },
             Framework = ProjectFramework.Node,
             Port = 9081
         };
@@ -127,13 +127,13 @@ namespace Regi.Test
                 {
                     Name = "SampleApp1",
                     Path = PathHelper.GetSampleProjectPath("SampleApp/SampleApp.csproj"),
-                    Roles = new List<ProjectRole> { ProjectRole.Web }
+                    Roles = new List<ProjectRole> { ProjectRole.App }
                 },
                 new Project
                 {
                     Name = "SampleApp2",
                     Path = PathHelper.GetSampleProjectPath("SampleApp/SampleApp.csproj"),
-                    Roles = new List<ProjectRole> { ProjectRole.Web },
+                    Roles = new List<ProjectRole> { ProjectRole.App },
                     Port = 9080,
                     Serial = true
                 },
@@ -142,13 +142,13 @@ namespace Regi.Test
                 {
                     Name = "SampleSuccessfulTests",
                     Path = PathHelper.GetSampleProjectPath("SampleSuccessfulTests/SampleSuccessfulTests.csproj"),
-                    Roles = new List<ProjectRole> { ProjectRole.Unit }
+                    Roles = new List<ProjectRole> { ProjectRole.Test }
                 },
                 new Project
                 {
                     Name = "SampleSuccessfulTests",
                     Path = PathHelper.GetSampleProjectPath("SampleSuccessfulTests/SampleSuccessfulTests.csproj"),
-                    Roles = new List<ProjectRole> { ProjectRole.Integration },
+                    Roles = new List<ProjectRole> { ProjectRole.Test },
                     Serial = true
                 }
             },

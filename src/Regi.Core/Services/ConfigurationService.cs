@@ -1,5 +1,6 @@
 ﻿using Regi.Extensions;
 using Regi.Models;
+using Regi.Utilities;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -74,7 +75,9 @@ namespace Regi.Services
             }
             catch (Exception e)
             {
-                throw new RegiException($"Configuration file was not properly formatted: {startupFile.FullName}{Environment.NewLine}{e.Message}", e);
+                string relativePath = Path.GetRelativePath(_fileSystem.WorkingDirectory, startupFile.FullName);
+
+                throw new RegiException($"Configuration file was not properly formatted: {relativePath}{Environment.NewLine}{ExceptionUtility.GetMessage(e)}", e);
             }
         }
     }

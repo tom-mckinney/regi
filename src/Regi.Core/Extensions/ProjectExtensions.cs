@@ -17,12 +17,12 @@ namespace Regi.Extensions
 
         public static IEnumerable<Project> WhereApp(this IEnumerable<Project> projects)
         {
-            return WhereRoleIs(projects, ProjectRole.Web);
+            return WhereRoleIs(projects, ProjectRole.App);
         }
 
         public static IEnumerable<Project> WhereTest(this IEnumerable<Project> projects)
         {
-            return WhereRoleIs(projects, ProjectRole.Unit, ProjectRole.Integration);
+            return WhereRoleIs(projects, ProjectRole.Test);
         }
     }
 }
