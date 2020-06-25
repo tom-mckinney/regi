@@ -24,7 +24,7 @@ namespace Regi.Test.Commands
         public TestCommandTests(ITestOutputHelper testOutput)
         {
             _console = new TestConsole(testOutput);
-            _projectManager = new ProjectManager(_console, new Mock<ICleanupService>().Object);
+            _projectManager = new ProjectManager(_console, new Mock<ICleanupService>().Object, new ProjectFilter());
             _summaryService = new SummaryService(_projectManager, new TestFileSystem(), _console);
         }
 

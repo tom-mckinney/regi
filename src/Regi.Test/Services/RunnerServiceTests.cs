@@ -38,7 +38,7 @@ namespace Regi.Test.Services
             _console = new TestConsole(output);
             _queueService = new TestQueueService(_console);
             _runnerService = new RunnerService(
-                new ProjectManager(_console, new Mock<ICleanupService>().Object),
+                new ProjectManager(_console, new Mock<ICleanupService>().Object, new ProjectFilter()),
                 _frameworkServiceProviderMock.Object,
                 _queueService,
                 _networkingServiceMock.Object,

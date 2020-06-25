@@ -5,7 +5,6 @@ using Regi.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -27,11 +26,13 @@ namespace Regi
     {
         private readonly IConsole _console;
         private readonly ICleanupService _cleanupService;
+        private readonly IProjectFilter _projectFilter;
 
-        public ProjectManager(IConsole console, ICleanupService cleanupService)
+        public ProjectManager(IConsole console, ICleanupService cleanupService, IProjectFilter projectFilter)
         {
             _console = console;
             _cleanupService = cleanupService;
+            _projectFilter = projectFilter;
         }
 
         public IList<Project> Projects { get; private set; } = new List<Project>();
@@ -40,7 +41,7 @@ namespace Regi
 
         public IList<Project> FilterAndTrackProjects(CommandOptions options, RegiConfig config, Func<RegiConfig, IEnumerable<Project>> getTargetProjects)
         {
-            Projects = FilterByOptions(config.Projects, options);
+            Projects = FilterByOptions(getTargetProjects(config), options);
 
             LinkProjectRequirements(Projects, options, config);
 
@@ -51,43 +52,31 @@ namespace Regi
 
         public IList<Project> FilterByOptions(IEnumerable<Project> projects, CommandOptions options)
         {
+            // TODO: add a query builder pattern that combines filter expressions
+
             if (!string.IsNullOrWhiteSpace(options.Name))
             {
-                projects = projects.Where(p => Regex.IsMatch(p.Name, options.Name, RegexOptions.IgnoreCase));
+                projects = _projectFilter.FilterByName(projects, options.Name);
             }
 
             if (options.Labels?.Any() == true)
             {
-                projects = projects.Where(p => 
-                    p.Labels.Any(label => 
-                        options.Labels.Any(pattern => Regex.IsMatch(label, pattern))));
+                projects = _projectFilter.FilterByLabels(projects, options.Labels);
             }
 
             if (options.Exclude != null && options.Exclude.Any())
             {
-                projects = projects
-                    .Where(p =>
-                    {
-                        foreach (var exclusion in options.Exclude)
-                        {
-                            if (new Regex(exclusion, RegexOptions.IgnoreCase).IsMatch(p.Name))
-                                return false;
-                        }
-
-                        return true;
-                    });
+                projects = _projectFilter.FilterByExclusions(projects, options.Exclude);
             }
 
             if (options.Roles?.Any() == true)
             {
-                projects = projects
-                    .Where(p => p.Roles.ContainsAny(options.Roles));
+                projects = _projectFilter.FilterByRoles(projects, options.Roles);
             }
 
             if (!options.IncludeOptional)
             {
-                projects = projects
-                    .Where(p => p.Optional == false);
+                projects = _projectFilter.FilterByOptional(projects);
             }
 
             return projects.ToList();

@@ -59,7 +59,7 @@ namespace Regi.CommandLine
                 var projectManager = app.GetRequiredService<IProjectManager>();
 
                 using var shutdownCts = new CancellationTokenSource(5000);
-                await projectManager.KillAllProcesses(new CommandOptions(), shutdownCts.Token, true);
+                await projectManager.KillAllProcesses(new CommandOptions(), shutdownCts.Token, false);
             }
         }
 
@@ -74,6 +74,7 @@ namespace Regi.CommandLine
                 })
                 .AddScoped<IQueueService, QueueService>()
                 .AddSingleton<IProjectManager, ProjectManager>()
+                .AddSingleton<IProjectFilter, ProjectFilter>()
                 .AddSingleton<IConfigurationService, ConfigurationService>()
                 .AddSingleton<IFrameworkServiceProvider, FrameworkServiceProvider>()
                 .AddSingleton<IRunnerService, RunnerService>()

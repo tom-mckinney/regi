@@ -25,7 +25,7 @@ namespace Regi.Test.Commands
         public StartCommandTests(ITestOutputHelper output)
         {
             _console = new TestConsole(output);
-            _projectManager = new ProjectManager(_console, _cleanupServiceMock.Object);
+            _projectManager = new ProjectManager(_console, _cleanupServiceMock.Object, new ProjectFilter());
         }
 
         StartCommand CreateCommand()

@@ -22,7 +22,7 @@ namespace Regi.Test.Commands
         public InstallCommandTests(ITestOutputHelper testOutput)
         {
             _console = new TestConsole(testOutput);
-            _projectManager = new ProjectManager(_console, new Mock<ICleanupService>().Object);
+            _projectManager = new ProjectManager(_console, new Mock<ICleanupService>().Object, new ProjectFilter());
         }
 
         InstallCommand CreateCommand()

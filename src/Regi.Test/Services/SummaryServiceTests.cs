@@ -25,7 +25,7 @@ namespace Regi.Test.Services
 
         ISummaryService CreateService()
         {
-            return new SummaryService(new ProjectManager(_console, new Mock<ICleanupService>().Object), _fileSystem, _console);
+            return new SummaryService(new ProjectManager(_console, new Mock<ICleanupService>().Object, new ProjectFilter()), _fileSystem, _console);
         }
 
         [Fact]
