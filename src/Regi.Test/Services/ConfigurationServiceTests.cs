@@ -72,7 +72,7 @@ namespace Regi.Test.Services
 
             var service = CreateService();
 
-            StartupConfig startupConfig = await service.GetConfigurationAsync(null);
+            RegiConfig startupConfig = await service.GetConfigurationAsync(null);
 
             Assert.StartsWith(expectedPath, startupConfig.Path, StringComparison.InvariantCulture);
             Assert.Equal(totalAppCount + totalTestCount, startupConfig.Projects.Count);
@@ -99,7 +99,7 @@ namespace Regi.Test.Services
 
             var service = CreateService();
 
-            StartupConfig startupConfig = await service.GetConfigurationAsync(options);
+            RegiConfig startupConfig = await service.GetConfigurationAsync(options);
 
             Assert.StartsWith(expectedPath, startupConfig.Path, StringComparison.InvariantCulture);
             Assert.Equal(expectedPath, _fileSystem.WorkingDirectory);
@@ -113,7 +113,7 @@ namespace Regi.Test.Services
             AssertAllRuntimePropertiesAreBound(startupConfig, expectedPath);
         }
 
-        private void AssertAllRuntimePropertiesAreBound(StartupConfig config, string expectedPath)
+        private void AssertAllRuntimePropertiesAreBound(RegiConfig config, string expectedPath)
         {
             Assert.StartsWith(expectedPath, config.Path, StringComparison.InvariantCulture);
 

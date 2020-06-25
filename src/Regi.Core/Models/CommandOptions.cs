@@ -18,7 +18,10 @@ namespace Regi.Models
         [Option(CommandOptionType.MultipleValue, Description = "Search pattern to exclude from the command")]
         public List<string> Exclude { get; set; }
 
-        [Option(Description = "Project type")]
+        [Option(CommandOptionType.MultipleValue, Description = "Search pattern to filter projects with a matching label")]
+        public List<string> Labels { get; set; }
+
+        [Option(Description = "Search pattern to filter projects with a matching role")]
         public IEnumerable<ProjectRole> Roles { get; set; }
 
         [Option(CommandOptionType.NoValue, Description = "Print all output")]

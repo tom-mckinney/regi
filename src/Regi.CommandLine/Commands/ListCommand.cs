@@ -19,7 +19,7 @@ namespace Regi.CommandLine.Commands
             _summaryService = summaryService;
         }
 
-        protected override Func<StartupConfig, IEnumerable<Project>> GetTargetProjects => (c) => new List<Project>();
+        protected override Func<RegiConfig, IEnumerable<Project>> GetTargetProjects => (c) => new List<Project>();
 
         protected override Task<int> ExecuteAsync(IList<Project> projects, CancellationToken cancellationToken)
         {

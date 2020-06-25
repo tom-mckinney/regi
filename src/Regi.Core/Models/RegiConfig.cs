@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 
 namespace Regi.Models
 {
-    public class StartupConfig
+    public class RegiConfig
     {
         [JsonIgnore]
         public string Path { get; set; }
@@ -12,6 +12,7 @@ namespace Regi.Models
         [JsonPropertyName("projects")]
         public List<Project> Projects { get; set; } = new List<Project>();
 
+        // TODO: Delete this property when Regi 1.0.0 is release
         [Obsolete("This is temporary for interactive documentation. Use Projects instead")]
         [JsonPropertyName("apps")]
         public List<object> Apps
@@ -21,6 +22,7 @@ namespace Regi.Models
             set => throw new RegiException("The properties \"apps\" and \"tests\" have been removed. Use \"projects\" instead.");
         }
 
+        // TODO: Delete this property when Regi 1.0.0 is release
         [Obsolete("This is temporary for interactive documentation. Use Projects instead")]
         [JsonPropertyName("tests")]
         public List<object> Tests

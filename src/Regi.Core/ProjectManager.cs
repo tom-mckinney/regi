@@ -17,7 +17,7 @@ namespace Regi
 
         CancellationTokenSource CancellationTokenSource { get; }
 
-        IList<Project> FilterAndTrackProjects(CommandOptions options, StartupConfig config, Func<StartupConfig, IEnumerable<Project>> getTargetProjects);
+        IList<Project> FilterAndTrackProjects(CommandOptions options, RegiConfig config, Func<RegiConfig, IEnumerable<Project>> getTargetProjects);
         IList<Project> FilterByOptions(IEnumerable<Project> projects, CommandOptions options);
         Task KillAllProcesses(CommandOptions options, CancellationToken cancellationToken, bool logKillCount = false);
         Task KillAllProcesses(IEnumerable<Project> projects, CommandOptions options, CancellationToken cancellationToken, bool logKillCount = false);
@@ -38,11 +38,9 @@ namespace Regi
 
         public CancellationTokenSource CancellationTokenSource { get; } = new CancellationTokenSource();
 
-        public IList<Project> FilterAndTrackProjects(CommandOptions options, StartupConfig config, Func<StartupConfig, IEnumerable<Project>> getTargetProjects)
+        public IList<Project> FilterAndTrackProjects(CommandOptions options, RegiConfig config, Func<RegiConfig, IEnumerable<Project>> getTargetProjects)
         {
-            var targetProjects = getTargetProjects(config);
-
-            Projects = FilterByOptions(targetProjects, options);
+            Projects = FilterByOptions(config.Projects, options);
 
             LinkProjectRequirements(Projects, options, config);
 
@@ -55,7 +53,14 @@ namespace Regi
         {
             if (!string.IsNullOrWhiteSpace(options.Name))
             {
-                projects = projects.Where(p => new Regex(options.Name, RegexOptions.IgnoreCase).IsMatch(p.Name));
+                projects = projects.Where(p => Regex.IsMatch(p.Name, options.Name, RegexOptions.IgnoreCase));
+            }
+
+            if (options.Labels?.Any() == true)
+            {
+                projects = projects.Where(p => 
+                    p.Labels.Any(label => 
+                        options.Labels.Any(pattern => Regex.IsMatch(label, pattern))));
             }
 
             if (options.Exclude != null && options.Exclude.Any())
@@ -88,7 +93,7 @@ namespace Regi
             return projects.ToList();
         }
 
-        public static void LinkProjectRequirements(IEnumerable<Project> projects, CommandOptions options, StartupConfig config)
+        public static void LinkProjectRequirements(IEnumerable<Project> projects, CommandOptions options, RegiConfig config)
         {
             foreach (var project in projects)
             {

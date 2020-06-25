@@ -91,7 +91,7 @@ namespace Regi.Models
             }
         }
 
-        public void TryAddSource(CommandOptions options, StartupConfig config)
+        public void TryAddSource(CommandOptions options, RegiConfig config)
         {
             if (string.IsNullOrWhiteSpace(Source))
             {

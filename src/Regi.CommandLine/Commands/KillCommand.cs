@@ -20,9 +20,9 @@ namespace Regi.CommandLine.Commands
             _runnerService = runnerService;
         }
 
-        public override bool RequireStartupConfig => false;
+        public override bool RequireRegiConfig => false;
 
-        protected override Func<StartupConfig, IEnumerable<Project>> GetTargetProjects => (c) => c.Projects;
+        protected override Func<RegiConfig, IEnumerable<Project>> GetTargetProjects => (c) => c.Projects;
 
         protected override async Task<int> ExecuteAsync(IList<Project> projects, CancellationToken cancellationToken)
         {

@@ -12,8 +12,8 @@ namespace Regi.Services
 {
     public interface IConfigurationService
     {
-        Task<StartupConfig> GetConfigurationAsync(CommandOptions options);
-        ValueTask<StartupConfig> CreateConfigurationAsync(IEnumerable<Project> projects, CommandOptions options);
+        Task<RegiConfig> GetConfigurationAsync(CommandOptions options);
+        ValueTask<RegiConfig> CreateConfigurationAsync(IEnumerable<Project> projects, CommandOptions options);
     }
 
     public class ConfigurationService : IConfigurationService
@@ -25,17 +25,17 @@ namespace Regi.Services
             _fileSystem = fileSystem;
         }
 
-        public ValueTask<StartupConfig> CreateConfigurationAsync(IEnumerable<Project> projects, CommandOptions options)
+        public ValueTask<RegiConfig> CreateConfigurationAsync(IEnumerable<Project> projects, CommandOptions options)
         {
-            var config = new StartupConfig
+            var config = new RegiConfig
             {
                 Projects = projects.ToList()
             };
 
-            return new ValueTask<StartupConfig>(config);
+            return new ValueTask<RegiConfig>(config);
         }
 
-        public async Task<StartupConfig> GetConfigurationAsync(CommandOptions options)
+        public async Task<RegiConfig> GetConfigurationAsync(CommandOptions options)
         {
             DirectoryInfo directory;
 
@@ -67,7 +67,7 @@ namespace Regi.Services
             try
             {
                 
-                StartupConfig config = await JsonSerializer.DeserializeAsync<StartupConfig>(stream, Constants.DefaultSerializerOptions);
+                RegiConfig config = await JsonSerializer.DeserializeAsync<RegiConfig>(stream, Constants.DefaultSerializerOptions);
 
                 config.Path = startupFile.FullName;
 

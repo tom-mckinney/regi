@@ -14,7 +14,7 @@ namespace Regi.Models
         /// </summary>
         /// <param name="projects"></param>
         /// <param name="config"></param>
-        public EnvironmentVariableDictionary(StartupConfig config) : base()
+        public EnvironmentVariableDictionary(RegiConfig config) : base()
         {
             if (config == null)
             {

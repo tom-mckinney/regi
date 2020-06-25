@@ -24,7 +24,7 @@ namespace Regi.CommandLine.Commands
             _summaryService = summaryService;
         }
 
-        protected override Func<StartupConfig, IEnumerable<Project>> GetTargetProjects => (c) => c.Projects.WhereRoleIs(ProjectRole.Test);
+        protected override Func<RegiConfig, IEnumerable<Project>> GetTargetProjects => (c) => c.Projects.WhereRoleIs(ProjectRole.Test);
 
         protected override async Task<int> ExecuteAsync(IList<Project> projects, CancellationToken cancellationToken)
         {

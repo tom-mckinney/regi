@@ -106,7 +106,7 @@ namespace Regi.Test
             Port = 9081
         };
 
-        public static StartupConfig ConfigurationDefault => new StartupConfig
+        public static RegiConfig ConfigurationDefault => new RegiConfig
         {
             Projects = new List<Project>
             {
@@ -119,7 +119,7 @@ namespace Regi.Test
             Services = new List<Project>()
         };
 
-        public static StartupConfig ConfigurationGood => new StartupConfig
+        public static RegiConfig ConfigurationGood => new RegiConfig
         {
             Projects = new List<Project>
             {

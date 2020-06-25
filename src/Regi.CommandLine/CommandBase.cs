@@ -30,22 +30,22 @@ namespace Regi.CommandLine
         /// <summary>
         /// Setting to false will allow this command to be executed in a directory without a Regi configuration file
         /// </summary>
-        public virtual bool RequireStartupConfig => true;
+        public virtual bool RequireRegiConfig => true;
 
         /// <summary>
         /// Setting to false will prevent this command from filtering projects and tracking them in the <see cref="ProjectManager"/>.
         /// </summary>
         public virtual bool FilterProjects => true;
 
-        public StartupConfig Config { get; protected set; }
+        public RegiConfig Config { get; protected set; }
 
-        protected abstract Func<StartupConfig, IEnumerable<Project>> GetTargetProjects { get; }
+        protected abstract Func<RegiConfig, IEnumerable<Project>> GetTargetProjects { get; }
 
         protected virtual async Task BeforeExecuteAsync()
         {
             try
             {
-                if (RequireStartupConfig)
+                if (RequireRegiConfig)
                 {
                     Config = await _configurationService.GetConfigurationAsync(Options);
 
@@ -59,7 +59,7 @@ namespace Regi.CommandLine
             }
             catch (Exception e)
             {
-                if (RequireStartupConfig)
+                if (RequireRegiConfig)
                 {
                     throw;
                 }

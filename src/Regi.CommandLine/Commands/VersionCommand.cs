@@ -17,10 +17,10 @@ namespace Regi.CommandLine.Commands
         {
         }
 
-        public override bool RequireStartupConfig => false;
+        public override bool RequireRegiConfig => false;
         public override bool FilterProjects => false;
 
-        protected override Func<StartupConfig, IEnumerable<Project>> GetTargetProjects => (s) => new List<Project>();
+        protected override Func<RegiConfig, IEnumerable<Project>> GetTargetProjects => (s) => new List<Project>();
 
         protected override Task<int> ExecuteAsync(IList<Project> projects, CancellationToken cancellationToken)
         {

@@ -7,7 +7,8 @@
       "port": 3000,
       "commands": {
         "start": "run dev"
-      }
+      },
+      "labels": [ "frontend" ]
     },
     {
       "name": "Backend",
@@ -16,19 +17,22 @@
       "port": 5000,
       "arguments": {
         "*": [ "--foo bar" ]
-      }
+      },
+      "labels": [ "backend" ]
     },
     {
       "name": "SampleSuccessfulTests",
       "path": "./SampleSuccessfulTests",
       "framework": "dotnet",
-      "roles": [ "test" ]
+      "roles": [ "test" ],
+      "labels": [ "backend" ]
     },
     {
       "name": "NodeApp",
       "path": "./NodeApp",
       "framework": "node",
-      "roles": [ "test" ]
+      "roles": [ "test" ],
+      "labels": [ "backend" ]
     },
     // {
     //   "name": "IntegrationTests",
@@ -53,7 +57,8 @@
       "serial": true,
       "environment": {
         "HEADLESS": true
-      }
+      },
+      "labels": [ "e2e" ]
     }
   ],
   "services": []

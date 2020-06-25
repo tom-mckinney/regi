@@ -11,7 +11,7 @@ namespace Regi.Services
 {
     public interface ISummaryService
     {
-        OutputSummary PrintDomainSummary(StartupConfig config, CommandOptions options);
+        OutputSummary PrintDomainSummary(RegiConfig config, CommandOptions options);
         OutputSummary PrintTestSummary(IList<Project> projects, TimeSpan timespan);
     }
 
@@ -28,7 +28,7 @@ namespace Regi.Services
             _console = console;
         }
 
-        public OutputSummary PrintDomainSummary(StartupConfig config, CommandOptions options)
+        public OutputSummary PrintDomainSummary(RegiConfig config, CommandOptions options)
         {
             options.IncludeOptional = true; // Always include optional projects that match criteria
 
