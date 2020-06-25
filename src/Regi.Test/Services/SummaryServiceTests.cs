@@ -25,7 +25,7 @@ namespace Regi.Test.Services
 
         ISummaryService CreateService()
         {
-            return new SummaryService(new ProjectManager(_console, new Mock<ICleanupService>().Object), _fileSystem, _console);
+            return new SummaryService(new ProjectManager(_console, new Mock<ICleanupService>().Object, new ProjectFilter()), _fileSystem, _console);
         }
 
         [Fact]
@@ -35,30 +35,9 @@ namespace Regi.Test.Services
 
             var output = service.PrintDomainSummary(SampleProjects.ConfigurationGood, TestOptions.Create());
 
-            Assert.Equal(SampleProjects.ConfigurationGood.Apps.Count, output.Apps.Count);
-            Assert.Equal(SampleProjects.ConfigurationGood.Tests.Count, output.Tests.Count);
+            Assert.Equal(SampleProjects.ConfigurationGood.Projects.Count, output.Projects.Count);
 
-            Assert.Contains("Apps:", _console.LogOutput, StringComparison.InvariantCulture);
-            Assert.Contains("Tests:", _console.LogOutput, StringComparison.InvariantCulture);
-        }
-
-        [Theory]
-        [InlineData("node", 1, 0)]
-        [InlineData("test", 0, 2)]
-        [InlineData("SampleApp1", 1, 0)]
-        public void PrintDomainSummary_prints_only_apps_or_tests_that_match_name_if_specified(string name, int appCount, int testCount)
-        {
-            var service = CreateService();
-
-            var output = service.PrintDomainSummary(SampleProjects.ConfigurationGood, new RegiOptions { Name = name });
-
-            Assert.Equal(appCount, output.Apps.Count);
-            Assert.Equal(testCount, output.Tests.Count);
-
-            if (appCount <= 0)
-                Assert.DoesNotContain("Apps:", _console.LogOutput, StringComparison.InvariantCulture);
-            if (testCount <= 0)
-                Assert.DoesNotContain("Tests:", _console.LogOutput, StringComparison.InvariantCulture);
+            Assert.Contains("Projects:", _console.LogOutput, StringComparison.InvariantCulture);
         }
 
         [Fact]
@@ -68,19 +47,17 @@ namespace Regi.Test.Services
 
             var config = SampleProjects.ConfigurationGood;
 
-            foreach (var app in config.Apps)
+            foreach (var app in config.Projects)
             {
                 app.Optional = true;
             }
 
             var output = service.PrintDomainSummary(config, TestOptions.Create());
 
-            Assert.Equal(SampleProjects.ConfigurationGood.Apps.Count, output.Apps.Count);
-            Assert.Equal(SampleProjects.ConfigurationGood.Tests.Count, output.Tests.Count);
+            Assert.Equal(SampleProjects.ConfigurationGood.Projects.Count, output.Projects.Count);
 
-            Assert.Contains("Apps:", _console.LogOutput, StringComparison.InvariantCulture);
-            Assert.Equal(config.Apps.Count, new Regex("(Optional)").Matches(_console.LogOutput).Count);
-            Assert.Contains("Tests:", _console.LogOutput, StringComparison.InvariantCulture);
+            Assert.Contains("Projects:", _console.LogOutput, StringComparison.InvariantCulture);
+            Assert.Equal(config.Projects.Count, new Regex("(Optional)").Matches(_console.LogOutput).Count);
         }
 
         [Fact]

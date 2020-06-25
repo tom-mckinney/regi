@@ -1,35 +1,33 @@
 {
-  "apps": [
+  "projects": [
     {
       "name": "SampleApp1",
       "path": "../SampleApp/SampleApp.csproj",
-      "type": "web",
+      "roles": [ "app" ],
       "port": 8000
     },
     {
       "name": "SampleApp2",
       "path": "../SampleApp/SampleApp.csproj",
-      "type": "web",
+      "roles": [ "app" ],
       "port": 9080
     },
     {
       "name": "NodeApp",
       "path": "../NodeApp/package.json",
-      "type": "web",
+      "roles": [ "app" ],
       "framework": "node",
       "port": 9081
-    }
-  ],
-  "tests": [
-    {
-      "name": "SampleSuccessfulTests",
-      "path": "../SampleSuccessfulTests/SampleSuccessfulTests.csproj",
-      "type": "unit"
     },
     {
       "name": "SampleSuccessfulTests",
       "path": "../SampleSuccessfulTests/SampleSuccessfulTests.csproj",
-      "type": "integration",
+      "roles": [ "test" ]
+    },
+    {
+      "name": "SampleSuccessfulTests",
+      "path": "../SampleSuccessfulTests/SampleSuccessfulTests.csproj",
+      "roles": [ "test" ],
       "requires": [
         "SampleApp1"
       ]

@@ -13,9 +13,9 @@ namespace Regi.Services
 {
     public interface ICleanupService
     {
-        void KillProcessTree(AppProcess process, RegiOptions options);
-        void KillProcessTree(AppProcess process, RegiOptions options, TimeSpan timeout);
-        Task<IReadOnlyList<AppProcess>> ShutdownBuildServers(RegiOptions options, CancellationToken cancellationToken);
+        void KillProcessTree(AppProcess process, CommandOptions options);
+        void KillProcessTree(AppProcess process, CommandOptions options, TimeSpan timeout);
+        Task<IReadOnlyList<AppProcess>> ShutdownBuildServers(CommandOptions options, CancellationToken cancellationToken);
     }
 
     public class CleanupService : ICleanupService
@@ -33,12 +33,12 @@ namespace Regi.Services
             _console = console;
         }
 
-        public void KillProcessTree(AppProcess process, RegiOptions options)
+        public void KillProcessTree(AppProcess process, CommandOptions options)
         {
             KillProcessTree(process, options, _defaultTimeout);
         }
 
-        public void KillProcessTree(AppProcess process, RegiOptions options, TimeSpan timeout)
+        public void KillProcessTree(AppProcess process, CommandOptions options, TimeSpan timeout)
         {
             if (process == null)
             {
@@ -70,7 +70,7 @@ namespace Regi.Services
             process.Kill(timeout, _console);
         }
 
-        public async Task<IReadOnlyList<AppProcess>> ShutdownBuildServers(RegiOptions options, CancellationToken cancellationToken)
+        public async Task<IReadOnlyList<AppProcess>> ShutdownBuildServers(CommandOptions options, CancellationToken cancellationToken)
         {
             var output = new List<AppProcess>
             {
@@ -80,7 +80,7 @@ namespace Regi.Services
             return output.AsReadOnly();
         }
 
-        private void LogOutputs(string stdout, string stderr, RegiOptions options)
+        private void LogOutputs(string stdout, string stderr, CommandOptions options)
         {
             if (_console != null && options.Verbose)
             {

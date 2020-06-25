@@ -4,16 +4,33 @@ using System.Text.Json.Serialization;
 
 namespace Regi.Models
 {
-    public class StartupConfig
+    public class RegiConfig
     {
         [JsonIgnore]
         public string Path { get; set; }
 
-        [JsonPropertyName("apps")]
-        public List<Project> Apps { get; set; } = new List<Project>();
+        [JsonPropertyName("projects")]
+        public List<Project> Projects { get; set; } = new List<Project>();
 
+        // TODO: Delete this property when Regi 1.0.0 is release
+        [Obsolete("This is temporary for interactive documentation. Use Projects instead")]
+        [JsonPropertyName("apps")]
+        public List<object> Apps
+        {
+            get => null;
+#pragma warning restore CA1065 // Do not raise exceptions in unexpected locations
+            set => throw new RegiException("The properties \"apps\" and \"tests\" have been removed. Use \"projects\" instead.");
+        }
+
+        // TODO: Delete this property when Regi 1.0.0 is release
+        [Obsolete("This is temporary for interactive documentation. Use Projects instead")]
         [JsonPropertyName("tests")]
-        public List<Project> Tests { get; set; } = new List<Project>();
+        public List<object> Tests
+        {
+            get => null;
+#pragma warning restore CA1065 // Do not raise exceptions in unexpected locations
+            set => throw new RegiException("The properties \"apps\" and \"tests\" have been removed. Use \"projects\" instead.");
+        }
 
         [JsonPropertyName("services")]
         public List<Project> Services { get; set; } = new List<Project>();
@@ -22,9 +39,7 @@ namespace Regi.Models
         [JsonPropertyName("sources")]
         public IDictionary<string, string> RawSources { get; set; } = new Dictionary<string, string>();
 
-
         private IDictionary<ProjectFramework, string> _sources;
-
         public IDictionary<ProjectFramework, string> GetSources()
         {
             if (_sources == null)

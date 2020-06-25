@@ -14,15 +14,14 @@ namespace Regi.Models
         /// </summary>
         /// <param name="projects"></param>
         /// <param name="config"></param>
-        public EnvironmentVariableDictionary(StartupConfig config) : base()
+        public EnvironmentVariableDictionary(RegiConfig config) : base()
         {
             if (config == null)
             {
                 throw new ArgumentException("Project list cannot be null when creating VariableList", nameof(config));
             }
 
-            var allProjects = config.Apps
-                .Concat(config.Tests)
+            var allProjects = config.Projects
                 .Concat(config.Services);
 
             foreach (var project in allProjects)

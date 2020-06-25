@@ -16,7 +16,7 @@ namespace Regi.Services
 
         string GetDirectoryPath(string path, bool throwIfNotFound = true, string targetObj = "project");
         string GetRelativePath(string path);
-        ValueTask<FileInfo> CreateConfigFileAsync(StartupConfig config);
+        ValueTask<FileInfo> CreateConfigFileAsync(RegiConfig config);
         List<FileInfo> FindAllProjectFiles();
         string FindFileOrDirectory(string fileName);
         IEnumerable<DirectoryInfo> GetChildDirectories(DirectoryInfo directory);
@@ -94,7 +94,7 @@ namespace Regi.Services
             }
         }
 
-        public async ValueTask<FileInfo> CreateConfigFileAsync(StartupConfig config)
+        public async ValueTask<FileInfo> CreateConfigFileAsync(RegiConfig config)
         {
             string configFilePath = Path.Combine(WorkingDirectory, "regi.json");
 

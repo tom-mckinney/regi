@@ -13,7 +13,7 @@ namespace Regi.Frameworks
 {
     public interface IDotnet : IFramework
     {
-        Task<AppProcess> ShutdownBuildServer(RegiOptions options, CancellationToken cancellationToken);
+        Task<AppProcess> ShutdownBuildServer(CommandOptions options, CancellationToken cancellationToken);
     }
 
     public class Dotnet : FrameworkBase, IDotnet
@@ -47,7 +47,7 @@ namespace Regi.Frameworks
             FrameworkCommands.DotnetCore.Build
         };
 
-        protected override void ApplyFrameworkOptions(StringBuilder builder, string command, Project project, RegiOptions options)
+        protected override void ApplyFrameworkOptions(StringBuilder builder, string command, Project project, CommandOptions options)
         {
             if (project == null)
             {
@@ -77,7 +77,7 @@ namespace Regi.Frameworks
             }
         }
 
-        public async Task<AppProcess> ShutdownBuildServer(RegiOptions options, CancellationToken cancellationToken)
+        public async Task<AppProcess> ShutdownBuildServer(CommandOptions options, CancellationToken cancellationToken)
         {
             AppProcess shutdownBuildServer = CreateProcess(FrameworkCommands.DotnetCore.ShutdownBuildServer, options, _fileSystem);
 

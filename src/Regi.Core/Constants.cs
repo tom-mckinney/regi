@@ -23,7 +23,7 @@ namespace Regi
                     WriteIndented = true,
                     IgnoreNullValues = true
                 };
-                options.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
+                options.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase, false));
                 return options;
             }
         }

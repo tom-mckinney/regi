@@ -13,11 +13,11 @@ namespace Regi.Services
 {
     public interface IRunnerService
     {
-        Task<IList<Project>> StartAsync(IList<Project> projects, RegiOptions options, CancellationToken cancellationToken);
-        Task<IList<Project>> TestAsync(IList<Project> projects, RegiOptions options, CancellationToken cancellationToken);
-        Task<IList<Project>> BuildAsync(IList<Project> projects, RegiOptions options, CancellationToken cancellationToken);
-        Task<IList<Project>> InstallAsync(IList<Project> projects, RegiOptions options, CancellationToken cancellationToken);
-        Task KillAsync(IList<Project> projects, RegiOptions options, CancellationToken cancellationToken);
+        Task<IList<Project>> StartAsync(IList<Project> projects, CommandOptions options, CancellationToken cancellationToken);
+        Task<IList<Project>> TestAsync(IList<Project> projects, CommandOptions options, CancellationToken cancellationToken);
+        Task<IList<Project>> BuildAsync(IList<Project> projects, CommandOptions options, CancellationToken cancellationToken);
+        Task<IList<Project>> InstallAsync(IList<Project> projects, CommandOptions options, CancellationToken cancellationToken);
+        Task KillAsync(IList<Project> projects, CommandOptions options, CancellationToken cancellationToken);
     }
 
     public class RunnerService : IRunnerService
@@ -48,7 +48,7 @@ namespace Regi.Services
             _console = console;
         }
 
-        public async Task<IList<Project>> StartAsync(IList<Project> projects, RegiOptions options, CancellationToken cancellationToken)
+        public async Task<IList<Project>> StartAsync(IList<Project> projects, CommandOptions options, CancellationToken cancellationToken)
         {
             if (projects.Count <= 0)
                 _console.WriteEmphasizedLine("No projects found");
@@ -73,7 +73,7 @@ namespace Regi.Services
             return projects;
         }
 
-        private async Task<AppProcess> InternalStartProject(Project project, string applicationDirectoryPath, RegiOptions options, CancellationToken cancellationToken)
+        private async Task<AppProcess> InternalStartProject(Project project, string applicationDirectoryPath, CommandOptions options, CancellationToken cancellationToken)
         {
             _console.WriteEmphasizedLine($"Starting project {project.Name} ({applicationDirectoryPath})");
 
@@ -93,7 +93,7 @@ namespace Regi.Services
             return process;
         }
 
-        public async Task<IList<Project>> TestAsync(IList<Project> projects, RegiOptions options, CancellationToken cancellationToken)
+        public async Task<IList<Project>> TestAsync(IList<Project> projects, CommandOptions options, CancellationToken cancellationToken)
         {
             if (projects.Count <= 0)
                 _console.WriteEmphasizedLine("No projects found");
@@ -120,7 +120,7 @@ namespace Regi.Services
                             string dependencyPluralization = project.RequiredProjects.Count > 1 ? "dependencies" : "dependency";
                             _console.WriteDefaultLine($"Starting {project.RequiredProjects.Count} {dependencyPluralization} for project {appName}");
 
-                            RegiOptions requiredOptions = options.CloneForRequiredProjects();
+                            CommandOptions requiredOptions = options.CloneForRequiredProjects();
 
                             IQueueService dependencyQueue = _frameworkServiceProvider.CreateScopedQueueService();
 
@@ -186,7 +186,7 @@ namespace Regi.Services
             return projects;
         }
 
-        public async Task<IList<Project>> BuildAsync(IList<Project> projects, RegiOptions options, CancellationToken cancellationToken)
+        public async Task<IList<Project>> BuildAsync(IList<Project> projects, CommandOptions options, CancellationToken cancellationToken)
         {
             if (projects.Count <= 0)
                 _console.WriteEmphasizedLine("No projects found");
@@ -222,7 +222,7 @@ namespace Regi.Services
             return projects;
         }
 
-        public async Task<IList<Project>> InstallAsync(IList<Project> projects, RegiOptions options, CancellationToken cancellationToken)
+        public async Task<IList<Project>> InstallAsync(IList<Project> projects, CommandOptions options, CancellationToken cancellationToken)
         {
             if (projects.Count <= 0)
                 _console.WriteEmphasizedLine("No projects found");
@@ -246,7 +246,7 @@ namespace Regi.Services
                             string dependencyPluralization = project.Requires.Count > 1 ? "dependencies" : "dependency";
                             _console.WriteDefaultLine($"Starting install for {project.RequiredProjects.Count} {dependencyPluralization} for project {project.Name}");
 
-                            RegiOptions requiredOptions = options.CloneForRequiredProjects();
+                            CommandOptions requiredOptions = options.CloneForRequiredProjects();
 
                             IQueueService dependencyQueue = _frameworkServiceProvider.CreateScopedQueueService();
 
@@ -282,7 +282,7 @@ namespace Regi.Services
             return projects;
         }
 
-        private async Task<AppProcess> InternalInstallProject(Project project, string appDirectoryPath, RegiOptions options, CancellationToken cancellationToken)
+        private async Task<AppProcess> InternalInstallProject(Project project, string appDirectoryPath, CommandOptions options, CancellationToken cancellationToken)
         {
             _console.WriteEmphasizedLine($"Starting install for project {project.Name}");
 
@@ -297,7 +297,7 @@ namespace Regi.Services
             return process;
         }
 
-        public async Task KillAsync(IList<Project> projects, RegiOptions options, CancellationToken cancellationToken)
+        public async Task KillAsync(IList<Project> projects, CommandOptions options, CancellationToken cancellationToken)
         {
             _console.WriteEmphasizedLine("Committing regicide...");
 
@@ -323,7 +323,7 @@ namespace Regi.Services
             _console.WriteSuccessLine("Finished killing processess successfuly", ConsoleLineStyle.LineBeforeAndAfter);
         }
 
-        private void RunScriptsForTask(Project project, AppTask task, RegiOptions options)
+        private void RunScriptsForTask(Project project, AppTask task, CommandOptions options)
         {
             if (project.Scripts?.Count > 0 && project.Scripts.TryGetValue(task, out ICollection<object> beforeScripts))
             {

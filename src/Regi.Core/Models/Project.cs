@@ -21,7 +21,9 @@ namespace Regi.Models
 
         public IList<string> Paths { get; set; }
 
-        public ProjectType Type { get; set; }
+        public IList<ProjectRole> Roles { get; set; } = new List<ProjectRole>();
+
+        public IList<string> Labels { get; set; } = new List<string>();
 
         public ProjectFramework Framework { get; set; } = ProjectFramework.Dotnet;
 
@@ -89,7 +91,7 @@ namespace Regi.Models
             }
         }
 
-        public void TryAddSource(RegiOptions options, StartupConfig config)
+        public void TryAddSource(CommandOptions options, RegiConfig config)
         {
             if (string.IsNullOrWhiteSpace(Source))
             {

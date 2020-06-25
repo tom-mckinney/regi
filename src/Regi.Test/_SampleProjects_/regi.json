@@ -1,10 +1,11 @@
 {
-  "apps": [
+  "projects": [
     {
       "name": "Frontend",
       "path": "./Frontend/package.json",
       "framework": "node",
       "port": 3000,
+      "labels": [ "frontend" ],
       "commands": {
         "start": "run dev"
       }
@@ -14,29 +15,30 @@
       "path": "./Backend/Backend.csproj",
       "framework": "dotnet",
       "port": 5000,
+      "labels": [ "backend" ],
       "arguments": {
-        "*": [ "--foo bar" ]
+        "start": [ "--foo bar" ]
       }
-    }
-  ],
-  "tests": [
+    },
     {
       "name": "SampleSuccessfulTests",
       "path": "./SampleSuccessfulTests",
       "framework": "dotnet",
-      "type": "unit"
+      "roles": [ "test" ],
+      "labels": [ "backend" ]
     },
     {
       "name": "NodeApp",
       "path": "./NodeApp",
       "framework": "node",
-      "type": "unit"
+      "roles": [ "test" ],
+      "labels": [ "backend" ]
     },
     // {
     //   "name": "IntegrationTests",
     //   "path": "./IntegrationTests",
     //   "framework": "node",
-    //   "type": "integration",
+    //   "type": "test",
     //   "requires": [ "Frontend", "Backend" ],
     //   "rawOutput": true,
     //   "serial": true,
@@ -48,14 +50,15 @@
       "name": "IntegrationTests-Cypress",
       "path": "./IntegrationTests-Cypress",
       "framework": "node",
-      "type": "integration",
+      "roles": [ "test" ],
       "requires": [ "Frontend", "Backend" ],
       "optional": true,
       "rawOutput": true,
       "serial": true,
       "environment": {
         "HEADLESS": true
-      }
+      },
+      "labels": [ "e2e" ]
     }
   ],
   "services": []

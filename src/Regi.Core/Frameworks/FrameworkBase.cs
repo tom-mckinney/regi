@@ -44,7 +44,7 @@ namespace Regi.Frameworks
         public virtual string PublishCommand => FrameworkCommands.Publish;
         public virtual string PackageCommand => FrameworkCommands.Package;
 
-        public virtual async Task<AppProcess> Install(Project project, string appDirectoryPath, RegiOptions options, CancellationToken cancellationToken)
+        public virtual async Task<AppProcess> Install(Project project, string appDirectoryPath, CommandOptions options, CancellationToken cancellationToken)
         {
             AppProcess install = CreateProcess(InstallCommand, project, appDirectoryPath, options);
 
@@ -55,7 +55,7 @@ namespace Regi.Frameworks
             return install;
         }
 
-        public virtual Task<AppProcess> Start(Project project, string appDirectoryPath, RegiOptions options, CancellationToken cancellationToken)
+        public virtual Task<AppProcess> Start(Project project, string appDirectoryPath, CommandOptions options, CancellationToken cancellationToken)
         {
             return Task.Run(() =>
             {
@@ -67,7 +67,7 @@ namespace Regi.Frameworks
             }, cancellationToken);
         }
 
-        public virtual async Task<AppProcess> Test(Project project, string appDirectoryPath, RegiOptions options, CancellationToken cancellationToken)
+        public virtual async Task<AppProcess> Test(Project project, string appDirectoryPath, CommandOptions options, CancellationToken cancellationToken)
         {
             AppProcess test = CreateProcess(TestCommand, project, appDirectoryPath, options);
 
@@ -78,7 +78,7 @@ namespace Regi.Frameworks
             return test;
         }
 
-        public virtual async Task<AppProcess> Build(Project project, string appDirectoryPath, RegiOptions options, CancellationToken cancellationToken)
+        public virtual async Task<AppProcess> Build(Project project, string appDirectoryPath, CommandOptions options, CancellationToken cancellationToken)
         {
             AppProcess build = CreateProcess(BuildCommand, project, appDirectoryPath, options);
 
@@ -89,7 +89,7 @@ namespace Regi.Frameworks
             return build;
         }
 
-        public virtual async Task<AppProcess> Kill(RegiOptions options, CancellationToken cancellationToken)
+        public virtual async Task<AppProcess> Kill(CommandOptions options, CancellationToken cancellationToken)
         {
             var statuses = new List<AppStatus>();
             AppProcess process = null;
@@ -141,7 +141,7 @@ namespace Regi.Frameworks
 
         protected virtual IEnumerable<string> FrameworkCommandWildcardExclusions { get; } = new List<string>();
 
-        protected virtual void ApplyFrameworkOptions(StringBuilder builder, string command, Project project, RegiOptions options)
+        protected virtual void ApplyFrameworkOptions(StringBuilder builder, string command, Project project, CommandOptions options)
         {
             lock (_lock)
             {
@@ -163,7 +163,7 @@ namespace Regi.Frameworks
         protected virtual string FormatAdditionalArguments(IEnumerable<string> args) => string.Join(' ', args);
 
         /// TODO: this should be part of <see cref="ProcessUtility"/>
-        public virtual AppProcess CreateProcess(string command, RegiOptions options, IFileSystem fileSystem, string fileName = null)
+        public virtual AppProcess CreateProcess(string command, CommandOptions options, IFileSystem fileSystem, string fileName = null)
         {
             fileName ??= _frameworkExePath;
             string args = command;
@@ -205,7 +205,7 @@ namespace Regi.Frameworks
             return output;
         }
 
-        public virtual AppProcess CreateProcess(string command, Project project, string appDirectoryPath, RegiOptions options, string fileName = null)
+        public virtual AppProcess CreateProcess(string command, Project project, string appDirectoryPath, CommandOptions options, string fileName = null)
         {
             fileName ??= _frameworkExePath;
             string args = BuildCommandArguments(command, project, options);
@@ -240,7 +240,7 @@ namespace Regi.Frameworks
 
             process.Exited += HandleExited(output);
 
-            if (project.RawOutput || options.RawOutput)
+            if (project.RawOutput || options.UnformattedOutput)
             {
                 output.RawOutput = true;
                 process.StartInfo.CreateNoWindow = false;
@@ -269,7 +269,7 @@ namespace Regi.Frameworks
             return output;
         }
 
-        public virtual string BuildCommandArguments(string command, Project project, RegiOptions options)
+        public virtual string BuildCommandArguments(string command, Project project, CommandOptions options)
         {
             lock (_lock)
             {
@@ -295,7 +295,7 @@ namespace Regi.Frameworks
             }
         }
 
-        public virtual void AddCommandOptions(StringBuilder builder, string command, Project project, RegiOptions options)
+        public virtual void AddCommandOptions(StringBuilder builder, string command, Project project, CommandOptions options)
         {
             if (project?.Arguments?.Count > 0)
             {
@@ -365,7 +365,7 @@ namespace Regi.Frameworks
             }
         });
 
-        protected virtual void HandleDispose(Project project, int processId, RegiOptions options)
+        protected virtual void HandleDispose(Project project, int processId, CommandOptions options)
         {
             if (options.Verbose)
             {

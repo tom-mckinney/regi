@@ -9,7 +9,7 @@ namespace Regi.Test.Models
         [Fact]
         public void Sources_throws_if_RawSources_has_invalid_enum_name()
         {
-            var config = new StartupConfig
+            var config = new RegiConfig
             {
                 RawSources = new Dictionary<string, string>
                 {
@@ -27,7 +27,7 @@ namespace Regi.Test.Models
         [InlineData("DOTNET")]
         public void Sources_allows_any_casing_for_enum_names(string framework)
         {
-            var config = new StartupConfig
+            var config = new RegiConfig
             {
                 RawSources = new Dictionary<string, string>
                 {

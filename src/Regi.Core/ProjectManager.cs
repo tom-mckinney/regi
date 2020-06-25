@@ -5,7 +5,6 @@ using Regi.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -17,32 +16,32 @@ namespace Regi
 
         CancellationTokenSource CancellationTokenSource { get; }
 
-        IList<Project> FilterAndTrackProjects(RegiOptions options, StartupConfig config, Func<StartupConfig, IEnumerable<Project>> getTargetProjects);
-        IList<Project> FilterByOptions(IEnumerable<Project> projects, RegiOptions options);
-        Task KillAllProcesses(RegiOptions options, CancellationToken cancellationToken, bool logKillCount = false);
-        Task KillAllProcesses(IEnumerable<Project> projects, RegiOptions options, CancellationToken cancellationToken, bool logKillCount = false);
+        IList<Project> FilterAndTrackProjects(CommandOptions options, RegiConfig config, Func<RegiConfig, IEnumerable<Project>> getTargetProjects);
+        IList<Project> FilterByOptions(IEnumerable<Project> projects, CommandOptions options);
+        Task KillAllProcesses(CommandOptions options, CancellationToken cancellationToken, bool logKillCount = false);
+        Task KillAllProcesses(IEnumerable<Project> projects, CommandOptions options, CancellationToken cancellationToken, bool logKillCount = false);
     }
 
     public class ProjectManager : IProjectManager
     {
         private readonly IConsole _console;
         private readonly ICleanupService _cleanupService;
+        private readonly IProjectFilter _projectFilter;
 
-        public ProjectManager(IConsole console, ICleanupService cleanupService)
+        public ProjectManager(IConsole console, ICleanupService cleanupService, IProjectFilter projectFilter)
         {
             _console = console;
             _cleanupService = cleanupService;
+            _projectFilter = projectFilter;
         }
 
         public IList<Project> Projects { get; private set; } = new List<Project>();
 
         public CancellationTokenSource CancellationTokenSource { get; } = new CancellationTokenSource();
 
-        public IList<Project> FilterAndTrackProjects(RegiOptions options, StartupConfig config, Func<StartupConfig, IEnumerable<Project>> getTargetProjects)
+        public IList<Project> FilterAndTrackProjects(CommandOptions options, RegiConfig config, Func<RegiConfig, IEnumerable<Project>> getTargetProjects)
         {
-            var targetProjects = getTargetProjects(config);
-
-            Projects = FilterByOptions(targetProjects, options);
+            Projects = FilterByOptions(getTargetProjects(config), options);
 
             LinkProjectRequirements(Projects, options, config);
 
@@ -51,44 +50,39 @@ namespace Regi
             return Projects;
         }
 
-        public IList<Project> FilterByOptions(IEnumerable<Project> projects, RegiOptions options)
+        public IList<Project> FilterByOptions(IEnumerable<Project> projects, CommandOptions options)
         {
+            // TODO: add a query builder pattern that combines filter expressions
+
             if (!string.IsNullOrWhiteSpace(options.Name))
             {
-                projects = projects.Where(p => new Regex(options.Name, RegexOptions.IgnoreCase).IsMatch(p.Name));
+                projects = _projectFilter.FilterByName(projects, options.Name);
+            }
+
+            if (options.Labels?.Any() == true)
+            {
+                projects = _projectFilter.FilterByLabels(projects, options.Labels);
             }
 
             if (options.Exclude != null && options.Exclude.Any())
             {
-                projects = projects
-                    .Where(p =>
-                    {
-                        foreach (var exclusion in options.Exclude)
-                        {
-                            if (new Regex(exclusion, RegexOptions.IgnoreCase).IsMatch(p.Name))
-                                return false;
-                        }
-
-                        return true;
-                    });
+                projects = _projectFilter.FilterByExclusions(projects, options.Exclude);
             }
 
-            if (options.Type.HasValue)
+            if (options.Roles?.Any() == true)
             {
-                projects = projects
-                    .Where(p => p.Type == options.Type);
+                projects = _projectFilter.FilterByRoles(projects, options.Roles);
             }
 
             if (!options.IncludeOptional)
             {
-                projects = projects
-                    .Where(p => p.Optional == false);
+                projects = _projectFilter.FilterByOptional(projects);
             }
 
             return projects.ToList();
         }
 
-        public static void LinkProjectRequirements(IEnumerable<Project> projects, RegiOptions options, StartupConfig config)
+        public static void LinkProjectRequirements(IEnumerable<Project> projects, CommandOptions options, RegiConfig config)
         {
             foreach (var project in projects)
             {
@@ -96,7 +90,7 @@ namespace Regi
 
                 foreach (var r in project.Requires)
                 {
-                    var requiredProject = config.Apps.FirstOrDefault(p => p.Name.Contains(r, StringComparison.InvariantCultureIgnoreCase));
+                    var requiredProject = config.Projects.FirstOrDefault(p => p.Name.Contains(r, StringComparison.InvariantCultureIgnoreCase));
 
                     if (requiredProject == null)
                         requiredProject = config.Services.FirstOrDefault(p => p.Name.Contains(r, StringComparison.InvariantCultureIgnoreCase));
@@ -111,12 +105,12 @@ namespace Regi
             }
         }
 
-        public Task KillAllProcesses(RegiOptions options, CancellationToken cancellationToken, bool logKillCount = false)
+        public Task KillAllProcesses(CommandOptions options, CancellationToken cancellationToken, bool logKillCount = false)
         {
             return KillAllProcesses(Projects, options, cancellationToken, logKillCount);
         }
 
-        public async Task KillAllProcesses(IEnumerable<Project> projects, RegiOptions options, CancellationToken cancellationToken, bool logKillCount = false)
+        public async Task KillAllProcesses(IEnumerable<Project> projects, CommandOptions options, CancellationToken cancellationToken, bool logKillCount = false)
         {
             int projectCount = projects.Count();
             if (projectCount > 0)

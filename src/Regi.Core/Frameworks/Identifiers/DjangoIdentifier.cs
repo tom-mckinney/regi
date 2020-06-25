@@ -1,4 +1,5 @@
-﻿using Regi.Models;
+﻿using Regi.Extensions;
+using Regi.Models;
 using Regi.Services;
 using System;
 using System.Threading.Tasks;
@@ -42,7 +43,7 @@ namespace Regi.Frameworks.Identifiers
             project = await base.CreateOrModifyAsync(project, directoryContents);
 
             project.Framework = ProjectFramework.Django;
-            project.Type = ProjectType.Web;
+            project.Roles.TryAdd(ProjectRole.App);
 
             return project;
         }

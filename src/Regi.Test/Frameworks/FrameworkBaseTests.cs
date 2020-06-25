@@ -89,7 +89,7 @@ namespace Regi.Test.Frameworks
         {
             var service = new WumboService(_console);
 
-            var options = new RegiOptions
+            var options = new CommandOptions
             {
                 RemainingArguments = new List<string> {"--wumbo good", "--verbose"}
             };

@@ -58,8 +58,9 @@ namespace Regi.Test.Services
 
             var config = await service.CreateConfigurationAsync(projects, TestOptions.Create());
 
-            Assert.Equal(appCount, config.Apps.Count);
-            Assert.Equal(testCount, config.Tests.Count);
+            Assert.Equal(appCount + testCount, config.Projects.Count);
+            Assert.Equal(appCount, config.Projects.Count(p => p.Name == SampleProjects.Backend.Name));
+            Assert.Equal(testCount, config.Projects.Count(p => p.Name == SampleProjects.XunitTests.Name));
         }
 
         [Fact]
@@ -71,11 +72,12 @@ namespace Regi.Test.Services
 
             var service = CreateService();
 
-            StartupConfig startupConfig = await service.GetConfigurationAsync(null);
+            RegiConfig startupConfig = await service.GetConfigurationAsync(null);
 
             Assert.StartsWith(expectedPath, startupConfig.Path, StringComparison.InvariantCulture);
-            Assert.Equal(totalAppCount, startupConfig.Apps.Count);
-            Assert.Equal(totalTestCount, startupConfig.Tests.Count);
+            Assert.Equal(totalAppCount + totalTestCount, startupConfig.Projects.Count);
+            Assert.Equal(totalAppCount, startupConfig.Projects.WhereApp().Count());
+            Assert.Equal(totalTestCount, startupConfig.Projects.WhereTest().Count());
             Assert.Empty(startupConfig.Services);
 
             AssertAllRuntimePropertiesAreBound(startupConfig, expectedPath);
@@ -90,31 +92,32 @@ namespace Regi.Test.Services
 
             _fileSystem.WorkingDirectory = PathHelper.GetSampleProjectPath("BUNK_DIRECTORY");
 
-            var options = new RegiOptions
+            var options = new CommandOptions
             {
                 ConfigurationPath = expectedPath + file
             };
 
             var service = CreateService();
 
-            StartupConfig startupConfig = await service.GetConfigurationAsync(options);
+            RegiConfig startupConfig = await service.GetConfigurationAsync(options);
 
             Assert.StartsWith(expectedPath, startupConfig.Path, StringComparison.InvariantCulture);
             Assert.Equal(expectedPath, _fileSystem.WorkingDirectory);
 
 
-            Assert.Equal(totalAppCount, startupConfig.Apps.Count);
-            Assert.Equal(totalTestCount, startupConfig.Tests.Count);
+            Assert.Equal(totalAppCount + totalTestCount, startupConfig.Projects.Count);
+            Assert.Equal(totalAppCount, startupConfig.Projects.WhereApp().Count());
+            Assert.Equal(totalTestCount, startupConfig.Projects.WhereTest().Count());
             Assert.Empty(startupConfig.Services);
 
             AssertAllRuntimePropertiesAreBound(startupConfig, expectedPath);
         }
 
-        private void AssertAllRuntimePropertiesAreBound(StartupConfig config, string expectedPath)
+        private void AssertAllRuntimePropertiesAreBound(RegiConfig config, string expectedPath)
         {
             Assert.StartsWith(expectedPath, config.Path, StringComparison.InvariantCulture);
 
-            foreach (var project in config.Apps.Concat(config.Tests))
+            foreach (var project in config.Projects)
             {
                 foreach (var path in project.GetAppDirectoryPaths(_fileSystem))
                 {
@@ -130,7 +133,7 @@ namespace Regi.Test.Services
 
             _fileSystem.WorkingDirectory = PathHelper.GetSampleProjectPath("ConfigurationGood");
 
-            var options = new RegiOptions
+            var options = new CommandOptions
             {
                 ConfigurationPath = expectedPath
             };
@@ -138,6 +141,21 @@ namespace Regi.Test.Services
             var service = CreateService();
 
             await Assert.ThrowsAsync<DirectoryNotFoundException>(() => service.GetConfigurationAsync(options));
+        }
+
+        [Fact]
+        public async Task GetStartupConfig_throws_when_using_deprecated_config_file()
+        {
+            _fileSystem.WorkingDirectory = PathHelper.GetSampleProjectPath("ConfigurationDeprecated");
+
+            var service = CreateService();
+
+            var ex = await Assert.ThrowsAsync<RegiException>(() => service.GetConfigurationAsync(null));
+
+            Assert.IsType<RegiException>(ex.InnerException);
+            Assert.Equal("The properties \"apps\" and \"tests\" have been removed. Use \"projects\" instead.", ex.InnerException.Message);
+
+            ex.LogAndReturnStatus(_console);
         }
 
         [Fact]

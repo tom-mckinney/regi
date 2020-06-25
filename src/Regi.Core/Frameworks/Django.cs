@@ -39,10 +39,9 @@ namespace Regi.Frameworks
             }
         };
 
-        protected override void ApplyFrameworkOptions(StringBuilder builder, string command, Project project, RegiOptions options)
+        protected override void ApplyFrameworkOptions(StringBuilder builder, string command, Project project, CommandOptions options)
         {
-            System.Diagnostics.Debugger.Launch();
-            if (project.Port.HasValue && project.Type == ProjectType.Web)
+            if (project.Port.HasValue && project.Roles.Contains(ProjectRole.App))
             {
                 if (command == FrameworkCommands.Django.RunServer)
                 {
@@ -57,7 +56,7 @@ namespace Regi.Frameworks
 
         public override string TestCommand => "./manage.py test";
 
-        public override async Task<AppProcess> Install(Project project, string appDirectoryPath, RegiOptions options, CancellationToken cancellationToken)
+        public override async Task<AppProcess> Install(Project project, string appDirectoryPath, CommandOptions options, CancellationToken cancellationToken)
         {
             AppProcess install = CreateProcess(InstallCommand, project, appDirectoryPath, options, "pip");
 

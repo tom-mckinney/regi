@@ -1,9 +1,11 @@
 ﻿using McMaster.Extensions.CommandLineUtils;
+using Regi.Extensions;
 using Regi.Models;
 using Regi.Services;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -22,7 +24,7 @@ namespace Regi.CommandLine.Commands
             _summaryService = summaryService;
         }
 
-        protected override Func<StartupConfig, IEnumerable<Project>> GetTargetProjects => (c) => c.Tests;
+        protected override Func<RegiConfig, IEnumerable<Project>> GetTargetProjects => (c) => c.Projects.WhereRoleIs(ProjectRole.Test);
 
         protected override async Task<int> ExecuteAsync(IList<Project> projects, CancellationToken cancellationToken)
         {

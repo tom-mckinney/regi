@@ -175,9 +175,9 @@ namespace Regi.Extensions
             console.WriteIndentedLine($"- {propertyName}: {propertyValue}", indentCount);
         }
 
-        public static void WritePropertyIfSpecified(this IConsole console, string propertyName, ProjectType propertyValue, int indentCount = 2)
+        public static void WritePropertyIfSpecified(this IConsole console, string propertyName, ProjectRole propertyValue, int indentCount = 2)
         {
-            if (propertyValue == ProjectType.Unknown)
+            if (propertyValue == ProjectRole.Unknown)
                 return;
 
             console.WriteIndentedLine($"- {propertyName}: {propertyValue}", indentCount);

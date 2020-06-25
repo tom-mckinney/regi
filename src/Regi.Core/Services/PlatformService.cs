@@ -13,8 +13,8 @@ namespace Regi.Services
     public interface IPlatformService
     {
         IRuntimeInfo RuntimeInfo { get; }
-        Process GetKillProcess(string processName, RegiOptions options);
-        void RunAnonymousScript(string script, RegiOptions options, string workingDirectory = null);
+        Process GetKillProcess(string processName, CommandOptions options);
+        void RunAnonymousScript(string script, CommandOptions options, string workingDirectory = null);
     }
 
     public class PlatformService : IPlatformService
@@ -31,7 +31,7 @@ namespace Regi.Services
 
         public IRuntimeInfo RuntimeInfo { get; private set; }
 
-        public Process GetKillProcess(string processName, RegiOptions options)
+        public Process GetKillProcess(string processName, CommandOptions options)
         {
             var startInfo = new ProcessStartInfo
             {
@@ -77,7 +77,7 @@ namespace Regi.Services
             return process;
         }
 
-        public void RunAnonymousScript(string script, RegiOptions options, string workingDirectory = null)
+        public void RunAnonymousScript(string script, CommandOptions options, string workingDirectory = null)
         {
             string scriptExecutable = PathUtility.GetFileNameFromCommand(script);
             if (!PathUtility.TryGetPathFile(scriptExecutable, RuntimeInfo, out string fileName))

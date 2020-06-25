@@ -1,8 +1,10 @@
 ﻿using Regi.Extensions;
 using Regi.Models;
+using Regi.Utilities;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 
@@ -10,8 +12,8 @@ namespace Regi.Services
 {
     public interface IConfigurationService
     {
-        Task<StartupConfig> GetConfigurationAsync(RegiOptions options);
-        ValueTask<StartupConfig> CreateConfigurationAsync(IEnumerable<Project> projects, RegiOptions options);
+        Task<RegiConfig> GetConfigurationAsync(CommandOptions options);
+        ValueTask<RegiConfig> CreateConfigurationAsync(IEnumerable<Project> projects, CommandOptions options);
     }
 
     public class ConfigurationService : IConfigurationService
@@ -23,26 +25,17 @@ namespace Regi.Services
             _fileSystem = fileSystem;
         }
 
-        public ValueTask<StartupConfig> CreateConfigurationAsync(IEnumerable<Project> projects, RegiOptions options)
+        public ValueTask<RegiConfig> CreateConfigurationAsync(IEnumerable<Project> projects, CommandOptions options)
         {
-            var config = new StartupConfig();
-
-            foreach (var project in projects)
+            var config = new RegiConfig
             {
-                if (project.Type == ProjectType.Unit || project.Type == ProjectType.Integration)
-                {
-                    config.Tests.Add(project);
-                }
-                else
-                {
-                    config.Apps.Add(project);
-                }
-            }
+                Projects = projects.ToList()
+            };
 
-            return new ValueTask<StartupConfig>(config);
+            return new ValueTask<RegiConfig>(config);
         }
 
-        public async Task<StartupConfig> GetConfigurationAsync(RegiOptions options)
+        public async Task<RegiConfig> GetConfigurationAsync(CommandOptions options)
         {
             DirectoryInfo directory;
 
@@ -74,7 +67,7 @@ namespace Regi.Services
             try
             {
                 
-                StartupConfig config = await JsonSerializer.DeserializeAsync<StartupConfig>(stream, Constants.DefaultSerializerOptions);
+                RegiConfig config = await JsonSerializer.DeserializeAsync<RegiConfig>(stream, Constants.DefaultSerializerOptions);
 
                 config.Path = startupFile.FullName;
 
@@ -82,7 +75,9 @@ namespace Regi.Services
             }
             catch (Exception e)
             {
-                throw new RegiException($"Configuration file was not properly formatted: {startupFile.FullName}{Environment.NewLine}{e.Message}", e);
+                string relativePath = Path.GetRelativePath(_fileSystem.WorkingDirectory, startupFile.FullName);
+
+                throw new RegiException($"Configuration file was not properly formatted: {relativePath}{Environment.NewLine}{ExceptionUtility.GetMessage(e)}", e);
             }
         }
     }

@@ -11,7 +11,7 @@ namespace Regi.Services
 {
     public interface ISummaryService
     {
-        OutputSummary PrintDomainSummary(StartupConfig config, RegiOptions options);
+        OutputSummary PrintDomainSummary(RegiConfig config, CommandOptions options);
         OutputSummary PrintTestSummary(IList<Project> projects, TimeSpan timespan);
     }
 
@@ -28,17 +28,15 @@ namespace Regi.Services
             _console = console;
         }
 
-        public OutputSummary PrintDomainSummary(StartupConfig config, RegiOptions options)
+        public OutputSummary PrintDomainSummary(RegiConfig config, CommandOptions options)
         {
             options.IncludeOptional = true; // Always include optional projects that match criteria
 
             OutputSummary output = new OutputSummary();
 
-            var apps = _projectManager.FilterByOptions(config.Apps, options);
-            var tests = _projectManager.FilterByOptions(config.Tests, options);
+            var projects = _projectManager.FilterByOptions(config.Projects, options);
 
-            PrintAppGroupDetails(apps, output.Apps, "Apps");
-            PrintAppGroupDetails(tests, output.Tests, "Tests");
+            PrintAppGroupDetails(projects, output.Projects, "Projects");
 
             void PrintAppGroupDetails(IList<Project> inputApps, IList<Project> outputApps, string groupName)
             {
@@ -63,7 +61,7 @@ namespace Regi.Services
                         if (options.Verbose)
                         {
                             _console.WritePropertyIfSpecified("Framework", app.Framework);
-                            _console.WritePropertyIfSpecified("Type", app.Type);
+                            _console.WritePropertyIfSpecified("Type", app.Roles);
                             _console.WritePropertyIfSpecified("Paths", app.GetAppDirectoryPaths(_fileSystemService), true, 2);
                             _console.WritePropertyIfSpecified("Port", app.Port);
                             _console.WritePropertyIfSpecified("Commands", app.Commands);

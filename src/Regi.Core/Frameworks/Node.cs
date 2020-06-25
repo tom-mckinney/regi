@@ -34,7 +34,7 @@ namespace Regi.Frameworks
         };
 
 
-        protected override void ApplyFrameworkOptions(StringBuilder builder, string command, Project project, RegiOptions options)
+        protected override void ApplyFrameworkOptions(StringBuilder builder, string command, Project project, CommandOptions options)
         {
             if (!string.IsNullOrWhiteSpace(project.Source))
             {

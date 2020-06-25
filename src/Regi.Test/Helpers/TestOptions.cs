@@ -8,9 +8,9 @@ namespace Regi.Test.Helpers
 {
     public static class TestOptions
     {
-        public static RegiOptions Create(EnvironmentVariableDictionary varList = null, params string[] otherArguments)
+        public static CommandOptions Create(EnvironmentVariableDictionary varList = null, params string[] otherArguments)
         {
-            return new RegiOptions
+            return new CommandOptions
             {
                 VariableList = varList,
                 RemainingArguments = otherArguments.ToList(),

@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace Regi.Models
 {
-    public class RegiOptions
+    public class CommandOptions
     {
         [Argument(0, Description = "Name of the project")]
         public string Name { get; set; }
@@ -18,8 +18,11 @@ namespace Regi.Models
         [Option(CommandOptionType.MultipleValue, Description = "Search pattern to exclude from the command")]
         public List<string> Exclude { get; set; }
 
-        [Option(Description = "Project type")]
-        public ProjectType? Type { get; set; }
+        [Option(CommandOptionType.MultipleValue, Description = "Search pattern to filter projects with a matching label")]
+        public List<string> Labels { get; set; }
+
+        [Option(Description = "Search pattern to filter projects with a matching role")]
+        public IEnumerable<ProjectRole> Roles { get; set; }
 
         [Option(CommandOptionType.NoValue, Description = "Print all output")]
         public bool Verbose { get; set; } = false;
@@ -33,8 +36,8 @@ namespace Regi.Models
         [Option(CommandOptionType.NoValue, Description = "Do not run any processes in parallel")]
         public bool NoParallel { get; set; } = false;
 
-        [Option(CommandOptionType.NoValue, Description = "Return raw output without any formatting or verbosity settings")]
-        public bool RawOutput { get; set; } = false;
+        [Option(CommandOptionType.NoValue, Template = "-u --unformatted", Description = "Return output without any formatting or verbosity settings")]
+        public bool UnformattedOutput { get; set; } = false;
 
         [Option(CommandOptionType.NoValue, Template = "-i --include-optional", Description = "Include optional projects")]
         public bool IncludeOptional { get; set; }
@@ -47,9 +50,9 @@ namespace Regi.Models
         /// Clones options and sets Arguments to null. This is used when omitting arguments or properties for required projects.
         /// </summary>
         /// <returns></returns>
-        public RegiOptions CloneForRequiredProjects()
+        public CommandOptions CloneForRequiredProjects()
         {
-            RegiOptions clone = (RegiOptions)MemberwiseClone();
+            CommandOptions clone = (CommandOptions)MemberwiseClone();
 
             clone.RemainingArguments = null;
 

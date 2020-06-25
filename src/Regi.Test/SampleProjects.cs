@@ -12,7 +12,7 @@ namespace Regi.Test
         {
             Name = "ClassLib",
             Paths = new[] { PathHelper.GetSampleProjectPath("ClassLib") },
-            Type = ProjectType.Web, // TODO: have a classlib type
+            Roles = new List<ProjectRole> { ProjectRole.App }, // TODO: have a classlib type
         };
 
         public static Project Frontend => new Project
@@ -20,7 +20,7 @@ namespace Regi.Test
             Name = "Frontend",
             Path = PathHelper.GetSampleProjectPath("Frontend"),
             Framework = ProjectFramework.Node,
-            Type = ProjectType.Web,
+            Roles = new List<ProjectRole> { ProjectRole.App },
             Port = 3000,
             Commands = new Dictionary<string, string>
             {
@@ -33,7 +33,7 @@ namespace Regi.Test
             Name = "Backend",
             Path = PathHelper.GetSampleProjectPath("Backend"),
             Framework = ProjectFramework.Dotnet,
-            Type = ProjectType.Web,
+            Roles = new List<ProjectRole> { ProjectRole.App },
             Port = 5000,
             Arguments = new CommandDictionary
             {
@@ -46,7 +46,7 @@ namespace Regi.Test
             Name = "SampleSuccessfulTests",
             Path = PathHelper.GetSampleProjectPath("SampleSuccessfulTests"),
             Framework = ProjectFramework.Dotnet,
-            Type = ProjectType.Unit
+            Roles = new List<ProjectRole> { ProjectRole.Test }
         };
 
         public static Project JestTests => new Project
@@ -81,7 +81,7 @@ namespace Regi.Test
                 PathHelper.GetSampleProjectPath("AppCollection/App3/App3.csproj"),
             },
             Framework = ProjectFramework.Dotnet,
-            Type = ProjectType.Web
+            Roles = new List<ProjectRole> { ProjectRole.App }
         };
 
         public static Project TestCollection => new Project
@@ -94,64 +94,61 @@ namespace Regi.Test
                 PathHelper.GetSampleProjectPath("TestCollection/Test3/Test3.csproj"),
             },
             Framework = ProjectFramework.Dotnet,
-            Type = ProjectType.Unit
+            Roles = new List<ProjectRole> { ProjectRole.Test }
         };
 
         public static Project SimpleNodeApp => new Project
         {
             Name = "NodeApp",
             Path = PathHelper.GetSampleProjectPath("NodeApp/package.json"),
-            Type = ProjectType.Web,
+            Roles = new List<ProjectRole> { ProjectRole.App },
             Framework = ProjectFramework.Node,
             Port = 9081
         };
 
-        public static StartupConfig ConfigurationDefault => new StartupConfig
+        public static RegiConfig ConfigurationDefault => new RegiConfig
         {
-            Apps = new List<Project>
+            Projects = new List<Project>
             {
-                Frontend, Backend
-            },
-            Tests = new List<Project>
-            {
-                XunitTests, JestTests, IntegrationTests
+                Frontend,
+                Backend,
+                XunitTests,
+                JestTests,
+                IntegrationTests,
             },
             Services = new List<Project>()
         };
 
-        public static StartupConfig ConfigurationGood => new StartupConfig
+        public static RegiConfig ConfigurationGood => new RegiConfig
         {
-            Apps = new List<Project>
+            Projects = new List<Project>
             {
                 new Project
                 {
                     Name = "SampleApp1",
                     Path = PathHelper.GetSampleProjectPath("SampleApp/SampleApp.csproj"),
-                    Type = ProjectType.Web
+                    Roles = new List<ProjectRole> { ProjectRole.App }
                 },
                 new Project
                 {
                     Name = "SampleApp2",
                     Path = PathHelper.GetSampleProjectPath("SampleApp/SampleApp.csproj"),
-                    Type = ProjectType.Web,
+                    Roles = new List<ProjectRole> { ProjectRole.App },
                     Port = 9080,
                     Serial = true
                 },
-                SimpleNodeApp
-            },
-            Tests = new List<Project>
-            {
+                SimpleNodeApp,
                 new Project
                 {
                     Name = "SampleSuccessfulTests",
                     Path = PathHelper.GetSampleProjectPath("SampleSuccessfulTests/SampleSuccessfulTests.csproj"),
-                    Type = ProjectType.Unit
+                    Roles = new List<ProjectRole> { ProjectRole.Test }
                 },
                 new Project
                 {
                     Name = "SampleSuccessfulTests",
                     Path = PathHelper.GetSampleProjectPath("SampleSuccessfulTests/SampleSuccessfulTests.csproj"),
-                    Type = ProjectType.Integration,
+                    Roles = new List<ProjectRole> { ProjectRole.Test },
                     Serial = true
                 }
             },
