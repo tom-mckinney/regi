@@ -1,0 +1,65 @@
+{
+  "projects": [
+    {
+      "name": "Frontend",
+      "path": "./Frontend/package.json",
+      "framework": "node",
+      "port": 3000,
+      "labels": [ "frontend" ],
+      "commands": {
+        "start": "run dev"
+      }
+    },
+    {
+      "name": "Backend",
+      "path": "./Backend/Backend.csproj",
+      "framework": "dotnet",
+      "port": 5000,
+      "labels": [ "backend" ],
+      "arguments": {
+        "start": [ "--foo bar" ]
+      }
+    },
+    {
+      "name": "SampleSuccessfulTests",
+      "path": "./SampleSuccessfulTests",
+      "framework": "dotnet",
+      "roles": [ "test" ],
+      "labels": [ "backend" ]
+    },
+    {
+      "name": "NodeApp",
+      "path": "./NodeApp",
+      "framework": "node",
+      "roles": [ "test" ],
+      "labels": [ "backend" ]
+    },
+    // {
+    //   "name": "IntegrationTests",
+    //   "path": "./IntegrationTests",
+    //   "framework": "node",
+    //   "type": "test",
+    //   "requires": [ "Frontend", "Backend" ],
+    //   "rawOutput": true,
+    //   "serial": true,
+    //   "environment": {
+    //     "HEADLESS": true
+    //   }
+    // },
+    {
+      "name": "IntegrationTests",
+      "path": "./IntegrationTests",
+      "framework": "node",
+      "roles": [ "test" ],
+      "requires": [ "Frontend", "Backend" ],
+      "optional": true,
+      "rawOutput": true,
+      "serial": true,
+      "environment": {
+        "HEADLESS": true
+      },
+      "labels": [ "e2e" ]
+    }
+  ],
+  "services": []
+}
