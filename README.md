@@ -2,7 +2,7 @@
 
 > [ rej-ee ]
 
-[![nuget](https://img.shields.io/nuget/v/Regi)](https://www.nuget.org/packages/Regi/) ![Publish Package](https://github.com/tom-mckinney/regi/workflows/Publish%20Package/badge.svg) ![Run Tests](https://github.com/tom-mckinney/regi/workflows/Run%20Tests/badge.svg?branch=master)
+[![nuget](https://img.shields.io/nuget/v/Regi)](https://www.nuget.org/packages/Regi/) ![Publish Package](https://github.com/tom-mckinney/regi/workflows/Publish%20Package/badge.svg) ![Run Tests](https://github.com/tom-mckinney/regi/workflows/Run%20Tests/badge.svg?branch=main)
 
 Regi is a "config-first" microservice orchestrator. The first iteration of this project was created to address the growing complexity of a microservice domain without adding vendor dependencies or cumbersome overhead. This project is still a work in progress, and is likely evolve over its lifetime; however, we are committed to always uphold the following standards:
 
@@ -70,7 +70,7 @@ Regi is most commonly used as a .NET Core Global tool (i.e. a command line appli
 
 ## Samples
 
-The most up-to-date examples can be found in the [Sample Projects](https://github.com/tom-mckinney/regi/tree/master/src/Regi.Test/_SampleProjects_) of the `Regi.Test` project. Below is a simple example of what a `regi.json` configuration file might look like:
+The most up-to-date examples can be found in the [Sample Projects](https://github.com/tom-mckinney/regi/tree/main/src/Regi.Test/_SampleProjects_) of the `Regi.Test` project. Below is a simple example of what a `regi.json` configuration file might look like:
 
 ```json
 {
