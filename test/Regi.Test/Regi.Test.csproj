@@ -28,27 +28,9 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
   </ItemGroup>
-
-  <ItemGroup>
-    <Compile Remove="_SampleProjects_\**" />
-    <EmbeddedResource Remove="_SampleProjects_\**" />
-    <None Remove="_SampleProjects_\**" />
-  </ItemGroup>
   
   <ItemGroup>
     <None Include="SystemResponses\**\*">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="_SampleProjects_\**\*.csproj" Exclude="**\obj\**\*;**\bin\**\*;**\node_modules\**\*;**\.next\**\*">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="_SampleProjects_\**\*.cs" Exclude="**\obj\**\*;**\bin\**\*;**\node_modules\**\*;**\.next\**\*">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="_SampleProjects_\**\*.json" Exclude="**\obj\**\*;**\bin\**\*;**\node_modules\**\*;**\.next\**\*">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="_SampleProjects_\**\*.js" Exclude="**\obj\**\*;**\bin\**\*;**\node_modules\**\*;**\.next\**\*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
