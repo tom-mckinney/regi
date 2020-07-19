@@ -1,4 +1,5 @@
 ﻿using McMaster.Extensions.CommandLineUtils;
+using Regi.Abstractions;
 using Regi.Extensions;
 using System;
 using System.Diagnostics;
@@ -7,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Regi.Models
 {
-    public class AppProcess
+    public class AppProcess : IAppProcess
     {
         private static readonly object _lock = new object();
 

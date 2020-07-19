@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Regi.Models
+namespace Regi.Abstractions
 {
     public enum AppTask
     {

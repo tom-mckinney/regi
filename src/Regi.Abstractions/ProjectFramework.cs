@@ -1,4 +1,8 @@
-﻿namespace Regi.Models
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace Regi.Abstractions
 {
     public enum ProjectFramework
     {

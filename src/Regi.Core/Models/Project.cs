@@ -1,11 +1,12 @@
-﻿using Regi.Services;
+﻿using Regi.Abstractions;
+using Regi.Services;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
 namespace Regi.Models
 {
-    public class Project
+    public class Project : IProject
     {
         public Project() { }
 

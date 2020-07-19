@@ -1,4 +1,4 @@
-﻿namespace Regi.Models
+﻿namespace Regi.Abstractions
 {
     public enum ProjectRole
     {

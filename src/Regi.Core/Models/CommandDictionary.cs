@@ -1,10 +1,12 @@
-﻿using System;
+﻿using Regi.Abstractions;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Regi.Models
 {
-    public class CommandDictionary<TValue> : Dictionary<string, ICollection<TValue>>
+    public class CommandDictionary<TValue>
+        : Dictionary<string, ICollection<TValue>>, ICommandDictionary<TValue>
     {
         public CommandDictionary() : base(StringComparer.InvariantCultureIgnoreCase)
         {
@@ -33,7 +35,8 @@ namespace Regi.Models
         }
     }
 
-    public class CommandDictionary : CommandDictionary<string>
+    public class CommandDictionary
+        : CommandDictionary<string>, ICommandDictionary
     {
     }
 }

@@ -1,16 +1,17 @@
-﻿using System;
+﻿using Regi.Abstractions;
+using System;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
 namespace Regi.Models
 {
-    public class RegiConfig
+    public class RegiConfig : ITopology
     {
         [JsonIgnore]
         public string Path { get; set; }
 
         [JsonPropertyName("projects")]
-        public List<Project> Projects { get; set; } = new List<Project>();
+        public IList<IProject> Projects { get; set; } = new List<IProject>();
 
         // TODO: Delete this property when Regi 1.0.0 is release
         [Obsolete("This is temporary for interactive documentation. Use Projects instead")]

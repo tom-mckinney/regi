@@ -113,7 +113,7 @@ namespace Regi.Test.Frameworks
 
             AppProcess process = await _service.Start(_consoleApp, _consoleApp.GetAppDirectoryPaths(_fileSystem)[0], optionsWithoutVerbose, CancellationToken.None);
 
-            process.WaitForExit();
+            await process.WaitForExitAsync(CancellationToken.None);
 
             await Task.Delay(100); // flakes out for some reason
 
@@ -129,7 +129,7 @@ namespace Regi.Test.Frameworks
         {
             AppProcess process = await _service.Start(_consoleApp, _consoleApp.GetAppDirectoryPaths(_fileSystem)[0], TestOptions.Create(), CancellationToken.None);
 
-            process.WaitForExit();
+            await process.WaitForExitAsync(CancellationToken.None);
 
             Assert.Equal(AppTask.Start, process.Task);
             Assert.Equal(AppStatus.Success, process.Status);

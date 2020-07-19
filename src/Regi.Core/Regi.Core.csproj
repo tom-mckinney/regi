@@ -26,4 +26,8 @@
     <PackageReference Include="System.Text.Json" Version="4.7.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Regi.Abstractions\Regi.Abstractions.csproj" />
+  </ItemGroup>
+
 </Project>
