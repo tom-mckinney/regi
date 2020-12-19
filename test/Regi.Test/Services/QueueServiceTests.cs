@@ -1,4 +1,5 @@
 ﻿using Moq;
+using Regi.Abstractions;
 using Regi.Models;
 using Regi.Services;
 using Regi.Test.Helpers;
@@ -136,7 +137,7 @@ namespace Regi.Test.Services
                 })
                 .Verifiable();
 
-            await _service.ConfirmProjectsStartedAsync(new List<Project> { new Project { Name = "TestProject", Port = port } }, CancellationToken.None);
+            await _service.ConfirmProjectsStartedAsync(new List<IProject> { new Project { Name = "TestProject", Port = port } }, CancellationToken.None);
 
             _networkingServiceMock.Verify(m => m.IsPortListening(port), Times.Exactly(expectedCallCount));
             Assert.Equal(callCount, expectedCallCount);

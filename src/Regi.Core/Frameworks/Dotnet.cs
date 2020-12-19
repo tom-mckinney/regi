@@ -1,4 +1,5 @@
 ﻿using McMaster.Extensions.CommandLineUtils;
+using Regi.Abstractions;
 using Regi.Extensions;
 using Regi.Models;
 using Regi.Services;
@@ -13,7 +14,7 @@ namespace Regi.Frameworks
 {
     public interface IDotnet : IFramework
     {
-        Task<AppProcess> ShutdownBuildServer(CommandOptions options, CancellationToken cancellationToken);
+        Task<IAppProcess> ShutdownBuildServer(CommandOptions options, CancellationToken cancellationToken);
     }
 
     public class Dotnet : FrameworkBase, IDotnet
@@ -47,7 +48,7 @@ namespace Regi.Frameworks
             FrameworkCommands.DotnetCore.Build
         };
 
-        protected override void ApplyFrameworkOptions(StringBuilder builder, string command, Project project, CommandOptions options)
+        protected override void ApplyFrameworkOptions(StringBuilder builder, string command, IProject project, CommandOptions options)
         {
             if (project == null)
             {
@@ -65,7 +66,7 @@ namespace Regi.Frameworks
             base.ApplyFrameworkOptions(builder, command, project, options);
         }
 
-        protected override void SetEnvironmentVariables(Process process, Project project)
+        protected override void SetEnvironmentVariables(Process process, IProject project)
         {
             base.SetEnvironmentVariables(process, project);
 
@@ -77,9 +78,9 @@ namespace Regi.Frameworks
             }
         }
 
-        public async Task<AppProcess> ShutdownBuildServer(CommandOptions options, CancellationToken cancellationToken)
+        public async Task<IAppProcess> ShutdownBuildServer(CommandOptions options, CancellationToken cancellationToken)
         {
-            AppProcess shutdownBuildServer = CreateProcess(FrameworkCommands.DotnetCore.ShutdownBuildServer, options, _fileSystem);
+            IAppProcess shutdownBuildServer = CreateProcess(FrameworkCommands.DotnetCore.ShutdownBuildServer, options, _fileSystem);
 
             shutdownBuildServer.Start();
             await shutdownBuildServer.WaitForExitAsync(cancellationToken);

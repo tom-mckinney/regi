@@ -1,4 +1,5 @@
-﻿using Regi.Models;
+﻿using Regi.Abstractions;
+using Regi.Models;
 using System.Collections.Generic;
 using Xunit;
 

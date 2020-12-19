@@ -1,17 +1,15 @@
-﻿using Regi.Models;
-using System;
+﻿using Regi.Abstractions;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Regi.Services
 {
     public interface IDiscoveryService
     {
-        ValueTask<IEnumerable<Project>> IdentifyAllProjectsAsync(DirectoryInfo directory);
+        ValueTask<IEnumerable<IProject>> IdentifyAllProjectsAsync(DirectoryInfo directory);
 
-        ValueTask<Project> IdentifyProjectAsync(DirectoryInfo directory);
+        ValueTask<IProject> IdentifyProjectAsync(DirectoryInfo directory);
     }
 
     public class DiscoveryService : IDiscoveryService
@@ -25,16 +23,16 @@ namespace Regi.Services
             _identifiers = identifiers;
         }
 
-        public async ValueTask<IEnumerable<Project>> IdentifyAllProjectsAsync(DirectoryInfo directory)
+        public async ValueTask<IEnumerable<IProject>> IdentifyAllProjectsAsync(DirectoryInfo directory)
         {
             var project = await IdentifyProjectAsync(directory);
 
             if (project != null)
             {
-                return new List<Project> { project };
+                return new List<IProject> { project };
             }
 
-            var output = new List<Project>();
+            var output = new List<IProject>();
 
             foreach (var childDirectory in _fileSystem.GetChildDirectories(directory))
             {
@@ -47,9 +45,9 @@ namespace Regi.Services
             return output;
         }
 
-        public async ValueTask<Project> IdentifyProjectAsync(DirectoryInfo directory)
+        public async ValueTask<IProject> IdentifyProjectAsync(DirectoryInfo directory)
         {
-            Project project = null;
+            IProject project = null;
 
             var fileSystemObjects = _fileSystem.GetAllChildren(directory);
 

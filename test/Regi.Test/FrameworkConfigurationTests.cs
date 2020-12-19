@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Regi.Abstractions;
 using Regi.CommandLine;
 using Regi.Frameworks;
 using Regi.Models;

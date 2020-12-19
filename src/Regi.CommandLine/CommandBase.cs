@@ -1,4 +1,5 @@
 ﻿using McMaster.Extensions.CommandLineUtils;
+using Regi.Abstractions;
 using Regi.Extensions;
 using Regi.Models;
 using Regi.Services;
@@ -37,9 +38,9 @@ namespace Regi.CommandLine
         /// </summary>
         public virtual bool FilterProjects => true;
 
-        public RegiConfig Config { get; protected set; }
+        public IServiceMesh Config { get; protected set; }
 
-        protected abstract Func<RegiConfig, IEnumerable<Project>> GetTargetProjects { get; }
+        protected abstract Func<IServiceMesh, IEnumerable<IProject>> GetTargetProjects { get; }
 
         protected virtual async Task BeforeExecuteAsync()
         {
@@ -70,7 +71,7 @@ namespace Regi.CommandLine
             }
         }
 
-        protected abstract Task<int> ExecuteAsync(IList<Project> projects, CancellationToken cancellationToken);
+        protected abstract Task<int> ExecuteAsync(IList<IProject> projects, CancellationToken cancellationToken);
 
         protected virtual void AfterExecute()
         {

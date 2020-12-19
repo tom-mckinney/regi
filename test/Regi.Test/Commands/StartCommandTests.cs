@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Options;
 using Moq;
+using Regi.Abstractions;
 using Regi.CommandLine.Commands;
 using Regi.Models;
 using Regi.Services;
@@ -39,7 +40,7 @@ namespace Regi.Test.Commands
             _configServiceMock.Setup(m => m.GetConfigurationAsync(It.IsAny<CommandOptions>()))
                 .ReturnsAsync(SampleProjects.ConfigurationDefault)
                 .Verifiable();
-            _runnerServiceMock.Setup(m => m.StartAsync(It.IsAny<IList<Project>>(), It.IsAny<CommandOptions>(), It.IsAny<CancellationToken>()))
+            _runnerServiceMock.Setup(m => m.StartAsync(It.IsAny<IList<IProject>>(), It.IsAny<CommandOptions>(), It.IsAny<CancellationToken>()))
                 .Callback((IList<Project> projects, CommandOptions options, CancellationToken token) =>
                 {
                     foreach (var p in projects)
@@ -47,7 +48,7 @@ namespace Regi.Test.Commands
                         p.Processes.Add(new AppProcess(new Process(), AppTask.Start, AppStatus.Success));
                     }
                 })
-                .Returns((IList<Project> projects, CommandOptions options, CancellationToken token) => Task.FromResult(projects))
+                .Returns((IList<IProject> projects, CommandOptions options, CancellationToken token) => Task.FromResult(projects))
                 .Verifiable();
 
             StartCommand command = CreateCommand();

@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 
 namespace Regi.Models
 {
-    public class RegiConfig : ITopology
+    public class RegiConfig : IServiceMesh
     {
         [JsonIgnore]
         public string Path { get; set; }
@@ -34,7 +34,7 @@ namespace Regi.Models
         }
 
         [JsonPropertyName("services")]
-        public List<Project> Services { get; set; } = new List<Project>();
+        public IList<IProject> Services { get; set; } = new List<IProject>();
 
         // TODO: Remove RawSources when .NET 5 supports deserializing all Dictionary keys
         [JsonPropertyName("sources")]

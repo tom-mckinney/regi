@@ -1,9 +1,8 @@
-﻿using Regi.Models;
+﻿using Regi.Abstractions;
 using Regi.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using System.Text;
 
 namespace Regi.Test
 {
@@ -11,7 +10,7 @@ namespace Regi.Test
     {
         protected static readonly TestFileSystem _fileSystem = new TestFileSystem();
 
-        protected static void CleanupApp(AppProcess app)
+        protected static void CleanupApp(IAppProcess app)
         {
             if (app == null)
             {

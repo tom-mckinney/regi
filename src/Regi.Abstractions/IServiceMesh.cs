@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 
 namespace Regi.Abstractions
 {
-    public interface ITopology
+    public interface IServiceMesh
     {
         IList<IProject> Projects { get; set; }
 

@@ -1,4 +1,5 @@
 ﻿using Moq;
+using Regi.Abstractions;
 using Regi.Extensions;
 using Regi.Frameworks;
 using Regi.Models;
@@ -124,7 +125,7 @@ namespace Regi.Test.Services
             appCollection.Paths = appCollection.Paths.Take(pathCount).ToList();
             var config = new RegiConfig
             {
-                Projects = new List<Project> { appCollection }
+                Projects = new List<IProject> { appCollection }
             };
 
             _dotnetServiceMock.Setup(m => m.Start(It.IsAny<Project>(), It.IsAny<string>(), It.IsAny<CommandOptions>(), It.IsAny<CancellationToken>()))
@@ -292,7 +293,7 @@ namespace Regi.Test.Services
                     .Verifiable();
             }
 
-            var projects = await _runnerService.TestAsync(new List<Project> { testProject }, TestOptions.Create(), CancellationToken.None);
+            var projects = await _runnerService.TestAsync(new List<IProject> { testProject }, TestOptions.Create(), CancellationToken.None);
 
             var actualTestProject = Assert.Single(projects);
             Assert.Same(testProject, actualTestProject);
@@ -382,7 +383,7 @@ namespace Regi.Test.Services
 
             var options = TestOptions.Create();
 
-            var projects = new List<Project> { SampleProjects.IntegrationTests };
+            var projects = new List<IProject> { SampleProjects.IntegrationTests };
 
             ProjectManager.LinkProjectRequirements(projects, options, SampleProjects.ConfigurationDefault);
 
@@ -465,7 +466,7 @@ namespace Regi.Test.Services
 
             var config = new RegiConfig
             {
-                Projects = new List<Project> { app, test1, test2 },
+                Projects = new List<IProject> { app, test1, test2 },
             };
 
             ProjectManager.LinkProjectRequirements(config.Projects, options, config);

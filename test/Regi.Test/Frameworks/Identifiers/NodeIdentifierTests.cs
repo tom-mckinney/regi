@@ -1,5 +1,5 @@
-﻿using Regi.Frameworks.Identifiers;
-using Regi.Models;
+﻿using Regi.Abstractions;
+using Regi.Frameworks.Identifiers;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -12,7 +12,7 @@ namespace Regi.Test.Identifiers
             return new NodeIdentifier(FileSystemMock.Object);
         }
 
-        protected override void ShouldHaveMatched(Project expectedProject, bool wasMatch)
+        protected override void ShouldHaveMatched(IProject expectedProject, bool wasMatch)
         {
             if (expectedProject.Framework == ProjectFramework.Node)
             {
@@ -26,7 +26,7 @@ namespace Regi.Test.Identifiers
 
         [Theory]
         [MemberData(nameof(NodeProjects))]
-        public async Task Identify_node_project(string name, Project expectedProject)
+        public async Task Identify_node_project(string name, IProject expectedProject)
         {
             var actualProject = await Identify_base_project(name, expectedProject);
 

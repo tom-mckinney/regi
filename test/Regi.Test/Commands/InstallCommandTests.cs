@@ -1,4 +1,5 @@
 ﻿using Moq;
+using Regi.Abstractions;
 using Regi.CommandLine.Commands;
 using Regi.Models;
 using Regi.Services;
@@ -39,15 +40,15 @@ namespace Regi.Test.Commands
             _configServiceMock.Setup(m => m.GetConfigurationAsync(It.IsAny<CommandOptions>()))
                 .ReturnsAsync(SampleProjects.ConfigurationDefault)
                 .Verifiable();
-            _runnerServiceMock.Setup(m => m.InstallAsync(It.IsAny<IList<Project>>(), It.IsAny<CommandOptions>(), It.IsAny<CancellationToken>()))
-                .Callback((IList<Project> projects, CommandOptions options, CancellationToken token) =>
+            _runnerServiceMock.Setup(m => m.InstallAsync(It.IsAny<IList<IProject>>(), It.IsAny<CommandOptions>(), It.IsAny<CancellationToken>()))
+                .Callback((IList<IProject> projects, CommandOptions options, CancellationToken token) =>
                 {
                     foreach (var p in projects)
                     {
                         p.Processes.Add(new AppProcess(new Process(), AppTask.Install, AppStatus.Success));
                     }
                 })
-                .Returns((IList<Project> projects, CommandOptions options, CancellationToken token) => Task.FromResult(projects))
+                .Returns((IList<IProject> projects, CommandOptions options, CancellationToken token) => Task.FromResult(projects))
                 .Verifiable();
 
             InstallCommand command = CreateCommand();
@@ -66,12 +67,12 @@ namespace Regi.Test.Commands
             _configServiceMock.Setup(m => m.GetConfigurationAsync(It.IsAny<CommandOptions>()))
                 .ReturnsAsync(SampleProjects.ConfigurationDefault)
                 .Verifiable();
-            _runnerServiceMock.Setup(m => m.InstallAsync(It.IsAny<IList<Project>>(), It.IsAny<CommandOptions>(), It.IsAny<CancellationToken>()))
-                .Callback((IList<Project> projects, CommandOptions options, CancellationToken token) =>
+            _runnerServiceMock.Setup(m => m.InstallAsync(It.IsAny<IList<IProject>>(), It.IsAny<CommandOptions>(), It.IsAny<CancellationToken>()))
+                .Callback((IList<IProject> projects, CommandOptions options, CancellationToken token) =>
                 {
                     projects[0].Processes.Add(new AppProcess(new Process(), AppTask.Install, AppStatus.Failure));
                 })
-                .Returns((IList<Project> projects, CommandOptions options, CancellationToken token) => Task.FromResult(projects))
+                .Returns((IList<IProject> projects, CommandOptions options, CancellationToken token) => Task.FromResult(projects))
                 .Verifiable();
 
             InstallCommand command = CreateCommand();

@@ -1,7 +1,7 @@
 ﻿using McMaster.Extensions.CommandLineUtils;
 using Microsoft.Extensions.DependencyInjection;
+using Regi.Abstractions;
 using Regi.CommandLine;
-using Regi.Models;
 using Regi.Services;
 using Regi.Test.Helpers;
 using System;

@@ -1,10 +1,8 @@
-﻿using Moq;
+﻿using Regi.Abstractions;
 using Regi.Models;
 using Regi.Services;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;

@@ -1,12 +1,11 @@
 ﻿using Moq;
+using Regi.Abstractions;
 using Regi.Frameworks;
 using Regi.Models;
 using Regi.Services;
 using Regi.Test.Extensions;
 using Regi.Test.Helpers;
 using System;
-using System.IO;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
@@ -42,7 +41,7 @@ namespace Regi.Test.Frameworks
         [Fact]
         public async Task TestProject_on_success_returns_status()
         {
-            AppProcess unitTest = await _service.Test(_successfulTests, _successfulTests.GetAppDirectoryPaths(_fileSystem)[0], TestOptions.Create(), CancellationToken.None);
+            var unitTest = await _service.Test(_successfulTests, _successfulTests.GetAppDirectoryPaths(_fileSystem)[0], TestOptions.Create(), CancellationToken.None);
 
             Assert.Equal(AppTask.Test, unitTest.Task);
             Assert.Equal(AppStatus.Success, unitTest.Status);
@@ -51,7 +50,7 @@ namespace Regi.Test.Frameworks
         [Fact]
         public async Task TestProject_verbose_on_success_prints_all_output()
         {
-            AppProcess unitTest = await _service.Test(_successfulTests, _successfulTests.GetAppDirectoryPaths(_fileSystem)[0], TestOptions.Create(), CancellationToken.None);
+            var unitTest = await _service.Test(_successfulTests, _successfulTests.GetAppDirectoryPaths(_fileSystem)[0], TestOptions.Create(), CancellationToken.None);
 
             Assert.Equal(AppTask.Test, unitTest.Task);
             Assert.Equal(AppStatus.Success, unitTest.Status);
@@ -61,7 +60,7 @@ namespace Regi.Test.Frameworks
         [Fact]
         public async Task TestProject_on_failure_prints_only_exception_info()
         {
-            AppProcess unitTest = await _service.Test(_failedTests, _failedTests.GetAppDirectoryPaths(_fileSystem)[0], TestOptions.Create(), CancellationToken.None);
+            var unitTest = await _service.Test(_failedTests, _failedTests.GetAppDirectoryPaths(_fileSystem)[0], TestOptions.Create(), CancellationToken.None);
 
             Assert.Equal(AppTask.Test, unitTest.Task);
             Assert.Equal(AppStatus.Failure, unitTest.Status);
@@ -71,7 +70,7 @@ namespace Regi.Test.Frameworks
         [Fact]
         public async Task TestProject_verbose_on_failure_prints_all_output()
         {
-            AppProcess unitTest = await _service.Test(_failedTests, _failedTests.GetAppDirectoryPaths(_fileSystem)[0], TestOptions.Create(), CancellationToken.None);
+            var unitTest = await _service.Test(_failedTests, _failedTests.GetAppDirectoryPaths(_fileSystem)[0], TestOptions.Create(), CancellationToken.None);
 
             Assert.Equal(AppTask.Test, unitTest.Task);
             Assert.Equal(AppStatus.Failure, unitTest.Status);
@@ -83,7 +82,7 @@ namespace Regi.Test.Frameworks
         {
             var options = TestOptions.Create();
 
-            AppProcess process = await _service.Start(_consoleApp, _consoleApp.GetAppDirectoryPaths(_fileSystem)[0], options, CancellationToken.None);
+            var process = await _service.Start(_consoleApp, _consoleApp.GetAppDirectoryPaths(_fileSystem)[0], options, CancellationToken.None);
 
             Assert.Equal(AppStatus.Running, process.Status);
 
@@ -97,7 +96,7 @@ namespace Regi.Test.Frameworks
         [Fact]
         public async Task RunProject_returns_failure_status_on_thrown_exception()
         {
-            AppProcess process = await _service.Start(_consoleFailureApp, _consoleFailureApp.GetAppDirectoryPaths(_fileSystem)[0], TestOptions.Create(), CancellationToken.None);
+            var process = await _service.Start(_consoleFailureApp, _consoleFailureApp.GetAppDirectoryPaths(_fileSystem)[0], TestOptions.Create(), CancellationToken.None);
 
             await process.WaitForExitAsync(CancellationToken.None);
 
@@ -111,7 +110,7 @@ namespace Regi.Test.Frameworks
         {
             CommandOptions optionsWithoutVerbose = new CommandOptions { Verbose = false, KillProcessesOnExit = false };
 
-            AppProcess process = await _service.Start(_consoleApp, _consoleApp.GetAppDirectoryPaths(_fileSystem)[0], optionsWithoutVerbose, CancellationToken.None);
+            var process = await _service.Start(_consoleApp, _consoleApp.GetAppDirectoryPaths(_fileSystem)[0], optionsWithoutVerbose, CancellationToken.None);
 
             await process.WaitForExitAsync(CancellationToken.None);
 
@@ -127,7 +126,7 @@ namespace Regi.Test.Frameworks
         [Fact]
         public async Task RunProject_verbose_starts_and_prints_all_output()
         {
-            AppProcess process = await _service.Start(_consoleApp, _consoleApp.GetAppDirectoryPaths(_fileSystem)[0], TestOptions.Create(), CancellationToken.None);
+            var process = await _service.Start(_consoleApp, _consoleApp.GetAppDirectoryPaths(_fileSystem)[0], TestOptions.Create(), CancellationToken.None);
 
             await process.WaitForExitAsync(CancellationToken.None);
 
@@ -141,7 +140,7 @@ namespace Regi.Test.Frameworks
         [Fact]
         public async Task RunProject_web_starts_and_prints_nothing()
         {
-            AppProcess process = await _service.Start(_webApp, _webApp.GetAppDirectoryPaths(_fileSystem)[0], TestOptions.Create(), CancellationToken.None);
+            var process = await _service.Start(_webApp, _webApp.GetAppDirectoryPaths(_fileSystem)[0], TestOptions.Create(), CancellationToken.None);
 
             Thread.Sleep(1000);
 
@@ -157,7 +156,7 @@ namespace Regi.Test.Frameworks
         {
             _webApp.Port = 8080;
 
-            AppProcess process = await _service.Start(_webApp, _webApp.GetAppDirectoryPaths(_fileSystem)[0], TestOptions.Create(), CancellationToken.None);
+            var process = await _service.Start(_webApp, _webApp.GetAppDirectoryPaths(_fileSystem)[0], TestOptions.Create(), CancellationToken.None);
 
             Thread.Sleep(1000);
 
@@ -178,7 +177,7 @@ namespace Regi.Test.Frameworks
                 { "foo", "bar" }
             };
 
-            AppProcess process = await _service.Start(_webApp, _webApp.GetAppDirectoryPaths(_fileSystem)[0], TestOptions.Create(varList), CancellationToken.None);
+            var process = await _service.Start(_webApp, _webApp.GetAppDirectoryPaths(_fileSystem)[0], TestOptions.Create(varList), CancellationToken.None);
 
             Thread.Sleep(500);
 
@@ -196,7 +195,7 @@ namespace Regi.Test.Frameworks
         {
             _consoleApp.Source = "http://artifactory.org/nuget";
 
-            AppProcess process = await _service.Install(_consoleApp, _consoleApp.GetAppDirectoryPaths(_fileSystem)[0], TestOptions.Create(), CancellationToken.None);
+            var process = await _service.Install(_consoleApp, _consoleApp.GetAppDirectoryPaths(_fileSystem)[0], TestOptions.Create(), CancellationToken.None);
 
             Assert.Equal(AppTask.Install, process.Task);
             Assert.Equal(AppStatus.Success, process.Status);
@@ -209,7 +208,7 @@ namespace Regi.Test.Frameworks
             string source = "http://artifactory.org/nuget";
             _consoleApp.Source = source;
 
-            AppProcess process = await _service.Install(_consoleApp, _consoleApp.GetAppDirectoryPaths(_fileSystem)[0], TestOptions.Create(), CancellationToken.None);
+            var process = await _service.Install(_consoleApp, _consoleApp.GetAppDirectoryPaths(_fileSystem)[0], TestOptions.Create(), CancellationToken.None);
 
             Assert.Contains($"--source {source}", process.Process.StartInfo.Arguments, StringComparison.InvariantCulture);
         }
@@ -221,7 +220,7 @@ namespace Regi.Test.Frameworks
         {
             _runtimeInfoMock.Setup(m => m.IsWindows).Returns(isWindows).Verifiable();
 
-            AppProcess process = await _service.Kill(TestOptions.Create(), CancellationToken.None);
+            var process = await _service.Kill(TestOptions.Create(), CancellationToken.None);
 
             Assert.Equal(AppStatus.Success, process.Status);
             Assert.Equal(AppTask.Kill, process.Task);

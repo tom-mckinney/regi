@@ -1,4 +1,5 @@
 ﻿using McMaster.Extensions.CommandLineUtils;
+using Regi.Abstractions;
 using Regi.Extensions;
 using Regi.Models;
 using Regi.Services;
@@ -44,9 +45,9 @@ namespace Regi.Frameworks
         public virtual string PublishCommand => FrameworkCommands.Publish;
         public virtual string PackageCommand => FrameworkCommands.Package;
 
-        public virtual async Task<AppProcess> Install(Project project, string appDirectoryPath, CommandOptions options, CancellationToken cancellationToken)
+        public virtual async Task<IAppProcess> Install(IProject project, string appDirectoryPath, CommandOptions options, CancellationToken cancellationToken)
         {
-            AppProcess install = CreateProcess(InstallCommand, project, appDirectoryPath, options);
+            IAppProcess install = CreateProcess(InstallCommand, project, appDirectoryPath, options);
 
             install.Start();
 
@@ -55,11 +56,11 @@ namespace Regi.Frameworks
             return install;
         }
 
-        public virtual Task<AppProcess> Start(Project project, string appDirectoryPath, CommandOptions options, CancellationToken cancellationToken)
+        public virtual Task<IAppProcess> Start(IProject project, string appDirectoryPath, CommandOptions options, CancellationToken cancellationToken)
         {
             return Task.Run(() =>
             {
-                AppProcess start = CreateProcess(StartCommand, project, appDirectoryPath, options);
+                IAppProcess start = CreateProcess(StartCommand, project, appDirectoryPath, options);
 
                 start.Start();
 
@@ -67,9 +68,9 @@ namespace Regi.Frameworks
             }, cancellationToken);
         }
 
-        public virtual async Task<AppProcess> Test(Project project, string appDirectoryPath, CommandOptions options, CancellationToken cancellationToken)
+        public virtual async Task<IAppProcess> Test(IProject project, string appDirectoryPath, CommandOptions options, CancellationToken cancellationToken)
         {
-            AppProcess test = CreateProcess(TestCommand, project, appDirectoryPath, options);
+            IAppProcess test = CreateProcess(TestCommand, project, appDirectoryPath, options);
 
             test.Start();
 
@@ -78,9 +79,9 @@ namespace Regi.Frameworks
             return test;
         }
 
-        public virtual async Task<AppProcess> Build(Project project, string appDirectoryPath, CommandOptions options, CancellationToken cancellationToken)
+        public virtual async Task<IAppProcess> Build(IProject project, string appDirectoryPath, CommandOptions options, CancellationToken cancellationToken)
         {
-            AppProcess build = CreateProcess(BuildCommand, project, appDirectoryPath, options);
+            IAppProcess build = CreateProcess(BuildCommand, project, appDirectoryPath, options);
 
             build.Start();
 
@@ -89,10 +90,10 @@ namespace Regi.Frameworks
             return build;
         }
 
-        public virtual async Task<AppProcess> Kill(CommandOptions options, CancellationToken cancellationToken)
+        public virtual async Task<IAppProcess> Kill(CommandOptions options, CancellationToken cancellationToken)
         {
             var statuses = new List<AppStatus>();
-            AppProcess process = null;
+            IAppProcess process = null;
 
             foreach (var name in ProcessNames)
             {
@@ -128,7 +129,7 @@ namespace Regi.Frameworks
             return process;
         }
 
-        protected virtual void SetEnvironmentVariables(Process process, Project project)
+        protected virtual void SetEnvironmentVariables(Process process, IProject project)
         {
             process.StartInfo.EnvironmentVariables.TryAdd("END_TO_END_TESTING", bool.TrueString);
             process.StartInfo.EnvironmentVariables.TryAdd("IN_MEMORY_DATABASE", bool.TrueString);
@@ -141,7 +142,7 @@ namespace Regi.Frameworks
 
         protected virtual IEnumerable<string> FrameworkCommandWildcardExclusions { get; } = new List<string>();
 
-        protected virtual void ApplyFrameworkOptions(StringBuilder builder, string command, Project project, CommandOptions options)
+        protected virtual void ApplyFrameworkOptions(StringBuilder builder, string command, IProject project, CommandOptions options)
         {
             lock (_lock)
             {
@@ -163,7 +164,7 @@ namespace Regi.Frameworks
         protected virtual string FormatAdditionalArguments(IEnumerable<string> args) => string.Join(' ', args);
 
         /// TODO: this should be part of <see cref="ProcessUtility"/>
-        public virtual AppProcess CreateProcess(string command, CommandOptions options, IFileSystem fileSystem, string fileName = null)
+        public virtual IAppProcess CreateProcess(string command, CommandOptions options, IFileSystem fileSystem, string fileName = null)
         {
             fileName ??= _frameworkExePath;
             string args = command;
@@ -205,7 +206,7 @@ namespace Regi.Frameworks
             return output;
         }
 
-        public virtual AppProcess CreateProcess(string command, Project project, string appDirectoryPath, CommandOptions options, string fileName = null)
+        public virtual IAppProcess CreateProcess(string command, IProject project, string appDirectoryPath, CommandOptions options, string fileName = null)
         {
             fileName ??= _frameworkExePath;
             string args = BuildCommandArguments(command, project, options);
@@ -269,7 +270,7 @@ namespace Regi.Frameworks
             return output;
         }
 
-        public virtual string BuildCommandArguments(string command, Project project, CommandOptions options)
+        public virtual string BuildCommandArguments(string command, IProject project, CommandOptions options)
         {
             lock (_lock)
             {
@@ -295,7 +296,7 @@ namespace Regi.Frameworks
             }
         }
 
-        public virtual void AddCommandOptions(StringBuilder builder, string command, Project project, CommandOptions options)
+        public virtual void AddCommandOptions(StringBuilder builder, string command, IProject project, CommandOptions options)
         {
             if (project?.Arguments?.Count > 0)
             {
@@ -314,7 +315,7 @@ namespace Regi.Frameworks
             _console.WriteDefaultLine(name + ": " + e.Data, ConsoleLineStyle.Normal);
         });
 
-        public virtual DataReceivedEventHandler HandleErrorDataReceived(string name, AppProcess output) => new DataReceivedEventHandler((o, e) =>
+        public virtual DataReceivedEventHandler HandleErrorDataReceived(string name, IAppProcess output) => new DataReceivedEventHandler((o, e) =>
         {
             lock (_lock)
             {
@@ -341,7 +342,7 @@ namespace Regi.Frameworks
         {
         });
 
-        public virtual EventHandler HandleExited(AppProcess output) => new EventHandler((o, e) =>
+        public virtual EventHandler HandleExited(IAppProcess output) => new EventHandler((o, e) =>
         {
             lock (_lock)
             {
@@ -365,7 +366,7 @@ namespace Regi.Frameworks
             }
         });
 
-        protected virtual void HandleDispose(Project project, int processId, CommandOptions options)
+        protected virtual void HandleDispose(IProject project, int processId, CommandOptions options)
         {
             if (options.Verbose)
             {

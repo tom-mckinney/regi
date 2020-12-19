@@ -39,6 +39,8 @@ namespace Regi.Abstractions
 
         Task WaitForExitAsync(CancellationToken cancellationToken);
 
+        void Start();
+
         void Kill(TimeSpan timeout);
     }
 }

@@ -32,7 +32,7 @@ namespace Regi.Models
 
         public IList<string> Requires { get; set; } = new List<string>();
 
-        public CommandDictionary Arguments { get; set; } = new CommandDictionary();
+        public ICommandDictionary Arguments { get; set; } = new CommandDictionary();
 
         public int? Port { get; set; }
 
@@ -44,15 +44,15 @@ namespace Regi.Models
 
         public bool RawOutput { get; set; }
 
-        public CommandDictionary<object> Scripts { get; set; }
+        public ICommandDictionary<object> Scripts { get; set; }
 
         public bool Optional { get; set; }
 
         [JsonIgnore]
-        public ConcurrentBag<AppProcess> Processes { get; set; } = new ConcurrentBag<AppProcess>();
+        public ConcurrentBag<IAppProcess> Processes { get; set; } = new ConcurrentBag<IAppProcess>();
 
         [JsonIgnore]
-        public ConcurrentBag<Project> RequiredProjects { get; set; } = new ConcurrentBag<Project>();
+        public ConcurrentBag<IProject> RequiredProjects { get; set; } = new ConcurrentBag<IProject>();
 
         [JsonIgnore]
         public AppStatus OutputStatus

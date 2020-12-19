@@ -1,7 +1,7 @@
 ﻿using Moq;
+using Regi.Abstractions;
 using Regi.Frameworks.Identifiers;
 using Regi.Models;
-using Regi.Services;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -33,12 +33,12 @@ namespace Regi.Test.Identifiers
             SampleProjects.JestTests,
         }.Select(p => new object[] { p.Name, p });
 
-        protected virtual void ShouldHaveIdentified(Project expectedProject, bool wasIdentified)
+        protected virtual void ShouldHaveIdentified(IProject expectedProject, bool wasIdentified)
         {
             Assert.True(wasIdentified);
         }
 
-        protected virtual void ShouldHaveMatched(Project expectedProject, bool wasMatch)
+        protected virtual void ShouldHaveMatched(IProject expectedProject, bool wasMatch)
         {
             Assert.True(wasMatch);
         }
@@ -46,7 +46,7 @@ namespace Regi.Test.Identifiers
         [Theory]
         [MemberData(nameof(DotnetProjects))]
         [MemberData(nameof(NodeProjects))]
-        public async Task<Project> Identify_base_project(string name, Project expectedProject)
+        public async Task<IProject> Identify_base_project(string name, IProject expectedProject)
         {
             if (expectedProject == null)
                 throw new ArgumentNullException(nameof(expectedProject));
@@ -76,7 +76,7 @@ namespace Regi.Test.Identifiers
             return actualProject;
         }
 
-        protected static FileSystemDictionary GetFileSystemDictionary(Project project)
+        protected static FileSystemDictionary GetFileSystemDictionary(IProject project)
         {
             project = project ?? throw new ArgumentNullException(nameof(project));
 
@@ -101,12 +101,12 @@ namespace Regi.Test.Identifiers
             {
             }
 
-            public override ValueTask<bool> IsMatchAsync(Project project, IFileSystemDictionary directoryContents)
+            public override ValueTask<bool> IsMatchAsync(IProject project, IFileSystemDictionary directoryContents)
             {
                 return new ValueTask<bool>(true);
             }
 
-            public override ValueTask<bool> ShouldIdentify(Project project, IFileSystemDictionary directoryContents)
+            public override ValueTask<bool> ShouldIdentify(IProject project, IFileSystemDictionary directoryContents)
             {
                 return new ValueTask<bool>(true);
             }

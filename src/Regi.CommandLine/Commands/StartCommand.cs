@@ -1,5 +1,6 @@
 ﻿using McMaster.Extensions.CommandLineUtils;
 using Microsoft.Extensions.Options;
+using Regi.Abstractions;
 using Regi.Models;
 using Regi.Services;
 using System;
@@ -22,9 +23,9 @@ namespace Regi.CommandLine.Commands
             _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
         }
 
-        protected override Func<RegiConfig, IEnumerable<Project>> GetTargetProjects => (c) => c.Projects;
+        protected override Func<IServiceMesh, IEnumerable<IProject>> GetTargetProjects => (c) => c.Projects;
 
-        protected override async Task<int> ExecuteAsync(IList<Project> projects, CancellationToken cancellationToken)
+        protected override async Task<int> ExecuteAsync(IList<IProject> projects, CancellationToken cancellationToken)
         {
             await _runnerService.StartAsync(projects, Options, cancellationToken);
 

@@ -1,4 +1,5 @@
 ﻿using McMaster.Extensions.CommandLineUtils;
+using Regi.Abstractions;
 using Regi.Extensions;
 using Regi.Models;
 using Regi.Utilities;
@@ -13,11 +14,11 @@ namespace Regi.Services
 {
     public interface IRunnerService
     {
-        Task<IList<Project>> StartAsync(IList<Project> projects, CommandOptions options, CancellationToken cancellationToken);
-        Task<IList<Project>> TestAsync(IList<Project> projects, CommandOptions options, CancellationToken cancellationToken);
-        Task<IList<Project>> BuildAsync(IList<Project> projects, CommandOptions options, CancellationToken cancellationToken);
-        Task<IList<Project>> InstallAsync(IList<Project> projects, CommandOptions options, CancellationToken cancellationToken);
-        Task KillAsync(IList<Project> projects, CommandOptions options, CancellationToken cancellationToken);
+        Task<IList<IProject>> StartAsync(IList<IProject> projects, CommandOptions options, CancellationToken cancellationToken);
+        Task<IList<IProject>> TestAsync(IList<IProject> projects, CommandOptions options, CancellationToken cancellationToken);
+        Task<IList<IProject>> BuildAsync(IList<IProject> projects, CommandOptions options, CancellationToken cancellationToken);
+        Task<IList<IProject>> InstallAsync(IList<IProject> projects, CommandOptions options, CancellationToken cancellationToken);
+        Task KillAsync(IList<IProject> projects, CommandOptions options, CancellationToken cancellationToken);
     }
 
     public class RunnerService : IRunnerService
@@ -48,7 +49,7 @@ namespace Regi.Services
             _console = console;
         }
 
-        public async Task<IList<Project>> StartAsync(IList<Project> projects, CommandOptions options, CancellationToken cancellationToken)
+        public async Task<IList<IProject>> StartAsync(IList<IProject> projects, CommandOptions options, CancellationToken cancellationToken)
         {
             if (projects.Count <= 0)
                 _console.WriteEmphasizedLine("No projects found");
@@ -73,11 +74,11 @@ namespace Regi.Services
             return projects;
         }
 
-        private async Task<AppProcess> InternalStartProject(Project project, string applicationDirectoryPath, CommandOptions options, CancellationToken cancellationToken)
+        private async Task<IAppProcess> InternalStartProject(IProject project, string applicationDirectoryPath, CommandOptions options, CancellationToken cancellationToken)
         {
             _console.WriteEmphasizedLine($"Starting project {project.Name} ({applicationDirectoryPath})");
 
-            AppProcess process = await _frameworkServiceProvider
+            IAppProcess process = await _frameworkServiceProvider
                 .GetFrameworkService(project.Framework)
                 .Start(project, applicationDirectoryPath, options, cancellationToken);
 
@@ -93,7 +94,7 @@ namespace Regi.Services
             return process;
         }
 
-        public async Task<IList<Project>> TestAsync(IList<Project> projects, CommandOptions options, CancellationToken cancellationToken)
+        public async Task<IList<IProject>> TestAsync(IList<IProject> projects, CommandOptions options, CancellationToken cancellationToken)
         {
             if (projects.Count <= 0)
                 _console.WriteEmphasizedLine("No projects found");
@@ -124,7 +125,7 @@ namespace Regi.Services
 
                             IQueueService dependencyQueue = _frameworkServiceProvider.CreateScopedQueueService();
 
-                            IDictionary<int, Project> requiredProjectsWithPorts = new Dictionary<int, Project>();
+                            IDictionary<int, IProject> requiredProjectsWithPorts = new Dictionary<int, IProject>();
 
                             foreach (var requiredProject in project.RequiredProjects)
                             {
@@ -186,7 +187,7 @@ namespace Regi.Services
             return projects;
         }
 
-        public async Task<IList<Project>> BuildAsync(IList<Project> projects, CommandOptions options, CancellationToken cancellationToken)
+        public async Task<IList<IProject>> BuildAsync(IList<IProject> projects, CommandOptions options, CancellationToken cancellationToken)
         {
             if (projects.Count <= 0)
                 _console.WriteEmphasizedLine("No projects found");
@@ -222,7 +223,7 @@ namespace Regi.Services
             return projects;
         }
 
-        public async Task<IList<Project>> InstallAsync(IList<Project> projects, CommandOptions options, CancellationToken cancellationToken)
+        public async Task<IList<IProject>> InstallAsync(IList<IProject> projects, CommandOptions options, CancellationToken cancellationToken)
         {
             if (projects.Count <= 0)
                 _console.WriteEmphasizedLine("No projects found");
@@ -282,7 +283,7 @@ namespace Regi.Services
             return projects;
         }
 
-        private async Task<AppProcess> InternalInstallProject(Project project, string appDirectoryPath, CommandOptions options, CancellationToken cancellationToken)
+        private async Task<IAppProcess> InternalInstallProject(IProject project, string appDirectoryPath, CommandOptions options, CancellationToken cancellationToken)
         {
             _console.WriteEmphasizedLine($"Starting install for project {project.Name}");
 
@@ -297,7 +298,7 @@ namespace Regi.Services
             return process;
         }
 
-        public async Task KillAsync(IList<Project> projects, CommandOptions options, CancellationToken cancellationToken)
+        public async Task KillAsync(IList<IProject> projects, CommandOptions options, CancellationToken cancellationToken)
         {
             _console.WriteEmphasizedLine("Committing regicide...");
 
@@ -323,9 +324,9 @@ namespace Regi.Services
             _console.WriteSuccessLine("Finished killing processess successfuly", ConsoleLineStyle.LineBeforeAndAfter);
         }
 
-        private void RunScriptsForTask(Project project, AppTask task, CommandOptions options)
+        private void RunScriptsForTask(IProject project, AppTask task, CommandOptions options)
         {
-            if (project.Scripts?.Count > 0 && project.Scripts.TryGetValue(task, out ICollection<object> beforeScripts))
+            if (project.Scripts?.Count > 0 && project.Scripts.TryGetValue(task.ToString(), out ICollection<object> beforeScripts))
             {
                 foreach (var script in beforeScripts)
                 {

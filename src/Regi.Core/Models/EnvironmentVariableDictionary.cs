@@ -1,4 +1,5 @@
-﻿using Regi.Extensions;
+﻿using Regi.Abstractions;
+using Regi.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,7 +15,7 @@ namespace Regi.Models
         /// </summary>
         /// <param name="projects"></param>
         /// <param name="config"></param>
-        public EnvironmentVariableDictionary(RegiConfig config) : base()
+        public EnvironmentVariableDictionary(IServiceMesh config) : base()
         {
             if (config == null)
             {
@@ -30,7 +31,7 @@ namespace Regi.Models
             }
         }
 
-        public void AddProject(Project project)
+        public void AddProject(IProject project)
         {
             if (project.Environment?.Count > 0)
             {

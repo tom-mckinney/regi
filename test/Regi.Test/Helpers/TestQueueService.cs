@@ -1,11 +1,8 @@
 ﻿using McMaster.Extensions.CommandLineUtils;
-using Regi.Models;
+using Regi.Abstractions;
 using Regi.Services;
-using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -22,7 +19,7 @@ namespace Regi.Test.Helpers
         public int WaitOnPortListCallCount = 0;
         public int WaitOnPortCallCount = 0;
 
-        public override Task ConfirmProjectsStartedAsync(IDictionary<int, Project> projects, CancellationToken cancellationToken)
+        public override Task ConfirmProjectsStartedAsync(IDictionary<int, IProject> projects, CancellationToken cancellationToken)
         {
             WaitOnPortListCallCount++;
 
@@ -34,7 +31,7 @@ namespace Regi.Test.Helpers
             return Task.CompletedTask;
         }
 
-        public override Task WaitOnPortAsync(Project project, CancellationToken cancellationToken)
+        public override Task WaitOnPortAsync(IProject project, CancellationToken cancellationToken)
         {
             if (project.Port.HasValue)
             {

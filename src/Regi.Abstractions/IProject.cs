@@ -44,5 +44,7 @@ namespace Regi.Abstractions
         ConcurrentBag<IProject> RequiredProjects { get; set; }
 
         AppStatus OutputStatus { get; }
+
+        IList<string> GetAppDirectoryPaths(IFileSystem fileSystem);
     }
 }

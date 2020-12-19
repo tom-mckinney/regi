@@ -1,8 +1,6 @@
-﻿using Regi.Models;
-using System;
+﻿using Regi.Abstractions;
+using Regi.Models;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Text;
 using Xunit;
 
 namespace Regi.Test.Models
@@ -14,7 +12,7 @@ namespace Regi.Test.Models
         {
             var project = new Project
             {
-                Processes = new ConcurrentBag<AppProcess>
+                Processes = new ConcurrentBag<IAppProcess>
                 {
                     new AppProcess(null, AppTask.Test, AppStatus.Success),
                     new AppProcess(null, AppTask.Test, AppStatus.Success)
@@ -29,7 +27,7 @@ namespace Regi.Test.Models
         {
             var project = new Project
             {
-                Processes = new ConcurrentBag<AppProcess>
+                Processes = new ConcurrentBag<IAppProcess>
                 {
                     new AppProcess(null, AppTask.Test, AppStatus.Failure), // This one failed
                     new AppProcess(null, AppTask.Test, AppStatus.Success),
@@ -46,7 +44,7 @@ namespace Regi.Test.Models
         {
             var project = new Project
             {
-                Processes = new ConcurrentBag<AppProcess>
+                Processes = new ConcurrentBag<IAppProcess>
                 {
                     new AppProcess(null, AppTask.Test, AppStatus.Running), // This one is still running
                     new AppProcess(null, AppTask.Test, AppStatus.Success)
@@ -61,7 +59,7 @@ namespace Regi.Test.Models
         {
             var project = new Project
             {
-                Processes = new ConcurrentBag<AppProcess>
+                Processes = new ConcurrentBag<IAppProcess>
                 {
                     new AppProcess(null, AppTask.Test, AppStatus.Unknown), // This one is unknown
                     new AppProcess(null, AppTask.Test, AppStatus.Success)

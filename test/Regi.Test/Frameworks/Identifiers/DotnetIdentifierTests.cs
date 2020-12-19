@@ -1,5 +1,5 @@
-﻿using Regi.Frameworks.Identifiers;
-using Regi.Models;
+﻿using Regi.Abstractions;
+using Regi.Frameworks.Identifiers;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -14,7 +14,7 @@ namespace Regi.Test.Identifiers
             return new DotnetIdentifier(FileSystemMock.Object);
         }
 
-        protected override void ShouldHaveMatched(Project expectedProject, bool wasMatch)
+        protected override void ShouldHaveMatched(IProject expectedProject, bool wasMatch)
         {
             if (expectedProject.Framework == ProjectFramework.Dotnet)
             {
@@ -28,7 +28,7 @@ namespace Regi.Test.Identifiers
 
         [Theory]
         [MemberData(nameof(DotnetProjects))]
-        public async Task Identify_dotnet_project(string name, Project expectedProject)
+        public async Task Identify_dotnet_project(string name, IProject expectedProject)
         {
             var actualProject = await Identify_base_project(name, expectedProject);
 

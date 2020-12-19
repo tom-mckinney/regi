@@ -1,5 +1,5 @@
 ﻿using McMaster.Extensions.CommandLineUtils;
-using Regi.Models;
+using Regi.Abstractions;
 using Regi.Services;
 using System;
 using System.Collections.Generic;
@@ -20,15 +20,14 @@ namespace Regi.CommandLine.Commands
             _runnerService = runnerService;
         }
 
-        protected override Func<RegiConfig, IEnumerable<Project>> GetTargetProjects => (c) => c.Projects;
+        protected override Func<IServiceMesh, IEnumerable<IProject>> GetTargetProjects => (c) => c.Projects;
 
-        protected override async Task<int> ExecuteAsync(IList<Project> projects, CancellationToken cancellationToken)
+        protected override async Task<int> ExecuteAsync(IList<IProject> projects, CancellationToken cancellationToken)
         {
             await _runnerService.InstallAsync(projects, Options, cancellationToken);
 
             return projects
-                .Where(p => p.Processes?.Any(x => x.Status == AppStatus.Failure) == true)
-                .Count();
+                .Count(p => p.Processes?.Any(x => x.Status == AppStatus.Failure) == true);
         }
     }
 }

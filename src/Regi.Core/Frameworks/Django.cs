@@ -1,8 +1,8 @@
 ﻿using McMaster.Extensions.CommandLineUtils;
+using Regi.Abstractions;
 using Regi.Extensions;
 using Regi.Models;
 using Regi.Services;
-using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
@@ -39,7 +39,7 @@ namespace Regi.Frameworks
             }
         };
 
-        protected override void ApplyFrameworkOptions(StringBuilder builder, string command, Project project, CommandOptions options)
+        protected override void ApplyFrameworkOptions(StringBuilder builder, string command, IProject project, CommandOptions options)
         {
             if (project.Port.HasValue && project.Roles.Contains(ProjectRole.App))
             {
@@ -56,9 +56,9 @@ namespace Regi.Frameworks
 
         public override string TestCommand => "./manage.py test";
 
-        public override async Task<AppProcess> Install(Project project, string appDirectoryPath, CommandOptions options, CancellationToken cancellationToken)
+        public override async Task<IAppProcess> Install(IProject project, string appDirectoryPath, CommandOptions options, CancellationToken cancellationToken)
         {
-            AppProcess install = CreateProcess(InstallCommand, project, appDirectoryPath, options, "pip");
+            IAppProcess install = CreateProcess(InstallCommand, project, appDirectoryPath, options, "pip");
 
             install.Start();
 

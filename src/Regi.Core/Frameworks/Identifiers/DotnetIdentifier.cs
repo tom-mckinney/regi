@@ -1,6 +1,5 @@
-﻿using Regi.Extensions;
-using Regi.Models;
-using Regi.Services;
+﻿using Regi.Abstractions;
+using Regi.Extensions;
 using System;
 using System.Threading.Tasks;
 
@@ -14,12 +13,12 @@ namespace Regi.Frameworks.Identifiers
         {
         }
 
-        public override ValueTask<bool> ShouldIdentify(Project project, IFileSystemDictionary directoryContents)
+        public override ValueTask<bool> ShouldIdentify(IProject project, IFileSystemDictionary directoryContents)
         {
             return new ValueTask<bool>(true);
         }
 
-        public override ValueTask<bool> IsMatchAsync(Project project, IFileSystemDictionary directoryContents)
+        public override ValueTask<bool> IsMatchAsync(IProject project, IFileSystemDictionary directoryContents)
         {
             if (project?.Framework == ProjectFramework.Dotnet)
             {
@@ -40,7 +39,7 @@ namespace Regi.Frameworks.Identifiers
             return new ValueTask<bool>(false);
         }
 
-        public override async ValueTask<Project> CreateOrModifyAsync(Project project, IFileSystemDictionary directoryContents)
+        public override async ValueTask<IProject> CreateOrModifyAsync(IProject project, IFileSystemDictionary directoryContents)
         {
             project = await base.CreateOrModifyAsync(project, directoryContents);
 

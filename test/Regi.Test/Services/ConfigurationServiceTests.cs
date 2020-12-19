@@ -1,4 +1,5 @@
 ﻿using McMaster.Extensions.CommandLineUtils;
+using Regi.Abstractions;
 using Regi.Extensions;
 using Regi.Models;
 using Regi.Services;
@@ -72,9 +73,9 @@ namespace Regi.Test.Services
 
             var service = CreateService();
 
-            RegiConfig startupConfig = await service.GetConfigurationAsync(null);
+            IServiceMesh startupConfig = await service.GetConfigurationAsync(null);
 
-            Assert.StartsWith(expectedPath, startupConfig.Path, StringComparison.InvariantCulture);
+            Assert.StartsWith(expectedPath, ((RegiConfig)startupConfig).Path, StringComparison.InvariantCulture);
             Assert.Equal(totalAppCount + totalTestCount, startupConfig.Projects.Count);
             Assert.Equal(totalAppCount, startupConfig.Projects.WhereApp().Count());
             Assert.Equal(totalTestCount, startupConfig.Projects.WhereTest().Count());
@@ -99,9 +100,9 @@ namespace Regi.Test.Services
 
             var service = CreateService();
 
-            RegiConfig startupConfig = await service.GetConfigurationAsync(options);
+            IServiceMesh startupConfig = await service.GetConfigurationAsync(options);
 
-            Assert.StartsWith(expectedPath, startupConfig.Path, StringComparison.InvariantCulture);
+            Assert.StartsWith(expectedPath, ((RegiConfig)startupConfig).Path, StringComparison.InvariantCulture);
             Assert.Equal(expectedPath, _fileSystem.WorkingDirectory);
 
 
@@ -113,9 +114,9 @@ namespace Regi.Test.Services
             AssertAllRuntimePropertiesAreBound(startupConfig, expectedPath);
         }
 
-        private void AssertAllRuntimePropertiesAreBound(RegiConfig config, string expectedPath)
+        private void AssertAllRuntimePropertiesAreBound(IServiceMesh config, string expectedPath)
         {
-            Assert.StartsWith(expectedPath, config.Path, StringComparison.InvariantCulture);
+            Assert.StartsWith(expectedPath, ((RegiConfig)config).Path, StringComparison.InvariantCulture);
 
             foreach (var project in config.Projects)
             {

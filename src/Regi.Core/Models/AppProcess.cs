@@ -1,5 +1,4 @@
-﻿using McMaster.Extensions.CommandLineUtils;
-using Regi.Abstractions;
+﻿using Regi.Abstractions;
 using Regi.Extensions;
 using System;
 using System.Diagnostics;
@@ -95,12 +94,12 @@ namespace Regi.Models
             return Process.WaitForExitAsync(cancellationToken);
         }
 
-        public void Kill(IConsole console = null)
+        public void Kill()
         {
-            Kill(Constants.DefaultTimeout, console);
+            Kill(Constants.DefaultTimeout);
         }
 
-        public void Kill(TimeSpan timeout, IConsole console = null)
+        public void Kill(TimeSpan timeout)
         {
             OnKill?.Invoke(ProcessId);
 
@@ -113,7 +112,8 @@ namespace Regi.Models
                 }
                 catch (Exception e)
                 {
-                    console?.WriteErrorLine($"Exception was thrown while exiting process with PID {ProcessId}. Details: {e.Message}");
+                    // TODO: add ILogger injection
+                    //console?.WriteErrorLine($"Exception was thrown while exiting process with PID {ProcessId}. Details: {e.Message}");
                 }
             }
         }

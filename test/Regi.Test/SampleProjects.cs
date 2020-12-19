@@ -1,8 +1,7 @@
-﻿using Regi.Models;
+﻿using Regi.Abstractions;
+using Regi.Models;
 using Regi.Test.Helpers;
-using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace Regi.Test
 {
@@ -130,9 +129,9 @@ namespace Regi.Test
             Port = 9081
         };
 
-        public static RegiConfig ConfigurationDefault => new RegiConfig
+        public static IServiceMesh ConfigurationDefault => new RegiConfig
         {
-            Projects = new List<Project>
+            Projects = new List<IProject>
             {
                 Frontend,
                 Backend,
@@ -140,12 +139,12 @@ namespace Regi.Test
                 JestTests,
                 IntegrationTests,
             },
-            Services = new List<Project>()
+            Services = new List<IProject>()
         };
 
-        public static RegiConfig ConfigurationGood => new RegiConfig
+        public static IServiceMesh ConfigurationGood => new RegiConfig
         {
-            Projects = new List<Project>
+            Projects = new List<IProject>
             {
                 new Project
                 {
@@ -176,7 +175,7 @@ namespace Regi.Test
                     Serial = true
                 }
             },
-            Services = new List<Project>(),
+            Services = new List<IProject>(),
             RawSources = new Dictionary<string, string>
             {
                 { ProjectFramework.Dotnet.ToString(), "http://nuget.org/api" },

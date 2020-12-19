@@ -1,4 +1,5 @@
 ﻿using Moq;
+using Regi.Abstractions;
 using Regi.Frameworks;
 using Regi.Models;
 using Regi.Services;

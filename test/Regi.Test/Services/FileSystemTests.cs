@@ -1,4 +1,5 @@
-﻿using Regi.Services;
+﻿using Regi.Abstractions;
+using Regi.Services;
 using Regi.Test.Helpers;
 using System;
 using System.Collections.Generic;
@@ -13,7 +14,7 @@ namespace Regi.Test.Services
     [Collection(TestCollections.NoParallel)]
     public class FileSystemTests
     {
-        private IFileSystem _service;
+        private readonly IFileSystem _service;
 
         public FileSystemTests(ITestOutputHelper output)
         {

@@ -1,5 +1,6 @@
 ﻿using McMaster.Extensions.CommandLineUtils;
 using Microsoft.Extensions.DependencyInjection;
+using Regi.Abstractions;
 using Regi.CommandLine.Commands;
 using Regi.Extensions;
 using Regi.Frameworks;

@@ -1,4 +1,5 @@
 ﻿using Moq;
+using Regi.Abstractions;
 using Regi.Models;
 using Regi.Services;
 using Regi.Test.Helpers;
@@ -63,7 +64,7 @@ namespace Regi.Test.Services
         [Fact]
         public void Passing_test_with_single_path()
         {
-            var projects = new List<Project>
+            var projects = new List<IProject>
             {
                 SampleProjects.XunitTests
             };
@@ -88,7 +89,7 @@ namespace Regi.Test.Services
         [Fact]
         public void Passing_test_collection_with_multiple_paths()
         {
-            var projects = new List<Project>
+            var projects = new List<IProject>
             {
                 SampleProjects.TestCollection
             };
@@ -118,7 +119,7 @@ namespace Regi.Test.Services
         [Fact]
         public void Failing_test_collection_with_multiple_paths()
         {
-            var projects = new List<Project>
+            var projects = new List<IProject>
             {
                 SampleProjects.TestCollection
             };

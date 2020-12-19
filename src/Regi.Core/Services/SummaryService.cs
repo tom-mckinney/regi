@@ -1,18 +1,18 @@
 ﻿using McMaster.Extensions.CommandLineUtils;
+using Regi.Abstractions;
 using Regi.Extensions;
 using Regi.Models;
 using Regi.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace Regi.Services
 {
     public interface ISummaryService
     {
-        OutputSummary PrintDomainSummary(RegiConfig config, CommandOptions options);
-        OutputSummary PrintTestSummary(IList<Project> projects, TimeSpan timespan);
+        OutputSummary PrintDomainSummary(IServiceMesh config, CommandOptions options);
+        OutputSummary PrintTestSummary(IList<IProject> projects, TimeSpan timespan);
     }
 
     public class SummaryService : ISummaryService
@@ -28,7 +28,7 @@ namespace Regi.Services
             _console = console;
         }
 
-        public OutputSummary PrintDomainSummary(RegiConfig config, CommandOptions options)
+        public OutputSummary PrintDomainSummary(IServiceMesh config, CommandOptions options)
         {
             options.IncludeOptional = true; // Always include optional projects that match criteria
 
@@ -38,7 +38,7 @@ namespace Regi.Services
 
             PrintAppGroupDetails(projects, output.Projects, "Projects");
 
-            void PrintAppGroupDetails(IList<Project> inputApps, IList<Project> outputApps, string groupName)
+            void PrintAppGroupDetails(IList<IProject> inputApps, IList<IProject> outputApps, string groupName)
             {
                 if (inputApps != null && inputApps.Any())
                 {
@@ -78,7 +78,7 @@ namespace Regi.Services
             return output;
         }
 
-        public OutputSummary PrintTestSummary(IList<Project> projects, TimeSpan timespan)
+        public OutputSummary PrintTestSummary(IList<IProject> projects, TimeSpan timespan)
         {
             int failCount = 0;
             int successCount = 0;
