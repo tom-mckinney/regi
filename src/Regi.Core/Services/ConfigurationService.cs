@@ -67,10 +67,10 @@ namespace Regi.Services
 
             try
             {
-                
-                RegiConfig config = await JsonSerializer.DeserializeAsync<RegiConfig>(stream, Constants.DefaultSerializerOptions);
 
-                config.Path = startupFile.FullName;
+                IServiceMesh config = await JsonSerializer.DeserializeAsync<IServiceMesh>(stream, Constants.DefaultSerializerOptions);
+
+                //config.Path = startupFile.FullName;
 
                 return config;
             }

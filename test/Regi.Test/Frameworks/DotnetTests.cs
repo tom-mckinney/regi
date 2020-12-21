@@ -60,11 +60,17 @@ namespace Regi.Test.Frameworks
         [Fact]
         public async Task TestProject_on_failure_prints_only_exception_info()
         {
-            var unitTest = await _service.Test(_failedTests, _failedTests.GetAppDirectoryPaths(_fileSystem)[0], TestOptions.Create(), CancellationToken.None);
+            var options = TestOptions.Create();
+
+            options.Verbose = false;
+
+            var unitTest = await _service.Test(_failedTests, _failedTests.GetAppDirectoryPaths(_fileSystem)[0], options, CancellationToken.None);
 
             Assert.Equal(AppTask.Test, unitTest.Task);
             Assert.Equal(AppStatus.Failure, unitTest.Status);
-            Assert.Contains("Test Run Failed.", _console.LogOutput, StringComparison.InvariantCulture);
+
+            Assert.Contains("SampleFailedTests.UnitTest1.Test1 [FAIL]", _console.LogOutput, StringComparison.InvariantCulture);
+            Assert.DoesNotMatch("Total:\\s*\\d", _console.LogOutput);
         }
 
         [Fact]
@@ -74,7 +80,11 @@ namespace Regi.Test.Frameworks
 
             Assert.Equal(AppTask.Test, unitTest.Task);
             Assert.Equal(AppStatus.Failure, unitTest.Status);
-            Assert.Contains("Total tests:", _console.LogOutput, StringComparison.InvariantCulture);
+
+            Assert.Contains("Failed!", _console.LogOutput, StringComparison.InvariantCulture);
+            Assert.Matches("Failed:\\s*1", _console.LogOutput);
+            Assert.Matches("Passed:\\s*0", _console.LogOutput);
+            Assert.Matches("Total:\\s*1", _console.LogOutput);
         }
 
         [Fact]

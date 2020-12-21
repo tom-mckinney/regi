@@ -41,7 +41,7 @@ namespace Regi.Test.Commands
                 .ReturnsAsync(SampleProjects.ConfigurationDefault)
                 .Verifiable();
             _runnerServiceMock.Setup(m => m.StartAsync(It.IsAny<IList<IProject>>(), It.IsAny<CommandOptions>(), It.IsAny<CancellationToken>()))
-                .Callback((IList<Project> projects, CommandOptions options, CancellationToken token) =>
+                .Callback((IList<IProject> projects, CommandOptions options, CancellationToken token) =>
                 {
                     foreach (var p in projects)
                     {
