@@ -14,11 +14,11 @@ jobs:
     env:
       DOTNET_CLI_TELEMETRY_OPTOUT: 1
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v2
 
     - uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: '5.x'
+        dotnet-version: '5.0.x'
 
     - name: Install sample project dependencies
       run: dotnet run -p ./src/Regi.CommandLine/Regi.CommandLine.csproj -- install --configuration ./samples
