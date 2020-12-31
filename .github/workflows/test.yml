@@ -6,9 +6,9 @@ jobs:
   test:
     strategy:
       matrix:
-        os: [ubuntu-18.04]
+        # os: [ubuntu-18.04]
         # os: [windows-2019, ubuntu-18.04] # TODO: fix flakey tests that rely on DirectoryHelper
-        # os: [windows-2019, ubuntu-18.04, macOS-10.14] # TODO: enable macOS once setup-dotnet has been fixed
+        os: [windows-2019, ubuntu-18.04, macOS-10.14] # TODO: enable macOS once setup-dotnet has been fixed
     name: Test on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     env:
@@ -18,7 +18,7 @@ jobs:
 
     - uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: '3.1.101'
+        dotnet-version: '5.x'
 
     - name: Install sample project dependencies
       run: dotnet run -p ./src/Regi.CommandLine/Regi.CommandLine.csproj -- install --configuration ./samples
