@@ -1,9 +1,8 @@
-﻿using Regi.Abstractions;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Regi.Models
+namespace Regi.Abstractions
 {
     public class CommandDictionary<TValue>
         : Dictionary<string, ICollection<TValue>>, ICommandDictionary<TValue>

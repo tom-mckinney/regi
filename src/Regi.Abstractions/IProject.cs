@@ -23,7 +23,7 @@ namespace Regi.Abstractions
 
         IList<string> Requires { get; set; }
 
-        ICommandDictionary Arguments { get; set; }
+        CommandDictionary Arguments { get; set; }
 
         int? Port { get; set; }
 
@@ -35,7 +35,7 @@ namespace Regi.Abstractions
 
         bool RawOutput { get; set; }
 
-        ICommandDictionary<object> Scripts { get; set; }
+        CommandDictionary<object> Scripts { get; set; }
 
         bool Optional { get; set; }
 

@@ -1,5 +1,4 @@
 ﻿using Regi.Abstractions;
-using Regi.Services;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
@@ -32,7 +31,7 @@ namespace Regi.Models
 
         public IList<string> Requires { get; set; } = new List<string>();
 
-        public ICommandDictionary Arguments { get; set; } = new CommandDictionary();
+        public CommandDictionary Arguments { get; set; } = new CommandDictionary();
 
         public int? Port { get; set; }
 
@@ -44,7 +43,7 @@ namespace Regi.Models
 
         public bool RawOutput { get; set; }
 
-        public ICommandDictionary<object> Scripts { get; set; }
+        public CommandDictionary<object> Scripts { get; set; }
 
         public bool Optional { get; set; }
 
