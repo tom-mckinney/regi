@@ -129,7 +129,7 @@ namespace Regi.Test
             Port = 9081
         };
 
-        public static IServiceMesh ConfigurationDefault => new RegiConfig
+        public static IServiceMesh ConfigurationDefault => new ServiceMesh
         {
             Projects = new List<IProject>
             {
@@ -142,7 +142,7 @@ namespace Regi.Test
             Services = new List<IProject>()
         };
 
-        public static IServiceMesh ConfigurationGood => new RegiConfig
+        public static IServiceMesh ConfigurationGood => new ServiceMesh
         {
             Projects = new List<IProject>
             {

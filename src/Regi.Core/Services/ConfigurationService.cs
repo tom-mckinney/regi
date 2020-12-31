@@ -28,7 +28,7 @@ namespace Regi.Services
 
         public ValueTask<IServiceMesh> CreateConfigurationAsync(IEnumerable<IProject> projects, CommandOptions options)
         {
-            var config = new RegiConfig
+            var config = new ServiceMesh
             {
                 Projects = projects.ToList()
             };
@@ -68,11 +68,11 @@ namespace Regi.Services
             try
             {
 
-                IServiceMesh config = await JsonSerializer.DeserializeAsync<IServiceMesh>(stream, Constants.DefaultSerializerOptions);
+                var config = await JsonSerializer.DeserializeAsync<ServiceMesh<Project>>(stream, Constants.DefaultSerializerOptions);
 
-                //config.Path = startupFile.FullName;
+                config.Path = startupFile.FullName;
 
-                return config;
+                return (ServiceMesh)config;
             }
             catch (Exception e)
             {

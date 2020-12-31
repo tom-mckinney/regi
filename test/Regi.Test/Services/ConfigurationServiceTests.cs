@@ -75,7 +75,7 @@ namespace Regi.Test.Services
 
             IServiceMesh startupConfig = await service.GetConfigurationAsync(null);
 
-            Assert.StartsWith(expectedPath, ((RegiConfig)startupConfig).Path, StringComparison.InvariantCulture);
+            Assert.StartsWith(expectedPath, startupConfig.Path, StringComparison.InvariantCulture);
             Assert.Equal(totalAppCount + totalTestCount, startupConfig.Projects.Count);
             Assert.Equal(totalAppCount, startupConfig.Projects.WhereApp().Count());
             Assert.Equal(totalTestCount, startupConfig.Projects.WhereTest().Count());
@@ -102,7 +102,7 @@ namespace Regi.Test.Services
 
             IServiceMesh startupConfig = await service.GetConfigurationAsync(options);
 
-            Assert.StartsWith(expectedPath, ((RegiConfig)startupConfig).Path, StringComparison.InvariantCulture);
+            Assert.StartsWith(expectedPath, startupConfig.Path, StringComparison.InvariantCulture);
             Assert.Equal(expectedPath, _fileSystem.WorkingDirectory);
 
 
@@ -116,7 +116,7 @@ namespace Regi.Test.Services
 
         private void AssertAllRuntimePropertiesAreBound(IServiceMesh config, string expectedPath)
         {
-            Assert.StartsWith(expectedPath, ((RegiConfig)config).Path, StringComparison.InvariantCulture);
+            Assert.StartsWith(expectedPath, ((ServiceMesh)config).Path, StringComparison.InvariantCulture);
 
             foreach (var project in config.Projects)
             {
@@ -142,21 +142,6 @@ namespace Regi.Test.Services
             var service = CreateService();
 
             await Assert.ThrowsAsync<DirectoryNotFoundException>(() => service.GetConfigurationAsync(options));
-        }
-
-        [Fact]
-        public async Task GetStartupConfig_throws_when_using_deprecated_config_file()
-        {
-            _fileSystem.WorkingDirectory = PathHelper.GetSampleProjectPath("ConfigurationDeprecated");
-
-            var service = CreateService();
-
-            var ex = await Assert.ThrowsAsync<RegiException>(() => service.GetConfigurationAsync(null));
-
-            Assert.IsType<RegiException>(ex.InnerException);
-            Assert.Equal("The properties \"apps\" and \"tests\" have been removed. Use \"projects\" instead.", ex.InnerException.Message);
-
-            ex.LogAndReturnStatus(_console);
         }
 
         [Fact]

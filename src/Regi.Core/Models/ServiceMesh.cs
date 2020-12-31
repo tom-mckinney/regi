@@ -1,40 +1,26 @@
 ﻿using Regi.Abstractions;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.Json.Serialization;
 
 namespace Regi.Models
 {
-    public class RegiConfig : IServiceMesh
+    public class ServiceMesh : ServiceMesh<IProject>, IServiceMesh
+    {
+    }
+
+    public class ServiceMesh<TProject> : IServiceMesh<TProject>
+        where TProject : IProject
     {
         [JsonIgnore]
         public string Path { get; set; }
 
         [JsonPropertyName("projects")]
-        public IList<IProject> Projects { get; set; } = new List<IProject>();
-
-        // TODO: Delete this property when Regi 1.0.0 is release
-        [Obsolete("This is temporary for interactive documentation. Use Projects instead")]
-        [JsonPropertyName("apps")]
-        public List<object> Apps
-        {
-            get => null;
-#pragma warning restore CA1065 // Do not raise exceptions in unexpected locations
-            set => throw new RegiException("The properties \"apps\" and \"tests\" have been removed. Use \"projects\" instead.");
-        }
-
-        // TODO: Delete this property when Regi 1.0.0 is release
-        [Obsolete("This is temporary for interactive documentation. Use Projects instead")]
-        [JsonPropertyName("tests")]
-        public List<object> Tests
-        {
-            get => null;
-#pragma warning restore CA1065 // Do not raise exceptions in unexpected locations
-            set => throw new RegiException("The properties \"apps\" and \"tests\" have been removed. Use \"projects\" instead.");
-        }
+        public IList<TProject> Projects { get; set; } = new List<TProject>();
 
         [JsonPropertyName("services")]
-        public IList<IProject> Services { get; set; } = new List<IProject>();
+        public IList<TProject> Services { get; set; } = new List<TProject>();
 
         // TODO: Remove RawSources when .NET 5 supports deserializing all Dictionary keys
         [JsonPropertyName("sources")]
@@ -52,7 +38,7 @@ namespace Regi.Models
                     try
                     {
                         var key = Enum.Parse<ProjectFramework>(source.Key, true);
-                            
+
                         _sources.Add(key, source.Value);
                     }
                     catch (ArgumentException)
@@ -65,6 +51,17 @@ namespace Regi.Models
             }
 
             return _sources;
+        }
+
+        public static explicit operator ServiceMesh(ServiceMesh<TProject> input)
+        {
+            return new ServiceMesh
+            {
+                Path = input.Path,
+                Projects = input.Projects.Select(p => (IProject)p).ToList(),
+                Services = input.Services.Select(p => (IProject)p).ToList(),
+                RawSources = input.RawSources
+            };
         }
     }
 }

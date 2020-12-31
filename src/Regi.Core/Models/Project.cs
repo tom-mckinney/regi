@@ -92,7 +92,7 @@ namespace Regi.Models
             }
         }
 
-        public void TryAddSource(CommandOptions options, RegiConfig config)
+        public void TryAddSource(CommandOptions options, ServiceMesh config)
         {
             if (string.IsNullOrWhiteSpace(Source))
             {

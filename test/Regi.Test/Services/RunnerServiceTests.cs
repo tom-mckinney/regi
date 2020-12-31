@@ -123,7 +123,7 @@ namespace Regi.Test.Services
         {
             var appCollection = SampleProjects.AppCollection;
             appCollection.Paths = appCollection.Paths.Take(pathCount).ToList();
-            var config = new RegiConfig
+            var config = new ServiceMesh
             {
                 Projects = new List<IProject> { appCollection }
             };
@@ -464,7 +464,7 @@ namespace Regi.Test.Services
             options.NoParallel = true;
             options.Roles = test1.Roles;
 
-            var config = new RegiConfig
+            var config = new ServiceMesh
             {
                 Projects = new List<IProject> { app, test1, test2 },
             };
