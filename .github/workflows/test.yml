@@ -24,4 +24,4 @@ jobs:
       run: dotnet run -p ./src/Regi.CommandLine/Regi.CommandLine.csproj -- install --configuration ./samples
 
     - name: Run xunit tests
-      run: dotnet test ./src/Regi.sln
+      run: dotnet test ./Regi.sln
