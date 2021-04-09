@@ -32,17 +32,18 @@ namespace Regi.Services
         {
             options.IncludeOptional = true; // Always include optional projects that match criteria
 
-            OutputSummary output = new OutputSummary();
+            var output = new OutputSummary();
 
             var projects = _projectManager.FilterByOptions(config.Projects, options);
 
-            PrintAppGroupDetails(projects, output.Projects, "Projects");
+            PrintAppGroupDetails(projects, output.Projects, "Projects", true);
 
-            void PrintAppGroupDetails(IList<IProject> inputApps, IList<IProject> outputApps, string groupName)
+            void PrintAppGroupDetails(IList<IProject> inputApps, IList<IProject> outputApps, string groupName, bool required = false)
             {
-                if (inputApps != null && inputApps.Any())
+                if (inputApps?.Any() == true)
                 {
                     _console.WriteEmphasizedLine($"{groupName}:");
+
                     foreach (var app in inputApps)
                     {
                         outputApps.Add(app);
@@ -72,6 +73,11 @@ namespace Regi.Services
                             _console.WritePropertyIfSpecified("Raw Output", app.RawOutput);
                         }
                     }
+                }
+                else if (required)
+                {
+                    _console.WriteEmphasizedLine($"{groupName}:");
+                    _console.WriteWarningLine("  None");
                 }
             }
 

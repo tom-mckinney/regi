@@ -97,7 +97,7 @@ namespace Regi.Services
             FileInfo configFile = new FileInfo(configFilePath);
 
             using var fileStream = configFile.Create();
-            await JsonSerializer.SerializeAsync(fileStream, config, Constants.DefaultSerializerOptions);
+            await JsonSerializer.SerializeAsync(fileStream, config, typeof(ServiceMesh), Constants.DefaultSerializerOptions);
 
             _console.WriteEmphasizedLine($"Job's done.");
 
