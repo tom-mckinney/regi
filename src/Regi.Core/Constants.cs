@@ -21,7 +21,7 @@ namespace Regi
                     PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
                     DictionaryKeyPolicy = JsonNamingPolicy.CamelCase,
                     WriteIndented = true,
-                    IgnoreNullValues = true
+                    DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault
                 };
                 options.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase, false));
                 return options;
