@@ -1,10 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using Regi.Abstractions;
+using System.Collections.Generic;
 
 namespace Regi.Models
 {
     public class OutputSummary
     {
-        public IList<Project> Projects { get; set; } = new List<Project>();
+        public IList<IProject> Projects { get; set; } = new List<IProject>();
 
         public int SuccessCount { get; set; }
 

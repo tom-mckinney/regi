@@ -1,0 +1,33 @@
+{
+  "projects": [
+    {
+      "name": "SampleApp1",
+      "path": "../SampleApp/SampleApp.csproj",
+      "roles": [ "wumbo" ]
+    },
+    {
+      "name": "SampleApp2",
+      "path": "../SampleApp/SampleApp.csproj",
+      "roles": [ "app" ],
+      "port": 9080
+    },
+    {
+      "name": "NodeApp",
+      "path": "../NodeApp/package.json",
+      "roles": [ "app" ],
+      "framework": "node",
+      "port": 9081
+    },
+    {
+      "name": "SampleSuccessfulTests",
+      "path": "../SampleSuccessfulTests/SampleSuccessfulTests.csproj",
+      "roles": [ "test" ]
+    },
+    {
+      "name": "SampleSuccessfulTests",
+      "path": "../SampleSuccessfulTests/SampleSuccessfulTests.csproj",
+      "roles": [ "test" ]
+    }
+  ],
+  "services": []
+}

@@ -7,21 +7,20 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-18.04]
-        # os: [windows-2019, ubuntu-18.04] # TODO: fix flakey tests that rely on DirectoryHelper
-        # os: [windows-2019, ubuntu-18.04, macOS-10.14] # TODO: enable macOS once setup-dotnet has been fixed
+        # os: [windows-2019, ubuntu-18.04, macOS-10.14] # TODO: enable once flakey task cancellation tests are fixed on all platforms
     name: Test on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     env:
       DOTNET_CLI_TELEMETRY_OPTOUT: 1
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v2
 
     - uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: '3.1.101'
+        dotnet-version: '5.0.x'
 
     - name: Install sample project dependencies
-      run: dotnet run -p ./src/Regi.CommandLine/Regi.CommandLine.csproj -- install --configuration ./src/Regi.Test/_SampleProjects_
+      run: dotnet run -p ./src/Regi.CommandLine/Regi.CommandLine.csproj -- install --configuration ./samples
 
     - name: Run xunit tests
-      run: dotnet test ./src/Regi.sln
+      run: dotnet test ./Regi.sln

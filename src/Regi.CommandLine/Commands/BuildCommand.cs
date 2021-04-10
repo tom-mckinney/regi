@@ -1,9 +1,8 @@
 ﻿using McMaster.Extensions.CommandLineUtils;
-using Regi.Models;
+using Regi.Abstractions;
 using Regi.Services;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -20,9 +19,9 @@ namespace Regi.CommandLine.Commands
             _runnerService = runnerService;
         }
 
-        protected override Func<RegiConfig, IEnumerable<Project>> GetTargetProjects => (c) => c.Projects;
+        protected override Func<IServiceMesh, IEnumerable<IProject>> GetTargetProjects => (c) => c.Projects;
 
-        protected override async Task<int> ExecuteAsync(IList<Project> projects, CancellationToken cancellationToken)
+        protected override async Task<int> ExecuteAsync(IList<IProject> projects, CancellationToken cancellationToken)
         {
             await _runnerService.BuildAsync(projects, Options, cancellationToken);
 

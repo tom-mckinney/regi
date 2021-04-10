@@ -1,11 +1,11 @@
-﻿using Regi.Services;
+﻿using Regi.Abstractions;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
 namespace Regi.Models
 {
-    public class Project
+    public class Project : IProject
     {
         public Project() { }
 
@@ -48,10 +48,10 @@ namespace Regi.Models
         public bool Optional { get; set; }
 
         [JsonIgnore]
-        public ConcurrentBag<AppProcess> Processes { get; set; } = new ConcurrentBag<AppProcess>();
+        public ConcurrentBag<IAppProcess> Processes { get; set; } = new ConcurrentBag<IAppProcess>();
 
         [JsonIgnore]
-        public ConcurrentBag<Project> RequiredProjects { get; set; } = new ConcurrentBag<Project>();
+        public ConcurrentBag<IProject> RequiredProjects { get; set; } = new ConcurrentBag<IProject>();
 
         [JsonIgnore]
         public AppStatus OutputStatus
@@ -91,7 +91,7 @@ namespace Regi.Models
             }
         }
 
-        public void TryAddSource(CommandOptions options, RegiConfig config)
+        public void TryAddSource(CommandOptions options, ServiceMesh config)
         {
             if (string.IsNullOrWhiteSpace(Source))
             {

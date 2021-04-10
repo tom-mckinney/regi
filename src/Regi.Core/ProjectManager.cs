@@ -1,4 +1,5 @@
 ﻿using McMaster.Extensions.CommandLineUtils;
+using Regi.Abstractions;
 using Regi.Extensions;
 using Regi.Models;
 using Regi.Services;
@@ -12,14 +13,14 @@ namespace Regi
 {
     public interface IProjectManager
     {
-        IList<Project> Projects { get; }
+        IList<IProject> Projects { get; }
 
         CancellationTokenSource CancellationTokenSource { get; }
 
-        IList<Project> FilterAndTrackProjects(CommandOptions options, RegiConfig config, Func<RegiConfig, IEnumerable<Project>> getTargetProjects);
-        IList<Project> FilterByOptions(IEnumerable<Project> projects, CommandOptions options);
+        IList<IProject> FilterAndTrackProjects(CommandOptions options, IServiceMesh config, Func<IServiceMesh, IEnumerable<IProject>> getTargetProjects);
+        IList<IProject> FilterByOptions(IEnumerable<IProject> projects, CommandOptions options);
         Task KillAllProcesses(CommandOptions options, CancellationToken cancellationToken, bool logKillCount = false);
-        Task KillAllProcesses(IEnumerable<Project> projects, CommandOptions options, CancellationToken cancellationToken, bool logKillCount = false);
+        Task KillAllProcesses(IEnumerable<IProject> projects, CommandOptions options, CancellationToken cancellationToken, bool logKillCount = false);
     }
 
     public class ProjectManager : IProjectManager
@@ -35,11 +36,11 @@ namespace Regi
             _projectFilter = projectFilter;
         }
 
-        public IList<Project> Projects { get; private set; } = new List<Project>();
+        public IList<IProject> Projects { get; private set; } = new List<IProject>();
 
         public CancellationTokenSource CancellationTokenSource { get; } = new CancellationTokenSource();
 
-        public IList<Project> FilterAndTrackProjects(CommandOptions options, RegiConfig config, Func<RegiConfig, IEnumerable<Project>> getTargetProjects)
+        public IList<IProject> FilterAndTrackProjects(CommandOptions options, IServiceMesh config, Func<IServiceMesh, IEnumerable<IProject>> getTargetProjects)
         {
             Projects = FilterByOptions(getTargetProjects(config), options);
 
@@ -50,7 +51,7 @@ namespace Regi
             return Projects;
         }
 
-        public IList<Project> FilterByOptions(IEnumerable<Project> projects, CommandOptions options)
+        public IList<IProject> FilterByOptions(IEnumerable<IProject> projects, CommandOptions options)
         {
             // TODO: add a query builder pattern that combines filter expressions
 
@@ -82,7 +83,7 @@ namespace Regi
             return projects.ToList();
         }
 
-        public static void LinkProjectRequirements(IEnumerable<Project> projects, CommandOptions options, RegiConfig config)
+        public static void LinkProjectRequirements(IEnumerable<IProject> projects, CommandOptions options, IServiceMesh config)
         {
             foreach (var project in projects)
             {
@@ -110,7 +111,7 @@ namespace Regi
             return KillAllProcesses(Projects, options, cancellationToken, logKillCount);
         }
 
-        public async Task KillAllProcesses(IEnumerable<Project> projects, CommandOptions options, CancellationToken cancellationToken, bool logKillCount = false)
+        public async Task KillAllProcesses(IEnumerable<IProject> projects, CommandOptions options, CancellationToken cancellationToken, bool logKillCount = false)
         {
             int projectCount = projects.Count();
             if (projectCount > 0)

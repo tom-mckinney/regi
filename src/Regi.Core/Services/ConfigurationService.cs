@@ -1,4 +1,5 @@
-﻿using Regi.Extensions;
+﻿using Regi.Abstractions;
+using Regi.Extensions;
 using Regi.Models;
 using Regi.Utilities;
 using System;
@@ -12,8 +13,8 @@ namespace Regi.Services
 {
     public interface IConfigurationService
     {
-        Task<RegiConfig> GetConfigurationAsync(CommandOptions options);
-        ValueTask<RegiConfig> CreateConfigurationAsync(IEnumerable<Project> projects, CommandOptions options);
+        Task<IServiceMesh> GetConfigurationAsync(CommandOptions options);
+        ValueTask<IServiceMesh> CreateConfigurationAsync(IEnumerable<IProject> projects, CommandOptions options);
     }
 
     public class ConfigurationService : IConfigurationService
@@ -25,17 +26,17 @@ namespace Regi.Services
             _fileSystem = fileSystem;
         }
 
-        public ValueTask<RegiConfig> CreateConfigurationAsync(IEnumerable<Project> projects, CommandOptions options)
+        public ValueTask<IServiceMesh> CreateConfigurationAsync(IEnumerable<IProject> projects, CommandOptions options)
         {
-            var config = new RegiConfig
+            var config = new ServiceMesh
             {
                 Projects = projects.ToList()
             };
 
-            return new ValueTask<RegiConfig>(config);
+            return new ValueTask<IServiceMesh>(config);
         }
 
-        public async Task<RegiConfig> GetConfigurationAsync(CommandOptions options)
+        public async Task<IServiceMesh> GetConfigurationAsync(CommandOptions options)
         {
             DirectoryInfo directory;
 
@@ -66,12 +67,12 @@ namespace Regi.Services
 
             try
             {
-                
-                RegiConfig config = await JsonSerializer.DeserializeAsync<RegiConfig>(stream, Constants.DefaultSerializerOptions);
+
+                var config = await JsonSerializer.DeserializeAsync<ServiceMesh<Project>>(stream, Constants.DefaultSerializerOptions);
 
                 config.Path = startupFile.FullName;
 
-                return config;
+                return (ServiceMesh)config;
             }
             catch (Exception e)
             {

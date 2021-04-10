@@ -1,3 +1,3 @@
 ./build.sh
 
-regi install --configuration ./src/Regi.Test/_SampleProjects_
+regi install --configuration ./samples

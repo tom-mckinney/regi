@@ -1,18 +1,18 @@
 ﻿using McMaster.Extensions.CommandLineUtils;
+using Regi.Abstractions;
 using Regi.Extensions;
 using Regi.Models;
 using Regi.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace Regi.Services
 {
     public interface ISummaryService
     {
-        OutputSummary PrintDomainSummary(RegiConfig config, CommandOptions options);
-        OutputSummary PrintTestSummary(IList<Project> projects, TimeSpan timespan);
+        OutputSummary PrintDomainSummary(IServiceMesh config, CommandOptions options);
+        OutputSummary PrintTestSummary(IList<IProject> projects, TimeSpan timespan);
     }
 
     public class SummaryService : ISummaryService
@@ -28,21 +28,22 @@ namespace Regi.Services
             _console = console;
         }
 
-        public OutputSummary PrintDomainSummary(RegiConfig config, CommandOptions options)
+        public OutputSummary PrintDomainSummary(IServiceMesh config, CommandOptions options)
         {
             options.IncludeOptional = true; // Always include optional projects that match criteria
 
-            OutputSummary output = new OutputSummary();
+            var output = new OutputSummary();
 
             var projects = _projectManager.FilterByOptions(config.Projects, options);
 
-            PrintAppGroupDetails(projects, output.Projects, "Projects");
+            PrintAppGroupDetails(projects, output.Projects, "Projects", true);
 
-            void PrintAppGroupDetails(IList<Project> inputApps, IList<Project> outputApps, string groupName)
+            void PrintAppGroupDetails(IList<IProject> inputApps, IList<IProject> outputApps, string groupName, bool required = false)
             {
-                if (inputApps != null && inputApps.Any())
+                if (inputApps?.Any() == true)
                 {
                     _console.WriteEmphasizedLine($"{groupName}:");
+
                     foreach (var app in inputApps)
                     {
                         outputApps.Add(app);
@@ -73,12 +74,17 @@ namespace Regi.Services
                         }
                     }
                 }
+                else if (required)
+                {
+                    _console.WriteEmphasizedLine($"{groupName}:");
+                    _console.WriteWarningLine("  None");
+                }
             }
 
             return output;
         }
 
-        public OutputSummary PrintTestSummary(IList<Project> projects, TimeSpan timespan)
+        public OutputSummary PrintTestSummary(IList<IProject> projects, TimeSpan timespan)
         {
             int failCount = 0;
             int successCount = 0;

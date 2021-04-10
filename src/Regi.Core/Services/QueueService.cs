@@ -1,6 +1,6 @@
 ﻿using McMaster.Extensions.CommandLineUtils;
+using Regi.Abstractions;
 using Regi.Extensions;
-using Regi.Models;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -23,10 +23,10 @@ namespace Regi.Services
 
         Task RunAllAsync(CancellationToken cancellationToken);
 
-        Task ConfirmProjectsStartedAsync(IList<Project> projects, CancellationToken cancellationToken);
-        Task ConfirmProjectsStartedAsync(IDictionary<int, Project> projects, CancellationToken cancellationToken);
+        Task ConfirmProjectsStartedAsync(IList<IProject> projects, CancellationToken cancellationToken);
+        Task ConfirmProjectsStartedAsync(IDictionary<int, IProject> projects, CancellationToken cancellationToken);
 
-        Task WaitOnPortAsync(Project project, CancellationToken cancellationToken);
+        Task WaitOnPortAsync(IProject project, CancellationToken cancellationToken);
     }
 
     public class QueueService : IQueueService
@@ -125,7 +125,7 @@ namespace Regi.Services
             }
         }
 
-        public virtual async Task WaitOnPortAsync(Project project, CancellationToken cancellationToken)
+        public virtual async Task WaitOnPortAsync(IProject project, CancellationToken cancellationToken)
         {
             if (project.Port.HasValue)
             {
@@ -144,16 +144,16 @@ namespace Regi.Services
             }
         }
 
-        public Task ConfirmProjectsStartedAsync(IList<Project> projects, CancellationToken cancellationToken)
+        public Task ConfirmProjectsStartedAsync(IList<IProject> projects, CancellationToken cancellationToken)
         {
-            IDictionary<int, Project> projectsWithPorts = projects
+            IDictionary<int, IProject> projectsWithPorts = projects
                 .Where(p => p.Port.HasValue)
                 .ToDictionary(p => p.Port.Value);
 
             return ConfirmProjectsStartedAsync(projectsWithPorts, cancellationToken);
         }
 
-        public virtual async Task ConfirmProjectsStartedAsync(IDictionary<int, Project> projects, CancellationToken cancellationToken)
+        public virtual async Task ConfirmProjectsStartedAsync(IDictionary<int, IProject> projects, CancellationToken cancellationToken)
         {
             string projectPluralization = projects.Count == 1 ? "project" : "projects";
             string hasPluralization = projects.Count == 1 ? "has" : "have";

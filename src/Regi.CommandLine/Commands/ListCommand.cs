@@ -1,5 +1,5 @@
 ﻿using McMaster.Extensions.CommandLineUtils;
-using Regi.Models;
+using Regi.Abstractions;
 using Regi.Services;
 using System;
 using System.Collections.Generic;
@@ -19,9 +19,9 @@ namespace Regi.CommandLine.Commands
             _summaryService = summaryService;
         }
 
-        protected override Func<RegiConfig, IEnumerable<Project>> GetTargetProjects => (c) => new List<Project>();
+        protected override Func<IServiceMesh, IEnumerable<IProject>> GetTargetProjects => (c) => new List<IProject>();
 
-        protected override Task<int> ExecuteAsync(IList<Project> projects, CancellationToken cancellationToken)
+        protected override Task<int> ExecuteAsync(IList<IProject> projects, CancellationToken cancellationToken)
         {
             _summaryService.PrintDomainSummary(Config, Options);
 

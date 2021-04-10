@@ -1,13 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using Regi.Abstractions;
+using System.Collections.Generic;
 using System.IO;
 
 namespace Regi.Models
 {
-    public interface IFileSystemDictionary : IDictionary<string, FileSystemInfo>
-    {
-        string Name { get; }
-        string Path { get; }
-    }
 
     public class FileSystemDictionary : Dictionary<string, FileSystemInfo>, IFileSystemDictionary
     {

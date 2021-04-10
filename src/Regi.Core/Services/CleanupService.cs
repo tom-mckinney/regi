@@ -1,4 +1,5 @@
 ﻿using McMaster.Extensions.CommandLineUtils;
+using Regi.Abstractions;
 using Regi.Extensions;
 using Regi.Frameworks;
 using Regi.Models;
@@ -13,9 +14,9 @@ namespace Regi.Services
 {
     public interface ICleanupService
     {
-        void KillProcessTree(AppProcess process, CommandOptions options);
-        void KillProcessTree(AppProcess process, CommandOptions options, TimeSpan timeout);
-        Task<IReadOnlyList<AppProcess>> ShutdownBuildServers(CommandOptions options, CancellationToken cancellationToken);
+        void KillProcessTree(IAppProcess process, CommandOptions options);
+        void KillProcessTree(IAppProcess process, CommandOptions options, TimeSpan timeout);
+        Task<IReadOnlyList<IAppProcess>> ShutdownBuildServers(CommandOptions options, CancellationToken cancellationToken);
     }
 
     public class CleanupService : ICleanupService
@@ -33,12 +34,12 @@ namespace Regi.Services
             _console = console;
         }
 
-        public void KillProcessTree(AppProcess process, CommandOptions options)
+        public void KillProcessTree(IAppProcess process, CommandOptions options)
         {
             KillProcessTree(process, options, _defaultTimeout);
         }
 
-        public void KillProcessTree(AppProcess process, CommandOptions options, TimeSpan timeout)
+        public void KillProcessTree(IAppProcess process, CommandOptions options, TimeSpan timeout)
         {
             if (process == null)
             {
@@ -67,12 +68,12 @@ namespace Regi.Services
                 LogOutputs(stdout, stderr, options);
             }
 
-            process.Kill(timeout, _console);
+            process.Kill(timeout);
         }
 
-        public async Task<IReadOnlyList<AppProcess>> ShutdownBuildServers(CommandOptions options, CancellationToken cancellationToken)
+        public async Task<IReadOnlyList<IAppProcess>> ShutdownBuildServers(CommandOptions options, CancellationToken cancellationToken)
         {
-            var output = new List<AppProcess>
+            var output = new List<IAppProcess>
             {
                 await _dotnetService.ShutdownBuildServer(options, cancellationToken)
             };

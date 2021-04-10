@@ -1,11 +1,11 @@
-﻿using System;
+﻿using McMaster.Extensions.CommandLineUtils;
+using Regi.Abstractions;
+using Regi.Extensions;
+using Regi.Services;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using McMaster.Extensions.CommandLineUtils;
-using Regi.Extensions;
-using Regi.Models;
-using Regi.Services;
 
 namespace Regi.CommandLine.Commands
 {
@@ -20,9 +20,9 @@ namespace Regi.CommandLine.Commands
         public override bool RequireRegiConfig => false;
         public override bool FilterProjects => false;
 
-        protected override Func<RegiConfig, IEnumerable<Project>> GetTargetProjects => (s) => new List<Project>();
+        protected override Func<IServiceMesh, IEnumerable<IProject>> GetTargetProjects => (s) => new List<IProject>();
 
-        protected override Task<int> ExecuteAsync(IList<Project> projects, CancellationToken cancellationToken)
+        protected override Task<int> ExecuteAsync(IList<IProject> projects, CancellationToken cancellationToken)
         {
             var version = typeof(Program).Assembly.GetName().Version;
 

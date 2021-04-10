@@ -1,5 +1,4 @@
 ﻿using McMaster.Extensions.CommandLineUtils;
-using McMaster.Extensions.CommandLineUtils.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
 using Regi.Abstractions;
 using Regi.CommandLine.Commands;
@@ -98,7 +97,6 @@ namespace Regi.CommandLine
                 .AddIdentifer<DjangoIdentifier>()
 
                 .AddSingleton(console)
-                .AddSingleton<CommandLineContext, DefaultCommandLineContext>()
                 .BuildServiceProvider();
         }
     }

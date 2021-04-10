@@ -1,5 +1,5 @@
 ﻿using McMaster.Extensions.CommandLineUtils;
-using Regi.Models;
+using Regi.Abstractions;
 using Regi.Services;
 using System.Collections.Generic;
 

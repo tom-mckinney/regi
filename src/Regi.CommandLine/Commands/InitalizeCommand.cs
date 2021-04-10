@@ -1,11 +1,11 @@
-﻿using System;
+﻿using McMaster.Extensions.CommandLineUtils;
+using Regi.Abstractions;
+using Regi.Services;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using McMaster.Extensions.CommandLineUtils;
-using Regi.Models;
-using Regi.Services;
 
 namespace Regi.CommandLine.Commands
 {
@@ -29,9 +29,9 @@ namespace Regi.CommandLine.Commands
         public override bool RequireRegiConfig => false;
         public override bool FilterProjects => false;
 
-        protected override Func<RegiConfig, IEnumerable<Project>> GetTargetProjects => (s) => new List<Project>();
+        protected override Func<IServiceMesh, IEnumerable<IProject>> GetTargetProjects => (s) => new List<IProject>();
 
-        protected override async Task<int> ExecuteAsync(IList<Project> projects, CancellationToken cancellationToken)
+        protected override async Task<int> ExecuteAsync(IList<IProject> projects, CancellationToken cancellationToken)
         {
             var directory = new DirectoryInfo(_fileSystem.WorkingDirectory);
 

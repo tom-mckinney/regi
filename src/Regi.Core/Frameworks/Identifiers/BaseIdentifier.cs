@@ -1,5 +1,5 @@
-﻿using Regi.Models;
-using Regi.Services;
+﻿using Regi.Abstractions;
+using Regi.Models;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -14,10 +14,10 @@ namespace Regi.Frameworks.Identifiers
             _fileSystem = fileSystem;
         }
 
-        public abstract ValueTask<bool> IsMatchAsync(Project project, IFileSystemDictionary directoryContents);
-        public abstract ValueTask<bool> ShouldIdentify(Project project, IFileSystemDictionary directoryContents);
+        public abstract ValueTask<bool> IsMatchAsync(IProject project, IFileSystemDictionary directoryContents);
+        public abstract ValueTask<bool> ShouldIdentify(IProject project, IFileSystemDictionary directoryContents);
         
-        public virtual ValueTask<Project> CreateOrModifyAsync(Project project, IFileSystemDictionary directoryContents)
+        public virtual ValueTask<IProject> CreateOrModifyAsync(IProject project, IFileSystemDictionary directoryContents)
         {
             if (project == null)
             {
@@ -30,7 +30,7 @@ namespace Regi.Frameworks.Identifiers
                 _fileSystem.GetRelativePath(directoryContents.Path)
             };
 
-            return new ValueTask<Project>(project);
+            return new ValueTask<IProject>(project);
         }
     }
 }

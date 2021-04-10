@@ -1,4 +1,5 @@
-﻿using Regi.Models;
+﻿using Regi.Abstractions;
+using Regi.Models;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -8,10 +9,10 @@ namespace Regi
     {
         ProjectFramework Framework { get; }
 
-        Task<AppProcess> Install(Project project, string appDirectoryPath, CommandOptions options, CancellationToken cancellationToken);
-        Task<AppProcess> Start(Project project, string appDirectoryPath, CommandOptions options, CancellationToken cancellationToken);
-        Task<AppProcess> Test(Project project, string appDirectoryPath, CommandOptions options, CancellationToken cancellationToken);
-        Task<AppProcess> Build(Project project, string appDirectoryPath, CommandOptions options, CancellationToken cancellationToken);
-        Task<AppProcess> Kill(CommandOptions options, CancellationToken cancellationToken);
+        Task<IAppProcess> Install(IProject project, string appDirectoryPath, CommandOptions options, CancellationToken cancellationToken);
+        Task<IAppProcess> Start(IProject project, string appDirectoryPath, CommandOptions options, CancellationToken cancellationToken);
+        Task<IAppProcess> Test(IProject project, string appDirectoryPath, CommandOptions options, CancellationToken cancellationToken);
+        Task<IAppProcess> Build(IProject project, string appDirectoryPath, CommandOptions options, CancellationToken cancellationToken);
+        Task<IAppProcess> Kill(CommandOptions options, CancellationToken cancellationToken);
     }
 }

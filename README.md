@@ -20,13 +20,13 @@ dotnet tool install -g regi
 
 ### Building from source code
 
-Windows:
+Powershell:
 
 ```powershell
-.\build.cmd
+./build.ps1
 ```
 
-Mac/Linux:
+Bash:
 
 ```powershell
 ./build.sh
@@ -70,7 +70,7 @@ Regi is most commonly used as a .NET Core Global tool (i.e. a command line appli
 
 ## Samples
 
-The most up-to-date examples can be found in the [Sample Projects](https://github.com/tom-mckinney/regi/tree/main/src/Regi.Test/_SampleProjects_) of the `Regi.Test` project. Below is a simple example of what a `regi.json` configuration file might look like:
+The most up-to-date examples can be found in the [Sample Projects](https://github.com/tom-mckinney/regi/tree/main/samples) directory. Below is a simple example of what a `regi.json` configuration file might look like:
 
 ```json
 {

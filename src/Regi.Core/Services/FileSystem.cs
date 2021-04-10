@@ -1,4 +1,5 @@
 ﻿using McMaster.Extensions.CommandLineUtils;
+using Regi.Abstractions;
 using Regi.Extensions;
 using Regi.Models;
 using System;
@@ -10,18 +11,6 @@ using System.Threading.Tasks;
 
 namespace Regi.Services
 {
-    public interface IFileSystem
-    {
-        string WorkingDirectory { get; set; }
-
-        string GetDirectoryPath(string path, bool throwIfNotFound = true, string targetObj = "project");
-        string GetRelativePath(string path);
-        ValueTask<FileInfo> CreateConfigFileAsync(RegiConfig config);
-        List<FileInfo> FindAllProjectFiles();
-        string FindFileOrDirectory(string fileName);
-        IEnumerable<DirectoryInfo> GetChildDirectories(DirectoryInfo directory);
-        IFileSystemDictionary GetAllChildren(DirectoryInfo directory);
-    }
 
     public class FileSystem : IFileSystem
     {
@@ -94,7 +83,7 @@ namespace Regi.Services
             }
         }
 
-        public async ValueTask<FileInfo> CreateConfigFileAsync(RegiConfig config)
+        public async ValueTask<FileInfo> CreateConfigFileAsync(IServiceMesh config)
         {
             string configFilePath = Path.Combine(WorkingDirectory, "regi.json");
 
@@ -108,7 +97,7 @@ namespace Regi.Services
             FileInfo configFile = new FileInfo(configFilePath);
 
             using var fileStream = configFile.Create();
-            await JsonSerializer.SerializeAsync(fileStream, config, Constants.DefaultSerializerOptions);
+            await JsonSerializer.SerializeAsync(fileStream, config, typeof(ServiceMesh), Constants.DefaultSerializerOptions);
 
             _console.WriteEmphasizedLine($"Job's done.");
 
