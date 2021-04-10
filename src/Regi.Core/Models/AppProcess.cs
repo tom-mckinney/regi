@@ -26,12 +26,14 @@ namespace Regi.Models
 
         public virtual Process Process { get; protected set; }
 
-        public int ProcessId { get; private set; }
-        public string ProcessName { get; private set; }
+        public int ProcessId { get; protected set; }
+        public string ProcessName { get; protected set; }
 
         public int? Port { get; set; }
 
         public string Path { get; set; }
+
+        public bool IsCanceled { get; protected set; }
 
         public DateTimeOffset? StartTime
         {
@@ -82,14 +84,22 @@ namespace Regi.Models
 
         public Action<int> OnKill { get; set; }
 
-        public void WaitForExit()
-        {
-            Process?.WaitForExit();
-        }
-
         public async Task WaitForExitAsync(CancellationToken cancellationToken)
         {
-            await Process?.WaitForExitAsync(cancellationToken);
+            try
+            {
+                await Process?.WaitForExitAsync(cancellationToken);
+            }
+            catch (TaskCanceledException)
+            {
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    IsCanceled = true;
+                }
+
+                throw;
+            }
+
         }
 
         public void Kill(OptionsBase options = null)
