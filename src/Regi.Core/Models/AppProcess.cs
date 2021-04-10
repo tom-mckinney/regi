@@ -86,12 +86,13 @@ namespace Regi.Models
             Process?.WaitForExit();
         }
 
-        public Task WaitForExitAsync(CancellationToken cancellationToken)
+        public async Task WaitForExitAsync(CancellationToken cancellationToken)
         {
-            if (Process == null)
-                return System.Threading.Tasks.Task.CompletedTask;
+            await Process?.WaitForExitAsync(cancellationToken);
+            //if (Process == null)
+            //    return System.Threading.Tasks.Task.CompletedTask;
 
-            return Process.WaitForExitAsync(cancellationToken);
+            //return await Process.WaitForExitAsync(cancellationToken);
         }
 
         public void Kill()
