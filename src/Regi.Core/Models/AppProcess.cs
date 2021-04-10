@@ -1,4 +1,5 @@
 ﻿using Regi.Abstractions;
+using Regi.Abstractions.Options;
 using Regi.Extensions;
 using System;
 using System.Diagnostics;
@@ -86,20 +87,17 @@ namespace Regi.Models
             Process?.WaitForExit();
         }
 
-        public Task WaitForExitAsync(CancellationToken cancellationToken)
+        public async Task WaitForExitAsync(CancellationToken cancellationToken)
         {
-            if (Process == null)
-                return System.Threading.Tasks.Task.CompletedTask;
-
-            return Process.WaitForExitAsync(cancellationToken);
+            await Process?.WaitForExitAsync(cancellationToken);
         }
 
-        public void Kill()
+        public void Kill(OptionsBase options = null)
         {
-            Kill(Constants.DefaultTimeout);
+            Kill(Constants.DefaultTimeout, options);
         }
 
-        public void Kill(TimeSpan timeout)
+        public void Kill(TimeSpan timeout, OptionsBase options = null)
         {
             OnKill?.Invoke(ProcessId);
 
@@ -112,8 +110,11 @@ namespace Regi.Models
                 }
                 catch (Exception e)
                 {
-                    // TODO: add ILogger injection
-                    //console?.WriteErrorLine($"Exception was thrown while exiting process with PID {ProcessId}. Details: {e.Message}");
+                    if (options?.Verbose == true)
+                    {
+                        Console.WriteLine($"Exception was thrown while exiting process with PID {ProcessId}. Details: {e.Message}"); // TODO: use ILogger
+                        //console?.WriteErrorLine($"Exception was thrown while exiting process with PID {ProcessId}. Details: {e.Message}");
+                    }
                 }
             }
         }

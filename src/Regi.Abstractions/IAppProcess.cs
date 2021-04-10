@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Regi.Abstractions.Options;
+using System;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
@@ -41,6 +42,6 @@ namespace Regi.Abstractions
 
         void Start();
 
-        void Kill(TimeSpan timeout);
+        void Kill(TimeSpan timeout, OptionsBase options = null);
     }
 }

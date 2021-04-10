@@ -27,35 +27,18 @@ namespace Regi.Test.Models
         }
 
         [Fact]
-        public void OnKill_is_never_invoked_if_it_is_null()
+        public async Task WaitForExitAsync_throws_if_process_is_null()
         {
-            int callCount = 0;
+            AppProcess process = new(null, AppTask.Test, AppStatus.Running);
 
-            AppProcess process = new AppProcess(new Process(), AppTask.Test, AppStatus.Running)
-            {
-                OnKill = null
-            };
-
-            Assert.Equal(0, callCount);
-        }
-
-        [Fact]
-        public async Task WaitForExitAsync_returns_if_process_is_null()
-        {
-            AppProcess process = new AppProcess(null, AppTask.Test, AppStatus.Running);
-
-            var task = process.WaitForExitAsync(CancellationToken.None);
-
-            await task;
-
-            Assert.True(task.IsCompleted);
+            await Assert.ThrowsAsync<NullReferenceException>(() => process.WaitForExitAsync(CancellationToken.None));
         }
 
         [Fact]
         public async Task WaitForExitAsync_can_be_cancelled_by_cancellation_token()
         {
             var runtimeInfo = new RuntimeInfo();
-            Process longRunningProcess = new Process
+            Process longRunningProcess = new()
             {
                 StartInfo = new ProcessStartInfo
                 {
