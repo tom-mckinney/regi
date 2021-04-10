@@ -26,8 +26,8 @@ namespace Regi.Models
 
         public virtual Process Process { get; protected set; }
 
-        public int ProcessId { get; private set; }
-        public string ProcessName { get; private set; }
+        public int ProcessId { get; protected set; }
+        public string ProcessName { get; protected set; }
 
         public int? Port { get; set; }
 
@@ -82,14 +82,9 @@ namespace Regi.Models
 
         public Action<int> OnKill { get; set; }
 
-        public void WaitForExit()
+        public Task WaitForExitAsync(CancellationToken cancellationToken)
         {
-            Process?.WaitForExit();
-        }
-
-        public async Task WaitForExitAsync(CancellationToken cancellationToken)
-        {
-            await Process?.WaitForExitAsync(cancellationToken);
+            return Process?.WaitForExitAsync(cancellationToken);
         }
 
         public void Kill(OptionsBase options = null)
