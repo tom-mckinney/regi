@@ -68,8 +68,6 @@ namespace Regi.Test.Models
             {
                 Assert.IsType<TaskCanceledException>(e);
             }
-
-            Assert.True(task.IsCanceled);
         }
     }
 }
