@@ -33,8 +33,6 @@ namespace Regi.Models
 
         public string Path { get; set; }
 
-        public bool IsCanceled { get; protected set; }
-
         public DateTimeOffset? StartTime
         {
             get
@@ -84,22 +82,9 @@ namespace Regi.Models
 
         public Action<int> OnKill { get; set; }
 
-        public async Task WaitForExitAsync(CancellationToken cancellationToken)
+        public Task WaitForExitAsync(CancellationToken cancellationToken)
         {
-            try
-            {
-                await Process?.WaitForExitAsync(cancellationToken);
-            }
-            catch (TaskCanceledException)
-            {
-                if (cancellationToken.IsCancellationRequested)
-                {
-                    IsCanceled = true;
-                }
-
-                throw;
-            }
-
+            return Process?.WaitForExitAsync(cancellationToken);
         }
 
         public void Kill(OptionsBase options = null)
