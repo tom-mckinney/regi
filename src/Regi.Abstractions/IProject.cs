@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Regi.Abstractions
 {
-    public interface IProject
+    public interface IProject : IService
     {
         string Name { get; set; }
 

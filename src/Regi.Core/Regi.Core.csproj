@@ -29,6 +29,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Regi.Abstractions\Regi.Abstractions.csproj" />
     <ProjectReference Include="..\Regi.Docker\Regi.Docker.csproj" />
+    <ProjectReference Include="..\Regi.Runtime\Regi.Runtime.csproj" />
   </ItemGroup>
 
 </Project>
