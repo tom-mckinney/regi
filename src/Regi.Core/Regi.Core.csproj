@@ -28,6 +28,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Regi.Abstractions\Regi.Abstractions.csproj" />
+    <ProjectReference Include="..\Regi.Serialization\Regi.Serialization.csproj" />
   </ItemGroup>
 
 </Project>
