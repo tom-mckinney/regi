@@ -18,7 +18,7 @@ namespace Regi.Runtime
             _fileSystem = fileSystem;
         }
 
-        public IReadOnlyDictionary<Guid, IManagedProcess> ManagedProcesses => _managedProcesses;
+        internal IReadOnlyDictionary<Guid, IManagedProcess> ManagedProcesses => _managedProcesses;
 
         public ValueTask<IManagedProcess> CreateAsync(string fileName, string arguments, DirectoryInfo workingDirectory = null)
         {
@@ -27,7 +27,7 @@ namespace Regi.Runtime
                 workingDirectory = new DirectoryInfo(_fileSystem.WorkingDirectory);
             }
 
-            var managedProcess = new ManagedProcess(fileName, arguments, workingDirectory);
+            var managedProcess = new ManagedProcess(fileName, arguments, workingDirectory, null); // TODO: create ILogSink
 
             if (!_managedProcesses.TryAdd(managedProcess.Id, managedProcess))
             {
