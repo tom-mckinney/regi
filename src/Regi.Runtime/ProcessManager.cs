@@ -35,7 +35,7 @@ namespace Regi.Runtime
 
             if (!_managedProcesses.TryAdd(managedProcess.Id, managedProcess))
             {
-                throw new InvalidOperationException($"Managed process with Id of {managedProcess.Id} already exists"); // TODO: test this
+                throw new InvalidOperationException($"Managed process with Id of {managedProcess.Id} already exists");
             }
 
             return managedProcess;

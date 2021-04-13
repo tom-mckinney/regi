@@ -31,12 +31,12 @@ namespace Regi.Runtime.Test
             var defaultSB = new StringBuilder();
             var errorSB = new StringBuilder();
 
-            _logSinkMock.Setup(m => m.OutputHandler)
+            _logSinkMock.Setup(m => m.OutputEventHandler)
                 .Returns((o, e) =>
                 {
                     defaultSB.Append(e.Data);
                 });
-            _logSinkMock.Setup(m => m.ErrorHandler)
+            _logSinkMock.Setup(m => m.ErrorEventHandler)
                 .Returns((o, e) =>
                 {
                     errorSB.Append(e.Data);

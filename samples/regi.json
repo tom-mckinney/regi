@@ -5,6 +5,7 @@
       "path": "./Frontend/package.json",
       "framework": "node",
       "port": 3000,
+      "roles": [ "app" ],
       "labels": [ "frontend" ],
       "commands": {
         "start": "run dev"
@@ -15,6 +16,7 @@
       "path": "./Backend/Backend.csproj",
       "framework": "dotnet",
       "port": 5000,
+      "roles": [ "app" ],
       "labels": [ "backend" ],
       "arguments": {
         "start": [ "--foo bar" ]

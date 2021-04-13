@@ -6,6 +6,7 @@ using Regi.Extensions;
 using Regi.Frameworks;
 using Regi.Frameworks.Identifiers;
 using Regi.Models;
+using Regi.Runtime;
 using Regi.Services;
 using System;
 using System.Threading;
@@ -95,6 +96,8 @@ namespace Regi.CommandLine
 
                 .AddFramework<IDjango, Django>()
                 .AddIdentifer<DjangoIdentifier>()
+
+                .AddRegiRuntime()
 
                 .AddSingleton(console)
                 .BuildServiceProvider();

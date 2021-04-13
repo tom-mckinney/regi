@@ -1,4 +1,5 @@
 ﻿using Regi.Abstractions;
+using Regi.Runtime.LogHandlers;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -10,14 +11,21 @@ namespace Regi.Runtime
 {
     public class LogSinkManager : ILogSinkManager
     {
+        private readonly ILogHandlerFactory _logHandlerFactory;
+
+        public LogSinkManager(ILogHandlerFactory logHandlerFactory)
+        {
+            _logHandlerFactory = logHandlerFactory;
+        }
+
         internal ConcurrentDictionary<Guid, ILogSink> LogSinks { get; } = new ConcurrentDictionary<Guid, ILogSink>();
 
         public ValueTask<ILogSink> CreateAsync(Guid managedProcessId)
         {
-            var logSink = new LogSink
-            {
-                ManagedProcessId = managedProcessId
-            };
+            var logSink = new LogSink(
+                managedProcessId,
+                _logHandlerFactory.CreateLogHandler<SilentLogHandler>(),
+                _logHandlerFactory.CreateLogHandler<DefaultLogHandler>());
 
             if (!LogSinks.TryAdd(managedProcessId, logSink))
             {

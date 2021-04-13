@@ -55,8 +55,8 @@ namespace Regi.Runtime
                 EnableRaisingEvents = true,
             };
 
-            this.Process.OutputDataReceived += LogSink.OutputHandler;
-            this.Process.ErrorDataReceived += LogSink.ErrorHandler;
+            this.Process.OutputDataReceived += LogSink.OutputEventHandler;
+            this.Process.ErrorDataReceived += LogSink.ErrorEventHandler;
 
             this.Process.Start();
             this.Process.BeginOutputReadLine();

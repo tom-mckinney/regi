@@ -10,7 +10,11 @@ namespace Regi.Abstractions
     public interface ILogSink
     {
         Guid ManagedProcessId { get; }
-        DataReceivedEventHandler OutputHandler { get; }
-        DataReceivedEventHandler ErrorHandler { get; }
+
+        ILogHandler OutputLogHandler { get; set; }
+        ILogHandler ErrorLogHandler { get; set; }
+
+        DataReceivedEventHandler OutputEventHandler { get; }
+        DataReceivedEventHandler ErrorEventHandler { get; }
     }
 }
