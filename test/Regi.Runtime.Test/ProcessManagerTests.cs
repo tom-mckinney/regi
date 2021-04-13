@@ -2,10 +2,7 @@
 using Regi.Abstractions;
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Upstream.Testing;
@@ -15,11 +12,12 @@ namespace Regi.Runtime.Test
 {
     public class ProcessManagerTests : TestBase<ProcessManager>
     {
+        private readonly Mock<ILogSinkManager> _logSinkManagerMock = new(MockBehavior.Strict);
         private readonly Mock<IFileSystem> _fileSystemMock = new(MockBehavior.Strict);
 
         protected override ProcessManager CreateTestClass()
         {
-            return new ProcessManager(_fileSystemMock.Object);
+            return new ProcessManager(_logSinkManagerMock.Object, _fileSystemMock.Object);
         }
 
         [Fact]
@@ -28,6 +26,10 @@ namespace Regi.Runtime.Test
             var fileName = "foo.exe";
             var arguments = "bar wumbo";
             var workingDirectory = new DirectoryInfo(Directory.GetCurrentDirectory());
+            var logSink = new LogSink();
+
+            _logSinkManagerMock.Setup(m => m.CreateAsync(It.IsAny<Guid>()))
+                .ReturnsAsync(logSink);
 
             var managedProcess = await TestClass.CreateAsync(fileName, arguments, workingDirectory);
 
@@ -35,6 +37,7 @@ namespace Regi.Runtime.Test
             Assert.Equal(fileName, managedProcess.FileName);
             Assert.Equal(arguments, managedProcess.Arguments);
             Assert.Equal(workingDirectory, managedProcess.WorkingDirectory);
+            Assert.Same(logSink, ((ManagedProcess)managedProcess).LogSink);
         }
 
         [Fact]
@@ -44,6 +47,9 @@ namespace Regi.Runtime.Test
             var arguments = "bar wumbo";
 
             var workingDirectory = Directory.GetCurrentDirectory();
+
+            _logSinkManagerMock.Setup(m => m.CreateAsync(It.IsAny<Guid>()))
+                .ReturnsAsync(new LogSink());
 
             _fileSystemMock.Setup(m => m.WorkingDirectory)
                 .Returns(workingDirectory);
@@ -61,6 +67,9 @@ namespace Regi.Runtime.Test
             var fileName = "foo.exe";
             var arguments = "bar wumbo";
             var workingDirectory = new DirectoryInfo(Directory.GetCurrentDirectory());
+
+            _logSinkManagerMock.Setup(m => m.CreateAsync(It.IsAny<Guid>()))
+                .ReturnsAsync(new LogSink());
 
             var managedProcess = await TestClass.CreateAsync(fileName, arguments, workingDirectory);
 

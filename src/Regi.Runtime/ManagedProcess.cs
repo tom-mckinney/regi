@@ -12,15 +12,18 @@ namespace Regi.Runtime
 {
     public class ManagedProcess : IManagedProcess
     {
-        private readonly ILogSink _logSink;
-
         public ManagedProcess(string fileName, string arguments, DirectoryInfo workingDirectory, ILogSink logSink)
+            : this(Guid.NewGuid(), fileName, arguments, workingDirectory, logSink)
         {
-            Id = Guid.NewGuid();
+        }
+
+        public ManagedProcess(Guid id, string fileName, string arguments, DirectoryInfo workingDirectory, ILogSink logSink)
+        {
+            Id = id;
             FileName = fileName;
             Arguments = arguments;
             WorkingDirectory = workingDirectory;
-            _logSink = logSink;
+            LogSink = logSink;
         }
 
         public Guid Id { get; protected set; }
@@ -32,6 +35,8 @@ namespace Regi.Runtime
         public DirectoryInfo WorkingDirectory { get; protected set; }
 
         internal Process Process { get; private set; }
+
+        internal ILogSink LogSink { get; private set; }
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
@@ -50,8 +55,8 @@ namespace Regi.Runtime
                 EnableRaisingEvents = true,
             };
 
-            this.Process.OutputDataReceived += _logSink.OutputHandler;
-            this.Process.ErrorDataReceived += _logSink.ErrorHandler;
+            this.Process.OutputDataReceived += LogSink.OutputHandler;
+            this.Process.ErrorDataReceived += LogSink.ErrorHandler;
 
             this.Process.Start();
             this.Process.BeginOutputReadLine();
