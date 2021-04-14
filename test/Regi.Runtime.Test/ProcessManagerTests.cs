@@ -1,5 +1,6 @@
 ﻿using Moq;
 using Regi.Abstractions;
+using Regi.Test.Stubs;
 using System;
 using System.Collections.Concurrent;
 using System.IO;
@@ -26,7 +27,7 @@ namespace Regi.Runtime.Test
             var fileName = "foo.exe";
             var arguments = "bar wumbo";
             var workingDirectory = new DirectoryInfo(Directory.GetCurrentDirectory());
-            var logSink = new LogSink();
+            var logSink = new StubbedLogSink();
 
             _logSinkManagerMock.Setup(m => m.CreateAsync(It.IsAny<Guid>()))
                 .ReturnsAsync(logSink);
@@ -49,7 +50,7 @@ namespace Regi.Runtime.Test
             var workingDirectory = Directory.GetCurrentDirectory();
 
             _logSinkManagerMock.Setup(m => m.CreateAsync(It.IsAny<Guid>()))
-                .ReturnsAsync(new LogSink());
+                .ReturnsAsync(new StubbedLogSink());
 
             _fileSystemMock.Setup(m => m.WorkingDirectory)
                 .Returns(workingDirectory);
@@ -69,7 +70,7 @@ namespace Regi.Runtime.Test
             var workingDirectory = new DirectoryInfo(Directory.GetCurrentDirectory());
 
             _logSinkManagerMock.Setup(m => m.CreateAsync(It.IsAny<Guid>()))
-                .ReturnsAsync(new LogSink());
+                .ReturnsAsync(new StubbedLogSink());
 
             var managedProcess = await TestClass.CreateAsync(fileName, arguments, workingDirectory);
 

@@ -15,6 +15,8 @@ namespace Regi.Models
             Path = path;
         }
 
+        public ServiceType Type => ServiceType.Project;
+
         public string Name { get; set; } = "Unnamed Project";
 
         public string Path { get; set; }

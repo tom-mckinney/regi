@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using Moq;
 using Regi.Abstractions;
+using Regi.Test;
 using Upstream.Testing;
 using Xunit;
 using Xunit.Abstractions;

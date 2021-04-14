@@ -9,9 +9,11 @@ using System.Threading.Tasks;
 
 namespace Regi.Docker
 {
-    public class DockerServiceRunner : IServiceRunner<IDockerService>
+    public class DockerServiceRunner : IServiceRunner
     {
-        public Task RunAsync(IDockerService service, OptionsBase options, CancellationToken cancellationToken)
+        public ServiceType Type => ServiceType.Docker;
+
+        public ValueTask<IManagedProcess> RunAsync(IService service, OptionsBase options, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }

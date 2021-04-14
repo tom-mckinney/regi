@@ -1,6 +1,8 @@
 ﻿using Moq;
 using Regi.Abstractions;
 using Regi.Runtime.LogHandlers;
+using Regi.Test;
+using Regi.Test.Stubs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -53,7 +55,7 @@ namespace Regi.Runtime.Test
 
             var managedProcessId = Guid.NewGuid();
 
-            TestClass.LogSinks.TryAdd(managedProcessId, new LogSink()); // pre-existing LogSink
+            TestClass.LogSinks.TryAdd(managedProcessId, new StubbedLogSink()); // pre-existing LogSink
 
             await Assert.ThrowsAsync<InvalidOperationException>(() => TestClass.CreateAsync(managedProcessId).AsTask());
         }

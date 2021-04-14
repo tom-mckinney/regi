@@ -8,9 +8,10 @@ using System.Threading.Tasks;
 
 namespace Regi.Abstractions
 {
-    public interface IServiceRunner<TService>
-        where TService : IService
+    public interface IServiceRunner
     {
-        Task RunAsync(TService service, OptionsBase options, CancellationToken cancellationToken);
+        ServiceType Type { get; }
+
+        ValueTask<IManagedProcess> RunAsync(IService service, OptionsBase options, CancellationToken cancellationToken);
     }
 }

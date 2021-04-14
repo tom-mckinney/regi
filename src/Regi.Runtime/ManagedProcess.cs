@@ -34,9 +34,9 @@ namespace Regi.Runtime
 
         public DirectoryInfo WorkingDirectory { get; protected set; }
 
-        internal Process Process { get; private set; }
+        internal Process Process { get; set; }
 
-        internal ILogSink LogSink { get; private set; }
+        internal ILogSink LogSink { get; set; }
 
         public Task StartAsync(CancellationToken cancellationToken)
         {

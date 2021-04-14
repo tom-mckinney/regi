@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Xunit.Abstractions;
 
-namespace Regi.Runtime.Test
+namespace Regi.Test
 {
     public class TestLogEntry
     {

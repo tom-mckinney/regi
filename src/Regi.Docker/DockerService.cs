@@ -16,6 +16,9 @@ namespace Regi.Docker
 
     public class DockerService : IDockerService
     {
+        public string Name { get; set; }
+        public ServiceType Type => ServiceType.Docker;
+
         public string Image { get; set; }
         public List<string> Ports { get; set; }
         public List<string> Volumes { get; set; }

@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Regi.Abstractions
+﻿namespace Regi.Abstractions
 {
     public interface IService
     {
+        string Name { get; set; }
+        ServiceType Type { get; }
     }
 }

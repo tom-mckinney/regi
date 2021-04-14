@@ -7,11 +7,6 @@ namespace Regi.Runtime
 {
     public class LogSink : ILogSink
     {
-        public LogSink() // TODO: delete me
-        {
-
-        }
-
         public LogSink(Guid managedProcessId, ILogHandler outputLogHandler, ILogHandler errorLogHandler)
         {
             ManagedProcessId = managedProcessId;
