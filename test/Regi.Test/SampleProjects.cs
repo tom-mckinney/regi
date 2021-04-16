@@ -139,7 +139,7 @@ namespace Regi.Test
                 JestTests,
                 IntegrationTests,
             },
-            Services = new List<IProject>()
+            Services = new List<IServiceMultiplexer>()
         };
 
         public static IServiceMesh ConfigurationGood => new ServiceMesh

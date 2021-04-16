@@ -1,4 +1,6 @@
-﻿namespace Regi.Abstractions
+﻿using System.Collections.Generic;
+
+namespace Regi.Abstractions
 {
     public interface IService
     {

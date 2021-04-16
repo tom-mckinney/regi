@@ -6,6 +6,6 @@ namespace Regi.Abstractions
 {
     public interface IServiceRunnerDispatcher
     {
-        ValueTask<IManagedProcess> DispatchAsync(IService service, OptionsBase options, CancellationToken cancellationToken);
+        ValueTask<IManagedProcess> DispatchAsync(IServiceMultiplexer service, OptionsBase options, CancellationToken cancellationToken);
     }
 }

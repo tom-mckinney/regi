@@ -18,7 +18,7 @@ namespace Regi.Runtime
             _serviceRunners = serviceRunners;
         }
 
-        public ValueTask<IManagedProcess> DispatchAsync(IService service, OptionsBase options, CancellationToken cancellationToken)
+        public ValueTask<IManagedProcess> DispatchAsync(IServiceMultiplexer service, OptionsBase options, CancellationToken cancellationToken)
         {
             var serviceRunner = _serviceRunners.FirstOrDefault(r => r.Type == service.Type);
 

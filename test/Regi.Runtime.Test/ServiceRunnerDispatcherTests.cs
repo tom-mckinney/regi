@@ -23,7 +23,7 @@ namespace Regi.Runtime.Test
         [Fact]
         public async Task Dispatches_services_with_matching_type()
         {
-            var testService = new TestService();
+            var testService = new TestServiceMultiplexer();
             var options = new OptionsBase();
 
             var expectedManagedProcess = new StubbedManagedProcess();
@@ -44,7 +44,7 @@ namespace Regi.Runtime.Test
         [Fact]
         public async Task Dispatch_throws_if_no_ServiceRunner_for_ServiceType()
         {
-            var testService = new TestService
+            var testService = new TestServiceMultiplexer
             {
                 Type = 0 // not a real ServiceType enum value
             };
@@ -57,6 +57,15 @@ namespace Regi.Runtime.Test
         {
             public string Name { get; set; }
             public ServiceType Type { get; set; } = ServiceType.Docker;
+        }
+
+        private class TestServiceMultiplexer : IServiceMultiplexer
+        {
+            public ServiceType Type { get; set; } = ServiceType.Docker;
+            public string Name { get; set; }
+            public string Image { get; set; }
+            public List<string> Ports { get; set; }
+            public List<string> Volumes { get; set; }
         }
     }
 }

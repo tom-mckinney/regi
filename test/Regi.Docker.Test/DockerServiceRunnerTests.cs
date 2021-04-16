@@ -20,7 +20,7 @@ namespace Regi.Docker.Test
 
         protected override DockerServiceRunner CreateTestClass()
         {
-            return new DockerServiceRunner();
+            return new DockerServiceRunner(_processManagerMock.Object);
         }
 
         [Fact]

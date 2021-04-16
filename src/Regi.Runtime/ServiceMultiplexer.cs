@@ -1,18 +1,19 @@
 ﻿using Regi.Abstractions;
-using Regi.Abstractions.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Regi.Docker
+namespace Regi.Runtime
 {
-    public class DockerService : IDockerService
+    public class ServiceMultiplexer : IServiceMultiplexer
     {
         public string Name { get; set; }
-        public ServiceType Type => ServiceType.Docker;
 
+        public ServiceType Type { get; set; }
+
+        // Docker
         public string Image { get; set; }
         public List<string> Ports { get; set; }
         public List<string> Volumes { get; set; }

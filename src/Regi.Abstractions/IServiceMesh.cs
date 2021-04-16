@@ -2,17 +2,19 @@
 
 namespace Regi.Abstractions
 {
-    public interface IServiceMesh : IServiceMesh<IProject>
+    public interface IServiceMesh : IServiceMesh<IProject, IServiceMultiplexer>
     {
     }
 
-    public interface IServiceMesh<TProject> where TProject : IProject
+    public interface IServiceMesh<TProject, TService>
+        where TProject : IProject
+        where TService : IService
     {
         string Path { get; }
 
         IList<TProject> Projects { get; set; }
 
-        IList<TProject> Services { get; set; }
+        IList<TService> Services { get; set; }
 
         IDictionary<ProjectFramework, string> GetSources();
     }

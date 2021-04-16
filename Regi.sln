@@ -18,17 +18,18 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{E0C3
 		samples\Dockerfile = samples\Dockerfile
 		samples\README.md = samples\README.md
 		samples\regi.json = samples\regi.json
+		regi.yml = regi.yml
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Regi.Abstractions", "src\Regi.Abstractions\Regi.Abstractions.csproj", "{C78977D2-1BBA-41C5-8591-233D74E10CE4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Regi.Abstractions", "src\Regi.Abstractions\Regi.Abstractions.csproj", "{C78977D2-1BBA-41C5-8591-233D74E10CE4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Regi.Docker", "src\Regi.Docker\Regi.Docker.csproj", "{273FBA82-DB40-4A62-B50A-181277FD04A4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Regi.Docker", "src\Regi.Docker\Regi.Docker.csproj", "{273FBA82-DB40-4A62-B50A-181277FD04A4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Regi.Docker.Test", "test\Regi.Docker.Test\Regi.Docker.Test.csproj", "{AD137A70-CB1F-4D9B-A037-E5DFC56D015C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Regi.Docker.Test", "test\Regi.Docker.Test\Regi.Docker.Test.csproj", "{AD137A70-CB1F-4D9B-A037-E5DFC56D015C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Regi.Runtime", "src\Regi.Runtime\Regi.Runtime.csproj", "{1494FD6F-D8C9-491E-9148-A6B93745AC2B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Regi.Runtime", "src\Regi.Runtime\Regi.Runtime.csproj", "{1494FD6F-D8C9-491E-9148-A6B93745AC2B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Regi.Runtime.Test", "test\Regi.Runtime.Test\Regi.Runtime.Test.csproj", "{0CB145A9-1705-431A-9C6A-61F13E888DD9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Regi.Runtime.Test", "test\Regi.Runtime.Test\Regi.Runtime.Test.csproj", "{0CB145A9-1705-431A-9C6A-61F13E888DD9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

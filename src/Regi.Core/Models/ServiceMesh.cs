@@ -6,12 +6,13 @@ using System.Text.Json.Serialization;
 
 namespace Regi.Models
 {
-    public class ServiceMesh : ServiceMesh<IProject>, IServiceMesh
+    public class ServiceMesh : ServiceMesh<IProject, IServiceMultiplexer>, IServiceMesh
     {
     }
 
-    public class ServiceMesh<TProject> : IServiceMesh<TProject>
+    public class ServiceMesh<TProject, TService> : IServiceMesh<TProject, TService>
         where TProject : IProject
+        where TService : IService
     {
         [JsonIgnore]
         public string Path { get; set; }
@@ -20,7 +21,7 @@ namespace Regi.Models
         public IList<TProject> Projects { get; set; } = new List<TProject>();
 
         [JsonPropertyName("services")]
-        public IList<TProject> Services { get; set; } = new List<TProject>();
+        public IList<TService> Services { get; set; } = new List<TService>();
 
         // TODO: Remove RawSources when .NET 5 supports deserializing all Dictionary keys
         [JsonPropertyName("sources")]
