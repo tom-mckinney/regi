@@ -1,6 +1,7 @@
 ﻿using Regi.Abstractions;
 using Regi.Extensions;
 using Regi.Models;
+using Regi.Runtime;
 using Regi.Utilities;
 using System;
 using System.Collections.Generic;
@@ -68,7 +69,7 @@ namespace Regi.Services
             try
             {
 
-                var config = await JsonSerializer.DeserializeAsync<ServiceMesh<Project>>(stream, Constants.DefaultSerializerOptions);
+                var config = await JsonSerializer.DeserializeAsync<ServiceMesh<Project, ServiceMultiplexer>>(stream, Constants.DefaultSerializerOptions);
 
                 config.Path = startupFile.FullName;
 

@@ -175,7 +175,7 @@ namespace Regi.Test
                     Serial = true
                 }
             },
-            Services = new List<IProject>(),
+            Services = new List<IServiceMultiplexer>(),
             RawSources = new Dictionary<string, string>
             {
                 { ProjectFramework.Dotnet.ToString(), "http://nuget.org/api" },

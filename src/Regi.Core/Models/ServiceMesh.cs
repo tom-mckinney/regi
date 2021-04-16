@@ -54,13 +54,13 @@ namespace Regi.Models
             return _sources;
         }
 
-        public static explicit operator ServiceMesh(ServiceMesh<TProject> input)
+        public static explicit operator ServiceMesh(ServiceMesh<TProject, TService> input)
         {
             return new ServiceMesh
             {
                 Path = input.Path,
                 Projects = input.Projects.Select(p => (IProject)p).ToList(),
-                Services = input.Services.Select(p => (IProject)p).ToList(),
+                Services = input.Services.Select(p => (IServiceMultiplexer)p).ToList(),
                 RawSources = input.RawSources
             };
         }

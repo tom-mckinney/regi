@@ -93,8 +93,8 @@ namespace Regi
                 {
                     var requiredProject = config.Projects.FirstOrDefault(p => p.Name.Contains(r, StringComparison.InvariantCultureIgnoreCase));
 
-                    if (requiredProject == null)
-                        requiredProject = config.Services.FirstOrDefault(p => p.Name.Contains(r, StringComparison.InvariantCultureIgnoreCase));
+                    //if (requiredProject == null) // TODO: figure this out
+                    //    requiredProject = config.Services.FirstOrDefault(p => p.Name.Contains(r, StringComparison.InvariantCultureIgnoreCase));
 
                     if (requiredProject == null)
                         throw new Exception($"Could not find requirement \"{r}\" defined in project {project.Name}");
