@@ -24,7 +24,7 @@ namespace Regi.CommandLine.Commands
             _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
         }
 
-        protected override Func<IServiceMesh, IEnumerable<IProject>> GetTargetProjects => (c) => c.Projects.WhereRoleIs(ProjectRole.App);
+        protected override Func<IServiceMesh, IEnumerable<IProject>> GetTargetProjects => (c) => c.Projects.WhereApp();
 
         protected override async Task<int> ExecuteAsync(IList<IProject> projects, CancellationToken cancellationToken)
         {

@@ -23,7 +23,7 @@ namespace Regi.Models
 
         public IList<string> Paths { get; set; }
 
-        public IList<ProjectRole> Roles { get; set; } = new List<ProjectRole>();
+        public IList<ProjectRole> Roles { get; set; } = new List<ProjectRole> { ProjectRole.App }; // app is default
 
         public IList<string> Labels { get; set; } = new List<string>();
 
