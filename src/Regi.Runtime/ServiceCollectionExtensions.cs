@@ -1,5 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Console;
 using Regi.Abstractions;
 
 namespace Regi.Runtime
@@ -13,7 +15,14 @@ namespace Regi.Runtime
             services.TryAddScoped<ILogSinkManager, LogSinkManager>();
             services.TryAddScoped<ILogHandlerFactory, LogHandlerFactory>();
             
-            services.AddLogging();
+            services.AddLogging(builder =>
+            {
+                builder.AddConsole(options =>
+                {
+                    options.FormatterName = "Regi";
+                });
+                builder.AddConsoleFormatter<RegiConsoleFormatter, RegiConsoleFormatterOptions>();
+            });
 
             return services;
         }

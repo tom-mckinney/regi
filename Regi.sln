@@ -18,7 +18,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{E0C3
 		samples\Dockerfile = samples\Dockerfile
 		samples\README.md = samples\README.md
 		samples\regi.json = samples\regi.json
-		regi.yml = regi.yml
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Regi.Abstractions", "src\Regi.Abstractions\Regi.Abstractions.csproj", "{C78977D2-1BBA-41C5-8591-233D74E10CE4}"
