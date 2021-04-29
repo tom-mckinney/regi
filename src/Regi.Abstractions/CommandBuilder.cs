@@ -22,7 +22,7 @@ namespace Regi.Abstractions
 
         public void Add(string directive)
         {
-            if (string.IsNullOrEmpty(directive))
+            if (string.IsNullOrWhiteSpace(directive))
             {
                 throw new InvalidOperationException("Received null value for directive");
             }
@@ -32,7 +32,7 @@ namespace Regi.Abstractions
 
         public void Add(string key, string value)
         {
-            if (string.IsNullOrEmpty(key) || string.IsNullOrEmpty(value))
+            if (string.IsNullOrWhiteSpace(key) || string.IsNullOrWhiteSpace(value))
             {
                 throw new InvalidOperationException("Received null value for directive key or value");
             }
@@ -42,21 +42,19 @@ namespace Regi.Abstractions
 
         public void Add(string key, ICollection<string> values, DirectiveListType listType = DirectiveListType.Multiple)
         {
-            if (string.IsNullOrEmpty(key) || !values.Any())
+            if (values?.Any() == true)
             {
-                throw new InvalidOperationException("Received null value for directive key or value");
-            }
-
-            if (listType == DirectiveListType.Multiple)
-            {
-                foreach (var v in values)
+                if (listType == DirectiveListType.Multiple)
                 {
-                    _directives.Add($"{key} {v}");
+                    foreach (var v in values)
+                    {
+                        Add(key, v);
+                    }
                 }
-            }
-            else
-            {
-                throw new NotImplementedException(); // TODO: support other types
+                else
+                {
+                    throw new NotImplementedException(); // TODO: support other types
+                }
             }
         }
     }

@@ -48,5 +48,33 @@ namespace Regi.Docker.Test
 
             Assert.Same(_managedProcessMock.Object, actualManagedProcess);
         }
+
+        [Fact]
+        public async Task Run_sets_environment_variables_if_specified()
+        {
+            var expectedFileName = "docker";
+            var expectedArgs = "run --name backend_db -e FOO=bar -e UP=10 mcr.microsoft.com/mssql/server";
+
+            _processManagerMock.Setup(m => m.CreateAsync(expectedFileName, expectedArgs, null))
+                .ReturnsAsync(_managedProcessMock.Object);
+
+            _managedProcessMock.Setup(m => m.StartAsync(CancellationToken.None))
+                .Returns(Task.CompletedTask);
+
+            var service = new DockerService
+            {
+                Name = "backend_db",
+                Image = "mcr.microsoft.com/mssql/server",
+                Environment = new Dictionary<string, object>
+                {
+                    { "FOO", "bar" },
+                    { "UP", 10 },
+                }
+            };
+
+            var actualManagedProcess = await TestClass.RunAsync(service, new OptionsBase(), CancellationToken.None);
+
+            Assert.Same(_managedProcessMock.Object, actualManagedProcess);
+        }
     }
 }

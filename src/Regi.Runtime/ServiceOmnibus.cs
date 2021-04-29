@@ -9,9 +9,10 @@ namespace Regi.Runtime
 {
     public class ServiceOmnibus : IServiceOmnibus
     {
+        // Common
         public string Name { get; set; }
-
         public ServiceType Type { get; set; }
+        public IDictionary<string, object> Environment { get; set; } = new Dictionary<string, object>();
 
         // Docker
         public string Image { get; set; }

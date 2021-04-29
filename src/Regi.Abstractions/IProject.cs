@@ -7,8 +7,6 @@ namespace Regi.Abstractions
 {
     public interface IProject : IService
     {
-        string Name { get; set; }
-
         string Path { get; set; }
 
         IList<string> Paths { get; set; }

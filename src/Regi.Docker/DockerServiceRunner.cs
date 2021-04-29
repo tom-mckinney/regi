@@ -23,8 +23,7 @@ namespace Regi.Docker
 
         public async ValueTask<IManagedProcess> RunAsync(IService service, OptionsBase options, CancellationToken cancellationToken)
         {
-            System.Diagnostics.Debugger.Launch();
-            if (service is not IDockerService dockerService) // todo: user generic runners
+            if (service is not IDockerService dockerService) // TODO: use generic runners
             {
                 throw new NotImplementedException();
             }
@@ -35,7 +34,16 @@ namespace Regi.Docker
             builder.Add("--name", dockerService.Name);
             builder.Add("-p", dockerService.Ports);
             builder.Add("-v", dockerService.Volumes);
-            builder.Add(dockerService.Image);
+
+            if (dockerService.Environment?.Any() == true)
+            {
+                foreach (var env in dockerService.Environment)
+                {
+                    builder.Add("-e", $"{env.Key}={env.Value}");
+                }
+            }
+            
+            builder.Add(dockerService.Image); // must be after all options
 
             var process = await _processManager.CreateAsync("docker", builder.Build());
 
