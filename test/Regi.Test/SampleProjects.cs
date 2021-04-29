@@ -1,5 +1,6 @@
 ﻿using Regi.Abstractions;
 using Regi.Models;
+using Regi.Runtime;
 using Regi.Test.Helpers;
 using System.Collections.Generic;
 
@@ -139,7 +140,29 @@ namespace Regi.Test
                 JestTests,
                 IntegrationTests,
             },
-            Services = new List<IServiceMultiplexer>()
+            Services = new List<IServiceOmnibus>()
+        };
+
+        public static IServiceMesh ConfigurationWithServices => new ServiceMesh
+        {
+            Projects = new List<IProject>
+            {
+                Frontend,
+                Backend,
+                XunitTests,
+                JestTests,
+                IntegrationTests,
+            },
+            Services = new List<IServiceOmnibus>
+            {
+                new ServiceOmnibus
+                {
+                    Name = "backend_db",
+                    Image = "mcr.microsoft.com/mssql/server",
+                    Ports = new() { "1420:1433" },
+                    Volumes = new() { "dbdata:/var/opt/mssql" },
+                }
+            }
         };
 
         public static IServiceMesh ConfigurationGood => new ServiceMesh
@@ -175,7 +198,7 @@ namespace Regi.Test
                     Serial = true
                 }
             },
-            Services = new List<IServiceMultiplexer>(),
+            Services = new List<IServiceOmnibus>(),
             RawSources = new Dictionary<string, string>
             {
                 { ProjectFramework.Dotnet.ToString(), "http://nuget.org/api" },

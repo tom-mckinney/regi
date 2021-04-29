@@ -5,8 +5,12 @@
       "path": "./Frontend/package.json",
       "framework": "node",
       "port": 3000,
-      "roles": [ "app" ],
-      "labels": [ "frontend" ],
+      "roles": [
+        "app"
+      ],
+      "labels": [
+        "frontend"
+      ],
       "commands": {
         "start": "run dev"
       }
@@ -16,25 +20,39 @@
       "path": "./Backend/Backend.csproj",
       "framework": "dotnet",
       "port": 5000,
-      "roles": [ "app" ],
-      "labels": [ "backend" ],
+      "roles": [
+        "app"
+      ],
+      "labels": [
+        "backend"
+      ],
       "arguments": {
-        "start": [ "--foo bar" ]
+        "start": [
+          "--foo bar"
+        ]
       }
     },
     {
       "name": "SampleSuccessfulTests",
       "path": "./SampleSuccessfulTests",
       "framework": "dotnet",
-      "roles": [ "test" ],
-      "labels": [ "backend" ]
+      "roles": [
+        "test"
+      ],
+      "labels": [
+        "backend"
+      ]
     },
     {
       "name": "NodeApp",
       "path": "./NodeApp",
       "framework": "node",
-      "roles": [ "test" ],
-      "labels": [ "backend" ]
+      "roles": [
+        "test"
+      ],
+      "labels": [
+        "backend"
+      ]
     },
     // {
     //   "name": "IntegrationTests",
@@ -52,16 +70,38 @@
       "name": "IntegrationTests",
       "path": "./IntegrationTests",
       "framework": "node",
-      "roles": [ "test" ],
-      "requires": [ "Frontend", "Backend" ],
+      "roles": [
+        "test"
+      ],
+      "requires": [
+        "Frontend",
+        "Backend"
+      ],
       "optional": true,
       "rawOutput": true,
       "serial": true,
       "environment": {
         "HEADLESS": true
       },
-      "labels": [ "e2e" ]
+      "labels": [
+        "e2e"
+      ]
     }
   ],
-  "services": []
+  "services": [
+    {
+      "name": "backend_db",
+      "type": "docker",
+      "image": "mcr.microsoft.com/mssql/server",
+      "environment": {
+        "ACCEPT_EULA": 1
+      },
+      "ports": [
+        "1420:1433"
+      ],
+      "volumes": [
+        "dbdata:/var/opt/mssql"
+      ]
+    }
+  ]
 }

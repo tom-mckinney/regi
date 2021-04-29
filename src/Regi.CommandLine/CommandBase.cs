@@ -38,7 +38,7 @@ namespace Regi.CommandLine
         /// </summary>
         public virtual bool FilterProjects => true;
 
-        public IServiceMesh Config { get; protected set; }
+        public IServiceMesh ServiceMesh { get; protected set; }
 
         protected abstract Func<IServiceMesh, IEnumerable<IProject>> GetTargetProjects { get; }
 
@@ -48,13 +48,13 @@ namespace Regi.CommandLine
             {
                 if (RequireRegiConfig)
                 {
-                    Config = await _configurationService.GetConfigurationAsync(Options);
+                    ServiceMesh = await _configurationService.GetConfigurationAsync(Options);
 
-                    Options.VariableList = new EnvironmentVariableDictionary(Config);
+                    Options.VariableList = new EnvironmentVariableDictionary(ServiceMesh);
 
                     if (FilterProjects)
                     {
-                        _projectManager.FilterAndTrackProjects(Options, Config, GetTargetProjects);
+                        _projectManager.FilterAndTrackProjects(Options, ServiceMesh, GetTargetProjects);
                     }
                 }
             }

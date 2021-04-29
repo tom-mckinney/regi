@@ -16,5 +16,6 @@ namespace Regi.Docker
         public string Image { get; set; }
         public List<string> Ports { get; set; }
         public List<string> Volumes { get; set; }
+        public IDictionary<string, object> Environment { get; set; } = new Dictionary<string, object>();
     }
 }

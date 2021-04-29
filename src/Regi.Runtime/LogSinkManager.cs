@@ -24,7 +24,7 @@ namespace Regi.Runtime
         {
             var logSink = new LogSink(
                 managedProcessId,
-                _logHandlerFactory.CreateLogHandler<SilentLogHandler>(),
+                _logHandlerFactory.CreateLogHandler<DefaultLogHandler>(), // TODO: make this variable
                 _logHandlerFactory.CreateLogHandler<DefaultLogHandler>());
 
             if (!LogSinks.TryAdd(managedProcessId, logSink))

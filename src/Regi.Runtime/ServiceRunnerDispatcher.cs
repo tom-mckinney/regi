@@ -11,20 +11,20 @@ namespace Regi.Runtime
 {
     public class ServiceRunnerDispatcher : IServiceRunnerDispatcher
     {
-        private readonly List<IServiceRunner> _serviceRunners;
+        private readonly IEnumerable<IServiceRunner> _serviceRunners;
 
-        public ServiceRunnerDispatcher(List<IServiceRunner> serviceRunners)
+        public ServiceRunnerDispatcher(IEnumerable<IServiceRunner> serviceRunners)
         {
             _serviceRunners = serviceRunners;
         }
 
-        public ValueTask<IManagedProcess> DispatchAsync(IServiceMultiplexer service, OptionsBase options, CancellationToken cancellationToken)
+        public ValueTask<IManagedProcess> DispatchAsync(IServiceOmnibus service, OptionsBase options, CancellationToken cancellationToken)
         {
             var serviceRunner = _serviceRunners.FirstOrDefault(r => r.Type == service.Type);
 
             if (serviceRunner == null)
             {
-                throw new NotImplementedException($"Regi does not support {service.Type} services");
+                throw new NotImplementedException($"Regi does not support {service.Type} services. Received {_serviceRunners.Count()} service runners");
             }
 
             return serviceRunner.RunAsync(service, options, cancellationToken);

@@ -1,5 +1,6 @@
 ﻿using Regi.Abstractions;
 using Regi.Abstractions.Options;
+using Regi.Abstractions.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,9 +21,10 @@ namespace Regi.Docker
 
         public ServiceType Type => ServiceType.Docker;
 
-        public ValueTask<IManagedProcess> RunAsync(IService service, OptionsBase options, CancellationToken cancellationToken)
+        public async ValueTask<IManagedProcess> RunAsync(IService service, OptionsBase options, CancellationToken cancellationToken)
         {
-            if (service is not DockerService dockerService) // todo: user generic runners
+            System.Diagnostics.Debugger.Launch();
+            if (service is not IDockerService dockerService) // todo: user generic runners
             {
                 throw new NotImplementedException();
             }
@@ -35,7 +37,11 @@ namespace Regi.Docker
             builder.Add("-v", dockerService.Volumes);
             builder.Add(dockerService.Image);
 
-            return _processManager.CreateAsync("docker", builder.Build());
+            var process = await _processManager.CreateAsync("docker", builder.Build());
+
+            await process.StartAsync(cancellationToken);
+
+            return process;
         }
     }
 }

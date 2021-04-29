@@ -6,5 +6,6 @@ namespace Regi.Abstractions
     {
         string Name { get; set; }
         ServiceType Type { get; }
+        IDictionary<string, object> Environment { get; set; }
     }
 }

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Regi.Runtime
 {
-    public class ServiceMultiplexer : IServiceMultiplexer
+    public class ServiceOmnibus : IServiceOmnibus
     {
         public string Name { get; set; }
 

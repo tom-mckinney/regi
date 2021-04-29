@@ -59,7 +59,7 @@ namespace Regi.Runtime.Test
             public ServiceType Type { get; set; } = ServiceType.Docker;
         }
 
-        private class TestServiceMultiplexer : IServiceMultiplexer
+        private class TestServiceMultiplexer : IServiceOmnibus
         {
             public ServiceType Type { get; set; } = ServiceType.Docker;
             public string Name { get; set; }

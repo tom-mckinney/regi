@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Regi.Abstractions;
 using Regi.CommandLine.Commands;
+using Regi.Docker;
 using Regi.Extensions;
 using Regi.Frameworks;
 using Regi.Frameworks.Identifiers;
@@ -98,6 +99,7 @@ namespace Regi.CommandLine
                 .AddIdentifer<DjangoIdentifier>()
 
                 .AddRegiRuntime()
+                .AddDocker()
 
                 .AddSingleton(console)
                 .BuildServiceProvider();

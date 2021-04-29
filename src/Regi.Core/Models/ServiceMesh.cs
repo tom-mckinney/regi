@@ -6,7 +6,7 @@ using System.Text.Json.Serialization;
 
 namespace Regi.Models
 {
-    public class ServiceMesh : ServiceMesh<IProject, IServiceMultiplexer>, IServiceMesh
+    public class ServiceMesh : ServiceMesh<IProject, IServiceOmnibus>, IServiceMesh
     {
     }
 
@@ -60,7 +60,7 @@ namespace Regi.Models
             {
                 Path = input.Path,
                 Projects = input.Projects.Select(p => (IProject)p).ToList(),
-                Services = input.Services.Select(p => (IServiceMultiplexer)p).ToList(),
+                Services = input.Services.Select(p => (IServiceOmnibus)p).ToList(),
                 RawSources = input.RawSources
             };
         }

@@ -32,8 +32,8 @@ namespace Regi.Runtime.Test
         [Fact]
         public async Task Create_instantiates_and_tracks_LogSink()
         {
-            _logHandlerFactory.Setup(m => m.CreateLogHandler<SilentLogHandler>())
-                .Returns(new SilentLogHandler(_testLogger));
+            _logHandlerFactory.Setup(m => m.CreateLogHandler<DefaultLogHandler>())
+                .Returns(new DefaultLogHandler(_testLogger));
             _logHandlerFactory.Setup(m => m.CreateLogHandler<DefaultLogHandler>())
                 .Returns(new DefaultLogHandler(_testLogger));
 
@@ -48,8 +48,8 @@ namespace Regi.Runtime.Test
         [Fact]
         public async Task Create_throws_if_ManagedProcess_Id_already_tracked()
         {
-            _logHandlerFactory.Setup(m => m.CreateLogHandler<SilentLogHandler>())
-                .Returns(new SilentLogHandler(_testLogger));
+            _logHandlerFactory.Setup(m => m.CreateLogHandler<DefaultLogHandler>())
+                .Returns(new DefaultLogHandler(_testLogger));
             _logHandlerFactory.Setup(m => m.CreateLogHandler<DefaultLogHandler>())
                 .Returns(new DefaultLogHandler(_testLogger));
 

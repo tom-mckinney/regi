@@ -27,8 +27,6 @@ namespace Regi.Abstractions
 
         int? Port { get; set; }
 
-        IDictionary<string, object> Environment { get; set; }
-
         bool Serial { get; set; }
 
         string Source { get; set; }

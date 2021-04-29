@@ -2,7 +2,7 @@
 
 namespace Regi.Abstractions
 {
-    public interface IServiceMesh : IServiceMesh<IProject, IServiceMultiplexer>
+    public interface IServiceMesh : IServiceMesh<IProject, IServiceOmnibus>
     {
     }
 

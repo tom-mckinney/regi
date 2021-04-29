@@ -23,7 +23,7 @@ namespace Regi.CommandLine.Commands
 
         protected override Task<int> ExecuteAsync(IList<IProject> projects, CancellationToken cancellationToken)
         {
-            _summaryService.PrintDomainSummary(Config, Options);
+            _summaryService.PrintDomainSummary(ServiceMesh, Options);
 
             return Task.FromResult(0);
         }

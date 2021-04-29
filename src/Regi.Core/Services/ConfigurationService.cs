@@ -69,7 +69,7 @@ namespace Regi.Services
             try
             {
 
-                var config = await JsonSerializer.DeserializeAsync<ServiceMesh<Project, ServiceMultiplexer>>(stream, Constants.DefaultSerializerOptions);
+                var config = await JsonSerializer.DeserializeAsync<ServiceMesh<Project, ServiceOmnibus>>(stream, Constants.DefaultSerializerOptions);
 
                 config.Path = startupFile.FullName;
 

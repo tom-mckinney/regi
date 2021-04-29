@@ -17,6 +17,7 @@ namespace Regi.Docker.Test
     public class DockerServiceRunnerTests : TestBase<DockerServiceRunner>
     {
         private readonly Mock<IProcessManager> _processManagerMock = new(MockBehavior.Strict);
+        private readonly Mock<IManagedProcess> _managedProcessMock = new(MockBehavior.Strict);
 
         protected override DockerServiceRunner CreateTestClass()
         {
@@ -26,17 +27,18 @@ namespace Regi.Docker.Test
         [Fact]
         public async Task Run_creates_and_starts_Docker_process()
         {
-            var expectedManagedProcess = new StubbedManagedProcess(); // process construction is tested elsewhere
-
             var expectedFileName = "docker";
-            var expectedArgs = "run --name wumbo_db -p 1420:1433 -v dbdata:/var/opt/mssql mcr.microsoft.com/mssql/server";
+            var expectedArgs = "run --name backend_db -p 1420:1433 -v dbdata:/var/opt/mssql mcr.microsoft.com/mssql/server";
 
             _processManagerMock.Setup(m => m.CreateAsync(expectedFileName, expectedArgs, null))
-                .ReturnsAsync(expectedManagedProcess);
+                .ReturnsAsync(_managedProcessMock.Object);
+
+            _managedProcessMock.Setup(m => m.StartAsync(CancellationToken.None))
+                .Returns(Task.CompletedTask);
 
             var service = new DockerService
             {
-                Name = "wumbo_db",
+                Name = "backend_db",
                 Image = "mcr.microsoft.com/mssql/server",
                 Ports = new() { "1420:1433" },
                 Volumes = new() { "dbdata:/var/opt/mssql" },
@@ -44,7 +46,7 @@ namespace Regi.Docker.Test
 
             var actualManagedProcess = await TestClass.RunAsync(service, new OptionsBase(), CancellationToken.None);
 
-            Assert.Same(expectedManagedProcess, actualManagedProcess);
+            Assert.Same(_managedProcessMock.Object, actualManagedProcess);
         }
     }
 }
