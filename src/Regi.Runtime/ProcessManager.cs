@@ -22,7 +22,7 @@ namespace Regi.Runtime
 
         internal IReadOnlyDictionary<Guid, IManagedProcess> ManagedProcesses => _managedProcesses;
 
-        public async ValueTask<IManagedProcess> CreateAsync(string fileName, string arguments, DirectoryInfo workingDirectory = null)
+        public async ValueTask<IManagedProcess> CreateAsync(string serviceName, string fileName, string arguments, DirectoryInfo workingDirectory = null)
         {
             if (workingDirectory == null)
             {
@@ -30,7 +30,7 @@ namespace Regi.Runtime
             }
 
             var id = Guid.NewGuid();
-            var logSink = await _logSinkManager.CreateAsync(id);
+            var logSink = await _logSinkManager.CreateAsync(serviceName, id);
             var managedProcess = new ManagedProcess(id, fileName, arguments, workingDirectory, logSink);
 
             if (!_managedProcesses.TryAdd(managedProcess.Id, managedProcess))

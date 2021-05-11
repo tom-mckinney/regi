@@ -8,6 +8,6 @@ namespace Regi.Abstractions
 {
     public interface ILogHandlerFactory
     {
-        TLogHandler CreateLogHandler<TLogHandler>() where TLogHandler : LogHandlerBase;
+        TLogHandler CreateLogHandler<TLogHandler>(string serviceName) where TLogHandler : LogHandlerBase;
     }
 }

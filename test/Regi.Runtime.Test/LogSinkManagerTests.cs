@@ -32,13 +32,15 @@ namespace Regi.Runtime.Test
         [Fact]
         public async Task Create_instantiates_and_tracks_LogSink()
         {
-            _logHandlerFactory.Setup(m => m.CreateLogHandler<DefaultLogHandler>())
-                .Returns(new DefaultLogHandler(_testLogger));
-            _logHandlerFactory.Setup(m => m.CreateLogHandler<DefaultLogHandler>())
-                .Returns(new DefaultLogHandler(_testLogger));
+            var serviceName = "foo";
+
+            _logHandlerFactory.Setup(m => m.CreateLogHandler<DefaultLogHandler>(serviceName))
+                .Returns(new DefaultLogHandler(serviceName, _testLogger));
+            _logHandlerFactory.Setup(m => m.CreateLogHandler<DefaultLogHandler>(serviceName))
+                .Returns(new DefaultLogHandler(serviceName, _testLogger));
 
             var managedProcessId = Guid.NewGuid();
-            var sink = await TestClass.CreateAsync(managedProcessId);
+            var sink = await TestClass.CreateAsync(serviceName, managedProcessId);
 
             Assert.True(TestClass.LogSinks.ContainsKey(managedProcessId), $"No LogSink with managed process ID {managedProcessId}");
             Assert.Same(sink, TestClass.LogSinks[managedProcessId]);
@@ -48,16 +50,18 @@ namespace Regi.Runtime.Test
         [Fact]
         public async Task Create_throws_if_ManagedProcess_Id_already_tracked()
         {
-            _logHandlerFactory.Setup(m => m.CreateLogHandler<DefaultLogHandler>())
-                .Returns(new DefaultLogHandler(_testLogger));
-            _logHandlerFactory.Setup(m => m.CreateLogHandler<DefaultLogHandler>())
-                .Returns(new DefaultLogHandler(_testLogger));
+            var serviceName = "foo";
+
+            _logHandlerFactory.Setup(m => m.CreateLogHandler<DefaultLogHandler>(serviceName))
+                .Returns(new DefaultLogHandler(serviceName, _testLogger));
+            _logHandlerFactory.Setup(m => m.CreateLogHandler<DefaultLogHandler>(serviceName))
+                .Returns(new DefaultLogHandler(serviceName, _testLogger));
 
             var managedProcessId = Guid.NewGuid();
 
             TestClass.LogSinks.TryAdd(managedProcessId, new StubbedLogSink()); // pre-existing LogSink
 
-            await Assert.ThrowsAsync<InvalidOperationException>(() => TestClass.CreateAsync(managedProcessId).AsTask());
+            await Assert.ThrowsAsync<InvalidOperationException>(() => TestClass.CreateAsync(serviceName, managedProcessId).AsTask());
         }
     }
 }

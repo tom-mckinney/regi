@@ -8,6 +8,6 @@ namespace Regi.Abstractions
 {
     public interface ILogSinkManager
     {
-        ValueTask<ILogSink> CreateAsync(Guid managedProcessId);
+        ValueTask<ILogSink> CreateAsync(string serviceName, Guid managedProcessId);
     }
 }

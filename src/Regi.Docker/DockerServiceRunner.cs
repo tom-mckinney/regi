@@ -45,7 +45,7 @@ namespace Regi.Docker
             
             builder.Add(dockerService.Image); // must be after all options
 
-            var process = await _processManager.CreateAsync("docker", builder.Build());
+            var process = await _processManager.CreateAsync(service.Name, "docker", builder.Build());
 
             await process.StartAsync(cancellationToken);
 

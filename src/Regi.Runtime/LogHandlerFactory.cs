@@ -13,10 +13,10 @@ namespace Regi.Runtime
             _loggerFactory = loggerFactory;
         }
 
-        public TLogHandler CreateLogHandler<TLogHandler>()
+        public TLogHandler CreateLogHandler<TLogHandler>(string serviceName)
             where TLogHandler : LogHandlerBase
         {
-            return (TLogHandler)Activator.CreateInstance(typeof(TLogHandler), _loggerFactory.CreateLogger<TLogHandler>());
+            return (TLogHandler)Activator.CreateInstance(typeof(TLogHandler), serviceName, _loggerFactory.CreateLogger<TLogHandler>());
         }
     }
 }

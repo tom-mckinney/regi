@@ -30,7 +30,7 @@ namespace Regi.Docker.Test
             var expectedFileName = "docker";
             var expectedArgs = "run --name backend_db -p 1420:1433 -v dbdata:/var/opt/mssql mcr.microsoft.com/mssql/server";
 
-            _processManagerMock.Setup(m => m.CreateAsync(expectedFileName, expectedArgs, null))
+            _processManagerMock.Setup(m => m.CreateAsync("backend_db", expectedFileName, expectedArgs, null))
                 .ReturnsAsync(_managedProcessMock.Object);
 
             _managedProcessMock.Setup(m => m.StartAsync(CancellationToken.None))
@@ -55,7 +55,7 @@ namespace Regi.Docker.Test
             var expectedFileName = "docker";
             var expectedArgs = "run --name backend_db -e FOO=bar -e UP=10 mcr.microsoft.com/mssql/server";
 
-            _processManagerMock.Setup(m => m.CreateAsync(expectedFileName, expectedArgs, null))
+            _processManagerMock.Setup(m => m.CreateAsync("backend_db", expectedFileName, expectedArgs, null))
                 .ReturnsAsync(_managedProcessMock.Object);
 
             _managedProcessMock.Setup(m => m.StartAsync(CancellationToken.None))

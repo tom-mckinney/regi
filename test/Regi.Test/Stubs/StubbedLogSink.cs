@@ -16,12 +16,13 @@ namespace Regi.Test.Stubs
         public StubbedLogSink(
             ITestOutputHelper testOutput = null,
             Guid managedProcessId = default,
+            string serviceName = null,
             ILogHandler outputHandler = null,
             ILogHandler errorHandler = null)
             : base(managedProcessId, outputHandler, errorHandler)
         {
-            OutputLogHandler ??= new DefaultLogHandler(new TestLogger(testOutput));
-            ErrorLogHandler ??= new DefaultLogHandler(new TestLogger(testOutput));
+            OutputLogHandler ??= new DefaultLogHandler(serviceName, new TestLogger(testOutput));
+            ErrorLogHandler ??= new DefaultLogHandler(serviceName, new TestLogger(testOutput));
         }
     }
 }

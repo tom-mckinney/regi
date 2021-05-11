@@ -5,8 +5,8 @@ namespace Regi.Runtime.LogHandlers
 {
     public class DefaultLogHandler : LogHandlerBase
     {
-        public DefaultLogHandler(ILogger logger)
-            : base(logger)
+        public DefaultLogHandler(string serviceName, ILogger logger)
+            : base(serviceName, logger)
         {
         }
 

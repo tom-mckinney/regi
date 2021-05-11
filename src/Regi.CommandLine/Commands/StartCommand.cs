@@ -37,7 +37,7 @@ namespace Regi.CommandLine.Commands
 
         protected override async Task<int> ExecuteAsync(IList<IProject> projects, CancellationToken cancellationToken)
         {
-            await _runnerService.StartAsync(projects, Options, cancellationToken);
+            //await _runnerService.StartAsync(projects, Options, cancellationToken); // TODO: re-enable this after troubleshooting
 
             foreach (var service in ServiceMesh.Services)
             {

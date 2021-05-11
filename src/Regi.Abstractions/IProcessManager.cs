@@ -7,7 +7,7 @@ namespace Regi.Abstractions
 {
     public interface IProcessManager
     {
-        ValueTask<IManagedProcess> CreateAsync(string fileName, string arguments, DirectoryInfo workingDirectory = null);
+        ValueTask<IManagedProcess> CreateAsync(string serviceName, string fileName, string arguments, DirectoryInfo workingDirectory = null);
         ValueTask<bool> ShutdownAsync(Guid managedProcessId, CancellationToken cancellationToken);
     }
 }

@@ -20,12 +20,12 @@ namespace Regi.Runtime
 
         internal ConcurrentDictionary<Guid, ILogSink> LogSinks { get; } = new ConcurrentDictionary<Guid, ILogSink>();
 
-        public ValueTask<ILogSink> CreateAsync(Guid managedProcessId)
+        public ValueTask<ILogSink> CreateAsync(string serviceName, Guid managedProcessId)
         {
             var logSink = new LogSink(
                 managedProcessId,
-                _logHandlerFactory.CreateLogHandler<DefaultLogHandler>(), // TODO: make this variable
-                _logHandlerFactory.CreateLogHandler<DefaultLogHandler>());
+                _logHandlerFactory.CreateLogHandler<DefaultLogHandler>(serviceName), // TODO: make this variable
+                _logHandlerFactory.CreateLogHandler<DefaultLogHandler>(serviceName));
 
             if (!LogSinks.TryAdd(managedProcessId, logSink))
             {
