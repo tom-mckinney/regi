@@ -22,5 +22,29 @@ namespace Regi.Runtime
         public DataReceivedEventHandler OutputEventHandler => (o, e) => OutputLogHandler.Handle(LogLevel.Information, e.Data);
 
         public DataReceivedEventHandler ErrorEventHandler => (o, e) => OutputLogHandler.Handle(LogLevel.Error, e.Data);
+
+        public bool TryGetStandardOutput(out string standardOutput)
+        {
+            if (OutputLogHandler is ILogHandlerWithCapture outputLogHandlerWithCapture)
+            {
+                standardOutput = outputLogHandlerWithCapture.GetCapturedLogMessages();
+                return true;
+            }
+
+            standardOutput = null;
+            return false;
+        }
+
+        public bool TryGetStandardError(out string standardError)
+        {
+            if (ErrorLogHandler is ILogHandlerWithCapture errorLogHandlerWithCapture)
+            {
+                standardError = errorLogHandlerWithCapture.GetCapturedLogMessages();
+                return true;
+            }
+
+            standardError = null;
+            return false;
+        }
     }
 }

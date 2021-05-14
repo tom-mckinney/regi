@@ -1,6 +1,7 @@
 ﻿using Moq;
 using Regi.Abstractions;
 using Regi.Abstractions.Options;
+using Regi.Runtime;
 using Regi.Test.Stubs;
 using System;
 using System.Collections.Generic;
@@ -34,7 +35,7 @@ namespace Regi.Docker.Test
                 .ReturnsAsync(_managedProcessMock.Object);
 
             _managedProcessMock.Setup(m => m.StartAsync(CancellationToken.None))
-                .Returns(Task.CompletedTask);
+                .ReturnsAsync(new ManagedProcessResult());
 
             var service = new DockerService
             {
@@ -59,7 +60,7 @@ namespace Regi.Docker.Test
                 .ReturnsAsync(_managedProcessMock.Object);
 
             _managedProcessMock.Setup(m => m.StartAsync(CancellationToken.None))
-                .Returns(Task.CompletedTask);
+                .ReturnsAsync(new ManagedProcessResult());
 
             var service = new DockerService
             {

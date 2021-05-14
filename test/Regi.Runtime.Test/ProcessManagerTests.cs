@@ -15,10 +15,11 @@ namespace Regi.Runtime.Test
     {
         private readonly Mock<ILogSinkManager> _logSinkManagerMock = new(MockBehavior.Strict);
         private readonly Mock<IFileSystem> _fileSystemMock = new(MockBehavior.Strict);
+        private readonly Mock<IRuntimeInfo> _runtimeInfoMock = new(MockBehavior.Strict);
 
         protected override ProcessManager CreateTestClass()
         {
-            return new ProcessManager(_logSinkManagerMock.Object, _fileSystemMock.Object);
+            return new ProcessManager(_logSinkManagerMock.Object, _fileSystemMock.Object, _runtimeInfoMock.Object);
         }
 
         [Fact]
@@ -33,13 +34,15 @@ namespace Regi.Runtime.Test
             _logSinkManagerMock.Setup(m => m.CreateAsync(serviceName, It.IsAny<Guid>()))
                 .ReturnsAsync(logSink);
 
-            var managedProcess = await TestClass.CreateAsync(serviceName, fileName, arguments, workingDirectory);
+            var managedProcessResponse = await TestClass.CreateAsync(serviceName, fileName, arguments, workingDirectory);
+            var managedProcess = Assert.IsAssignableFrom<ManagedProcess>(managedProcessResponse);
 
             Assert.NotEqual(default, managedProcess.Id);
             Assert.Equal(fileName, managedProcess.FileName);
             Assert.Equal(arguments, managedProcess.Arguments);
             Assert.Equal(workingDirectory, managedProcess.WorkingDirectory);
-            Assert.Same(logSink, ((ManagedProcess)managedProcess).LogSink);
+            Assert.Same(logSink, managedProcess.LogSink);
+            Assert.Same(_runtimeInfoMock.Object, managedProcess.RuntimeInfo);
         }
 
         [Fact]

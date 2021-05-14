@@ -12,12 +12,14 @@ namespace Regi.Runtime
     {
         private readonly ILogSinkManager _logSinkManager;
         private readonly IFileSystem _fileSystem;
+        private readonly IRuntimeInfo _runtimeInfo;
         private readonly ConcurrentDictionary<Guid, IManagedProcess> _managedProcesses = new(); 
 
-        public ProcessManager(ILogSinkManager logSinkManager, IFileSystem fileSystem)
+        public ProcessManager(ILogSinkManager logSinkManager, IFileSystem fileSystem, IRuntimeInfo runtimeInfo)
         {
             _logSinkManager = logSinkManager;
             _fileSystem = fileSystem;
+            _runtimeInfo = runtimeInfo;
         }
 
         internal IReadOnlyDictionary<Guid, IManagedProcess> ManagedProcesses => _managedProcesses;
@@ -31,7 +33,7 @@ namespace Regi.Runtime
 
             var id = Guid.NewGuid();
             var logSink = await _logSinkManager.CreateAsync(serviceName, id);
-            var managedProcess = new ManagedProcess(id, fileName, arguments, workingDirectory, logSink);
+            var managedProcess = new ManagedProcess(id, fileName, arguments, workingDirectory, logSink, _runtimeInfo);
 
             if (!_managedProcesses.TryAdd(managedProcess.Id, managedProcess))
             {

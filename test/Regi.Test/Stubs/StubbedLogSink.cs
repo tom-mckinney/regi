@@ -1,12 +1,6 @@
 ﻿using Regi.Abstractions;
 using Regi.Runtime;
-using Regi.Runtime.LogHandlers;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Xunit.Abstractions;
 
 namespace Regi.Test.Stubs
@@ -21,8 +15,32 @@ namespace Regi.Test.Stubs
             ILogHandler errorHandler = null)
             : base(managedProcessId, outputHandler, errorHandler)
         {
-            OutputLogHandler ??= new DefaultLogHandler(serviceName, new TestLogger(testOutput));
-            ErrorLogHandler ??= new DefaultLogHandler(serviceName, new TestLogger(testOutput));
+            OutputLogHandler ??= new StubbedLogHandler(serviceName, new TestLogger(testOutput));
+            ErrorLogHandler ??= new StubbedLogHandler(serviceName, new TestLogger(testOutput));
+        }
+
+        public string GetStandardOutput()
+        {
+            if (OutputLogHandler is ILogHandlerWithCapture stubbedOutputHandler)
+            {
+                return stubbedOutputHandler.GetCapturedLogMessages();
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        public string GetStandardError()
+        {
+            if (ErrorLogHandler is ILogHandlerWithCapture stubbedOutputHandler)
+            {
+                return stubbedOutputHandler.GetCapturedLogMessages();
+            }
+            else
+            {
+                return null;
+            }
         }
     }
 }

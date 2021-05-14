@@ -3,6 +3,7 @@ using Moq;
 using Regi.Abstractions;
 using Regi.Frameworks;
 using Regi.Models;
+using Regi.Runtime;
 using Regi.Services;
 using Regi.Test.Helpers;
 using System;

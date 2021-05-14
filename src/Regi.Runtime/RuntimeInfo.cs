@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using System.Text;
 
-namespace Regi.Services
+namespace Regi.Runtime
 {
     public interface IRuntimeInfo
     {

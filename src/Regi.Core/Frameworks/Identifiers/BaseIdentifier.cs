@@ -9,7 +9,7 @@ namespace Regi.Frameworks.Identifiers
     {
         private readonly IFileSystem _fileSystem;
 
-        public BaseIdentifier(IFileSystem fileSystem)
+        protected BaseIdentifier(IFileSystem fileSystem)
         {
             _fileSystem = fileSystem;
         }
@@ -29,6 +29,7 @@ namespace Regi.Frameworks.Identifiers
             {
                 _fileSystem.GetRelativePath(directoryContents.Path)
             };
+            project.Roles = new List<ProjectRole>(); // do not default this during identification
 
             return new ValueTask<IProject>(project);
         }

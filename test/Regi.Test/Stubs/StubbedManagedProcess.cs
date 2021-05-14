@@ -1,11 +1,7 @@
 ﻿using Regi.Abstractions;
 using Regi.Runtime;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Xunit.Abstractions;
 
 namespace Regi.Test.Stubs
@@ -16,12 +12,14 @@ namespace Regi.Test.Stubs
             string fileName = "dotnet",
             string arguments = "--info",
             DirectoryInfo workingDirectory = null,
-            ILogSink logSink = null)
-            : base(fileName, arguments, workingDirectory, logSink)
+            ILogSink logSink = null,
+            IRuntimeInfo runtimeInfo = null)
+            : base(fileName, arguments, workingDirectory, logSink, runtimeInfo)
         {
             Id = Guid.NewGuid();
             WorkingDirectory ??= new DirectoryInfo(Directory.GetCurrentDirectory());
             LogSink ??= new StubbedLogSink(TestOutput, Id);
+            RuntimeInfo ??= new StubbedRuntimeInfo();
         }
 
         public ITestOutputHelper TestOutput { get; set; }

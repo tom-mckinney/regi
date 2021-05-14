@@ -1,5 +1,6 @@
 ﻿using Moq;
 using Regi.Abstractions;
+using Regi.Test.Stubs;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -17,45 +18,36 @@ namespace Regi.Runtime.Test
     {
         private string _fileName = "dotnet";
         private string _arguments = "--info";
-        private DirectoryInfo _workingDirectory = new DirectoryInfo(Directory.GetCurrentDirectory());
-        private readonly Mock<ILogSink> _logSinkMock = new(MockBehavior.Strict);
+        private DirectoryInfo _workingDirectory = new(Directory.GetCurrentDirectory());
+        private readonly StubbedLogSink _logSinkStub = new();
+        private readonly Mock<IRuntimeInfo> _runtimeInfoMock = new(MockBehavior.Strict);
 
         protected override ManagedProcess CreateTestClass()
         {
-            return new ManagedProcess(_fileName, _arguments, _workingDirectory, _logSinkMock.Object);
+            return new ManagedProcess(_fileName, _arguments, _workingDirectory, _logSinkStub, _runtimeInfoMock.Object);
         }
 
-        [Fact]
-        public async Task Start_success()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task Start_success(bool isWindows)
         {
-            var defaultSB = new StringBuilder();
-            var errorSB = new StringBuilder();
-
-            _logSinkMock.Setup(m => m.OutputEventHandler)
-                .Returns((o, e) =>
-                {
-                    defaultSB.Append(e.Data);
-                });
-            _logSinkMock.Setup(m => m.ErrorEventHandler)
-                .Returns((o, e) =>
-                {
-                    errorSB.Append(e.Data);
-                });
+            _runtimeInfoMock.Setup(m => m.IsWindows)
+                .Returns(isWindows);
 
             var process = TestClass;
 
-            await process.StartAsync(CancellationToken.None);
+            var result = await process.StartAsync(CancellationToken.None);
 
-            process.Process.WaitForExit(); // only do this for testing purposes
+            Assert.Equal(0, result.ExitCode);
+            Assert.Contains(".NET", result.StandardOutput);
+            Assert.Empty(result.StandardError);
 
             Assert.Equal(_fileName, process.Process.StartInfo.FileName);
             Assert.Equal(_arguments, process.Process.StartInfo.Arguments);
             Assert.Equal(_workingDirectory.FullName, process.Process.StartInfo.WorkingDirectory);
 
-            Assert.Contains(".NET", defaultSB.ToString());
-            Assert.Empty(errorSB.ToString());
+            Assert.Equal(!isWindows, process.Process.StartInfo.CreateNoWindow);
         }
-
-        
     }
 }

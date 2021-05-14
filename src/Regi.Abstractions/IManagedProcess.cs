@@ -12,7 +12,7 @@ namespace Regi.Abstractions
         string Arguments { get; }
         DirectoryInfo WorkingDirectory { get; }
 
-        Task StartAsync(CancellationToken cancellationToken);
+        Task<IManagedProcessResult> StartAsync(CancellationToken cancellationToken);
         Task WaitForExitAsync(CancellationToken cancellationToken);
         Task KillAsync(CancellationToken cancellationToken);
     }

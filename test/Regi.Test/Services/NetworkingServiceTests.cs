@@ -1,4 +1,5 @@
 ﻿using Moq;
+using Regi.Runtime;
 using Regi.Services;
 using Regi.Test.Helpers;
 using Regi.Utilities;

@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Regi.Abstractions
 {
@@ -16,5 +12,8 @@ namespace Regi.Abstractions
 
         DataReceivedEventHandler OutputEventHandler { get; }
         DataReceivedEventHandler ErrorEventHandler { get; }
+
+        bool TryGetStandardOutput(out string standardOutput);
+        bool TryGetStandardError(out string standardError);
     }
 }
